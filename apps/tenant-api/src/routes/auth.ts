@@ -180,7 +180,7 @@ async function issueRefreshToken(
 /**
  * Authenticate a customer from a Bearer access token.
  */
-async function authenticateCustomer(c: Context) {
+export async function authenticateCustomer(c: Context) {
 	const token = getBearerToken(c.req.header('Authorization')) || null
 
 	if (!token) {

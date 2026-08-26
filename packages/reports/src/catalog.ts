@@ -164,6 +164,81 @@ const memberFields: ReportField[] = [
 	},
 ]
 
+const shopOrderFields: ReportField[] = [
+	{
+		id: 'createdAt',
+		label: 'Ordered at',
+		type: 'datetime',
+		timeframe: true,
+		groupable: true,
+		description: 'When the shop order was placed.',
+	},
+	{
+		id: 'status',
+		label: 'Status',
+		type: 'enum',
+		filterable: true,
+		groupable: true,
+		options: [
+			{ value: 'pending', label: 'Pending' },
+			{ value: 'paid', label: 'Paid' },
+			{ value: 'failed', label: 'Failed' },
+			{ value: 'refunded', label: 'Refunded' },
+		],
+	},
+	{
+		id: 'productName',
+		label: 'Product',
+		type: 'string',
+		filterable: true,
+		groupable: true,
+	},
+	{
+		id: 'amount',
+		label: 'Amount',
+		type: 'string',
+		filterable: false,
+		groupable: false,
+	},
+	{
+		id: 'orgPayout',
+		label: 'Org payout',
+		type: 'string',
+		filterable: false,
+		groupable: false,
+	},
+	{
+		id: 'currency',
+		label: 'Currency',
+		type: 'enum',
+		filterable: true,
+		groupable: true,
+		options: [{ value: 'usd', label: 'USD' }],
+	},
+	{
+		id: 'customerName',
+		label: 'Customer name',
+		type: 'string',
+		filterable: true,
+		groupable: true,
+		description: 'Name from the signed-in customer profile, if available.',
+	},
+	{
+		id: 'customerPhone',
+		label: 'Customer phone',
+		type: 'string',
+		filterable: true,
+		groupable: false,
+	},
+	{
+		id: 'customerEmail',
+		label: 'Customer email',
+		type: 'string',
+		filterable: true,
+		groupable: false,
+	},
+]
+
 const feedbackFields: ReportField[] = [
 	{
 		id: 'createdAt',
@@ -191,6 +266,14 @@ export const organizationCatalog: ReportCatalog = {
 			scope: 'organization',
 			source: 'tenant-api',
 			fields: customerFields,
+		},
+		{
+			id: 'shop_orders',
+			label: 'Shop orders',
+			description: 'Customer purchases from the public site shop (US only).',
+			scope: 'organization',
+			source: 'tenant-api',
+			fields: shopOrderFields,
 		},
 		{
 			id: 'notes',

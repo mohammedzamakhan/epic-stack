@@ -326,117 +326,123 @@ export default function JourneysList() {
 				/>
 			) : (
 				<ItemGroup>
-					{filteredJourneys.map((journey) => (
-						<Item key={journey.id} variant="outline" size="sm">
-							<ItemContent>
-								<Link
-									to={`/${orgSlug}/marketing/automations/${journey.id}`}
-									className="min-w-0"
-								>
-									<ItemTitle>{journey.name}</ItemTitle>
-									<ItemDescription>
-										<span className="capitalize">
-											{formatTriggerType(journey.triggerType)}
-										</span>
-										{' · '}
-										{_(msg`${journey.stepCount} steps`)}
-										{' · '}
-										{_(msg`${journey.runsCount} runs`)}
-									</ItemDescription>
-								</Link>
-							</ItemContent>
+					{filteredJourneys.map((journey) => {
+						const stepCount = journey.stepCount
+						const runsCount = journey.runsCount
+						const journeyName = journey.name
 
-							<ItemActions>
-								<JourneyStatusBadge status={journey.status} />
+						return (
+							<Item key={journey.id} variant="outline" size="sm">
+								<ItemContent>
+									<Link
+										to={`/${orgSlug}/marketing/automations/${journey.id}`}
+										className="min-w-0"
+									>
+										<ItemTitle>{journey.name}</ItemTitle>
+										<ItemDescription>
+											<span className="capitalize">
+												{formatTriggerType(journey.triggerType)}
+											</span>
+											{' · '}
+											{_(msg`${stepCount} steps`)}
+											{' · '}
+											{_(msg`${runsCount} runs`)}
+										</ItemDescription>
+									</Link>
+								</ItemContent>
 
-								<Button
-									render={
-										<Link
-											to={`/${orgSlug}/marketing/automations/${journey.id}/runs`}
-										/>
-									}
-									variant="ghost"
-									size="sm"
-									className="text-muted-foreground size-8 p-0"
-									title={_(msg`View run history`)}
-								>
-									<Icon name="clock" className="size-4" />
-								</Button>
+								<ItemActions>
+									<JourneyStatusBadge status={journey.status} />
 
-								<DropdownMenu>
-									<DropdownMenuTrigger
+									<Button
 										render={
-											<Button
-												variant="ghost"
-												size="sm"
-												className="text-muted-foreground size-8 p-0"
-												title={_(msg`More actions`)}
-											>
-												<Icon name="ellipsis" className="size-4" />
-											</Button>
+											<Link
+												to={`/${orgSlug}/marketing/automations/${journey.id}/runs`}
+											/>
 										}
-									/>
-									<DropdownMenuContent align="end">
-										{journey.status === 'draft' ||
-										journey.status === 'paused' ? (
+										variant="ghost"
+										size="sm"
+										className="text-muted-foreground size-8 p-0"
+										title={_(msg`View run history`)}
+									>
+										<Icon name="clock" className="size-4" />
+									</Button>
+
+									<DropdownMenu>
+										<DropdownMenuTrigger
+											render={
+												<Button
+													variant="ghost"
+													size="sm"
+													className="text-muted-foreground size-8 p-0"
+													title={_(msg`More actions`)}
+												>
+													<Icon name="ellipsis" className="size-4" />
+												</Button>
+											}
+										/>
+										<DropdownMenuContent align="end">
+											{journey.status === 'draft' ||
+											journey.status === 'paused' ? (
+												<DropdownMenuItem
+													onClick={() => {
+														void fetcher.submit(
+															{ intent: 'publish', journeyId: journey.id },
+															{ method: 'POST' },
+														)
+													}}
+												>
+													{_(msg`Publish`)}
+												</DropdownMenuItem>
+											) : journey.status === 'active' ? (
+												<DropdownMenuItem
+													onClick={() => {
+														void fetcher.submit(
+															{ intent: 'pause', journeyId: journey.id },
+															{ method: 'POST' },
+														)
+													}}
+												>
+													{_(msg`Pause`)}
+												</DropdownMenuItem>
+											) : null}
+
 											<DropdownMenuItem
 												onClick={() => {
 													void fetcher.submit(
-														{ intent: 'publish', journeyId: journey.id },
+														{ intent: 'duplicate', journeyId: journey.id },
 														{ method: 'POST' },
 													)
 												}}
 											>
-												{_(msg`Publish`)}
+												{_(msg`Duplicate`)}
 											</DropdownMenuItem>
-										) : journey.status === 'active' ? (
+
 											<DropdownMenuItem
+												className="text-destructive focus:text-destructive"
 												onClick={() => {
-													void fetcher.submit(
-														{ intent: 'pause', journeyId: journey.id },
-														{ method: 'POST' },
-													)
+													if (
+														confirm(
+															_(
+																msg`Are you sure you want to delete "${journeyName}"?`,
+															),
+														)
+													) {
+														void fetcher.submit(
+															{ intent: 'delete', journeyId: journey.id },
+															{ method: 'POST' },
+														)
+													}
 												}}
 											>
-												{_(msg`Pause`)}
+												{_(msg`Delete`)}
 											</DropdownMenuItem>
-										) : null}
-
-										<DropdownMenuItem
-											onClick={() => {
-												void fetcher.submit(
-													{ intent: 'duplicate', journeyId: journey.id },
-													{ method: 'POST' },
-												)
-											}}
-										>
-											{_(msg`Duplicate`)}
-										</DropdownMenuItem>
-
-										<DropdownMenuItem
-											className="text-destructive focus:text-destructive"
-											onClick={() => {
-												if (
-													confirm(
-														_(
-															msg`Are you sure you want to delete "${journey.name}"?`,
-														),
-													)
-												) {
-													void fetcher.submit(
-														{ intent: 'delete', journeyId: journey.id },
-														{ method: 'POST' },
-													)
-												}
-											}}
-										>
-											{_(msg`Delete`)}
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</ItemActions>
-						</Item>
-					))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</ItemActions>
+							</Item>
+						)
+					})}
 				</ItemGroup>
 			)}
 		</div>

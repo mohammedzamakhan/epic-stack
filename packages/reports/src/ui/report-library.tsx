@@ -77,7 +77,7 @@ export function ReportLibrary({
 					<p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
 						{scope === 'platform'
 							? 'Platform counts for operators, orgs, and waitlist.'
-							: 'Segment customers, notes, members, and feedback.'}
+							: 'Segment customers, shop orders, notes, members, and feedback.'}
 					</p>
 				</div>
 				<Button

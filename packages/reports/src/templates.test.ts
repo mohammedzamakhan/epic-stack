@@ -35,4 +35,24 @@ describe('definitionForNewReport', () => {
 		expect(list.groupBy).toEqual([])
 		expect(list.columns).toEqual(['name', 'email', 'phone', 'createdAt'])
 	})
+
+	it('creates shop order templates', () => {
+		const byStatus = definitionForNewReport(
+			'organization',
+			'shop-orders-by-status',
+		)
+		expect(byStatus.subject).toBe('shop_orders')
+		expect(byStatus.groupBy).toEqual(['status'])
+
+		const list = definitionForNewReport('organization', 'shop-order-list')
+		expect(list.visualization.chartStyle).toBe('table')
+		expect(list.columns).toEqual([
+			'customerName',
+			'customerPhone',
+			'productName',
+			'amount',
+			'status',
+			'createdAt',
+		])
+	})
 })

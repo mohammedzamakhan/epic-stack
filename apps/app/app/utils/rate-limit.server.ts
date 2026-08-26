@@ -75,6 +75,12 @@ export const PUBLIC_SITE_RATE_LIMIT: RateLimitConfig = {
 	windowMs: 60 * 1000, // 1 minute
 }
 
+export const SHOP_CONNECT_ONBOARDING_RATE_LIMIT: RateLimitConfig = {
+	scope: 'shop-connect-onboarding',
+	maxRequests: isDev ? 10 : 1,
+	windowMs: 30 * 1000,
+}
+
 /**
  * Serialize all rate-limit checks within this process.
  *

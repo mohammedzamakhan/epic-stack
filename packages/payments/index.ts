@@ -61,3 +61,16 @@ export {
 	type StripeWebhookDependencies,
 	type StripeCheckoutDependencies,
 } from './src/route-handlers'
+
+// Stripe Connect (tenant site commerce)
+export {
+	SHOP_PLATFORM_FEE_PERCENT,
+	calculateShopFees,
+	createConnectExpressAccount,
+	createConnectAccountLink,
+	createConnectLoginLink,
+	retrieveConnectAccountStatus,
+	createShopCheckoutSession,
+	createShopPaymentIntent,
+	type ConnectAccountStatus,
+} from './src/connect/stripe-connect'

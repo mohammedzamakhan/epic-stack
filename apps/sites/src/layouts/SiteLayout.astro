@@ -22,6 +22,7 @@ interface Props {
 		appleTouchIcon: string
 	} | null
 	tenantApiUrl?: string
+	appUrl?: string
 	orgSlug?: string | null
 	customHost?: string | null
 	defaultLocale?: string
@@ -38,6 +39,7 @@ const {
 	dir = 'ltr',
 	siteIcon,
 	tenantApiUrl,
+	appUrl,
 	orgSlug,
 	customHost,
 	defaultLocale = 'en',
@@ -79,6 +81,7 @@ const htmlClass =
 	data-heading-font={headingFont}
 	data-body-font={bodyFont}
 	data-tenant-api-url={tenantApiUrl}
+	data-app-url={appUrl}
 	data-org-slug={orgSlug || undefined}
 	data-custom-host={customHost || undefined}
 	data-default-locale={defaultLocale}

@@ -12,6 +12,13 @@ import SiteLayout from '~/layouts/SiteLayout.astro'
 import type { PublicOrganization, PublicWebsitePage } from '~/lib/org'
 import type { SiteLocaleLink } from '~/lib/media'
 import { getTenantApiUrl } from '~/lib/tenant-api'
+import { ENV } from 'varlock/env'
+
+const appUrl = (
+	process.env.PUBLIC_APP_URL ||
+	ENV.PUBLIC_APP_URL ||
+	'http://localhost:3001'
+).replace(/\/$/, '')
 
 interface Props {
 	organization: PublicOrganization
@@ -89,6 +96,7 @@ const alternateLinks = [
 	dir={localeDirection}
 	siteIcon={organization.siteIcon ?? null}
 	tenantApiUrl={getTenantApiUrl(organization.dataRegion)}
+	appUrl={appUrl}
 	orgSlug={Astro.locals.orgSlug || organization.slug}
 	customHost={Astro.locals.customHost}
 	defaultLocale={defaultLocale}

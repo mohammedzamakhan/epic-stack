@@ -3,10 +3,10 @@
 
 /// <reference types="emdash/locals" />
 
-import type {
-	ContentBylineCredit,
-	TaxonomyTerm,
-	PortableTextBlock,
+import {
+	type ContentBylineCredit,
+	type TaxonomyTerm,
+	type PortableTextBlock,
 } from 'emdash'
 
 export interface Page {

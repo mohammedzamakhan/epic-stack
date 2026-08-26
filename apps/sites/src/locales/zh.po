@@ -13,6 +13,26 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Back to shop"
+msgstr "返回商店"
+
+#: src/pages/profile.astro.ts:3
+msgid "Browse the shop"
+msgstr "浏览商店"
+
+#: src/pages/shop.astro.ts:3
+msgid "Buy now"
+msgstr "立即购买"
+
+#: src/pages/shop.astro.ts:3
+msgid "Card number"
+msgstr "卡号"
+
+#: src/pages/profile.astro.ts:3
+msgid "Cards used on past shop purchases on this account."
+msgstr "此账户在商店过往购买中使用的银行卡。"
+
 #: src/pages/verify.astro.ts:3
 msgid "Check your phone"
 msgstr "请查看手机"
@@ -21,6 +41,10 @@ msgstr "请查看手机"
 msgid "Continue"
 msgstr "继续"
 
+#: src/pages/shop.astro.ts:3
+msgid "CVC"
+msgstr "CVC"
+
 #: src/pages/profile.astro.ts:3
 msgid "Email"
 msgstr "电子邮件"
@@ -28,6 +52,14 @@ msgstr "电子邮件"
 #: src/pages/login.astro.ts:3
 msgid "Enter your phone number. We'll send a verification code."
 msgstr "请输入手机号，我们将发送验证码。"
+
+#: src/pages/profile.astro.ts:3
+msgid "Expires"
+msgstr "到期"
+
+#: src/pages/shop.astro.ts:3
+msgid "Expiry"
+msgstr "有效期"
 
 #: src/pages/complete-name.astro.ts:3
 msgid "Full name"
@@ -60,9 +92,37 @@ msgstr "姓名"
 msgid "Network error. Please try again."
 msgstr "网络错误，请重试。"
 
+#: src/pages/profile.astro.ts:3
+msgid "No orders yet."
+msgstr "暂无订单。"
+
+#: src/pages/profile.astro.ts:3
+msgid "No saved payment methods yet."
+msgstr "暂无已保存的支付方式。"
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Open menu"
 msgstr "打开菜单"
+
+#: src/pages/shop/success.astro.ts:3
+msgid "Order confirmed"
+msgstr "订单已确认"
+
+#: src/pages/profile.astro.ts:3
+msgid "Order history"
+msgstr "订单历史"
+
+#: src/pages/shop.astro.ts:3
+msgid "Pay now"
+msgstr "立即支付"
+
+#: src/pages/shop.astro.ts:3
+msgid "Payment method"
+msgstr "支付方式"
+
+#: src/pages/profile.astro.ts:3
+msgid "Payment methods"
+msgstr "支付方式"
 
 #: src/pages/login.astro.ts:3
 #: src/pages/profile.astro.ts:3
@@ -77,6 +137,10 @@ msgstr "目前无法更改电话号码。"
 msgid "Primary"
 msgstr "主导航"
 
+#: src/pages/shop.astro.ts:3
+msgid "Processing payment..."
+msgstr "正在处理付款..."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Profile"
 msgstr "个人资料"
@@ -84,6 +148,10 @@ msgstr "个人资料"
 #: src/pages/profile.astro.ts:3
 msgid "Profile updated successfully!"
 msgstr "资料已更新。"
+
+#: src/pages/profile.astro.ts:3
+msgid "Purchases from the shop while signed in."
+msgstr "登录后在商店的购买记录。"
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -102,6 +170,10 @@ msgstr "发送验证码"
 msgid "Sending..."
 msgstr "发送中..."
 
+#: src/pages/shop.astro.ts:3
+msgid "Shop"
+msgstr "商店"
+
 #: src/components/SiteHeader.astro.ts:3
 #: src/pages/login.astro.ts:3
 msgid "Sign in"
@@ -113,9 +185,25 @@ msgstr "登录"
 msgid "Something went wrong."
 msgstr "出了点问题。"
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Thank you for your purchase!"
+msgstr "感谢您的购买！"
+
+#: src/pages/shop.astro.ts:3
+msgid "This shop is not available right now."
+msgstr "该商店目前不可用。"
+
+#: src/pages/shop.astro.ts:3
+msgid "Unable to start checkout. Please try again."
+msgstr "无法开始结账，请重试。"
+
 #: src/pages/profile.astro.ts:3
 msgid "Update your basic details below."
 msgstr "请在下方更新您的基本信息。"
+
+#: src/pages/shop.astro.ts:3
+msgid "Use a new card"
+msgstr "使用新卡"
 
 #: src/pages/verify.astro.ts:3
 msgid "Verification Code"
@@ -128,6 +216,10 @@ msgstr "验证"
 #: src/pages/verify.astro.ts:3
 msgid "Verifying..."
 msgstr "验证中..."
+
+#: src/pages/shop/success.astro.ts:3
+msgid "We could not confirm this order."
+msgstr "我们无法确认此订单。"
 
 #: src/pages/complete-name.astro.ts:3
 msgid "We'll use this on your profile. You can change it later."

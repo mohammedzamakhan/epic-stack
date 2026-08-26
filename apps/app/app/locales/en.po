@@ -43,22 +43,18 @@ msgstr ""
 msgid "{0} of {1} targeted"
 msgstr ""
 
-#. placeholder {0}: (campaign.targetAudienceCount ?? 0).toLocaleString()
-#. placeholder {0}: campaign.targetAudienceCount.toLocaleString()
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:249
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns._index.tsx:158
-msgid "{0} recipients"
-msgstr ""
+#~ msgid "{0} recipients"
+#~ msgstr ""
 
-#. placeholder {0}: journey.runsCount
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:344
-msgid "{0} runs"
-msgstr ""
+#~ msgid "{0} runs"
+#~ msgstr ""
 
-#. placeholder {0}: journey.stepCount
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:342
-msgid "{0} steps"
-msgstr ""
+#~ msgid "{0} steps"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/index.tsx:308
 msgid "{avgPerDay} avg per day"
@@ -120,6 +116,11 @@ msgstr ""
 msgid "{processedObjects} of {totalObjects} files copied{failedObjectsText}"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:252
+#: app/routes/_app+/$orgSlug_+/marketing+/campaigns._index.tsx:160
+msgid "{recipientCount} recipients"
+msgstr ""
+
 #: app/routes/_auth+/waitlist.tsx:210
 msgid "{referralCount, plural, one {# person joined using your link!} other {# people joined using your link!}}"
 msgstr ""
@@ -128,12 +129,20 @@ msgstr ""
 msgid "{remainingMinutes, plural, one {expires in # minute} other {expires in # minutes}}"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:349
+msgid "{runsCount} runs"
+msgstr ""
+
 #: app/components/ui/notification-bell.tsx:49
 msgid "{seconds}s ago"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:334
 msgid "{status}"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:347
+msgid "{stepCount} steps"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/index.tsx:304
@@ -359,7 +368,7 @@ msgstr ""
 msgid "Add link"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:368
+#: app/components/app-sidebar.tsx:373
 msgid "Add members"
 msgstr ""
 
@@ -495,7 +504,7 @@ msgstr ""
 msgid "All core features included"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:244
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:248
 msgid "All customer automation workflows orchestrated durably by Cloudflare Workflows and executed by the regional data engine."
 msgstr ""
 
@@ -571,9 +580,12 @@ msgstr ""
 msgid "Archived"
 msgstr ""
 
-#. placeholder {0}: journey.name
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:422
-msgid "Are you sure you want to delete \"{0}\"?"
+#~ msgid "Are you sure you want to delete \"{0}\"?"
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:427
+msgid "Are you sure you want to delete \"{journeyName}\"?"
 msgstr ""
 
 #: app/components/note/comment-item.tsx:78
@@ -609,19 +621,24 @@ msgstr ""
 msgid "Assign responsibilities"
 msgstr ""
 
-#. placeholder {0}: step.attempt
-#. placeholder {1}: step.executedAt ? new Date(step.executedAt).toLocaleTimeString() : _(msg`Pending`)
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:413
-msgid "Attempt: {0} • Executed: {1}"
+#~ msgid "Attempt: {0} • Executed: {1}"
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:422
+msgid "Attempt: {attempt} • Executed: {executedAtLabel}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:279
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:283
 msgid "Audit Trail"
 msgstr ""
 
-#. placeholder {0}: journey.triggerType.replace('_', ' ')
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:210
-msgid "Audit trail and step execution history triggered by \"{0}\"."
+#~ msgid "Audit trail and step execution history triggered by \"{0}\"."
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:214
+msgid "Audit trail and step execution history triggered by \"{triggerLabel}\"."
 msgstr ""
 
 #: app/components/settings/two-factor-form.tsx:87
@@ -732,7 +749,7 @@ msgstr ""
 msgid "Billed monthly"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:344
+#: app/components/app-sidebar.tsx:349
 #: app/components/command-menu.tsx:181
 msgid "Billing"
 msgstr ""
@@ -1107,6 +1124,10 @@ msgstr ""
 msgid "Connect domain"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:93
+msgid "Connect Stripe"
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:1342
 msgid "Connect your AI assistants to {organizationName} data using the Model Context Protocol"
 msgstr ""
@@ -1159,6 +1180,10 @@ msgstr ""
 #: app/routes/_auth+/login.tsx:670
 #: app/routes/organizations+/create.tsx:765
 msgid "Continue"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:91
+msgid "Continue Stripe setup"
 msgstr ""
 
 #: app/routes/organizations+/create.tsx:900
@@ -1427,7 +1452,7 @@ msgstr ""
 msgid "Customer Signup (Registration)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:274
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:278
 msgid "Customer UUID"
 msgstr ""
 
@@ -1437,6 +1462,10 @@ msgstr ""
 
 #: app/components/app-sidebar.tsx:247
 msgid "Customers"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:155
+msgid "Customers pay this amount. You receive {orgSharePercent}% after the platform fee."
 msgstr ""
 
 #: app/components/data-table.tsx:509
@@ -1517,7 +1546,7 @@ msgstr ""
 
 #: app/components/data-table.tsx:386
 #: app/components/settings/passkey-manager.tsx:220
-#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:433
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:438
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:463
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:502
 msgid "Delete"
@@ -1601,6 +1630,7 @@ msgstr ""
 msgid "Deny"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:128
 #: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3548
 #: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3858
 #: app/routes/organizations+/create.tsx:737
@@ -1730,12 +1760,12 @@ msgstr ""
 msgid "Drag to reorder column"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:413
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:418
 msgid "Duplicate"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:207
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:277
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:281
 msgid "Duration"
 msgstr ""
 
@@ -1962,12 +1992,15 @@ msgstr ""
 msgid "Example Request"
 msgstr ""
 
-#. placeholder {0}: runs.length
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:240
-msgid "Execution History ({0})"
+#~ msgid "Execution History ({0})"
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:244
+msgid "Execution History ({runCount})"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:192
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:196
 msgid "Execution Runs"
 msgstr ""
 
@@ -2209,12 +2242,12 @@ msgstr ""
 msgid "Generating..."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:360
+#: app/components/app-sidebar.tsx:365
 msgid "Get chrome extension"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:142
-#: app/components/app-sidebar.tsx:373
+#: app/components/app-sidebar.tsx:378
 msgid "Get help"
 msgstr ""
 
@@ -2234,7 +2267,7 @@ msgid "Get started: {completedCount} of {totalSteps} steps complete"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:147
-#: app/components/app-sidebar.tsx:379
+#: app/components/app-sidebar.tsx:384
 #: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
 msgstr ""
@@ -2257,6 +2290,10 @@ msgstr ""
 
 #: app/components/settings/cards/organization/site-theme-card.tsx:444
 msgid "Gray color"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:224
+msgid "Guest checkout"
 msgstr ""
 
 #: app/components/data-table.tsx:188
@@ -2567,7 +2604,7 @@ msgstr ""
 msgid "Launch run"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:263
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:267
 msgid "Launch Test Run in Builder"
 msgstr ""
 
@@ -2652,7 +2689,7 @@ msgstr ""
 msgid "Loading notes..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:380
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:384
 msgid "Loading step executions from regional SQLite outbox..."
 msgstr ""
 
@@ -2802,7 +2839,7 @@ msgstr ""
 msgid "MCP OAuth Setup Instructions"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:330
+#: app/components/app-sidebar.tsx:335
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:1341
 msgid "MCP Server"
 msgstr ""
@@ -2881,7 +2918,7 @@ msgid "More"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:219
-#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:373
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:378
 msgid "More actions"
 msgstr ""
 
@@ -3049,7 +3086,7 @@ msgstr ""
 msgid "No delivery records yet."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:385
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:389
 msgid "No discrete action step dispatches recorded for this run."
 msgstr ""
 
@@ -3061,7 +3098,7 @@ msgstr ""
 msgid "No emojis found"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:252
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:256
 msgid "No execution runs recorded yet for this automation."
 msgstr ""
 
@@ -3150,6 +3187,10 @@ msgstr ""
 msgid "None"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:76
+msgid "Not connected"
+msgstr ""
+
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:483
 msgid "Not Verified (False)"
 msgstr ""
@@ -3192,7 +3233,7 @@ msgstr ""
 msgid "Notification Preferences"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:335
+#: app/components/app-sidebar.tsx:340
 msgid "Notifications"
 msgstr ""
 
@@ -3283,7 +3324,11 @@ msgstr ""
 msgid "Open rate"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:233
+#: app/components/settings/cards/organization/shop-card.tsx:105
+msgid "Open Stripe dashboard"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:237
 msgid "Open Visual Builder"
 msgstr ""
 
@@ -3310,6 +3355,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:309
 msgid "Or continue with email or username"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:204
+msgid "Orders placed on your public site."
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:60
@@ -3419,7 +3468,7 @@ msgid "Password login is disabled because your organization \"{orgName}\" requir
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:191
-#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:401
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:406
 msgid "Pause"
 msgstr ""
 
@@ -3433,12 +3482,20 @@ msgstr ""
 msgid "Paused"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:259
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:260
 msgid "Pausing automation..."
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:72
+msgid "Payments enabled"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:81
+msgid "Payouts enabled"
+msgstr ""
+
 #: ../../packages/ai/src/components/ai-elements/tool.tsx:44
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:416
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:402
 msgid "Pending"
 msgstr ""
 
@@ -3611,6 +3668,10 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:143
+msgid "Price (USD)"
+msgstr ""
+
 #: app/components/settings/cards/organization/billing-card.tsx:389
 #: app/routes/organizations+/create.tsx:1315
 msgid "Price not configured"
@@ -3655,6 +3716,10 @@ msgstr ""
 msgid "Processing"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:116
+msgid "Product name"
+msgstr ""
+
 #: app/components/app-sidebar.tsx:121
 #: app/components/user-dropdown.tsx:54
 #: app/routes/_auth+/onboarding_.$provider.tsx:250
@@ -3679,7 +3744,7 @@ msgid "Public Access"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:208
-#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:390
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:395
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:438
 #: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5755
 msgid "Publish"
@@ -3697,12 +3762,16 @@ msgstr ""
 msgid "Publish updates"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:187
+msgid "Publish your site before sharing the shop link with customers."
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:392
 #: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5741
 msgid "Published"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:249
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:250
 msgid "Publishing and activating automation..."
 msgstr ""
 
@@ -3753,6 +3822,10 @@ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:204
 msgid "Recent campaigns"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:201
+msgid "Recent orders"
 msgstr ""
 
 #: ../../packages/marketing/src/components/campaign-list.tsx:81
@@ -3977,7 +4050,7 @@ msgstr ""
 msgid "Routing Logic:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:346
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:350
 msgid "Run Execution Timeline"
 msgstr ""
 
@@ -3985,13 +4058,16 @@ msgstr ""
 msgid "Run history"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:272
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:276
 msgid "Run ID"
 msgstr ""
 
-#. placeholder {0}: selectedRun?.id ?? ''
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:366
-msgid "Run ID: {0}"
+#~ msgid "Run ID: {0}"
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:370
+msgid "Run ID: {selectedRunId}"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:93
@@ -4092,6 +4168,10 @@ msgstr ""
 msgid "Save languages"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:173
+msgid "Save product"
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:798
 msgid "Save the file and restart Claude Desktop"
 msgstr ""
@@ -4113,7 +4193,7 @@ msgstr ""
 msgid "Saving {headerValue}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:237
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:238
 msgid "Saving automation draft..."
 msgstr ""
 
@@ -4304,6 +4384,10 @@ msgstr ""
 msgid "Selected Members"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:52
+msgid "Sell one product on your public site. The platform keeps {SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to your connected Stripe account."
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns.new.tsx:73
 msgid "Send a one-time email or SMS to your audience."
 msgstr ""
@@ -4396,6 +4480,10 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:74
+msgid "Setup incomplete"
+msgstr ""
+
 #: app/components/settings/two-factor-form.tsx:179
 msgid "Setup key"
 msgstr ""
@@ -4424,12 +4512,24 @@ msgstr ""
 msgid "Shared across every page"
 msgstr ""
 
+#: app/components/app-sidebar.tsx:330
+msgid "Shop"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:62
+msgid "Shop payouts are available for US organizations only. KSA checkout will be supported separately."
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4700
 msgid "Short"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:87
 msgid "Show me features"
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:169
+msgid "Show product on your public site"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:130
@@ -4505,6 +4605,10 @@ msgstr ""
 msgid "Site icon"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:49
+msgid "Site shop"
+msgstr ""
+
 #: app/routes/organizations+/create.tsx:937
 msgid "Skip for now"
 msgstr ""
@@ -4576,14 +4680,14 @@ msgstr ""
 msgid "Start the conversation by adding the first comment."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:276
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:280
 msgid "Started At"
 msgstr ""
 
 #: app/components/data-table.tsx:207
 #: app/components/data-table.tsx:840
 #: app/components/settings/cards/sessions-card.tsx:239
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:275
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:279
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:950
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:604
 msgid "Status"
@@ -4593,9 +4697,12 @@ msgstr ""
 msgid "Step {currentStep} of {totalSteps}"
 msgstr ""
 
-#. placeholder {0}: timeline.length
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:391
-msgid "Step Executions ({0})"
+#~ msgid "Step Executions ({0})"
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:395
+msgid "Step Executions ({timelineCount})"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-elements/prompt-input.tsx:168
@@ -4760,9 +4867,12 @@ msgstr ""
 msgid "Test run"
 msgstr ""
 
-#. placeholder {0}: data.runId || 'initiated'
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:203
-msgid "Test run triggered successfully (Run ID: {0})"
+#~ msgid "Test run triggered successfully (Run ID: {0})"
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:204
+msgid "Test run triggered successfully (Run ID: {runId})"
 msgstr ""
 
 #: app/components/website/link-inspector.tsx:638
@@ -5000,7 +5110,7 @@ msgstr ""
 msgid "Triggered via operator test or API"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:270
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:271
 msgid "Triggering test run for customer \"{customerId}\"..."
 msgstr ""
 
@@ -5055,7 +5165,7 @@ msgid "Unknown error"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:226
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:209
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:210
 msgid "Unknown intent"
 msgstr ""
 
@@ -5270,11 +5380,11 @@ msgstr ""
 msgid "View notes from users you have access to"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:361
+#: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:366
 msgid "View run history"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:325
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:329
 msgid "View Timeline →"
 msgstr ""
 
@@ -5411,7 +5521,7 @@ msgstr ""
 msgid "When you get notifications, they'll show up here."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:373
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:377
 msgid "Workflow Error:"
 msgstr ""
 
@@ -5508,6 +5618,10 @@ msgstr ""
 msgid "You must agree to the terms of service and privacy policy"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:237
+msgid "You receive"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:428
 msgid "You're logged in! Navigating..."
 msgstr ""
@@ -5534,6 +5648,10 @@ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:523
 msgid "Your API key has been created successfully. Copy it now - you won't be able to see it again."
+msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:179
+msgid "Your customers can buy at <0>/shop</0> on your published site once payments are enabled."
 msgstr ""
 
 #: app/routes/organizations+/create.tsx:1019

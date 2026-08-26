@@ -327,6 +327,11 @@ function OrganizationSidebar({
 					isActive: location.pathname === `/${orgSlug}/settings/integrations`,
 				},
 				{
+					title: _(msg`Shop`),
+					url: `/${orgSlug}/settings/shop`,
+					isActive: location.pathname === `/${orgSlug}/settings/shop`,
+				},
+				{
 					title: _(msg`MCP Server`),
 					url: `/${orgSlug}/mcp`,
 					isActive: location.pathname.includes(`/${orgSlug}/mcp`),

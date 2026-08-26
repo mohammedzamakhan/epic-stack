@@ -11,6 +11,7 @@ import {
 	getSiteHostSuffixes,
 	resolveHost,
 } from '~/lib/resolve-host'
+import { isInlineShopCheckoutEnabled } from '~/lib/shop'
 import {
 	asAstroResponse,
 	edgeCache,
@@ -20,6 +21,9 @@ import {
 	shouldCachePublishedHtml,
 	sitesConnectSrc,
 	sitesScriptSrc,
+	sitesStripeConnectSrc,
+	sitesStripeFrameSrc,
+	sitesStripeScriptSrc,
 } from '~/lib/site-headers'
 
 export {
@@ -53,7 +57,13 @@ const tenantApiUrlKsa = (
 ).replace(/\/$/, '')
 const imgSrc = `img-src 'self' data: ${appUrl}`
 const fontSrc = `font-src 'self' data: ${appUrl}`
-const connectSrc = sitesConnectSrc([appUrl, tenantApiUrl, tenantApiUrlKsa])
+const stripeEnabled = isInlineShopCheckoutEnabled()
+const connectSrc = [
+	sitesConnectSrc([appUrl, tenantApiUrl, tenantApiUrlKsa]),
+	sitesStripeConnectSrc(stripeEnabled),
+]
+	.filter(Boolean)
+	.join(' ')
 
 const isProduction = isSitesProduction()
 
@@ -67,15 +77,18 @@ function securityHeadersFor(env: SiteHostEnv) {
 		'Content-Security-Policy': [
 			"default-src 'self'",
 			connectSrc,
-			sitesScriptSrc(!isProduction),
+			`${sitesScriptSrc(!isProduction)}${sitesStripeScriptSrc(stripeEnabled)}`,
 			"style-src 'self' 'unsafe-inline'",
 			fontSrc,
 			imgSrc,
 			"object-src 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",
+			sitesStripeFrameSrc(stripeEnabled),
 			`frame-ancestors 'self' ${frameAncestors} localhost:*`,
-		].join('; '),
+		]
+			.filter(Boolean)
+			.join('; '),
 		...(isProduction
 			? {
 					'Strict-Transport-Security':

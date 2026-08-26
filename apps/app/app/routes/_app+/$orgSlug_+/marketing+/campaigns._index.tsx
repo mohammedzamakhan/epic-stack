@@ -154,9 +154,11 @@ export default function CampaignsIndexRoute() {
 								<ItemDescription>
 									<span className="capitalize">{campaign.channel}</span>
 									{' · '}
-									{_(
-										msg`${campaign.targetAudienceCount.toLocaleString()} recipients`,
-									)}
+									{(() => {
+										const recipientCount =
+											campaign.targetAudienceCount.toLocaleString()
+										return _(msg`${recipientCount} recipients`)
+									})()}
 									{' · '}
 									{new Date(campaign.createdAt).toLocaleDateString()}
 								</ItemDescription>
