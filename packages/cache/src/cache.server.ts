@@ -406,7 +406,7 @@ function mapSqliteRowToCacheKeyInfo(row: {
 		swr?: number | null
 	} = {}
 	try {
-		metadata = JSON.parse(row.metadata)
+		metadata = JSON.parse(row.metadata) as any
 	} catch {
 		// ignore parse errors
 	}

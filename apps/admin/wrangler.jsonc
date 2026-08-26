@@ -9,15 +9,13 @@
 		"enabled": true,
 	},
 	"workers_dev": true,
-	"assets": {
-		"directory": "./build/client",
-		"binding": "ASSETS",
-	},
+	// @cloudflare/vite-plugin injects assets.directory at build time — do not set directory here.
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "epic_app_db",
 			"database_id": "ff7f36a4-16c4-488d-bb1d-872cba6b6909",
+			"migrations_dir": "../../packages/database/drizzle",
 		},
 	],
 	"kv_namespaces": [

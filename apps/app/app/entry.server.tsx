@@ -16,6 +16,10 @@ import {
 	type HandleDocumentRequestFunction,
 } from 'react-router'
 import { auditSensitiveRoutes } from '#app/utils/audit/audit-middleware.server.ts'
+import {
+	sitePreviewFrameSrc,
+	tenantApiConnectSrc,
+} from '#app/utils/csp-frame-src.server.ts'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
 
