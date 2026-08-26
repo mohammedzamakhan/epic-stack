@@ -214,7 +214,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-web
+          projectName: epic-startup
           directory: apps/web/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -224,7 +224,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-web-staging
+          projectName: epic-startup-staging
           directory: apps/web/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 

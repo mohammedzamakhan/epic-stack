@@ -17,7 +17,7 @@ permissions:
   deployments: write
 
 env:
-  CLOUDFLARE_PROJECT_NAME: epic-startup-web
+  CLOUDFLARE_PROJECT_NAME: epic-startup
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
@@ -57,7 +57,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-web
+          projectName: epic-startup
           directory: apps/web/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.head_ref }}
