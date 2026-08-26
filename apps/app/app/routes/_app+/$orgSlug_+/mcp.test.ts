@@ -406,10 +406,12 @@ describe('MCP Settings Page', () => {
 				)
 			expect(authorizations).toHaveLength(3)
 
+			const firstAuth = auths[0]
+			if (!firstAuth) throw new Error('Expected authorization')
 			await db
 				.update(MCPAuthorization)
 				.set({ isActive: false })
-				.where(eq(MCPAuthorization.id, auths[0].authorization.id))
+				.where(eq(MCPAuthorization.id, firstAuth.authorization.id))
 
 			authorizations = await db
 				.select()
