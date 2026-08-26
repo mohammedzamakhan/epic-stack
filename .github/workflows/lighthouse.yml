@@ -161,7 +161,7 @@ jobs:
             --config=apps/web/lighthouserc.cjs \
             --collect.url="${{ needs.preview-deploy.outputs.preview_url }}" \
             --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/about" \
-            --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/blog"
+            --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/posts/page/1"
         env:
           # Optional: Install https://github.com/apps/lighthouse-ci for enhanced GitHub integration
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN || '' }}
