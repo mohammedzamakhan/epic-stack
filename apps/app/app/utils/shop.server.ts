@@ -31,10 +31,7 @@ import {
 	customerPaymentMethods,
 } from '@repo/tenant-db'
 import type Stripe from 'stripe'
-import {
-	resolveVerifiedShopCustomer,
-	assertTenantCustomerJwtSecret,
-} from '#app/utils/tenant-customer-auth.server.ts'
+import { resolveVerifiedShopCustomer } from '#app/utils/tenant-customer-auth.server.ts'
 import { type ShopOrganization } from './shop.types.ts'
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -44,17 +41,22 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const paymentProvider = createStripeProvider(process.env.STRIPE_SECRET_KEY)
 const stripe = paymentProvider.getClient()
 
+let cachedStripePublishableKey: string | undefined
+
 function loadStripePublishableKey() {
 	const key = process.env.STRIPE_PUBLISHABLE_KEY?.trim()
 	if (!key) {
 		throw new Error('STRIPE_PUBLISHABLE_KEY environment variable is not set!')
 	}
-	assertStripePublishableKey(process.env.STRIPE_SECRET_KEY!, key)
+	if (shouldValidateShopStripeKeys()) {
+		assertStripePublishableKey(process.env.STRIPE_SECRET_KEY!, key)
+	}
 	return key
 }
 
-const stripePublishableKey = loadStripePublishableKey()
-assertTenantCustomerJwtSecret()
+function shouldValidateShopStripeKeys() {
+	return process.env.MOCKS !== 'true' && process.env.NODE_ENV !== 'test'
+}
 
 export { SHOP_PLATFORM_FEE_PERCENT, calculateShopFees } from '@repo/payments'
 export type { ShopOrganization, ShopOrderSummary } from './shop.types.ts'
@@ -143,7 +145,10 @@ function assertStripePublishableKey(secretKey: string, publishableKey: string) {
 }
 
 function getStripePublishableKey() {
-	return stripePublishableKey
+	if (!cachedStripePublishableKey) {
+		cachedStripePublishableKey = loadStripePublishableKey()
+	}
+	return cachedStripePublishableKey
 }
 
 const shopOrganizationColumns = {
