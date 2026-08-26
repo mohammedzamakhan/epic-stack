@@ -1,0 +1,68 @@
+[
+  {
+    "verdict": "confirmed",
+    "title": "Server-Side Request Forgery (SSRF) in GitLab Integration",
+    "description": "The GitLab integration allows users to configure a custom `instanceUrl` for self-hosted instances. While the URL is validated against a denylist using `validateInstanceUrl`, it fails to prevent SSRF because `validateInstanceUrl` allows resolving external domains that point to internal IP addresses (DNS rebinding / localtest.me). Additionally, the GitLab provider directly uses `fetch` instead of `safeFetch`, completely bypassing SSRF protections for DNS resolution time. This allows an attacker to make arbitrary authenticated HTTP requests to internal network services (e.g., metadata endpoints, internal APIs) via the `instanceUrl`.",
+    "root_cause": "GitLabProvider in packages/integrations/src/providers/gitlab/provider.ts does not wrap HTTP requests in safeFetch to prevent SSRF via DNS rebinding, allowing Server-Side Request Forgery.",
+    "intended_behavior": "Integration providers that connect to user-supplied URLs should use a safe fetch wrapper that resolves the hostname and checks the actual IP address against a denylist of private/internal networks before making the request, preventing DNS-based SSRF bypasses.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "packages/integrations/src/providers/gitlab/provider.ts",
+        "line": 150,
+        "scope": "getBaseUrl",
+        "description": "Reads user-provided instanceUrl from the integration config."
+      },
+      {
+        "kind": "propagation",
+        "file": "packages/integrations/src/providers/gitlab/provider.ts",
+        "line": 155,
+        "scope": "getBaseUrl",
+        "description": "Validates the URL using validateInstanceUrl, which is susceptible to DNS bypasses."
+      },
+      {
+        "kind": "sink",
+        "file": "packages/integrations/src/providers/gitlab/provider.ts",
+        "line": 585,
+        "scope": "getProject",
+        "description": "Calls fetch() directly with the attacker-controlled instanceUrl without additional IP-level validation."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "User must have permission to configure an integration."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "A user with integration setup permissions configures a GitLab integration with a malicious custom instance URL.",
+      "payloads": [
+        "https://localtest.me:8000"
+      ],
+      "instructions": [
+        "Create a GitLab integration.",
+        "Set the custom instance URL to a domain resolving to an internal IP (e.g., https://localtest.me).",
+        "Trigger an integration action (e.g., syncing projects) which causes the server to fetch from the internal IP."
+      ],
+      "expected_result": "The server sends an HTTP request to the internal IP address and returns the response or indicates connection success."
+    },
+    "remediation": {
+      "strategy": "Implement and enforce a safe fetch wrapper (`safeFetch`) in `GitLabProvider` (and all other providers) that performs DNS resolution and checks the resolved IP against a denylist of private ranges before establishing the HTTP connection. Replace all direct `fetch` calls with `safeFetch`."
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "SSRF bypasses using DNS are well-known and trivial to exploit with services like localtest.me."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Allows access to internal network services, metadata endpoints, or other restricted APIs."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The code clearly shows direct use of `fetch` with user-supplied domains, bypassing robust IP validation."
+    }
+  }
+]
