@@ -158,7 +158,7 @@ jobs:
         id: lighthouse
         run: |
           lhci autorun \
-            --config=apps/web/lighthouserc.js \
+            --config=apps/web/lighthouserc.cjs \
             --collect.url="${{ needs.preview-deploy.outputs.preview_url }}" \
             --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/about" \
             --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/blog"
