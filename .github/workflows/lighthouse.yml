@@ -55,8 +55,10 @@ jobs:
         id: deploy
         working-directory: apps/web
         run: |
-          npx wrangler deploy --env preview
-          echo "url=https://epic-startup-preview.zama-887.workers.dev" >> $GITHUB_OUTPUT
+          deploy_output=$(npx wrangler deploy --env preview)
+          echo "$deploy_output"
+          url=$(echo "$deploy_output" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | head -n 1)
+          echo "url=$url" >> $GITHUB_OUTPUT
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
