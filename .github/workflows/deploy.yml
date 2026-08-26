@@ -20,6 +20,11 @@ env:
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+  # Force npm to resolve linux-x64 optional native bindings even when lockfile
+  # was generated on macOS. Fixes @libsql/linux-x64-gnu and similar missing modules.
+  npm_config_os: linux
+  npm_config_cpu: x64
+  npm_config_libc: glibc
 
 jobs:
   affected:
@@ -80,9 +85,6 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
-      - name: 🔧 Rebuild native dependencies
-        run: npm rebuild libsql
-
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
 
@@ -106,7 +108,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql
+        run: npm rebuild sharp
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -134,7 +136,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql
+        run: npm rebuild sharp
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -160,7 +162,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql
+        run: npm rebuild sharp
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
