@@ -1,0 +1,100 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro'
+import { getPost } from '../../lib/emdash'
+import PostContent from '../../components/PostContent.astro'
+import SEO from '../../components/SEO.astro'
+import Button from '../../components/ui/Button.astro'
+import GridDesign from '../../components/GridDesign.astro'
+
+const { slug } = Astro.params
+const currentLocale = Astro.currentLocale ?? 'en'
+let post = await getPost(slug!, currentLocale)
+if (!post && currentLocale !== 'en') {
+  post = await getPost(slug!, 'en')
+}
+if (!post) {
+  post = await getPost(slug!)
+}
+
+if (!post) {
+	Astro.response.status = 404
+}
+
+const { title = '', content, seo, publishedAt, updatedAt, categories, heroImage } = (post || {}) as any
+
+// Calculate reading time (average 200 words per minute)
+function calculateReadingTime(postContent: unknown): number {
+	if (!postContent) return 3
+	const text = JSON.stringify(postContent)
+	const words = text.split(/\s+/).length
+	return Math.max(1, Math.ceil(words / 200))
+}
+
+const readingTime = calculateReadingTime(content)
+
+// Breadcrumbs for SEO
+const breadcrumbs = [
+	{ name: 'Home', url: '/' },
+	{ name: 'Blog', url: '/posts' },
+	{ name: title, url: `/posts/${slug}` },
+]
+---
+
+{post ? (
+	<MarketingLayout>
+		<Fragment slot="head">
+			<SEO
+				title={seo?.title || title}
+				description={seo?.description}
+				image={seo?.image || heroImage}
+				type="article"
+				publishedTime={publishedAt}
+				modifiedTime={updatedAt}
+				keywords={categories?.map((cat: { name: string }) => cat.name) || []}
+				breadcrumbs={breadcrumbs}
+				readingTime={readingTime}
+			/>
+		</Fragment>
+
+		<PostContent 
+			title={title}
+			content={content}
+			meta={seo}
+			publishedAt={publishedAt}
+			categories={categories}
+			heroImage={heroImage}
+		/>
+	</MarketingLayout>
+) : (
+	<MarketingLayout>
+		<Fragment slot="head">
+			<SEO
+				title="Article Not Found - Epic Startup"
+				description="The blog post you are looking for does not exist."
+			/>
+		</Fragment>
+
+		<section class="relative min-h-[70vh] flex items-center justify-center py-24 text-center">
+			<GridDesign />
+			<div class="container relative z-10 mx-auto px-4 max-w-xl">
+				<div class="space-y-6">
+					<span class="text-primary font-mono text-sm font-semibold tracking-wider uppercase">// 404 ERROR</span>
+					<h1 class="text-4xl md:text-6xl font-title text-foreground font-bold tracking-tight">
+						Article not found
+					</h1>
+					<p class="text-muted-foreground text-lg leading-relaxed">
+						Sorry, we couldn't find the blog post you're looking for.
+					</p>
+					<div class="flex flex-wrap justify-center gap-4 pt-4">
+						<Button href="/posts" variant="default" size="lg">
+							Back to Blog
+						</Button>
+						<Button href="/" variant="secondary" size="lg">
+							Return Home
+						</Button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</MarketingLayout>
+)}

@@ -1,0 +1,31 @@
+---
+import Featured from './Featured.astro'
+
+interface Props {
+	node: {
+		badge?: string
+		title?: string
+		subtitle?: string
+		features?: Array<{
+			icon?: string
+			title: string
+			description: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle, features } = node
+
+const mappedFeatures = features?.map((f: any) => ({
+	title: f.title,
+	description: f.description,
+}))
+---
+
+<Featured
+	title={title}
+	description={subtitle}
+	features={mappedFeatures as any}
+	blockType="featured"
+/>

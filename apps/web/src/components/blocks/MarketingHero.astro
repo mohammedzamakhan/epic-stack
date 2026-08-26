@@ -1,0 +1,76 @@
+---
+import HighImpactHero from '../heros/HighImpactHero.astro'
+import MediumImpactHero from '../heros/MediumImpactHero.astro'
+import LowImpactHero from '../heros/LowImpactHero.astro'
+import DefaultHero from '../DefaultHero.astro'
+
+interface Props {
+	node: {
+		variant?: 'highImpact' | 'mediumImpact' | 'lowImpact' | 'default'
+		headline?: string
+		subheadline?: string
+		badge?: string
+		mediaUrl?: string
+		videoUrl?: string
+		imagePerspective?: 'none' | 'left' | 'right' | 'bottom' | 'bottom-lg' | 'paper'
+		withBackgroundGlow?: boolean
+		isClosedBeta?: boolean
+		primaryCtaLabel?: string
+		primaryCtaUrl?: string
+		secondaryCtaLabel?: string
+		secondaryCtaUrl?: string
+		image?: { url: string; alt?: string }
+	}
+}
+
+const { node = {} as any } = Astro.props
+const {
+	variant = 'highImpact',
+	headline,
+	subheadline,
+	badge,
+	mediaUrl,
+	videoUrl,
+	imagePerspective,
+	withBackgroundGlow,
+	isClosedBeta,
+	primaryCtaLabel,
+	primaryCtaUrl,
+	secondaryCtaLabel,
+	secondaryCtaUrl,
+	image,
+} = node
+
+const links: any[] = []
+if (primaryCtaLabel) {
+	links.push({ label: primaryCtaLabel, url: primaryCtaUrl || '/signup', type: 'custom' })
+}
+if (secondaryCtaLabel) {
+	links.push({ label: secondaryCtaLabel, url: secondaryCtaUrl || '#', type: 'custom' })
+}
+
+const media = image || (mediaUrl ? { url: mediaUrl, alt: headline || 'Hero visual' } : undefined)
+const heroProps: any = {
+	title: headline,
+	description: subheadline,
+	headline,
+	subheadline,
+	badge,
+	links,
+	media,
+	videoUrl,
+	imagePerspective,
+	withBackgroundGlow,
+	isClosedBeta,
+}
+---
+
+{variant === 'mediumImpact' ? (
+	<MediumImpactHero {...heroProps} />
+) : variant === 'lowImpact' ? (
+	<LowImpactHero {...heroProps} />
+) : variant === 'default' ? (
+	<DefaultHero {...heroProps} />
+) : (
+	<HighImpactHero {...heroProps} />
+)}

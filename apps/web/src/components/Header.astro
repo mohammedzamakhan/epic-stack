@@ -2,6 +2,7 @@
 import { brand } from '@repo/config/brand'
 import GridDesign from './GridDesign.astro'
 import ThemeSwitcher from './ThemeSwitcher.astro'
+import LanguageSwitcher from './LanguageSwitcher.astro'
 import Button from './ui/Button.astro'
 import Navigation from './Navigation.astro'
 
@@ -192,7 +193,8 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 				</div>
 			</div>
 
-			<div class="hidden lg:flex items-center gap-4 relative z-10">
+			<div class="hidden lg:flex items-center gap-3 relative z-10">
+				<LanguageSwitcher />
 				<ThemeSwitcher />
 				<Button
 					href={demoUrl}
@@ -266,18 +268,19 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 					<Navigation isMobile={true} />
 				</div>
 
-				<div class="space-y-3 pt-6 border-t border-border/50">
-					<div class="flex items-center gap-3">
+				<div class="space-y-4 pt-6 border-t border-border/50">
+					<div class="flex items-center justify-between gap-3">
+						<LanguageSwitcher />
 						<ThemeSwitcher />
-						<Button
-							href={demoUrl}
-							class="flex-1"
-							size="xl"
-							target="_blank"
-						>
-							Get started
-						</Button>
 					</div>
+					<Button
+						href={demoUrl}
+						class="w-full"
+						size="xl"
+						target="_blank"
+					>
+						Get started
+					</Button>
 				</div>
 			</div>
 		</div>

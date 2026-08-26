@@ -29,7 +29,6 @@ jobs:
       app: ${{ steps.affected.outputs.app }}
       admin: ${{ steps.affected.outputs.admin }}
       web: ${{ steps.affected.outputs.web }}
-      cms: ${{ steps.affected.outputs.cms }}
       sites: ${{ steps.affected.outputs.sites }}
       tenant_api: ${{ steps.affected.outputs.tenant_api }}
       jobs_cron: ${{ steps.affected.outputs.jobs_cron }}
@@ -62,7 +61,6 @@ jobs:
           echo "app=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*app\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "admin=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*admin\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "web=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*web\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "cms=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*cms\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "sites=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*sites\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "tenant_api=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*tenant-api\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "jobs_cron=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*jobs-cron\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
@@ -527,74 +525,6 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-  deploy-cms:
-    name: 🚀 Deploy CMS (Vercel)
-    runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, affected]
-    if:
-      ${{ github.event_name == 'push' && (needs.affected.outputs.cms == 'true'
-      || contains(github.event.head_commit.modified, 'apps/cms/')) }}
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-
-      - name: ⎔ Setup node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📥 Download deps
-        run: npm ci --ignore-scripts
-
-      - name: 🚀 Deploy CMS to Vercel
-        working-directory: apps/cms
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          if [ -z "$VERCEL_TOKEN" ]; then
-            echo "Skipping Vercel deploy; set VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID."
-            exit 0
-          fi
-          npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
-
-  deploy-cms-cloudflare:
-    name: 🚀 Deploy CMS (Cloudflare Workers, optional)
-    runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, affected]
-    if:
-      ${{ github.event_name == 'push' && vars.CMS_DEPLOY_TARGET == 'cloudflare'
-      && (needs.affected.outputs.cms == 'true' ||
-      contains(github.event.head_commit.modified, 'apps/cms/')) }}
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-
-      - name: ⎔ Setup node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📥 Download deps
-        run: npm ci --ignore-scripts
-
-      - name: 📦 Build for Cloudflare Workers
-        working-directory: apps/cms
-        run: npx opennextjs-cloudflare build
-
-      - name: 🚀 Deploy CMS to Cloudflare Workers
-        working-directory: apps/cms
-        run: npx opennextjs-cloudflare deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-jobs-cron:
     name: 🚀 Deploy Jobs Cron (Cloudflare Workers)

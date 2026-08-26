@@ -4,8 +4,16 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 [vars]
-PUBLIC_CMS_URL = "https://epic-startup-cms.vercel.app"
 PUBLIC_ROOT_APP = "zama-887.workers.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "web-cms-db"
+database_id = "3085ac9c-03bd-403c-b6b9-d06efabbace8"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "web-media"
 
 [env.production]
 name = "epic-startup"

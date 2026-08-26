@@ -1,3 +1,5 @@
+> **Note: Payload CMS sections have been migrated to Emdash.**
+
 # Complete Epic Stack Deployment Guide
 
 Deploy your entire Epic Stack monorepo to production with this comprehensive

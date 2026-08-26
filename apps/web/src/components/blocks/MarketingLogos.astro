@@ -1,0 +1,24 @@
+---
+import Logos from './Logos.astro'
+
+interface Props {
+	node: {
+		title?: string
+		companies?: Array<{ name: string; logoUrl?: string }>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, companies } = node
+
+const mappedCompanies = companies?.map((c: any) => ({
+	name: c.name,
+	logo: c.logoUrl ? { url: c.logoUrl, alt: c.name } : undefined,
+}))
+---
+
+<Logos
+	title={title}
+	companies={mappedCompanies}
+	blockType="logos"
+/>

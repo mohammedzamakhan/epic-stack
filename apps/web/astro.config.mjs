@@ -2,18 +2,74 @@ import cloudflare from '@astrojs/cloudflare'
 import partytown from '@astrojs/partytown'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
+import { d1, r2 } from '@emdash-cms/cloudflare'
 import { getBrandDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
+import emdash, { local } from 'emdash/astro'
+import { sqlite } from 'emdash/db'
 import { fontless } from 'fontless'
 
 const domain = getBrandDomain()
+const isCloudflareBuild =
+	process.env.npm_lifecycle_event === 'build' ||
+	process.env.CLOUDFLARE_BUILD === 'true'
 
 export default defineConfig({
 	output: 'server',
 	site: `https://${domain}`,
+	i18n: {
+		defaultLocale: 'en',
+		locales: ['en', 'es', 'ar'],
+		fallback: {
+			es: 'en',
+			ar: 'en',
+		},
+		routing: {
+			prefixDefaultLocale: false,
+			fallbackType: 'rewrite',
+		},
+	},
+	session: isCloudflareBuild
+		? {
+				driver: {
+					entrypoint: 'unstorage/drivers/memory',
+				},
+			}
+		: {
+				driver: {
+					entrypoint: 'unstorage/drivers/fs-lite',
+					config: {
+						base: '.astro/session',
+					},
+				},
+			},
 	integrations: [
+		emdash({
+			database: isCloudflareBuild
+				? d1({ binding: 'DB' })
+				: sqlite({ url: 'file:./.emdash/data.db' }),
+			storage: isCloudflareBuild
+				? r2({ binding: 'MEDIA_BUCKET' })
+				: local({
+						directory: './.emdash/uploads',
+						baseUrl: '/_emdash/api/media/file',
+					}),
+			fonts: {
+				scripts: ['arabic'],
+			},
+			plugins: [
+				{
+					id: 'marketing-blocks',
+					version: '0.1.0',
+					entrypoint: new URL(
+						'./src/plugins/marketing-blocks/index.ts',
+						import.meta.url,
+					).href,
+				},
+			],
+		}),
 		varlockAstroIntegration(),
 		{
 			name: 'fix-varlock-entry-detection',
@@ -84,46 +140,6 @@ export default defineConfig({
 		},
 		optimizeDeps: {
 			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
-		},
-		resolve: {
-			alias: {
-				zlib: 'node:zlib',
-				http: 'node:http',
-				https: 'node:https',
-				crypto: 'node:crypto',
-				util: 'node:util',
-				stream: 'node:stream',
-				buffer: 'node:buffer',
-				events: 'node:events',
-				path: 'node:path',
-				url: 'node:url',
-				fs: 'node:fs',
-				os: 'node:os',
-			},
-		},
-		ssr: {
-			external: [
-				'node:zlib',
-				'node:http',
-				'node:https',
-				'node:path',
-				'node:url',
-				'node:fs',
-				'node:http2',
-				'node:buffer',
-				'node:crypto',
-				'node:os',
-				'node:child_process',
-				'node:tty',
-				'node:worker_threads',
-				'node:net',
-				'node:stream',
-				'node:util',
-				'node:events',
-				'node:querystring',
-				'node:assert',
-			],
-			noExternal: ['@payloadcms/live-preview'],
 		},
 		define: {
 			'process.env.NODE_ENV': JSON.stringify(

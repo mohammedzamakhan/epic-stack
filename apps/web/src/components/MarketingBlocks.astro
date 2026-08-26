@@ -1,0 +1,65 @@
+---
+import { PortableText } from "emdash/ui";
+import MarketingHero from "./blocks/MarketingHero.astro";
+import MarketingLogos from "./blocks/MarketingLogos.astro";
+import MarketingFeatures from "./blocks/MarketingFeatures.astro";
+import MarketingFeatureList from "./blocks/MarketingFeatureList.astro";
+import MarketingFeatured from "./blocks/MarketingFeatured.astro";
+import MarketingPricing from "./blocks/MarketingPricing.astro";
+import MarketingTestimonials from "./blocks/MarketingTestimonials.astro";
+import MarketingTestimonialHighlight from "./blocks/MarketingTestimonialHighlight.astro";
+import MarketingFAQ from "./blocks/MarketingFAQ.astro";
+import MarketingCTA from "./blocks/MarketingCTA.astro";
+import MarketingStatsGrid from "./blocks/MarketingStatsGrid.astro";
+import MarketingStats from "./blocks/MarketingStats.astro";
+import MarketingIntegration from "./blocks/MarketingIntegration.astro";
+import MarketingTabs from "./blocks/MarketingTabs.astro";
+import MarketingStickyCards from "./blocks/MarketingStickyCards.astro";
+import MarketingFounderNote from "./blocks/MarketingFounderNote.astro";
+import MarketingScrollHighlight from "./blocks/MarketingScrollHighlight.astro";
+import MarketingBuildFor from "./blocks/MarketingBuildFor.astro";
+import MarketingTeam from "./blocks/MarketingTeam.astro";
+import MarketingFormBlock from "./blocks/MarketingFormBlock.astro";
+import MarketingMediaBlock from "./blocks/MarketingMediaBlock.astro";
+import MarketingBlog from "./blocks/MarketingBlog.astro";
+import MarketingContent from "./blocks/MarketingContent.astro";
+import MarketingArchive from "./blocks/MarketingArchive.astro";
+
+interface Props {
+	value?: any;
+}
+
+const { value } = Astro.props;
+
+const marketingComponents = {
+	type: {
+		"marketing.hero": MarketingHero,
+		"marketing.logos": MarketingLogos,
+		"marketing.features": MarketingFeatures,
+		"marketing.featureGrid": MarketingFeatures,
+		"marketing.featureList": MarketingFeatureList,
+		"marketing.featured": MarketingFeatured,
+		"marketing.pricing": MarketingPricing,
+		"marketing.testimonials": MarketingTestimonials,
+		"marketing.testimonialHighlight": MarketingTestimonialHighlight,
+		"marketing.faq": MarketingFAQ,
+		"marketing.cta": MarketingCTA,
+		"marketing.statsGrid": MarketingStatsGrid,
+		"marketing.stats": MarketingStats,
+		"marketing.integration": MarketingIntegration,
+		"marketing.tabs": MarketingTabs,
+		"marketing.stickyCards": MarketingStickyCards,
+		"marketing.founderNote": MarketingFounderNote,
+		"marketing.scrollHighlight": MarketingScrollHighlight,
+		"marketing.buildFor": MarketingBuildFor,
+		"marketing.team": MarketingTeam,
+		"marketing.formBlock": MarketingFormBlock,
+		"marketing.mediaBlock": MarketingMediaBlock,
+		"marketing.blog": MarketingBlog,
+		"marketing.content": MarketingContent,
+		"marketing.archive": MarketingArchive,
+	},
+};
+---
+
+{value && Array.isArray(value) && <PortableText value={value} components={marketingComponents} />}

@@ -1,0 +1,26 @@
+---
+import Testimonials from './Testimonials.astro'
+
+interface Props {
+	node: {
+		headline?: string
+		badge?: string
+		testimonials?: Array<{
+			quote: string
+			author: string
+			role?: string
+			company?: string
+			avatar?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { headline, badge, testimonials } = node
+---
+
+<Testimonials
+	title={headline || 'What our customers say'}
+	subtitle={badge || 'Testimonials'}
+	blockType="testimonials"
+/>

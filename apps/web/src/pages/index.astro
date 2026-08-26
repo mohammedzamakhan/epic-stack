@@ -1,23 +1,20 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
-import { cmsClient } from '../lib/cms'
+import { getHomePage } from '../lib/emdash'
 import RenderHero from '../components/RenderHero.astro'
 import RenderBlocks from '../components/RenderBlocks.astro'
-import GridDesign from '../components/GridDesign.astro'
+import MarketingBlocks from '../components/MarketingBlocks.astro'
 import SEO from '../components/SEO.astro'
 import { brand } from '@repo/config/brand'
 
-// Fetch recent blog posts and home page content in parallel
-const [recentPostsData, homePage] = await Promise.all([
-	cmsClient.getPosts(1, 3),
-	cmsClient.getHomePage()
-])
-const recentPosts = recentPostsData
+// Fetch home page content
+const currentLocale = Astro.currentLocale ?? 'en'
+const homePage = await getHomePage(currentLocale)
 
 // SEO data - always available regardless of CMS content
-const seoTitle = homePage?.meta?.title || homePage?.title || `${brand.name} - ${brand.tagline}`
-const seoDescription = homePage?.meta?.description || brand.description
-const seoImage = homePage?.meta?.image
+const seoTitle = homePage?.seo?.title || (homePage as any)?.meta?.title || homePage?.title || `${brand.name} - ${brand.tagline}`
+const seoDescription = homePage?.seo?.description || (homePage as any)?.meta?.description || brand.description
+const seoImage = homePage?.seo?.image || (homePage as any)?.meta?.image
 ---
 
 <MarketingLayout>
@@ -33,16 +30,23 @@ const seoImage = homePage?.meta?.image
 	{
 		homePage ? (
 			<article>
-				{/* Render CMS Hero Section */}
-				{homePage.hero && (
-					<div>
-						<RenderHero {...homePage.hero} />
-					</div>
-				)}
+				{/* Native Emdash PortableText sections */}
+				{homePage.content && Array.isArray(homePage.content) && homePage.content.length > 0 ? (
+					<MarketingBlocks value={homePage.content} />
+				) : (
+					<>
+						{/* Render CMS Hero Section */}
+						{homePage.hero && (
+							<div>
+								<RenderHero {...(homePage.hero as any)} />
+							</div>
+						)}
 
-				{/* Render CMS Layout Blocks */}
-				{homePage.layout && homePage.layout.length > 0 && (
-					<RenderBlocks blocks={homePage.layout} />
+						{/* Render CMS Layout Blocks */}
+						{homePage.layout && homePage.layout.length > 0 && (
+							<RenderBlocks blocks={homePage.layout} />
+						)}
+					</>
 				)}
 			</article>
 		) : (
@@ -95,7 +99,7 @@ const seoImage = homePage?.meta?.image
 
 	<!-- Blog Section -->
 	<!-- {
-		recentPosts.docs && recentPosts.docs.length > 0 && (
+		recentPosts.entries && recentPosts.entries.length > 0 && (
 			<section class="relative w-full py-16 md:py-24">
 				<GridDesign />
 				<div class="container relative mx-auto px-4 md:px-6">
@@ -113,7 +117,7 @@ const seoImage = homePage?.meta?.image
 					</div>
 
 					<div class="grid grid-cols-1 md:grid-cols-3 border-l border-t border-dashed gap-0">
-						{recentPosts.docs.map((post, idx) => (
+						{recentPosts.entries.map((post, idx) => (
 							<article class="border-b border-r border-dashed bg-background hover:bg-gradient-to-b from-muted/5 to-muted/50 transition-colors">
 								{post.meta?.image && (
 									<div class="aspect-video overflow-hidden border-b border-dashed">

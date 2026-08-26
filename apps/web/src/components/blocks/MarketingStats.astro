@@ -1,0 +1,20 @@
+---
+import Stats from './Stats.astro'
+
+interface Props {
+	node: {
+		stats?: Array<{
+			value: string
+			label: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { stats } = node
+---
+
+<Stats
+	stats={stats as any}
+	blockType="stats"
+/>

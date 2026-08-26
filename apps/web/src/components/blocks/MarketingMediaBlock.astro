@@ -1,0 +1,18 @@
+---
+import MediaBlock from './MediaBlock.astro'
+
+interface Props {
+	node: {
+		mediaUrl?: string
+		caption?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { mediaUrl, caption } = node
+---
+
+<MediaBlock
+	media={mediaUrl ? { url: mediaUrl, alt: caption || 'Media' } : undefined}
+	blockType="mediaBlock"
+/>

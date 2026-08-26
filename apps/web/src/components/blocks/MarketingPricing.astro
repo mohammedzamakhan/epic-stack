@@ -1,0 +1,49 @@
+---
+import Pricing from './Pricing.astro'
+
+interface Props {
+	node: {
+		headline?: string
+		badge?: string
+		plans?: Array<{
+			name: string
+			price: string
+			period?: string
+			description?: string
+			features?: string
+			ctaLabel?: string
+			ctaUrl?: string
+			highlighted?: boolean
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { headline, badge, plans } = node
+
+const mappedPlans = plans?.map((p: any, idx: number) => {
+	const featureLines = typeof p.features === 'string'
+		? p.features.split('\n').filter(Boolean).map((f: string) => ({ name: f.trim(), icon: 'check' }))
+		: []
+
+	return {
+		id: `plan-${idx}`,
+		title: p.name,
+		description: p.description || '',
+		monthlyPrice: p.price.replace('$', ''),
+		yearlyPrice: p.price.replace('$', ''),
+		currency: p.price.startsWith('$') ? '$' : '',
+		buttonText: p.ctaLabel || 'Get Started',
+		highlight: !!p.highlighted,
+		badge: p.highlighted ? 'Popular' : undefined,
+		features: featureLines,
+	}
+})
+---
+
+<Pricing
+	title={headline || 'Simple, transparent pricing'}
+	subtitle={badge || 'Pricing'}
+	plans={mappedPlans as any}
+	blockType="pricing"
+/>

@@ -1,0 +1,269 @@
+{
+	"$schema": "https://emdashcms.com/seed.schema.json",
+	"version": "1",
+	"meta": {
+		"name": "Epic Startup",
+		"description": "Production-ready SaaS template powered by Astro and Emdash CMS",
+		"author": "Epic Startup"
+	},
+	"settings": {
+		"title": "Epic Startup",
+		"tagline": "Build your next SaaS faster"
+	},
+	"collections": [
+		{
+			"slug": "pages",
+			"label": "Pages",
+			"labelSingular": "Page",
+			"supports": ["drafts", "revisions", "seo"],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText"
+				}
+			]
+		},
+		{
+			"slug": "posts",
+			"label": "Posts",
+			"labelSingular": "Post",
+			"supports": ["drafts", "revisions", "seo"],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText"
+				},
+				{
+					"slug": "featured_image",
+					"label": "Featured Image",
+					"type": "image"
+				}
+			]
+		}
+	],
+	"content": {
+		"pages": [
+			{
+				"id": "home",
+				"slug": "home",
+				"status": "published",
+				"data": {
+					"title": "Home",
+					"content": [
+						{
+							"_type": "marketing.hero",
+							"_key": "hero",
+							"badge": "⚡️ Built for the Edge",
+							"headline": "Build your next startup even faster",
+							"subheadline": "The production-ready SaaS stack designed to help you ship faster and scale seamlessly across Cloudflare and Astro.",
+							"primaryCtaLabel": "Get Started",
+							"primaryCtaUrl": "/signup",
+							"secondaryCtaLabel": "Live Demo",
+							"secondaryCtaUrl": "/demo",
+							"centered": true
+						},
+						{
+							"_type": "marketing.features",
+							"_key": "features",
+							"badge": "Features",
+							"headline": "Everything you need to launch",
+							"subheadline": "Built-in auth, multitenancy, payments, edge database, and AI capabilities.",
+							"features": [
+								{
+									"icon": "zap",
+									"title": "Sub-millisecond Edge Performance",
+									"description": "Deployed natively on Cloudflare Workers and D1 for instant global response times."
+								},
+								{
+									"icon": "shield",
+									"title": "Enterprise Authentication & RBAC",
+									"description": "Multi-factor authentication, session management, and fine-grained role permissions."
+								},
+								{
+									"icon": "chart",
+									"title": "Multi-Tenant Architecture",
+									"description": "Regional tenant isolation and dedicated database provisioning with strict data residency."
+								},
+								{
+									"icon": "code",
+									"title": "Full-Stack TypeScript",
+									"description": "Type safety from database schemas to API routes and React/Astro UI components."
+								},
+								{
+									"icon": "lock",
+									"title": "Automated Security & Compliance",
+									"description": "Audit logging, CSRF defense, rate limiting, and encrypted environment secrets."
+								},
+								{
+									"icon": "cloud",
+									"title": "Integrated Headless CMS",
+									"description": "Native Emdash CMS running at the edge with zero external database dependencies."
+								}
+							]
+						},
+						{
+							"_type": "marketing.pricing",
+							"_key": "pricing",
+							"badge": "Pricing",
+							"headline": "Simple, transparent pricing",
+							"plans": [
+								{
+									"name": "Starter",
+									"price": "$0",
+									"period": "/month",
+									"description": "For developers and indie hackers testing locally.",
+									"features": "Full source code access\nLocal SQLite database\nCommunity Discord support\nSingle developer seat",
+									"ctaLabel": "Start Building",
+									"ctaUrl": "/signup",
+									"highlighted": false
+								},
+								{
+									"name": "Pro",
+									"price": "$29",
+									"period": "/month",
+									"description": "For high-velocity startups shipping production apps.",
+									"features": "All Starter features\nCloudflare D1 & R2 deployments\nUnlimited tenant databases\nAutomated CI/CD pipelines\nPriority email support",
+									"ctaLabel": "Get Pro",
+									"ctaUrl": "/signup",
+									"highlighted": true
+								},
+								{
+									"name": "Enterprise",
+									"price": "Custom",
+									"period": "",
+									"description": "For organizations requiring custom compliance and SLA.",
+									"features": "Dedicated regional instances\nCustom SAML/SSO integration\n99.99% Uptime SLA\n24/7 Dedicated engineering support",
+									"ctaLabel": "Contact Sales",
+									"ctaUrl": "/contact",
+									"highlighted": false
+								}
+							]
+						},
+						{
+							"_type": "marketing.faq",
+							"_key": "faq",
+							"badge": "FAQ",
+							"headline": "Frequently Asked Questions",
+							"items": [
+								{
+									"question": "What is Epic Startup?",
+									"answer": "Epic Startup is an enterprise-grade, full-stack monorepo template built with React Router 7, Astro, Tailwind CSS, and Cloudflare edge infrastructure."
+								},
+								{
+									"question": "How does the CMS work?",
+									"answer": "Content is managed natively via Emdash CMS, storing data in Cloudflare D1 and media in R2 with sub-millisecond edge delivery."
+								},
+								{
+									"question": "Can I deploy on my own Cloudflare account?",
+									"answer": "Yes! With a single command (npx wrangler deploy), your entire marketing site and CMS deploy globally across Cloudflare's edge."
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"id": "features",
+				"slug": "features",
+				"status": "published",
+				"data": {
+					"title": "Features & Capabilities",
+					"content": [
+						{
+							"_type": "marketing.hero",
+							"_key": "hero",
+							"badge": "Capabilities",
+							"headline": "Powerful features for modern SaaS",
+							"subheadline": "Explore all the built-in integrations, databases, and authentication mechanisms.",
+							"primaryCtaLabel": "Explore Stack",
+							"primaryCtaUrl": "/#features",
+							"centered": true
+						},
+						{
+							"_type": "marketing.features",
+							"_key": "features",
+							"badge": "Capabilities",
+							"headline": "Complete SaaS Toolkit",
+							"subheadline": "Enterprise-grade building blocks designed for developer productivity.",
+							"features": [
+								{
+									"icon": "zap",
+									"title": "Lightning Edge Compute",
+									"description": "Zero cold-start compute powered by Cloudflare Workers."
+								},
+								{
+									"icon": "shield",
+									"title": "Zero-Trust Security",
+									"description": "Hardened headers, rate limiting, and cryptographic secret storage."
+								},
+								{
+									"icon": "cloud",
+									"title": "Cloudflare D1 & R2 Storage",
+									"description": "Serverless relational SQLite and S3-compatible object storage."
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"posts": [
+			{
+				"id": "post-welcome",
+				"slug": "welcome-to-epic-stack",
+				"status": "published",
+				"data": {
+					"title": "Welcome to Epic Stack with Emdash CMS",
+					"published_at": "2026-08-25T12:00:00Z",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "We are excited to introduce Emdash CMS as our native Astro CMS engine. Running directly on Cloudflare D1 and R2, it gives us sub-millisecond edge response times and instant content editing."
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"id": "post-edge-architecture",
+				"slug": "modern-edge-architecture",
+				"status": "published",
+				"data": {
+					"title": "Scaling Full-Stack Applications at the Edge",
+					"published_at": "2026-08-25T10:00:00Z",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Edge architecture eliminates traditional server bottlenecks by co-locating data and compute as close to the user as possible."
+								}
+							]
+						}
+					]
+				}
+			}
+		]
+	}
+}

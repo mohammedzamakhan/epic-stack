@@ -1,0 +1,26 @@
+---
+import FeatureGrid from './FeatureGrid.astro'
+
+interface Props {
+	node: {
+		headline?: string
+		subheadline?: string
+		badge?: string
+		features?: Array<{
+			icon?: string
+			title: string
+			description: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { headline, subheadline, badge, features } = node
+---
+
+<FeatureGrid
+	title={headline || 'Everything you need to launch'}
+	subtitle={badge || 'Features'}
+	features={features as any}
+	blockType="featureGrid"
+/>

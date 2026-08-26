@@ -1,0 +1,23 @@
+---
+import FAQ from './FAQ.astro'
+
+interface Props {
+	node: {
+		headline?: string
+		badge?: string
+		items?: Array<{
+			question: string
+			answer: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { headline, badge, items } = node
+---
+
+<FAQ
+	title={headline || 'Frequently Asked Questions'}
+	subtitle={badge || 'FAQ'}
+	blockType="faq"
+/>

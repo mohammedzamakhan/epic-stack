@@ -1,6 +1,5 @@
 ---
-import { fetchHeaderData } from '../lib/fetchHeader'
-import type { HeaderNavItem } from '../types/header'
+import { getHeader } from '../lib/emdash'
 import MegaMenu from './MegaMenu.astro'
 
 interface Props {
@@ -9,8 +8,9 @@ interface Props {
 
 const { isMobile = false } = Astro.props
 
-const headerData = await fetchHeaderData()
-const navItems: HeaderNavItem[] = headerData?.navItems || []
+const currentLocale = Astro.currentLocale ?? 'en'
+const headerData = (await getHeader(currentLocale)) as any
+const navItems: any[] = Array.isArray(headerData?.navItems) ? headerData.navItems : []
 ---
 
 <nav class={isMobile ? 'flex flex-col space-y-1' : 'flex gap-6 items-center'}>
