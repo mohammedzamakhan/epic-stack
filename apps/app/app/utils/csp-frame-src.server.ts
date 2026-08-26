@@ -61,3 +61,37 @@ export function sitePreviewFrameSrc(
 	}
 	return [...new Set(sources)]
 }
+
+type TenantApiConnectEnv = {
+	PUBLIC_TENANT_API_URL?: string
+	PUBLIC_TENANT_API_URL_KSA?: string
+	TENANT_API_URL?: string
+	TENANT_API_URL_KSA?: string
+}
+
+function originFromUrl(value: string | undefined) {
+	if (!value) return null
+	try {
+		return new URL(value).origin
+	} catch {
+		return null
+	}
+}
+
+/**
+ * Browser-facing tenant-api origins for operator pages (`connect-src`):
+ * customers, marketing, and reports. Customer PII queries leave the App origin
+ * and hit regional APIs directly.
+ */
+export function tenantApiConnectSrc(env: TenantApiConnectEnv = {}) {
+	return [
+		...new Set(
+			[
+				originFromUrl(env.PUBLIC_TENANT_API_URL),
+				originFromUrl(env.PUBLIC_TENANT_API_URL_KSA),
+				originFromUrl(env.TENANT_API_URL),
+				originFromUrl(env.TENANT_API_URL_KSA),
+			].filter((value): value is string => Boolean(value)),
+		),
+	]
+}

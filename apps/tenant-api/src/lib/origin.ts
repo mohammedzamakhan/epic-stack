@@ -13,6 +13,7 @@ const RESERVED_SUBDOMAINS = new Set([
 	'docs',
 	'studio',
 	'api',
+	'api-ksa',
 	'www',
 	'mail',
 	'ftp',
@@ -289,6 +290,7 @@ export async function isAllowedBrowserOrigin(origin: string): Promise<boolean> {
 	const isAppOrigin = Boolean(
 		url &&
 		(url.hostname === appHostname ||
+			url.hostname === `admin.${brandDomain()}` ||
 			url.hostname === 'localhost' ||
 			(appUrl && url.origin === appUrl.origin)),
 	)
@@ -312,4 +314,22 @@ export async function isAllowedBrowserOrigin(origin: string): Promise<boolean> {
 
 	corsCache.set(origin, allowed)
 	return allowed
+}
+
+export function isOperatorControlPlaneOrigin(origin: string) {
+	const url = parseOrigin(origin)
+	if (!url) return false
+	const isProd = process.env.NODE_ENV === 'production'
+	if (isProd && url.protocol !== 'https:') return false
+	if (!isProd && url.protocol !== 'http:' && url.protocol !== 'https:') {
+		return false
+	}
+	const hostname = url.hostname.toLowerCase()
+	const domain = brandDomain()
+	return hostname === `app.${domain}` || hostname === `admin.${domain}`
+}
+
+export async function isAllowedAnalyticsOrigin(origin: string) {
+	if (isOperatorControlPlaneOrigin(origin)) return true
+	return isAllowedBrowserOrigin(origin)
 }

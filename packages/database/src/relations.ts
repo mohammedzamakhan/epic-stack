@@ -59,6 +59,7 @@ import {
 	WebsitePageSection,
 	NotificationPreference,
 	Notification,
+	SavedReport,
 } from './schema.ts'
 
 export const NoteRelations = relations(Note, ({ one, many }) => ({
@@ -129,6 +130,7 @@ export const UserRelations = relations(User, ({ one, many }) => ({
 	createdWebsitePages: many(WebsitePage),
 	notificationPreferences: many(NotificationPreference),
 	notifications: many(Notification),
+	savedReports: many(SavedReport),
 }))
 
 export const NoteImageRelations = relations(NoteImage, ({ one }) => ({
@@ -243,6 +245,7 @@ export const OrganizationRelations = relations(Organization, ({ many }) => ({
 	createdWebsitePages: many(WebsitePage),
 	notificationPreferences: many(NotificationPreference),
 	notifications: many(Notification),
+	savedReports: many(SavedReport),
 }))
 
 export const UtmSourceRelations = relations(UtmSource, ({ one }) => ({
@@ -803,6 +806,17 @@ export const NotificationRelations = relations(Notification, ({ one }) => ({
 	}),
 	user: one(User, {
 		fields: [Notification.userId],
+		references: [User.id],
+	}),
+}))
+
+export const SavedReportRelations = relations(SavedReport, ({ one }) => ({
+	organization: one(Organization, {
+		fields: [SavedReport.organizationId],
+		references: [Organization.id],
+	}),
+	createdBy: one(User, {
+		fields: [SavedReport.createdById],
 		references: [User.id],
 	}),
 }))

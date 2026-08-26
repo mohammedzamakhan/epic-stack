@@ -41,6 +41,12 @@ export function AdminSidebar({
 			icon: HomeIcon,
 		},
 		{
+			title: _(msg`Reports`),
+			url: '/reports',
+			isActive: location.pathname.startsWith('/reports'),
+			icon: FileTextIcon,
+		},
+		{
 			title: _(msg`Users`),
 			url: '/users',
 			isActive: location.pathname.startsWith('/users'),

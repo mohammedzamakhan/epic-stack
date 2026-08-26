@@ -8,13 +8,16 @@ import { getOperatorTenantClient } from '#app/utils/tenant-api.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug || ''
-	const { jwt, tenantApiUrl } = await getOperatorTenantClient(request, orgSlug)
+	const { jwt, publicTenantApiUrl } = await getOperatorTenantClient(
+		request,
+		orgSlug,
+	)
 
 	return {
 		orgSlug,
 		campaignId: params.campaignId || '',
 		jwt,
-		tenantApiUrl,
+		tenantApiUrl: publicTenantApiUrl,
 	}
 }
 

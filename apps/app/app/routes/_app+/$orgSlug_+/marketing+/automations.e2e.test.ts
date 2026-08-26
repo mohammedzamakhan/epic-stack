@@ -30,6 +30,7 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 			dataRegion: 'us',
 			jwt: 'mock-operator-jwt',
 			tenantApiUrl: 'http://localhost:3007',
+			publicTenantApiUrl: 'https://api.epic-startup.me:2999',
 			fetchTenant: mockFetchTenant as any,
 		})
 	})

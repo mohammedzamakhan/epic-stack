@@ -3,17 +3,18 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { ENV } from 'varlock/env'
-import { isAllowedBrowserOrigin } from './lib/origin.ts'
+import { isAllowedAnalyticsOrigin } from './lib/origin.ts'
 import { assertDataRegion, getNodeRegion } from './lib/region.ts'
 import { assertTenantApiSecrets } from './lib/secrets.ts'
+import { analyticsRoutes } from './routes/analytics.ts'
 import { authRoutes } from './routes/auth.ts'
+import { engagementSyncRoutes } from './routes/engagement-sync.ts'
 import {
-	journeySystemRoutes,
 	journeyOperatorRoutes,
+	journeySystemRoutes,
 } from './routes/journeys.ts'
 import { operatorRoutes } from './routes/operator.ts'
 import { provisionRoutes } from './routes/provision.ts'
-import { engagementSyncRoutes } from './routes/engagement-sync.ts'
 
 assertTenantApiSecrets()
 assertDataRegion()
@@ -22,11 +23,11 @@ const app = new Hono()
 
 app.use('*', logger())
 
-// Browser-facing: Sites auth and App operator pages call tenant-api directly.
-// Allow only origins that resolve to an org in THIS region (App origin is always allowed).
+// Browser-facing: Sites auth and App/Admin operator pages call tenant-api
+// directly. Allow published tenant Sites in this region, plus App and Admin.
 app.use('*', async (c, next) => {
 	const origin = c.req.header('Origin')
-	const allowed = origin ? await isAllowedBrowserOrigin(origin) : false
+	const allowed = origin ? await isAllowedAnalyticsOrigin(origin) : false
 
 	if (c.req.method === 'OPTIONS') {
 		if (!origin || !allowed) {
@@ -59,6 +60,7 @@ app.get('/health', (c) => {
 })
 
 app.route('/auth', authRoutes)
+app.route('/analytics', analyticsRoutes)
 app.route('/api', provisionRoutes)
 app.route('/api/marketing', engagementSyncRoutes)
 app.route('/api/journeys', journeySystemRoutes)

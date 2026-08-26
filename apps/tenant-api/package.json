@@ -17,6 +17,7 @@
     "@repo/config": "*",
     "@repo/database": "^0.0.0",
     "@repo/email": "*",
+    "@repo/reports": "*",
     "@repo/sms": "*",
     "@repo/tenant-db": "*",
     "drizzle-orm": "^0.45.2",

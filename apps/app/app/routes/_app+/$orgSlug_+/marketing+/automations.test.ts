@@ -27,6 +27,7 @@ describe('Marketing Journeys Routes Loaders & Actions', () => {
 			dataRegion: 'us',
 			jwt: 'mock-jwt-token',
 			tenantApiUrl: 'http://localhost:3007',
+			publicTenantApiUrl: 'https://api.epic-startup.me:2999',
 			fetchTenant: mockFetchTenant as any,
 		})
 	})

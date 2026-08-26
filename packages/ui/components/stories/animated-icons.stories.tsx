@@ -11,7 +11,6 @@ import { LaptopMinimalCheckIcon } from '../animated-icons/laptop-minimal-check-i
 import { ListTodoIcon } from '../animated-icons/list-todo'
 import { LockOpenIcon } from '../animated-icons/lock-open-icon'
 import { LogoutIcon } from '../animated-icons/logout-icon'
-import { McpIcon } from '../animated-icons/mcp-icon'
 import { MessageSquareMoreIcon } from '../animated-icons/message-square-more'
 import { SettingsGearIcon } from '../animated-icons/settings-gear-icon'
 import { ShieldCheckIcon } from '../animated-icons/shield-check-icon'
@@ -140,7 +139,6 @@ export const AllAnimatedIcons: Story = {
 				component: LogoutIcon,
 				description: 'Logout icon with slide animation',
 			},
-			{ name: 'MCP', component: McpIcon, description: 'MCP icon' },
 			{
 				name: 'Message Square More',
 				component: MessageSquareMoreIcon,
@@ -221,7 +219,6 @@ export const InteractiveShowcase: Story = {
 			{ name: 'List Todo', component: ListTodoIcon },
 			{ name: 'Lock Open', component: LockOpenIcon },
 			{ name: 'Logout', component: LogoutIcon },
-			{ name: 'MCP', component: McpIcon },
 			{ name: 'Message Square More', component: MessageSquareMoreIcon },
 			{ name: 'Settings Gear', component: SettingsGearIcon },
 			{ name: 'Shield Check', component: ShieldCheckIcon },

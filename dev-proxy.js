@@ -59,6 +59,7 @@ const RESERVED_SUBDOMAINS = new Set([
 	'docs',
 	'studio',
 	'api',
+	'api-ksa',
 	'www',
 	'mail',
 	'ftp',
@@ -80,6 +81,7 @@ const targets = {
 	[`admin.${domain}:${port}`]: 'http://localhost:3005',
 	[`cms.${domain}:${port}`]: 'http://localhost:3006',
 	[`api.${domain}:${port}`]: 'http://localhost:3007',
+	[`api-ksa.${domain}:${port}`]: 'http://localhost:3009',
 }
 
 /**

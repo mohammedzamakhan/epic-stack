@@ -85,6 +85,7 @@
     "@repo/notifications": "*",
     "@repo/observability": "*",
     "@repo/payments": "*",
+    "@repo/reports": "*",
     "@repo/seo": "*",
     "@repo/ui": "*",
     "@sentry/profiling-node": "9.15.0",
