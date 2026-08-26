@@ -1,22 +1,13 @@
+import { faker } from '@faker-js/faker'
 import { RateLimitEntry, count, db, eq } from '@repo/database'
 import { getClientIp } from '@repo/security'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 
 describe('Rate Limiting', () => {
-	beforeEach(async () => {
-		// Clean up rate limit entries before each test
-		await db.delete(RateLimitEntry)
-	})
-
-	afterEach(async () => {
-		// Clean up after each test
-		await db.delete(RateLimitEntry)
-	})
-
 	describe('Authorization Rate Limit (10 per hour per user)', () => {
 		it('should allow requests within the limit', async () => {
-			const userId = 'test-user-1'
+			const userId = `auth-allow-${faker.string.uuid()}`
 
 			for (let i = 0; i < 10; i++) {
 				const result = await checkRateLimit(
@@ -29,7 +20,7 @@ describe('Rate Limiting', () => {
 		})
 
 		it('should reject requests exceeding the limit', async () => {
-			const userId = 'test-user-2'
+			const userId = `auth-reject-${faker.string.uuid()}`
 
 			// Make 10 requests (at limit)
 			for (let i = 0; i < 10; i++) {
@@ -49,7 +40,7 @@ describe('Rate Limiting', () => {
 		})
 
 		it('should track remaining requests correctly', async () => {
-			const userId = 'test-user-3'
+			const userId = `auth-track-${faker.string.uuid()}`
 
 			const result1 = await checkRateLimit(
 				{ type: 'user', value: userId },
@@ -71,8 +62,8 @@ describe('Rate Limiting', () => {
 		})
 
 		it('should isolate rate limits per user', async () => {
-			const user1 = 'test-user-4'
-			const user2 = 'test-user-5'
+			const user1 = `auth-user1-${faker.string.uuid()}`
+			const user2 = `auth-user2-${faker.string.uuid()}`
 
 			// User 1 makes 5 requests
 			for (let i = 0; i < 5; i++) {
@@ -94,7 +85,7 @@ describe('Rate Limiting', () => {
 
 	describe('Token Rate Limit (20 per hour per IP)', () => {
 		it('should allow requests within the limit', async () => {
-			const ip = '192.168.1.1'
+			const ip = `10.0.0.${faker.number.int({ min: 1, max: 250 })}`
 
 			for (let i = 0; i < 20; i++) {
 				const result = await checkRateLimit(
@@ -107,7 +98,7 @@ describe('Rate Limiting', () => {
 		})
 
 		it('should reject requests exceeding the limit', async () => {
-			const ip = '192.168.1.2'
+			const ip = `10.0.1.${faker.number.int({ min: 1, max: 250 })}`
 
 			// Make 20 requests (at limit)
 			for (let i = 0; i < 20; i++) {
@@ -123,8 +114,8 @@ describe('Rate Limiting', () => {
 		})
 
 		it('should isolate rate limits per IP', async () => {
-			const ip1 = '192.168.1.3'
-			const ip2 = '192.168.1.4'
+			const ip1 = `10.0.2.${faker.number.int({ min: 1, max: 125 })}`
+			const ip2 = `10.0.2.${faker.number.int({ min: 126, max: 250 })}`
 
 			// IP 1 makes 15 requests
 			for (let i = 0; i < 15; i++) {
@@ -143,7 +134,7 @@ describe('Rate Limiting', () => {
 
 	describe('Tool Invocation Rate Limit (1000 per hour per token)', () => {
 		it('should allow requests within the limit', async () => {
-			const token = 'test-token-1'
+			const token = `token-allow-${faker.string.uuid()}`
 
 			// Test a sample of requests
 			for (let i = 0; i < 100; i++) {
@@ -156,7 +147,7 @@ describe('Rate Limiting', () => {
 		})
 
 		it('should reject requests exceeding the limit', async () => {
-			const token = 'test-token-2'
+			const token = `token-reject-${faker.string.uuid()}`
 
 			// Make 1000 requests (at limit)
 			for (let i = 0; i < 1000; i++) {
@@ -175,8 +166,8 @@ describe('Rate Limiting', () => {
 		}, 30000)
 
 		it('should isolate rate limits per token', async () => {
-			const token1 = 'test-token-3'
-			const token2 = 'test-token-4'
+			const token1 = `token1-${faker.string.uuid()}`
+			const token2 = `token2-${faker.string.uuid()}`
 
 			// Token 1 makes 500 requests - batch them for speed
 			const batchSize = 100
@@ -246,7 +237,7 @@ describe('Rate Limiting', () => {
 
 	describe('Rate Limit Window Cleanup', () => {
 		it('should clean up old entries outside the window', async () => {
-			const userId = 'test-user-cleanup'
+			const userId = `cleanup-${faker.string.uuid()}`
 			const now = Date.now()
 			const keyId = `${RATE_LIMITS.authorization.scope}:user:${userId}`
 
@@ -286,7 +277,7 @@ describe('Rate Limiting', () => {
 
 	describe('Rate Limit Reset Time', () => {
 		it('resets a full windowMs from now when there is no prior entry', async () => {
-			const userId = 'test-user-reset'
+			const userId = `reset-${faker.string.uuid()}`
 			const beforeTime = Date.now()
 
 			const result = await checkRateLimit(
@@ -307,7 +298,7 @@ describe('Rate Limiting', () => {
 		})
 
 		it('does not report an immediate reset while a 429 is still in effect', async () => {
-			const userId = 'test-user-reset-denied'
+			const userId = `reset-denied-${faker.string.uuid()}`
 
 			// Exhaust the limit
 			for (let i = 0; i < RATE_LIMITS.authorization.maxRequests; i++) {
@@ -334,7 +325,7 @@ describe('Rate Limiting', () => {
 
 	describe('Concurrent request atomicity', () => {
 		it('never allows more than maxRequests when requests race', async () => {
-			const userId = 'test-user-concurrency'
+			const userId = `concurrency-${faker.string.uuid()}`
 			const config = {
 				scope: 'test-concurrency',
 				maxRequests: 5,

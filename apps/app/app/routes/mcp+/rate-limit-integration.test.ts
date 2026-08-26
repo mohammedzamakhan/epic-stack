@@ -10,6 +10,7 @@ import {
 	count,
 	db,
 	eq,
+	inArray,
 } from '@repo/database'
 import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
@@ -30,12 +31,6 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 	let testOrgId: string
 
 	beforeEach(async () => {
-		// Clean up test data
-		await db.delete(RateLimitEntry)
-		await db.delete(MCPRefreshToken)
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPAuthorization)
-
 		// Create test user and organization
 		const [user] = await db
 			.insert(User)
@@ -94,14 +89,30 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 	})
 
 	afterEach(async () => {
-		// Clean up test data
-		await db.delete(RateLimitEntry)
-		await db.delete(MCPRefreshToken)
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPAuthorization)
-		await db.delete(UserOrganization)
-		await db.delete(User)
-		await db.delete(Organization)
+		if (!testUserId && !testOrgId) return
+
+		const authIds = db
+			.select({ id: MCPAuthorization.id })
+			.from(MCPAuthorization)
+			.where(eq(MCPAuthorization.userId, testUserId))
+
+		await db
+			.delete(RateLimitEntry)
+			.where(eq(RateLimitEntry.keyValue, testUserId))
+		await db
+			.delete(MCPRefreshToken)
+			.where(inArray(MCPRefreshToken.authorizationId, authIds))
+		await db
+			.delete(MCPAccessToken)
+			.where(inArray(MCPAccessToken.authorizationId, authIds))
+		await db
+			.delete(MCPAuthorization)
+			.where(eq(MCPAuthorization.userId, testUserId))
+		await db
+			.delete(UserOrganization)
+			.where(eq(UserOrganization.userId, testUserId))
+		await db.delete(User).where(eq(User.id, testUserId))
+		await db.delete(Organization).where(eq(Organization.id, testOrgId))
 	})
 
 	describe('Authorization Endpoint Rate Limiting (10 per hour per user)', () => {

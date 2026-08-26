@@ -257,25 +257,28 @@ export async function createAuthorizationWithTokens({
 	const refreshToken = generateToken()
 
 	// Create authorization record and tokens in a single transaction
-	const [authorization] = await db
-		.insert(MCPAuthorization)
-		.values({
-			userId,
-			organizationId,
-			clientName,
-			clientId: generateToken(),
+	const authorization = await db.transaction(async (tx) => {
+		const [createdAuthorization] = await tx
+			.insert(MCPAuthorization)
+			.values({
+				userId,
+				organizationId,
+				clientName,
+				clientId: generateToken(),
+			})
+			.returning()
+		if (!createdAuthorization) throw new Error('Failed to create authorization')
+		await tx.insert(MCPAccessToken).values({
+			authorizationId: createdAuthorization.id,
+			tokenHash: hashToken(accessToken),
+			expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
 		})
-		.returning()
-	if (!authorization) throw new Error('Failed to create authorization')
-	await db.insert(MCPAccessToken).values({
-		authorizationId: authorization.id,
-		tokenHash: hashToken(accessToken),
-		expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
-	})
-	await db.insert(MCPRefreshToken).values({
-		authorizationId: authorization.id,
-		tokenHash: hashToken(refreshToken),
-		expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
+		await tx.insert(MCPRefreshToken).values({
+			authorizationId: createdAuthorization.id,
+			tokenHash: hashToken(refreshToken),
+			expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
+		})
+		return createdAuthorization
 	})
 
 	return {
