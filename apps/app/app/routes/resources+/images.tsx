@@ -1,15 +1,135 @@
-import { promises as fs, constants } from 'node:fs'
 import { invariantResponse } from '@epic-web/invariant'
-import { getDomainUrl } from '@repo/common'
+import { getDomainUrl, isCloudflareWorkerRuntime } from '@repo/common'
 import { validateInstanceUrl } from '@repo/security'
-import { getImgResponse } from 'openimg/node'
 import { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/images'
+
+type ImageFit = 'cover' | 'contain'
+type ImageFormat = 'webp' | 'avif' | 'png' | 'jpeg' | 'jpg'
+
+type ImageParams = {
+	width?: number
+	height?: number
+	fit?: ImageFit
+	format?: ImageFormat
+}
+
+function parseImageParams(searchParams: URLSearchParams): ImageParams {
+	const width = searchParams.get('w')
+	const height = searchParams.get('h')
+	const fit = searchParams.get('fit')
+	const format = searchParams.get('format')
+
+	return {
+		width: width ? Number.parseInt(width, 10) : undefined,
+		height: height ? Number.parseInt(height, 10) : undefined,
+		fit: fit === 'cover' || fit === 'contain' ? fit : undefined,
+		format:
+			format === 'webp' ||
+			format === 'avif' ||
+			format === 'png' ||
+			format === 'jpeg' ||
+			format === 'jpg'
+				? format
+				: undefined,
+	}
+}
+
+function getImageResponseHeaders() {
+	const headers = new Headers()
+	headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+	headers.set('Access-Control-Allow-Origin', '*')
+	headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+	return headers
+}
+
+async function fetchImageSource(
+	request: Request,
+	searchParams: URLSearchParams,
+	objectKey: string | null,
+	organizationId: string | null,
+) {
+	if (objectKey) {
+		const { url: signedUrl, headers: signedHeaders } =
+			await getSignedGetRequestInfoAsync(objectKey, organizationId ?? undefined)
+		return fetch(signedUrl, { headers: signedHeaders })
+	}
+
+	const src = searchParams.get('src')
+	invariantResponse(src, 'src query parameter is required', { status: 400 })
+
+	if (URL.canParse(src)) {
+		const validation = validateInstanceUrl(src)
+		if (!validation.valid) {
+			throw new Error(`Invalid image URL: ${validation.reason}`)
+		}
+		return fetch(src)
+	}
+
+	const normalizedSrc = src.replace(/\\/g, '/').replace(/\.\.+/g, '')
+	const assetUrl = new URL(normalizedSrc, request.url)
+	return fetch(assetUrl)
+}
+
+async function getCloudflareImageResponse(
+	request: Request,
+	searchParams: URLSearchParams,
+	objectKey: string | null,
+	organizationId: string | null,
+) {
+	const params = parseImageParams(searchParams)
+	const upstream = await fetchImageSource(
+		request,
+		searchParams,
+		objectKey,
+		organizationId,
+	)
+
+	if (!upstream.ok) {
+		return new Response(upstream.statusText, {
+			status: upstream.status,
+			headers: getImageResponseHeaders(),
+		})
+	}
+
+	const shouldTransform =
+		params.width != null ||
+		params.height != null ||
+		params.fit != null ||
+		params.format != null
+
+	if (shouldTransform) {
+		const imageOptions: Record<string, number | string> = {}
+		if (params.width != null) imageOptions.width = params.width
+		if (params.height != null) imageOptions.height = params.height
+		if (params.fit != null) imageOptions.fit = params.fit
+		if (params.format != null) imageOptions.format = params.format
+
+		const transformed = await fetch(upstream.url, {
+			headers: upstream.headers,
+			cf: { image: imageOptions },
+		} as RequestInit & { cf?: { image: Record<string, number | string> } })
+
+		if (transformed.ok) {
+			const headers = getImageResponseHeaders()
+			const contentType = transformed.headers.get('content-type')
+			if (contentType) headers.set('Content-Type', contentType)
+			return new Response(transformed.body, { headers, status: 200 })
+		}
+	}
+
+	const headers = getImageResponseHeaders()
+	const contentType = upstream.headers.get('content-type')
+	if (contentType) headers.set('Content-Type', contentType)
+	return new Response(upstream.body, { headers, status: 200 })
+}
 
 let cacheDir: string | 'no_cache' | null = null
 
 async function getCacheDir() {
 	if (cacheDir) return cacheDir
+
+	const { promises: fs, constants } = await import('node:fs')
 
 	let dir: string | 'no_cache' = './tests/fixtures/openimg'
 	if (process.env.NODE_ENV === 'production') {
@@ -35,16 +155,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
 
-	const headers = new Headers()
-	headers.set('Cache-Control', 'public, max-age=31536000, immutable')
-	headers.set('Access-Control-Allow-Origin', '*')
-	headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+	const headers = getImageResponseHeaders()
 
 	const objectKey = searchParams.get('objectKey')
 	const organizationId = searchParams.get('organizationId')
 
 	if (objectKey) {
-		// SECURITY: Verify object-key entropy and format safety to prevent brute-force enumeration or path traversal
 		if (
 			objectKey.length < 16 ||
 			objectKey.includes('..') ||
@@ -55,6 +171,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 			})
 		}
 	}
+
+	if (isCloudflareWorkerRuntime()) {
+		return getCloudflareImageResponse(
+			request,
+			searchParams,
+			objectKey,
+			organizationId,
+		)
+	}
+
+	const { getImgResponse } = await import('openimg/node')
 
 	return getImgResponse(request, {
 		headers,
@@ -82,25 +209,20 @@ export async function loader({ request }: Route.LoaderArgs) {
 				if (!validation.valid) {
 					throw new Error(`Invalid image URL: ${validation.reason}`)
 				}
-				// Fetch image from external URL; will be matched against allowlist
 				return {
 					type: 'fetch',
 					url: src,
 				}
 			}
 
-			// Sanitize path to prevent path traversal attacks
 			const normalizedSrc = src.replace(/\\/g, '/').replace(/\.\.+/g, '')
 
-			// Retrieve image from filesystem (public folder)
 			if (normalizedSrc.startsWith('/assets')) {
-				// Files managed by Vite
 				return {
 					type: 'fs',
 					path: '.' + normalizedSrc,
 				}
 			}
-			// Fallback to files in public folder
 			return {
 				type: 'fs',
 				path: './public' + normalizedSrc,

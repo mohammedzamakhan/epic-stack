@@ -13,9 +13,11 @@ import {
 	and,
 	db,
 	eq,
+	inArray,
+	or,
 } from '@repo/database'
 import fc from 'fast-check'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { createAuthorizationWithTokens } from '#app/utils/mcp/oauth.server.ts'
 
 async function connectUserRole(userId: string, roleName: string) {
@@ -29,7 +31,7 @@ async function connectUserRole(userId: string, roleName: string) {
 	}
 }
 
-async function createTestUser() {
+async function createTestUser(createdUserIds: string[]) {
 	const [user] = await db
 		.insert(User)
 		.values({
@@ -40,10 +42,11 @@ async function createTestUser() {
 		.returning()
 	if (!user) throw new Error('Failed to insert user')
 	await connectUserRole(user.id, 'user')
+	createdUserIds.push(user.id)
 	return user
 }
 
-async function createTestOrganization(userId: string) {
+async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	let [adminRole] = await db
 		.select()
 		.from(OrganizationRole)
@@ -75,26 +78,52 @@ async function createTestOrganization(userId: string) {
 		organizationId: org.id,
 		organizationRoleId: adminRole.id,
 	})
+	createdOrgIds.push(org.id)
 	return org
 }
 
 describe('MCP Settings Page', () => {
-	beforeEach(async () => {
-		await db.delete(MCPRefreshToken)
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPAuthorization)
-		await db.delete(UserOrganization)
-		await db.delete(Organization)
-		await db.delete(User)
-	})
+	const createdUserIds: string[] = []
+	const createdOrgIds: string[] = []
 
 	afterEach(async () => {
-		await db.delete(MCPRefreshToken)
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPAuthorization)
-		await db.delete(UserOrganization)
-		await db.delete(Organization)
-		await db.delete(User)
+		if (createdUserIds.length === 0 && createdOrgIds.length === 0) return
+
+		const authIds = db
+			.select({ id: MCPAuthorization.id })
+			.from(MCPAuthorization)
+			.where(
+				or(
+					inArray(MCPAuthorization.userId, createdUserIds),
+					inArray(MCPAuthorization.organizationId, createdOrgIds),
+				),
+			)
+		await db
+			.delete(MCPRefreshToken)
+			.where(inArray(MCPRefreshToken.authorizationId, authIds))
+		await db
+			.delete(MCPAccessToken)
+			.where(inArray(MCPAccessToken.authorizationId, authIds))
+		await db
+			.delete(MCPAuthorization)
+			.where(
+				or(
+					inArray(MCPAuthorization.userId, createdUserIds),
+					inArray(MCPAuthorization.organizationId, createdOrgIds),
+				),
+			)
+		await db
+			.delete(UserOrganization)
+			.where(
+				or(
+					inArray(UserOrganization.userId, createdUserIds),
+					inArray(UserOrganization.organizationId, createdOrgIds),
+				),
+			)
+		await db.delete(Organization).where(inArray(Organization.id, createdOrgIds))
+		await db.delete(User).where(inArray(User.id, createdUserIds))
+		createdUserIds.length = 0
+		createdOrgIds.length = 0
 	})
 
 	describe('Property 12: Authorization list completeness', () => {
@@ -106,18 +135,19 @@ describe('MCP Settings Page', () => {
 						maxLength: 5,
 					}),
 					async (clientNames) => {
-						const user = await createTestUser()
-						const org = await createTestOrganization(user.id)
+						const user = await createTestUser(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
-						const createdAuths = await Promise.all(
-							clientNames.map((clientName) =>
-								createAuthorizationWithTokens({
+						const createdAuths = []
+						for (const clientName of clientNames) {
+							createdAuths.push(
+								await createAuthorizationWithTokens({
 									userId: user.id,
 									organizationId: org.id,
 									clientName,
 								}),
-							),
-						)
+							)
+						}
 
 						const authorizations = await db
 							.select({
@@ -146,9 +176,9 @@ describe('MCP Settings Page', () => {
 		}, 30000)
 
 		it('should not include authorizations from other users', async () => {
-			const user1 = await createTestUser()
-			const user2 = await createTestUser()
-			const org = await createTestOrganization(user1.id)
+			const user1 = await createTestUser(createdUserIds)
+			const user2 = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user1.id, createdOrgIds)
 
 			const [adminRole] = await db
 				.select()
@@ -190,9 +220,9 @@ describe('MCP Settings Page', () => {
 		})
 
 		it('should not include authorizations from other organizations', async () => {
-			const user = await createTestUser()
-			const org1 = await createTestOrganization(user.id)
-			const org2 = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org1 = await createTestOrganization(user.id, createdOrgIds)
+			const org2 = await createTestOrganization(user.id, createdOrgIds)
 
 			await createAuthorizationWithTokens({
 				userId: user.id,
@@ -227,8 +257,8 @@ describe('MCP Settings Page', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (clientName) => {
-						const user = await createTestUser()
-						const org = await createTestOrganization(user.id)
+						const user = await createTestUser(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						await createAuthorizationWithTokens({
 							userId: user.id,
@@ -265,8 +295,8 @@ describe('MCP Settings Page', () => {
 		}, 30000)
 
 		it('should update lastUsedAt when token is used', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			const { accessToken: ignoredAccessToken } =
 				await createAuthorizationWithTokens({
@@ -318,8 +348,8 @@ describe('MCP Settings Page', () => {
 						maxLength: 5,
 					}),
 					async (clientNames) => {
-						const user = await createTestUser()
-						const org = await createTestOrganization(user.id)
+						const user = await createTestUser(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						let currentCount = 0
 
@@ -351,26 +381,19 @@ describe('MCP Settings Page', () => {
 		}, 30000)
 
 		it('should maintain correct count after revocation', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
-			const auths = await Promise.all([
-				createAuthorizationWithTokens({
-					userId: user.id,
-					organizationId: org.id,
-					clientName: 'Client 1',
-				}),
-				createAuthorizationWithTokens({
-					userId: user.id,
-					organizationId: org.id,
-					clientName: 'Client 2',
-				}),
-				createAuthorizationWithTokens({
-					userId: user.id,
-					organizationId: org.id,
-					clientName: 'Client 3',
-				}),
-			])
+			const auths = []
+			for (const clientName of ['Client 1', 'Client 2', 'Client 3']) {
+				auths.push(
+					await createAuthorizationWithTokens({
+						userId: user.id,
+						organizationId: org.id,
+						clientName,
+					}),
+				)
+			}
 
 			let authorizations = await db
 				.select()
@@ -383,10 +406,12 @@ describe('MCP Settings Page', () => {
 				)
 			expect(authorizations).toHaveLength(3)
 
+			const firstAuth = auths[0]
+			if (!firstAuth) throw new Error('Expected authorization')
 			await db
 				.update(MCPAuthorization)
 				.set({ isActive: false })
-				.where(eq(MCPAuthorization.id, auths[0].authorization.id))
+				.where(eq(MCPAuthorization.id, firstAuth.authorization.id))
 
 			authorizations = await db
 				.select()

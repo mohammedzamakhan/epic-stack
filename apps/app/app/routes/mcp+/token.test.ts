@@ -12,9 +12,11 @@ import {
 	_RoleToUser,
 	db,
 	eq,
+	inArray,
+	or,
 } from '@repo/database'
 import fc from 'fast-check'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import {
 	createAuthorizationCode,
 	exchangeAuthorizationCode,
@@ -34,17 +36,18 @@ async function connectUserRole(userId: string, roleName: string) {
 }
 
 // Helper to create test user with session
-async function createTestUserWithSession() {
+async function createTestUserWithSession(createdUserIds: string[]) {
 	const [user] = await db
 		.insert(User)
 		.values({
 			email: faker.internet.email(),
-			username: faker.internet.username(),
+			username: `user-${faker.string.uuid().slice(0, 8)}`,
 			name: faker.person.fullName(),
 		})
 		.returning()
 	if (!user) throw new Error('Failed to insert user')
 	await connectUserRole(user.id, 'user')
+	createdUserIds.push(user.id)
 
 	const [session] = await db
 		.insert(Session)
@@ -59,7 +62,7 @@ async function createTestUserWithSession() {
 }
 
 // Helper to create test organization
-async function createTestOrganization(userId: string) {
+async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	let [adminRole] = await db
 		.select()
 		.from(OrganizationRole)
@@ -94,22 +97,53 @@ async function createTestOrganization(userId: string) {
 		organizationId: org.id,
 		organizationRoleId: adminRole.id,
 	})
+	createdOrgIds.push(org.id)
 	return org
 }
 
 describe('OAuth Token Endpoint', () => {
-	beforeEach(async () => {
-		// Clean up test data before each test
-		await db.delete(MCPAuthorization)
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPRefreshToken)
-	})
+	const createdUserIds: string[] = []
+	const createdOrgIds: string[] = []
 
 	afterEach(async () => {
-		// Clean up test data after each test
-		await db.delete(MCPAuthorization)
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPRefreshToken)
+		if (createdUserIds.length === 0 && createdOrgIds.length === 0) return
+
+		const authIds = db
+			.select({ id: MCPAuthorization.id })
+			.from(MCPAuthorization)
+			.where(
+				or(
+					inArray(MCPAuthorization.userId, createdUserIds),
+					inArray(MCPAuthorization.organizationId, createdOrgIds),
+				),
+			)
+		await db
+			.delete(MCPRefreshToken)
+			.where(inArray(MCPRefreshToken.authorizationId, authIds))
+		await db
+			.delete(MCPAccessToken)
+			.where(inArray(MCPAccessToken.authorizationId, authIds))
+		await db
+			.delete(MCPAuthorization)
+			.where(
+				or(
+					inArray(MCPAuthorization.userId, createdUserIds),
+					inArray(MCPAuthorization.organizationId, createdOrgIds),
+				),
+			)
+		await db
+			.delete(UserOrganization)
+			.where(
+				or(
+					inArray(UserOrganization.userId, createdUserIds),
+					inArray(UserOrganization.organizationId, createdOrgIds),
+				),
+			)
+		await db.delete(Session).where(inArray(Session.userId, createdUserIds))
+		await db.delete(Organization).where(inArray(Organization.id, createdOrgIds))
+		await db.delete(User).where(inArray(User.id, createdUserIds))
+		createdUserIds.length = 0
+		createdOrgIds.length = 0
 	})
 
 	describe('Property 24: Token response structure', () => {
@@ -118,8 +152,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code
 						const redirectUri = 'http://localhost:3000/callback'
@@ -169,8 +203,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code and exchange for tokens
 						const redirectUri = 'http://localhost:3000/callback'
@@ -228,8 +262,8 @@ describe('OAuth Token Endpoint', () => {
 						maxLength: 3,
 					}),
 					async (clientNames) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						for (const clientName of clientNames) {
 							const redirectUri = 'http://localhost:3000/callback'
@@ -294,8 +328,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code
 						const code = await createAuthorizationCode({
@@ -353,8 +387,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code
 						const code = await createAuthorizationCode({
@@ -383,8 +417,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code
 						const redirectUri = 'http://localhost:3000/callback'
@@ -422,8 +456,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code and exchange for tokens
 						const redirectUri = 'http://localhost:3000/callback'
@@ -468,8 +502,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code
 						const redirectUri = 'http://localhost:3000/callback'
@@ -509,8 +543,8 @@ describe('OAuth Token Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const { user } = await createTestUserWithSession()
-						const org = await createTestOrganization(user.id)
+						const { user } = await createTestUserWithSession(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization code and exchange for tokens
 						const redirectUri = 'http://localhost:3000/callback'

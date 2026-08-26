@@ -10,7 +10,7 @@ import {
 	User,
 } from '@repo/database'
 import * as fc from 'fast-check'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
 	generateToken,
 	hashToken,
@@ -68,13 +68,6 @@ async function deleteUserAndOrg(userId: string, organizationId: string) {
 }
 
 describe('MCP OAuth Service', () => {
-	// Clean up test data before each test
-	beforeEach(async () => {
-		await db.delete(MCPAccessToken)
-		await db.delete(MCPRefreshToken)
-		await db.delete(MCPAuthorization)
-	})
-
 	describe('Token Generation', () => {
 		it('should generate unique tokens', () => {
 			const token1 = generateToken()

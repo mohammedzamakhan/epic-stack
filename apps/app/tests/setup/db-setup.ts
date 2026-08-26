@@ -3,7 +3,9 @@ import fsExtra from 'fs-extra'
 import { afterAll, beforeAll } from 'vitest'
 import { BASE_DATABASE_PATH } from './global-setup.ts'
 
-const databaseFile = `./tests/database/data.${process.env.VITEST_POOL_ID || 0}.db`
+const workerId =
+	process.env.VITEST_POOL_ID ?? process.env.VITEST_WORKER_ID ?? '0'
+const databaseFile = `./tests/database/data.${workerId}.db`
 const databasePath = path.join(process.cwd(), databaseFile)
 process.env.DATABASE_URL = `file:${databasePath}`
 
@@ -21,6 +23,9 @@ beforeAll(async () => {
 	} else {
 		await fsExtra.remove(`${databasePath}-shm`).catch(() => {})
 	}
+
+	const { sqliteClient } = await import('@repo/database')
+	await sqliteClient.execute('PRAGMA busy_timeout = 30000')
 })
 
 afterAll(async () => {

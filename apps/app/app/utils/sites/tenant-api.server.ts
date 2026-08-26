@@ -42,19 +42,27 @@ async function callTenantCommand(options: {
 	}
 
 	const expectedRegion = resolveRegion(options.dataRegion)
-	const response = await fetch(`${tenantApiUrl}${options.path}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token}`,
-		},
-		body: JSON.stringify({
-			orgId: options.orgId,
-			slug: options.slug,
-			customDomain: options.customDomain ?? null,
-			dataRegion: expectedRegion,
-		}),
-	})
+	let response: Response
+	try {
+		response = await fetch(`${tenantApiUrl}${options.path}`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({
+				orgId: options.orgId,
+				slug: options.slug,
+				customDomain: options.customDomain ?? null,
+				dataRegion: expectedRegion,
+			}),
+		})
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error)
+		throw new Error(
+			`Failed to connect to Tenant API at ${tenantApiUrl}. Details: ${errorMessage}`,
+		)
+	}
 
 	const payload = (await response.json().catch(() => ({}))) as {
 		error?: string

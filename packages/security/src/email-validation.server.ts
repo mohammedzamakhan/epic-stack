@@ -1,5 +1,3 @@
-import { resolveMx } from 'node:dns/promises'
-
 /**
  * Self-hosted replacement for Arcjet's `validateEmail` rule
  * (`deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS']`), previously used to
@@ -717,10 +715,18 @@ async function checkMxRecords(
 	domain: string,
 	timeoutMs: number = DEFAULT_MX_LOOKUP_TIMEOUT_MS,
 ): Promise<MxLookupResult> {
+	const workerCaches = (globalThis as { caches?: { default?: unknown } }).caches
+	if (workerCaches !== undefined && 'default' in workerCaches) {
+		// Cloudflare Workers have no node:dns. Fail open like other infra errors.
+		return 'unknown'
+	}
+
 	const cached = mxResultCache.get(domain)
 	if (cached && cached.expiresAt > Date.now()) {
 		return cached.result
 	}
+
+	const { resolveMx } = await import('node:dns/promises')
 
 	let timeoutHandle: ReturnType<typeof setTimeout> | undefined
 	try {

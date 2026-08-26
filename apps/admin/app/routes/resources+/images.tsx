@@ -1,9 +1,8 @@
-import { promises as fs, constants } from 'node:fs'
 import { invariantResponse } from '@epic-web/invariant'
 import { getDomainUrl } from '@repo/common'
 import { validateInstanceUrl } from '@repo/security'
-import { getImgResponse } from 'openimg/node'
 import { ENV } from 'varlock/env'
+import { isCloudflareWorkerRuntime } from '#app/utils/runtime.server.ts'
 import { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/images'
 
@@ -11,6 +10,8 @@ let cacheDir: string | 'no_cache' | null = null
 
 async function getCacheDir() {
 	if (cacheDir) return cacheDir
+
+	const { promises: fs, constants } = await import('node:fs')
 
 	let dir: string | 'no_cache' = './tests/fixtures/openimg'
 	if (ENV.NODE_ENV === 'production') {
@@ -32,7 +33,79 @@ async function getCacheDir() {
 	return (cacheDir = dir)
 }
 
+async function getCloudflareImageResponse(request: Request) {
+	const url = new URL(request.url)
+	const searchParams = url.searchParams
+
+	const headers = new Headers()
+	headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+
+	const objectKey = searchParams.get('objectKey')
+	const organizationId = searchParams.get('organizationId')
+
+	let imageUrl: string
+	let fetchHeaders: HeadersInit | undefined
+
+	if (objectKey) {
+		if (
+			objectKey.length < 16 ||
+			objectKey.includes('..') ||
+			!/^[a-zA-Z0-9_\-./]+$/.test(objectKey)
+		) {
+			invariantResponse(false, 'Invalid or low-entropy objectKey parameter', {
+				status: 400,
+			})
+		}
+
+		const { url: signedUrl, headers: signedHeaders } =
+			await getSignedGetRequestInfoAsync(objectKey, organizationId!)
+		imageUrl = signedUrl
+		fetchHeaders = signedHeaders
+	} else {
+		const src = searchParams.get('src')
+		invariantResponse(src, 'src query parameter is required', { status: 400 })
+
+		if (URL.canParse(src)) {
+			const validation = validateInstanceUrl(src)
+			if (!validation.valid) {
+				throw new Error(`Invalid image URL: ${validation.reason}`)
+			}
+			imageUrl = src
+		} else {
+			const normalizedSrc = src.replace(/\\/g, '/').replace(/\.\.+/g, '')
+			const assetPath = normalizedSrc.startsWith('/')
+				? normalizedSrc
+				: `/${normalizedSrc}`
+			imageUrl = new URL(assetPath, url.origin).toString()
+		}
+	}
+
+	const imageResponse = await fetch(imageUrl, {
+		headers: fetchHeaders,
+	})
+
+	if (!imageResponse.ok) {
+		throw new Response('Not Found', { status: 404 })
+	}
+
+	const contentType = imageResponse.headers.get('content-type')
+	if (contentType) {
+		headers.set('Content-Type', contentType)
+	}
+
+	return new Response(imageResponse.body, {
+		headers,
+		status: imageResponse.status,
+	})
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
+	if (isCloudflareWorkerRuntime()) {
+		return getCloudflareImageResponse(request)
+	}
+
+	const { getImgResponse } = await import('openimg/node')
+
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
 
@@ -67,21 +140,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 				if (!validation.valid) {
 					throw new Error(`Invalid image URL: ${validation.reason}`)
 				}
-				// Fetch image from external URL; will be matched against allowlist
 				return {
 					type: 'fetch',
 					url: src,
 				}
 			}
-			// Retrieve image from filesystem (public folder)
 			if (src.startsWith('/assets')) {
-				// Files managed by Vite
 				return {
 					type: 'fs',
 					path: '.' + src,
 				}
 			}
-			// Fallback to files in public folder
 			return {
 				type: 'fs',
 				path: './public' + src,

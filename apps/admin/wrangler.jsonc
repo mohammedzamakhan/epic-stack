@@ -4,23 +4,18 @@
 	"main": "./workers/app.ts",
 	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2026-08-20",
-	"compatibility_flags": [
-		"nodejs_compat",
-		"nodejs_compat_populate_process_env",
-	],
+	"compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
 	"observability": {
 		"enabled": true,
 	},
 	"workers_dev": true,
-	"assets": {
-		"directory": "./build/client",
-		"binding": "ASSETS",
-	},
+	// @cloudflare/vite-plugin injects assets.directory at build time — do not set directory here.
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "epic_app_db",
 			"database_id": "ff7f36a4-16c4-488d-bb1d-872cba6b6909",
+			"migrations_dir": "../../packages/database/drizzle",
 		},
 	],
 	"kv_namespaces": [
@@ -35,19 +30,28 @@
 	//   INTERNAL_COMMAND_TOKEN
 	//   SSO_ENCRYPTION_KEY
 	//   AUDIT_LOG_SECRET_KEY
+	//   RESEND_API_KEY
+	//   STRIPE_SECRET_KEY
 	//   AWS_SECRET_ACCESS_KEY
+	//   GITHUB_CLIENT_SECRET
+	//   GITHUB_TOKEN
 	//   BETTERSTACK_API_KEY
 	//   SENTRY_AUTH_TOKEN
 	"vars": {
 		"NODE_ENV": "production",
 		"ALLOW_INDEXING": "false",
 		"BASE_URL": "https://epic-startup-admin.zama-887.workers.dev",
+		"ROOT_APP": "zama-887.workers.dev",
 		"LAUNCH_STATUS": "LAUNCHED",
+		"TRIAL_DAYS": "14",
+		"CREDIT_CARD_REQUIRED_FOR_TRIAL": "manual",
 		"AWS_REGION": "auto",
 		"AWS_ENDPOINT_URL_S3": "https://fly.storage.tigris.dev",
 		"BUCKET_NAME": "mock-bucket",
 		"AWS_ACCESS_KEY_ID": "mock-access-key",
+		"GITHUB_CLIENT_ID": "MOCK_GITHUB_CLIENT_ID",
 		"SENTRY_DSN": "your-dsn",
+		"STRIPE_PORTAL_URL": "",
 		"FLY_REGION": "",
 		"FLY_APP_NAME": "",
 	},

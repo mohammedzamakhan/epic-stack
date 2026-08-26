@@ -16,6 +16,7 @@ interface Env {
 	AWS_ENDPOINT_URL_S3: string
 	BUCKET_NAME: string
 	BASE_URL: string
+	ROOT_APP: string
 	PUBLIC_SITE_HOST_SUFFIXES?: string
 	TENANT_API_URL: string
 	TENANT_API_URL_KSA: string

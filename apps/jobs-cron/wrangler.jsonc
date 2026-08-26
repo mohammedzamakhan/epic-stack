@@ -2,28 +2,30 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "epic-startup-jobs-cron",
 	"main": "src/index.ts",
+	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2025-08-15",
+	"workers_dev": true,
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
 	"triggers": {
-		"crons": ["0 2 * * *", "0 3 * * *", "0 4 * * *", "0 * * * *"]
+		"crons": ["0 2 * * *", "0 3 * * *", "0 4 * * *", "0 * * * *"],
 	},
 	"workflows": [
 		{
 			"name": "storage-migration",
 			"binding": "STORAGE_MIGRATION_WORKFLOW",
-			"class_name": "StorageMigrationWorkflow"
+			"class_name": "StorageMigrationWorkflow",
 		},
 		{
 			"name": "marketing-journey",
 			"binding": "MARKETING_JOURNEY_WORKFLOW",
-			"class_name": "MarketingJourneyWorkflow"
-		}
+			"class_name": "MarketingJourneyWorkflow",
+		},
 	],
 	"vars": {
 		"APP_BASE_URL": "https://app.epic-startup.me",
 		"TENANT_API_URL": "https://tenant-us.epic-startup.me",
-		"TENANT_API_URL_KSA": "https://tenant-ksa.epic-startup.me"
-	}
+		"TENANT_API_URL_KSA": "https://tenant-ksa.epic-startup.me",
+	},
 }

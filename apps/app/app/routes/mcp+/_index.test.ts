@@ -8,6 +8,7 @@ import {
 	Organization,
 	OrganizationRole,
 	Role,
+	Session,
 	User,
 	UserOrganization,
 	_RoleToUser,
@@ -140,6 +141,7 @@ describe('MCP Stateless Endpoint', () => {
 						inArray(UserOrganization.organizationId, createdOrgIds),
 					),
 				)
+			await db.delete(Session).where(inArray(Session.userId, createdUserIds))
 			await db
 				.delete(Organization)
 				.where(inArray(Organization.id, createdOrgIds))

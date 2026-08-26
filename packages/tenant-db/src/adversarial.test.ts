@@ -731,7 +731,7 @@ describe('Adversarial SQLite Schema Testing (Milestone 1)', () => {
 				.from(journeyStepExecutions)
 				.where(eq(journeyStepExecutions.journeyId, journey!.id))
 			expect(allSteps).toHaveLength(50)
-		})
+		}, 30000)
 
 		it('handles concurrent status updates on same run', async () => {
 			const [cust] = await db

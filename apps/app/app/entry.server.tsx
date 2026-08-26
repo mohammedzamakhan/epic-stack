@@ -1,13 +1,14 @@
-import crypto from 'node:crypto'
-import { PassThrough } from 'node:stream'
 import { contentSecurity } from '@nichtsam/helmet/content'
-import { createReadableStreamFromReadable } from '@react-router/node'
-import { NonceProvider, makeTimings } from '@repo/common'
+import {
+	NonceProvider,
+	isCloudflareWorkerRuntime,
+	makeTimings,
+} from '@repo/common'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
 import { sentryLogger, sanitizeUrl } from '@repo/observability'
 import { isbot } from 'isbot'
-import { renderToPipeableStream } from 'react-dom/server'
+import { renderToReadableStream } from 'react-dom/server'
 import {
 	ServerRouter,
 	type LoaderFunctionArgs,
@@ -26,7 +27,47 @@ export const streamTimeout = 5000
 
 const MODE = process.env.NODE_ENV ?? 'development'
 
+function createNonce() {
+	const bytes = new Uint8Array(16)
+	crypto.getRandomValues(bytes)
+	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
+		'',
+	)
+}
+
 type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
+
+function applySecurityHeaders(responseHeaders: Headers) {
+	responseHeaders.set('X-Content-Type-Options', 'nosniff')
+	responseHeaders.set('X-Frame-Options', 'SAMEORIGIN')
+	responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+	if (process.env.NODE_ENV === 'production') {
+		responseHeaders.set(
+			'Strict-Transport-Security',
+			'max-age=31536000; includeSubDomains; preload',
+		)
+		if (process.env.SENTRY_DSN) {
+			responseHeaders.append('Document-Policy', 'js-profiling')
+		}
+	}
+}
+
+function applyRuntimeHeaders(responseHeaders: Headers) {
+	if (isCloudflareWorkerRuntime()) {
+		responseHeaders.set('cf-worker', 'epic-startup-app')
+		return
+	}
+
+	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown')
+	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
+}
+
+async function applyInstanceHeaders(responseHeaders: Headers) {
+	const { currentInstance, primaryInstance } = await getInstanceInfo()
+	responseHeaders.set('fly-primary-instance', primaryInstance)
+	responseHeaders.set('fly-instance', currentInstance)
+}
 
 function applyContentSecurity(
 	responseHeaders: Headers,
@@ -87,97 +128,64 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
 		args
 
-	// Automatic audit logging for sensitive routes
 	void auditSensitiveRoutes(
 		request,
 		new Response(null, { status: responseStatusCode }),
 	)
 
-	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown')
-	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
-	responseHeaders.set('fly-primary-instance', primaryInstance)
-	responseHeaders.set('fly-instance', currentInstance)
+	applySecurityHeaders(responseHeaders)
+	applyRuntimeHeaders(responseHeaders)
+	await applyInstanceHeaders(responseHeaders)
 
-	responseHeaders.set('X-Content-Type-Options', 'nosniff')
-	responseHeaders.set('X-Frame-Options', 'SAMEORIGIN')
-	responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-
-	if (process.env.NODE_ENV === 'production') {
-		responseHeaders.set(
-			'Strict-Transport-Security',
-			'max-age=31536000; includeSubDomains; preload',
-		)
-		if (process.env.SENTRY_DSN) {
-			responseHeaders.append('Document-Policy', 'js-profiling')
-		}
-	}
-
-	const callbackName = isbot(request.headers.get('user-agent'))
-		? 'onAllReady'
-		: 'onShellReady'
-
-	const nonce = crypto.randomBytes(16).toString('hex')
+	const nonce = createNonce()
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
 
 	const builderMode =
-		MODE === 'development' && request.url.includes('builder.my')
+		MODE === 'development' &&
+		request.url.includes('builder.my') &&
+		!isCloudflareWorkerRuntime()
 	const requestHost =
 		request.headers.get('x-forwarded-host') ?? request.headers.get('host')
 
-	return new Promise((resolve, reject) => {
-		let didError = false
-		// NOTE: this timing will only include things that are rendered in the shell
-		// and will not include suspended components and deferred loaders
-		const timings = makeTimings('render', 'renderToPipeableStream')
+	let didError = false
+	const timings = makeTimings('render', 'renderToReadableStream')
 
-		const { pipe, abort } = renderToPipeableStream(
-			<I18nProvider i18n={i18n}>
-				<NonceProvider value={nonce}>
-					<ServerRouter
-						nonce={nonce}
-						context={reactRouterContext}
-						url={request.url}
-					/>
-				</NonceProvider>
-			</I18nProvider>,
-			{
-				[callbackName]: () => {
-					const body = new PassThrough()
-					responseHeaders.set('Content-Type', 'text/html')
-					responseHeaders.append('Server-Timing', timings.toString())
-					applyContentSecurity(responseHeaders, nonce, builderMode, requestHost)
-
-					resolve(
-						new Response(createReadableStreamFromReadable(body), {
-							headers: responseHeaders,
-							status: didError ? 500 : responseStatusCode,
-						}),
-					)
-					pipe(body)
-				},
-				onShellError: (err: unknown) => {
-					reject(err)
-				},
-				onError: () => {
-					didError = true
-				},
-				nonce,
+	const stream = await renderToReadableStream(
+		<I18nProvider i18n={i18n}>
+			<NonceProvider value={nonce}>
+				<ServerRouter
+					nonce={nonce}
+					context={reactRouterContext}
+					url={request.url}
+				/>
+			</NonceProvider>
+		</I18nProvider>,
+		{
+			nonce,
+			onError: () => {
+				didError = true
 			},
-		)
+		},
+	)
 
-		setTimeout(abort, streamTimeout + 5000)
+	if (isbot(request.headers.get('user-agent'))) {
+		await stream.allReady
+	}
+
+	responseHeaders.set('Content-Type', 'text/html')
+	responseHeaders.append('Server-Timing', timings.toString())
+	applyContentSecurity(responseHeaders, nonce, builderMode, requestHost)
+
+	return new Response(stream, {
+		headers: responseHeaders,
+		status: didError ? 500 : responseStatusCode,
 	})
 }
 
 export async function handleDataRequest(response: Response) {
-	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	response.headers.set('fly-region', process.env.FLY_REGION ?? 'unknown')
-	response.headers.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
-	response.headers.set('fly-primary-instance', primaryInstance)
-	response.headers.set('fly-instance', currentInstance)
-
+	applyRuntimeHeaders(response.headers)
+	await applyInstanceHeaders(response.headers)
 	return response
 }
 
@@ -185,14 +193,10 @@ export function handleError(
 	error: unknown,
 	{ request }: LoaderFunctionArgs | ActionFunctionArgs,
 ): void {
-	// Skip capturing if the request is aborted as Remix docs suggest
-	// Ref: https://remix.run/docs/en/main/file-conventions/entry.server#handleerror
 	if (request.signal.aborted) {
 		return
 	}
 
-	// Log with context and automatically send to Sentry
-	// Sanitize URL to prevent leaking sensitive query parameters
 	const requestLogger = sentryLogger.child({
 		url: sanitizeUrl(request.url),
 		method: request.method,

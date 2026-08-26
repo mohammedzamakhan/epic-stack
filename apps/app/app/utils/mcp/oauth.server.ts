@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { auditService, AuditAction } from '@repo/audit'
+import { isCloudflareWorkerRuntime } from '@repo/common'
 import {
 	db,
 	eq,
@@ -216,15 +217,17 @@ const authorizationCodeCache = new Map<
 
 // Clean up expired codes every minute with batched deletions
 // to prevent blocking the event loop with large caches
-setInterval(() => {
-	const now = Date.now()
-	const toDelete: string[] = []
-	for (const [code, entry] of authorizationCodeCache.entries()) {
-		if (entry.expiresAt < now) toDelete.push(code)
-		if (toDelete.length > 100) break // limit iteration per cleanup cycle
-	}
-	toDelete.forEach((code) => authorizationCodeCache.delete(code))
-}, 60 * 1000).unref() // unref to allow process to exit if this is the only thing keeping it alive
+if (!isCloudflareWorkerRuntime()) {
+	setInterval(() => {
+		const now = Date.now()
+		const toDelete: string[] = []
+		for (const [code, entry] of authorizationCodeCache.entries()) {
+			if (entry.expiresAt < now) toDelete.push(code)
+			if (toDelete.length > 100) break // limit iteration per cleanup cycle
+		}
+		toDelete.forEach((code) => authorizationCodeCache.delete(code))
+	}, 60 * 1000).unref() // unref to allow process to exit if this is the only thing keeping it alive
+}
 
 // Generate cryptographically secure random token
 export function generateToken(): string {
@@ -253,7 +256,6 @@ export async function createAuthorizationWithTokens({
 	const accessToken = generateToken()
 	const refreshToken = generateToken()
 
-	// Create authorization record and tokens in a single transaction
 	const [authorization] = await db
 		.insert(MCPAuthorization)
 		.values({

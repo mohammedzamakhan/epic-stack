@@ -1,3 +1,4 @@
+import { isCloudflareWorkerRuntime } from '@repo/common'
 import { logger } from '@repo/observability'
 import { ssoAuditLogger, SSOAuditEventType } from './audit-logging.server.ts'
 import { ssoConfigurationService } from './configuration.server.ts'
@@ -498,7 +499,7 @@ export class SSOMonitoringService {
 // Export singleton instance
 export const ssoMonitoringService = new SSOMonitoringService()
 
-// Start monitoring in production
-if (process.env.NODE_ENV === 'production') {
+// Start monitoring in production Node/Fly — Workers forbid timers in global scope
+if (process.env.NODE_ENV === 'production' && !isCloudflareWorkerRuntime()) {
 	ssoMonitoringService.startMonitoring()
 }

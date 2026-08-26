@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+import { cloudflare } from '@cloudflare/vite-plugin'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import { getBrandDomain } from '@repo/config/brand'
@@ -11,9 +13,43 @@ import { defineConfig, type Plugin } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
+const appDir = fileURLToPath(new URL('.', import.meta.url))
 const domain = `app.${getBrandDomain()}`
 
 const MODE = process.env.NODE_ENV
+const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare'
+
+function cloudflareWorkerAliasPlugin(): Plugin | null {
+	if (!isCloudflare) return null
+	const workerFile = (name: string) => `${appDir}/workers/${name}`
+	const ssrOnly: Record<string, string> = {
+		'isomorphic-dompurify': workerFile('dompurify-stub.ts'),
+		'@sentry/react-router': workerFile('sentry-stub.ts'),
+	}
+	const always: Record<string, string> = {
+		'litefs-js/remix': workerFile('litefs-stub.ts'),
+		'litefs-js': workerFile('litefs-stub.ts'),
+		'@sentry/profiling-node': workerFile('litefs-stub.ts'),
+		'node:sqlite': workerFile('node-sqlite-stub.ts'),
+	}
+	const remixCrypto = workerFile('remix-crypto-stub.ts')
+	return {
+		name: 'cloudflare-worker-aliases',
+		enforce: 'pre',
+		resolveId(id, _importer, options) {
+			if (always[id]) return always[id]
+			if (/remix-utils\/build\/common\/crypto/.test(id)) return remixCrypto
+			if (
+				options?.ssr &&
+				(id.includes('notes-chart.tsx') || id.endsWith('notes-chart'))
+			) {
+				return workerFile('notes-chart-ssr-stub.tsx')
+			}
+			if (options?.ssr && ssrOnly[id]) return ssrOnly[id]
+			return null
+		},
+	}
+}
 
 // Plugin to stub out cache.server.ts in test mode to avoid node:sqlite in jsdom
 function stubCacheServerPlugin(): Plugin {
@@ -71,55 +107,59 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 }
 
 export default defineConfig((config) => ({
-	resolve: {
-		alias: {},
-	},
 	build: {
 		target: 'es2022',
 		cssMinify: MODE === 'production',
 
-		rollupOptions: {
-			input: config.isSsrBuild ? './server/app.ts' : undefined,
-			external: [
-				/node:.*/,
-				'fsevents',
-				'@sentry/profiling-node',
-				'@sentry-internal/node-cpu-profiler',
-			],
-			output: {
-				// Optimize chunk splitting for better caching and parallel loading
-				manualChunks: (id) => {
-					// Split vendor chunks for better caching
-					if (id.includes('node_modules')) {
-						// Large UI libraries in separate chunks
-						if (id.includes('@radix-ui')) {
-							return 'vendor-radix'
-						}
-						if (id.includes('@tiptap')) {
-							return 'vendor-tiptap'
-						}
-						if (id.includes('recharts') || id.includes('d3-')) {
-							return 'vendor-charts'
-						}
-						if (id.includes('react-router') || id.includes('@react-router')) {
-							return 'vendor-router'
-						}
-						// Core React in its own chunk
-						if (id.includes('react') || id.includes('react-dom')) {
-							return 'vendor-react'
-						}
-						// Other vendor code
-						return 'vendor'
+		rollupOptions: isCloudflare
+			? {}
+			: {
+					input: config.isSsrBuild ? './server/app.ts' : undefined,
+					external: [
+						/node:.*/,
+						'fsevents',
+						'@sentry/profiling-node',
+						'@sentry-internal/node-cpu-profiler',
+					],
+					output: {
+						// Optimize chunk splitting for better caching and parallel loading
+						manualChunks: (id) => {
+							// Split vendor chunks for better caching
+							if (id.includes('node_modules')) {
+								// Large UI libraries in separate chunks
+								if (id.includes('@radix-ui')) {
+									return 'vendor-radix'
+								}
+								if (id.includes('@tiptap')) {
+									return 'vendor-tiptap'
+								}
+								if (id.includes('recharts') || id.includes('d3-')) {
+									return 'vendor-charts'
+								}
+								if (
+									id.includes('react-router') ||
+									id.includes('@react-router')
+								) {
+									return 'vendor-router'
+								}
+								// Core React in its own chunk
+								if (id.includes('react') || id.includes('react-dom')) {
+									return 'vendor-react'
+								}
+								// Other vendor code
+								return 'vendor'
+							}
+						},
+					},
+				},
+
+		assetsInlineLimit: isCloudflare
+			? 4096
+			: (source: string) => {
+					if (typeof source === 'string' && source.includes('/app/assets')) {
+						return false
 					}
 				},
-			},
-		},
-
-		assetsInlineLimit: (source: string) => {
-			if (source.includes('/app/assets')) {
-				return false
-			}
-		},
 
 		sourcemap: true,
 	},
@@ -135,13 +175,18 @@ export default defineConfig((config) => ({
 		],
 	},
 	...(MODE !== 'test' && {
+		// Vite 6 merges legacy `ssr.noExternal` arrays with the Cloudflare
+		// plugin's `resolve.noExternal: true` into `['pkg', true]`, which breaks
+		// shouldExternalize (`filename.replace is not a function`). Use `true` for CF.
 		ssr: {
-			noExternal: [
-				'@repo/ai',
-				'@repo/email',
-				'@repo/marketing',
-				'@repo/marketing-workflow',
-			],
+			noExternal: isCloudflare
+				? true
+				: [
+						'@repo/ai',
+						'@repo/email',
+						'@repo/marketing',
+						'@repo/marketing-workflow',
+					],
 		},
 	}),
 	server: {
@@ -160,6 +205,8 @@ export default defineConfig((config) => ({
 	},
 	sentryConfig,
 	plugins: [
+		...(isCloudflare ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),
+		cloudflareWorkerAliasPlugin(),
 		varlockVitePlugin(),
 		MODE === 'test' ? stubCacheServerPlugin() : null,
 		envOnlyMacros(),
@@ -170,7 +217,7 @@ export default defineConfig((config) => ({
 		MODE === 'test' ? null : reactRouter(),
 		macrosPlugin(),
 		lingui(),
-		MODE === 'production' && process.env.SENTRY_AUTH_TOKEN
+		MODE === 'production' && process.env.SENTRY_AUTH_TOKEN && !isCloudflare
 			? sentryReactRouter(sentryConfig, config)
 			: null,
 	].filter(Boolean) as Plugin[],
@@ -181,7 +228,9 @@ export default defineConfig((config) => ({
 		environment: 'node',
 		envFile: '../../.env',
 		restoreMocks: true,
-		pool: 'threads',
+		// Forked workers get isolated process.env + SQLite files (threads shared one DB).
+		pool: 'forks',
+		maxWorkers: process.env.CI ? 2 : undefined,
 		coverage: {
 			include: ['app/**/*.{ts,tsx}'],
 			all: true,
