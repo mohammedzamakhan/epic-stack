@@ -281,110 +281,6 @@ jobs:
           directory: apps/sites/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  container-app:
-    name: 📦 Prepare App Container
-    runs-on: ubuntu-24.04
-    needs: [affected]
-    # only prepare container on pushes AND if app was affected
-    if:
-      ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-
-      - name: 👀 Read app name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: app_name
-        with:
-          file: 'apps/app/fly.toml'
-          field: 'app'
-
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 📦 Build App Staging Container
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/app/fly.toml \
-            --dockerfile apps/app/other/Dockerfile \
-            --app ${{ steps.app_name.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 📦 Build App Production Container
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
-            --config apps/app/fly.toml \
-            --dockerfile apps/app/other/Dockerfile \
-            --app ${{ steps.app_name.outputs.value }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-  container-admin:
-    name: 📦 Prepare Admin Container
-    runs-on: ubuntu-24.04
-    needs: [affected]
-    # only prepare container on pushes AND if admin was affected
-    if:
-      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true'
-      }}
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-
-      - name: 👀 Read admin app name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: admin_app_name
-        with:
-          file: 'apps/admin/fly.toml'
-          field: 'app'
-
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 📦 Build Admin Staging Container
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/admin/fly.toml \
-            --dockerfile apps/admin/other/Dockerfile \
-            --app ${{ steps.admin_app_name.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 📦 Build Admin Production Container
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
-            --config apps/admin/fly.toml \
-            --dockerfile apps/admin/other/Dockerfile \
-            --app ${{ steps.admin_app_name.outputs.value }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   # CMS is deployed to Cloudflare Workers (no container needed)
 
@@ -438,93 +334,68 @@ jobs:
             ${{ steps.meta.outputs.image }}:${{ github.sha }}
             ${{ steps.meta.outputs.image }}:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
 
+
   deploy-app:
-    name: 🚀 Deploy App
+    name: 🚀 Deploy App (Cloudflare Workers)
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, playwright, container-app, affected]
-    # only deploy on pushes AND if app was affected
+    needs: [lint, typecheck, vitest, playwright, affected]
     if:
       ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          fetch-depth: 0
+          node-version: 22
+          cache: 'npm'
 
-      - name: 👀 Read app name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: app_name
-        with:
-          file: 'apps/app/fly.toml'
-          field: 'app'
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
 
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 🚀 Deploy App Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
+      - name: 🏗 Build App
         run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.app_name.outputs.value }}-staging:${{ github.sha }}" \
-            --config apps/app/fly.toml \
-            --app ${{ steps.app_name.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          cd apps/app
+          npm run build
 
-      - name: 🚀 Deploy App Production
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}" \
-            --config apps/app/fly.toml \
-            --app ${{ steps.app_name.outputs.value }}
+      - name: 🚀 Deploy App
+        working-directory: apps/app
+        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-admin:
-    name: 🚀 Deploy Admin
+    name: 🚀 Deploy Admin (Cloudflare Workers)
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, playwright, container-admin, affected]
-    # only deploy on pushes AND if admin was affected
+    needs: [lint, typecheck, vitest, playwright, affected]
     if:
-      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true'
-      }}
+      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          fetch-depth: 0
+          node-version: 22
+          cache: 'npm'
 
-      - name: 👀 Read admin app name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: admin_app_name
-        with:
-          file: 'apps/admin/fly.toml'
-          field: 'app'
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
 
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 🚀 Deploy Admin Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
+      - name: 🏗 Build Admin
         run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.admin_app_name.outputs.value }}-staging:${{ github.sha }}" \
-            --config apps/admin/fly.toml \
-            --app ${{ steps.admin_app_name.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          cd apps/admin
+          npm run build
 
-      - name: 🚀 Deploy Admin Production
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.admin_app_name.outputs.value }}:${{ github.sha }}" \
-            --config apps/admin/fly.toml \
-            --app ${{ steps.admin_app_name.outputs.value }}
+      - name: 🚀 Deploy Admin
+        working-directory: apps/admin
+        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-jobs-cron:
     name: 🚀 Deploy Jobs Cron (Cloudflare Workers)
