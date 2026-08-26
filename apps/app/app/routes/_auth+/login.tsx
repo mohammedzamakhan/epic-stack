@@ -40,6 +40,7 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
+import { ensureLinguiRequestLocale } from '#app/modules/lingui/lingui.server.ts'
 import { login } from '#app/utils/auth.server.ts'
 import { ProviderConnectionForm } from '#app/utils/connections.tsx'
 import {
@@ -50,7 +51,6 @@ import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
 } from '#app/utils/organization/organizations.server.ts'
-import { ensureLinguiRequestLocale } from '#app/modules/lingui/lingui.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import { type Route } from './+types/login.ts'

@@ -197,11 +197,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		const data = (await testRes.json()) as any
+		const runId = data.runId || 'initiated'
 		return {
 			success: true,
-			message: i18n._(
-				t`Test run triggered successfully (Run ID: ${data.runId || 'initiated'})`,
-			),
+			message: i18n._(t`Test run triggered successfully (Run ID: ${runId})`),
 			runId: data.runId,
 		}
 	}

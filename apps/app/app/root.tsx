@@ -43,6 +43,7 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
+	useRouteLoaderData,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { ENV } from 'varlock/env'
@@ -323,7 +324,8 @@ function Document({
 	env?: Record<string, any>
 }) {
 	const allowIndexing = env.ALLOW_INDEXING !== false
-	const { locale } = useLoaderData<typeof loader>()
+	const data = useRouteLoaderData<typeof loader>('root')
+	const locale = data?.locale ?? 'en'
 	const direction = getDirection(locale)
 
 	// Generate Organization structured data for better SEO

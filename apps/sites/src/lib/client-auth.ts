@@ -79,6 +79,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 }
 
 export function getAccessTokenClaims(): {
+	customerId?: string
 	name?: string
 	orgId?: string
 } | null {
@@ -87,9 +88,19 @@ export function getAccessTokenClaims(): {
 	const payload = decodeJwtPayload(token)
 	if (!payload) return null
 	return {
+		customerId:
+			typeof payload.customerId === 'string'
+				? payload.customerId
+				: typeof payload.sub === 'string'
+					? payload.sub
+					: undefined,
 		name: typeof payload.name === 'string' ? payload.name : undefined,
 		orgId: typeof payload.orgId === 'string' ? payload.orgId : undefined,
 	}
+}
+
+export function getCustomerIdFromAccessToken(): string | undefined {
+	return getAccessTokenClaims()?.customerId
 }
 
 async function refreshSession(): Promise<boolean> {

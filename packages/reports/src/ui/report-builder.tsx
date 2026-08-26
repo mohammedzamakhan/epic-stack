@@ -213,7 +213,7 @@ export function ReportBuilder({
 		setPanel((current) => (current === next ? null : next))
 	}
 
-	const customerSubject = definition.subject === 'customers'
+	const tenantApiSubject = subject?.source === 'tenant-api'
 	const timeframeFieldLabel =
 		timeFields.find((field) => field.id === definition.timeframe.field)
 			?.label ?? definition.timeframe.field
@@ -314,11 +314,11 @@ export function ReportBuilder({
 				</ConfigCard>
 			</div>
 
-			{customerSubject && hasTenantDb === false ? (
+			{tenantApiSubject && hasTenantDb === false ? (
 				<div className="bg-muted/50 text-muted-foreground mx-4 mt-4 rounded-lg border px-3 py-2 text-sm leading-relaxed">
 					This organization has not provisioned a regional customer database
-					yet. Publish the public site to collect customers, then rerun this
-					report. Customer records are queried from the regional tenant API in
+					yet. Publish the public site to collect data, then rerun this report.
+					Customer and shop records are queried from the regional tenant API in
 					the browser and are never copied to the US control plane.
 				</div>
 			) : null}

@@ -13,6 +13,26 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Back to shop"
+msgstr "Volver a la tienda"
+
+#: src/pages/profile.astro.ts:3
+msgid "Browse the shop"
+msgstr "Explorar la tienda"
+
+#: src/pages/shop.astro.ts:3
+msgid "Buy now"
+msgstr "Comprar ahora"
+
+#: src/pages/shop.astro.ts:3
+msgid "Card number"
+msgstr "Número de tarjeta"
+
+#: src/pages/profile.astro.ts:3
+msgid "Cards used on past shop purchases on this account."
+msgstr "Tarjetas usadas en compras anteriores de la tienda en esta cuenta."
+
 #: src/pages/verify.astro.ts:3
 msgid "Check your phone"
 msgstr "Revisa tu teléfono"
@@ -21,6 +41,10 @@ msgstr "Revisa tu teléfono"
 msgid "Continue"
 msgstr "Continuar"
 
+#: src/pages/shop.astro.ts:3
+msgid "CVC"
+msgstr "CVC"
+
 #: src/pages/profile.astro.ts:3
 msgid "Email"
 msgstr "Correo electrónico"
@@ -28,6 +52,14 @@ msgstr "Correo electrónico"
 #: src/pages/login.astro.ts:3
 msgid "Enter your phone number. We'll send a verification code."
 msgstr "Introduce tu número de teléfono. Te enviaremos un código."
+
+#: src/pages/profile.astro.ts:3
+msgid "Expires"
+msgstr "Vence"
+
+#: src/pages/shop.astro.ts:3
+msgid "Expiry"
+msgstr "Vencimiento"
 
 #: src/pages/complete-name.astro.ts:3
 msgid "Full name"
@@ -60,9 +92,37 @@ msgstr "Nombre"
 msgid "Network error. Please try again."
 msgstr "Error de red. Inténtalo de nuevo."
 
+#: src/pages/profile.astro.ts:3
+msgid "No orders yet."
+msgstr "Aún no hay pedidos."
+
+#: src/pages/profile.astro.ts:3
+msgid "No saved payment methods yet."
+msgstr "Aún no hay métodos de pago guardados."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Open menu"
 msgstr "Abrir menú"
+
+#: src/pages/shop/success.astro.ts:3
+msgid "Order confirmed"
+msgstr "Pedido confirmado"
+
+#: src/pages/profile.astro.ts:3
+msgid "Order history"
+msgstr "Historial de pedidos"
+
+#: src/pages/shop.astro.ts:3
+msgid "Pay now"
+msgstr "Pagar ahora"
+
+#: src/pages/shop.astro.ts:3
+msgid "Payment method"
+msgstr "Método de pago"
+
+#: src/pages/profile.astro.ts:3
+msgid "Payment methods"
+msgstr "Métodos de pago"
 
 #: src/pages/login.astro.ts:3
 #: src/pages/profile.astro.ts:3
@@ -77,6 +137,10 @@ msgstr "El número de teléfono no se puede cambiar ahora."
 msgid "Primary"
 msgstr "Principal"
 
+#: src/pages/shop.astro.ts:3
+msgid "Processing payment..."
+msgstr "Procesando el pago..."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Profile"
 msgstr "Perfil"
@@ -84,6 +148,10 @@ msgstr "Perfil"
 #: src/pages/profile.astro.ts:3
 msgid "Profile updated successfully!"
 msgstr "Perfil actualizado correctamente."
+
+#: src/pages/profile.astro.ts:3
+msgid "Purchases from the shop while signed in."
+msgstr "Compras de la tienda mientras iniciaste sesión."
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -102,6 +170,10 @@ msgstr "Enviar código"
 msgid "Sending..."
 msgstr "Enviando..."
 
+#: src/pages/shop.astro.ts:3
+msgid "Shop"
+msgstr "Tienda"
+
 #: src/components/SiteHeader.astro.ts:3
 #: src/pages/login.astro.ts:3
 msgid "Sign in"
@@ -113,9 +185,25 @@ msgstr "Iniciar sesión"
 msgid "Something went wrong."
 msgstr "Algo salió mal."
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Thank you for your purchase!"
+msgstr "¡Gracias por tu compra!"
+
+#: src/pages/shop.astro.ts:3
+msgid "This shop is not available right now."
+msgstr "Esta tienda no está disponible en este momento."
+
+#: src/pages/shop.astro.ts:3
+msgid "Unable to start checkout. Please try again."
+msgstr "No se pudo iniciar el pago. Inténtalo de nuevo."
+
 #: src/pages/profile.astro.ts:3
 msgid "Update your basic details below."
 msgstr "Actualiza tus datos básicos a continuación."
+
+#: src/pages/shop.astro.ts:3
+msgid "Use a new card"
+msgstr "Usar una tarjeta nueva"
 
 #: src/pages/verify.astro.ts:3
 msgid "Verification Code"
@@ -128,6 +216,10 @@ msgstr "Verificar"
 #: src/pages/verify.astro.ts:3
 msgid "Verifying..."
 msgstr "Verificando..."
+
+#: src/pages/shop/success.astro.ts:3
+msgid "We could not confirm this order."
+msgstr "No pudimos confirmar este pedido."
 
 #: src/pages/complete-name.astro.ts:3
 msgid "We'll use this on your profile. You can change it later."

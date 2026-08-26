@@ -1,4 +1,10 @@
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
+import {
+	sqliteTable,
+	text,
+	integer,
+	index,
+	uniqueIndex,
+} from 'drizzle-orm/sqlite-core'
 import { sql, relations } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 
@@ -21,6 +27,7 @@ export const customers = sqliteTable('customers', {
 	refreshTokenExpiresAt: integer('refresh_token_expires_at', {
 		mode: 'timestamp',
 	}),
+	stripeCustomerId: text('stripe_customer_id').unique(),
 	createdAt: integer('created_at', { mode: 'timestamp' }).default(
 		sql`(strftime('%s', 'now'))`,
 	),
@@ -326,7 +333,96 @@ export const marketingMessagesRelations = relations(
 )
 
 // ==========================================
-// 7. INFERRED TYPES
+// 7. SHOP ORDERS (customer purchases on tenant sites)
+// ==========================================
+export const shopOrders = sqliteTable(
+	'shop_orders',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => randomUUID()),
+		customerId: text('customer_id').references(() => customers.id, {
+			onDelete: 'set null',
+		}),
+		productName: text('product_name').notNull(),
+		amountCents: integer('amount_cents').notNull(),
+		platformFeeCents: integer('platform_fee_cents').notNull(),
+		orgPayoutCents: integer('org_payout_cents').notNull(),
+		currency: text('currency').notNull().default('usd'),
+		stripeCheckoutSessionId: text('stripe_checkout_session_id'),
+		stripePaymentIntentId: text('stripe_payment_intent_id'),
+		status: text('status', {
+			enum: ['pending', 'paid', 'failed', 'refunded'],
+		})
+			.notNull()
+			.default('pending'),
+		createdAt: integer('created_at', { mode: 'timestamp' }).default(
+			sql`(strftime('%s', 'now'))`,
+		),
+		updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
+			sql`(strftime('%s', 'now'))`,
+		),
+	},
+	(table) => [
+		index('idx_shop_orders_customer').on(table.customerId),
+		index('idx_shop_orders_status').on(table.status),
+		uniqueIndex('shop_orders_stripe_checkout_session_id_unique').on(
+			table.stripeCheckoutSessionId,
+		),
+		uniqueIndex('shop_orders_stripe_payment_intent_id_unique').on(
+			table.stripePaymentIntentId,
+		),
+	],
+)
+
+export const shopOrdersRelations = relations(shopOrders, ({ one }) => ({
+	customer: one(customers, {
+		fields: [shopOrders.customerId],
+		references: [customers.id],
+	}),
+}))
+
+// ==========================================
+// 8. CUSTOMER PAYMENT METHODS (shop card snapshots)
+// ==========================================
+export const customerPaymentMethods = sqliteTable(
+	'customer_payment_methods',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => randomUUID()),
+		customerId: text('customer_id')
+			.notNull()
+			.references(() => customers.id, { onDelete: 'cascade' }),
+		stripePaymentMethodId: text('stripe_payment_method_id').notNull().unique(),
+		brand: text('brand').notNull(),
+		last4: text('last4').notNull(),
+		expMonth: integer('exp_month').notNull(),
+		expYear: integer('exp_year').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' }).default(
+			sql`(strftime('%s', 'now'))`,
+		),
+		updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
+			sql`(strftime('%s', 'now'))`,
+		),
+	},
+	(table) => [
+		index('idx_customer_payment_methods_customer').on(table.customerId),
+	],
+)
+
+export const customerPaymentMethodsRelations = relations(
+	customerPaymentMethods,
+	({ one }) => ({
+		customer: one(customers, {
+			fields: [customerPaymentMethods.customerId],
+			references: [customers.id],
+		}),
+	}),
+)
+
+// ==========================================
+// 9. INFERRED TYPES
 // ==========================================
 export type Customer = typeof customers.$inferSelect
 export type NewCustomer = typeof customers.$inferInsert
@@ -345,3 +441,10 @@ export type NewMarketingCampaign = typeof marketingCampaigns.$inferInsert
 
 export type MarketingMessage = typeof marketingMessages.$inferSelect
 export type NewMarketingMessage = typeof marketingMessages.$inferInsert
+
+export type ShopOrder = typeof shopOrders.$inferSelect
+export type NewShopOrder = typeof shopOrders.$inferInsert
+
+export type CustomerPaymentMethod = typeof customerPaymentMethods.$inferSelect
+export type NewCustomerPaymentMethod =
+	typeof customerPaymentMethods.$inferInsert

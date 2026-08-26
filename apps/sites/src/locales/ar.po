@@ -13,6 +13,26 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Back to shop"
+msgstr "العودة إلى المتجر"
+
+#: src/pages/profile.astro.ts:3
+msgid "Browse the shop"
+msgstr "تصفح المتجر"
+
+#: src/pages/shop.astro.ts:3
+msgid "Buy now"
+msgstr "اشترِ الآن"
+
+#: src/pages/shop.astro.ts:3
+msgid "Card number"
+msgstr "رقم البطاقة"
+
+#: src/pages/profile.astro.ts:3
+msgid "Cards used on past shop purchases on this account."
+msgstr "البطاقات المستخدمة في مشتريات المتجر السابقة على هذا الحساب."
+
 #: src/pages/verify.astro.ts:3
 msgid "Check your phone"
 msgstr "تحقق من هاتفك"
@@ -21,6 +41,10 @@ msgstr "تحقق من هاتفك"
 msgid "Continue"
 msgstr "متابعة"
 
+#: src/pages/shop.astro.ts:3
+msgid "CVC"
+msgstr "CVC"
+
 #: src/pages/profile.astro.ts:3
 msgid "Email"
 msgstr "البريد الإلكتروني"
@@ -28,6 +52,14 @@ msgstr "البريد الإلكتروني"
 #: src/pages/login.astro.ts:3
 msgid "Enter your phone number. We'll send a verification code."
 msgstr "أدخل رقم هاتفك. سنرسل رمز تحقق."
+
+#: src/pages/profile.astro.ts:3
+msgid "Expires"
+msgstr "تنتهي"
+
+#: src/pages/shop.astro.ts:3
+msgid "Expiry"
+msgstr "تاريخ الانتهاء"
 
 #: src/pages/complete-name.astro.ts:3
 msgid "Full name"
@@ -60,9 +92,37 @@ msgstr "الاسم"
 msgid "Network error. Please try again."
 msgstr "خطأ في الشبكة. حاول مرة أخرى."
 
+#: src/pages/profile.astro.ts:3
+msgid "No orders yet."
+msgstr "لا توجد طلبات بعد."
+
+#: src/pages/profile.astro.ts:3
+msgid "No saved payment methods yet."
+msgstr "لا توجد بطاقات محفوظة بعد."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Open menu"
 msgstr "فتح القائمة"
+
+#: src/pages/shop/success.astro.ts:3
+msgid "Order confirmed"
+msgstr "تم تأكيد الطلب"
+
+#: src/pages/profile.astro.ts:3
+msgid "Order history"
+msgstr "سجل الطلبات"
+
+#: src/pages/shop.astro.ts:3
+msgid "Pay now"
+msgstr "ادفع الآن"
+
+#: src/pages/shop.astro.ts:3
+msgid "Payment method"
+msgstr "طريقة الدفع"
+
+#: src/pages/profile.astro.ts:3
+msgid "Payment methods"
+msgstr "طرق الدفع"
 
 #: src/pages/login.astro.ts:3
 #: src/pages/profile.astro.ts:3
@@ -77,6 +137,10 @@ msgstr "لا يمكن تغيير رقم الهاتف حالياً."
 msgid "Primary"
 msgstr "الرئيسي"
 
+#: src/pages/shop.astro.ts:3
+msgid "Processing payment..."
+msgstr "جارٍ معالجة الدفع..."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Profile"
 msgstr "الملف الشخصي"
@@ -84,6 +148,10 @@ msgstr "الملف الشخصي"
 #: src/pages/profile.astro.ts:3
 msgid "Profile updated successfully!"
 msgstr "تم تحديث الملف الشخصي بنجاح."
+
+#: src/pages/profile.astro.ts:3
+msgid "Purchases from the shop while signed in."
+msgstr "المشتريات من المتجر أثناء تسجيل الدخول."
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -102,6 +170,10 @@ msgstr "إرسال الرمز"
 msgid "Sending..."
 msgstr "جارٍ الإرسال..."
 
+#: src/pages/shop.astro.ts:3
+msgid "Shop"
+msgstr "المتجر"
+
 #: src/components/SiteHeader.astro.ts:3
 #: src/pages/login.astro.ts:3
 msgid "Sign in"
@@ -113,9 +185,25 @@ msgstr "تسجيل الدخول"
 msgid "Something went wrong."
 msgstr "حدث خطأ ما."
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Thank you for your purchase!"
+msgstr "شكرًا لشرائك!"
+
+#: src/pages/shop.astro.ts:3
+msgid "This shop is not available right now."
+msgstr "هذا المتجر غير متاح حاليًا."
+
+#: src/pages/shop.astro.ts:3
+msgid "Unable to start checkout. Please try again."
+msgstr "تعذّر بدء الدفع. يرجى المحاولة مرة أخرى."
+
 #: src/pages/profile.astro.ts:3
 msgid "Update your basic details below."
 msgstr "حدّث بياناتك الأساسية أدناه."
+
+#: src/pages/shop.astro.ts:3
+msgid "Use a new card"
+msgstr "استخدام بطاقة جديدة"
 
 #: src/pages/verify.astro.ts:3
 msgid "Verification Code"
@@ -128,6 +216,10 @@ msgstr "تحقق"
 #: src/pages/verify.astro.ts:3
 msgid "Verifying..."
 msgstr "جارٍ التحقق..."
+
+#: src/pages/shop/success.astro.ts:3
+msgid "We could not confirm this order."
+msgstr "تعذّر تأكيد هذا الطلب."
 
 #: src/pages/complete-name.astro.ts:3
 msgid "We'll use this on your profile. You can change it later."

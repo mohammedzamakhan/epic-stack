@@ -15,6 +15,16 @@ const saving = i18n._(msg`Saving...`)
 const profileUpdated = i18n._(msg`Profile updated successfully!`)
 const somethingWentWrong = i18n._(msg`Something went wrong.`)
 const networkError = i18n._(msg`Network error. Please try again.`)
+const orderHistory = i18n._(msg`Order history`)
+const orderHistoryHint = i18n._(msg`Purchases from the shop while signed in.`)
+const noOrders = i18n._(msg`No orders yet.`)
+const browseShop = i18n._(msg`Browse the shop`)
+const paymentMethods = i18n._(msg`Payment methods`)
+const paymentMethodsHint = i18n._(
+	msg`Cards used on past shop purchases on this account.`,
+)
+const noPaymentMethods = i18n._(msg`No saved payment methods yet.`)
+const expires = i18n._(msg`Expires`)
 
 if (!organization) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
@@ -26,7 +36,13 @@ if (!organization) {
 	page={{ id: 'profile', title: yourProfile, slug: 'profile', isHomePage: false, sections: [] }}
 	title={`${yourProfile} - ${organization.name}`}
 >
-	<div id="profile-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4 py-12">
+	<div
+		id="profile-page-root"
+		class="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col gap-6 px-4 py-12"
+		data-no-orders={noOrders}
+		data-no-payment-methods={noPaymentMethods}
+		data-expires={expires}
+	>
 		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
 			<div class="mb-6 flex flex-col space-y-2 text-center">
 				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
@@ -103,91 +119,35 @@ if (!organization) {
 				</button>
 			</form>
 		</div>
+
+		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+			<div class="mb-4 space-y-1">
+				<h2 class="font-heading text-lg font-semibold text-foreground">{orderHistory}</h2>
+				<p class="text-sm text-muted-foreground">{orderHistoryHint}</p>
+			</div>
+			<ul id="order-history" class="divide-y rounded-lg border">
+				<li class="px-4 py-6 text-center text-sm text-muted-foreground">{noOrders}</li>
+			</ul>
+			<a
+				href="/shop"
+				class="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
+			>
+				{browseShop}
+			</a>
+		</div>
+
+		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+			<div class="mb-4 space-y-1">
+				<h2 class="font-heading text-lg font-semibold text-foreground">{paymentMethods}</h2>
+				<p class="text-sm text-muted-foreground">{paymentMethodsHint}</p>
+			</div>
+			<ul id="payment-methods" class="divide-y rounded-lg border">
+				<li class="px-4 py-6 text-center text-sm text-muted-foreground">{noPaymentMethods}</li>
+			</ul>
+		</div>
 	</div>
 
 	<script>
-		import { tenantFetch, setSessionTokens } from '~/lib/client-auth'
-		import { browserLocaleHref } from '~/lib/locale'
-
-		const form = document.getElementById('profile-form') as HTMLFormElement
-		const errorMessage = document.getElementById('error-message')!
-		const successMessage = document.getElementById('success-message')!
-		const submitButton = document.getElementById('submit-button') as HTMLButtonElement
-		const nameInput = document.getElementById('name') as HTMLInputElement
-		const emailInput = document.getElementById('email') as HTMLInputElement
-		const phoneInput = document.getElementById('phone') as HTMLInputElement
-		const saveLabel = form.dataset.save || 'Save Changes'
-		const savingLabel = form.dataset.saving || 'Saving...'
-		const errorLabel = form.dataset.error || 'Something went wrong.'
-		const networkLabel = form.dataset.network || 'Network error. Please try again.'
-
-		async function loadProfile() {
-			try {
-				const res = await tenantFetch('/auth/me')
-				if (res.status === 401) {
-					window.location.replace(browserLocaleHref('/login'))
-					return
-				}
-				if (res.ok) {
-					const data = await res.json()
-					if (data.customer) {
-						if (data.customer.name && nameInput) nameInput.value = data.customer.name
-						if (data.customer.email && emailInput) emailInput.value = data.customer.email
-						if (data.customer.phone && phoneInput) phoneInput.value = data.customer.phone
-					}
-				}
-			} catch (err) {
-				console.error('Failed to load profile:', err)
-			}
-		}
-
-		loadProfile()
-
-		form?.addEventListener('submit', async (e) => {
-			e.preventDefault()
-
-			const formData = new FormData(form)
-			const name = formData.get('name')?.toString() || ''
-			const email = formData.get('email')?.toString() || ''
-
-			errorMessage.classList.add('hidden')
-			successMessage.classList.add('hidden')
-
-			submitButton.disabled = true
-			submitButton.textContent = savingLabel
-
-			try {
-				const res = await tenantFetch('/auth/profile', {
-					method: 'POST',
-					body: JSON.stringify({ name, email }),
-				})
-				if (res.status === 401) {
-					window.location.replace(browserLocaleHref('/login'))
-					return
-				}
-				const data = await res.json()
-
-				if (res.ok) {
-					setSessionTokens({
-						accessToken:
-							typeof data.accessToken === 'string' ? data.accessToken : undefined,
-						refreshToken:
-							typeof data.refreshToken === 'string'
-								? data.refreshToken
-								: undefined,
-					})
-					successMessage.classList.remove('hidden')
-				} else {
-					errorMessage.textContent = data.error || errorLabel
-					errorMessage.classList.remove('hidden')
-				}
-			} catch {
-				errorMessage.textContent = networkLabel
-				errorMessage.classList.remove('hidden')
-			} finally {
-				submitButton.disabled = false
-				submitButton.textContent = saveLabel
-			}
-		})
+		import '../scripts/profile-page.ts'
 	</script>
 </SitePage>

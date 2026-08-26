@@ -164,6 +164,10 @@ export default function JourneyRunsRoute() {
 	}
 
 	const journeyStatus = journey.status as JourneyStatus
+	const triggerLabel = journey.triggerType.replace('_', ' ')
+	const runCount = runs.length
+	const selectedRunId = selectedRun?.id ?? ''
+	const timelineCount = timeline.length
 
 	return (
 		<div className="space-y-6">
@@ -207,7 +211,7 @@ export default function JourneyRunsRoute() {
 					</div>
 					<p className="text-muted-foreground pl-10 text-xs">
 						{_(
-							msg`Audit trail and step execution history triggered by "${journey.triggerType.replace('_', ' ')}".`,
+							msg`Audit trail and step execution history triggered by "${triggerLabel}".`,
 						)}
 					</p>
 				</div>
@@ -237,7 +241,7 @@ export default function JourneyRunsRoute() {
 			<Card>
 				<CardHeader className="pb-3">
 					<CardTitle className="text-base">
-						{_(msg`Execution History (${runs.length})`)}
+						{_(msg`Execution History (${runCount})`)}
 					</CardTitle>
 					<CardDescription>
 						{_(
@@ -363,7 +367,7 @@ export default function JourneyRunsRoute() {
 							)}
 						</DialogTitle>
 						<DialogDescription className="font-mono text-xs">
-							{_(msg`Run ID: ${selectedRun?.id ?? ''}`)}
+							{_(msg`Run ID: ${selectedRunId}`)}
 						</DialogDescription>
 					</DialogHeader>
 
@@ -388,58 +392,61 @@ export default function JourneyRunsRoute() {
 						) : (
 							<div className="space-y-3">
 								<h4 className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
-									{_(msg`Step Executions (${timeline.length})`)}
+									{_(msg`Step Executions (${timelineCount})`)}
 								</h4>
 								<div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
-									{timeline.map((step, idx) => (
-										<div
-											key={step.id || idx}
-											className="bg-card flex items-start justify-between rounded-lg border p-3 shadow-2xs"
-										>
-											<div className="space-y-1">
-												<div className="flex items-center gap-2">
-													<span className="text-foreground font-mono text-xs font-semibold">
-														{step.nodeId}
-													</span>
-													<Badge
-														variant="outline"
-														className="text-[9px] font-semibold tracking-wider uppercase"
-													>
-														{step.nodeType}
-													</Badge>
-												</div>
-												<p className="text-muted-foreground font-mono text-[11px]">
-													{_(
-														msg`Attempt: ${step.attempt} • Executed: ${
-															step.executedAt
-																? new Date(step.executedAt).toLocaleTimeString()
-																: _(msg`Pending`)
-														}`,
-													)}
-												</p>
-												{step.errorMessage && (
-													<p className="text-destructive text-xs">
-														{step.errorMessage}
-													</p>
-												)}
-											</div>
+									{timeline.map((step, idx) => {
+										const attempt = step.attempt
+										const executedAtLabel = step.executedAt
+											? new Date(step.executedAt).toLocaleTimeString()
+											: _(msg`Pending`)
 
-											<Badge
-												variant="outline"
-												className={cn(
-													'shrink-0 text-[10px] capitalize',
-													step.status === 'completed' ||
-														step.status === 'delivered'
-														? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600'
-														: step.status === 'failed'
-															? 'bg-destructive/10 text-destructive border-destructive/30'
-															: 'bg-muted text-muted-foreground',
-												)}
+										return (
+											<div
+												key={step.id || idx}
+												className="bg-card flex items-start justify-between rounded-lg border p-3 shadow-2xs"
 											>
-												{step.status}
-											</Badge>
-										</div>
-									))}
+												<div className="space-y-1">
+													<div className="flex items-center gap-2">
+														<span className="text-foreground font-mono text-xs font-semibold">
+															{step.nodeId}
+														</span>
+														<Badge
+															variant="outline"
+															className="text-[9px] font-semibold tracking-wider uppercase"
+														>
+															{step.nodeType}
+														</Badge>
+													</div>
+													<p className="text-muted-foreground font-mono text-[11px]">
+														{_(
+															msg`Attempt: ${attempt} • Executed: ${executedAtLabel}`,
+														)}
+													</p>
+													{step.errorMessage && (
+														<p className="text-destructive text-xs">
+															{step.errorMessage}
+														</p>
+													)}
+												</div>
+
+												<Badge
+													variant="outline"
+													className={cn(
+														'shrink-0 text-[10px] capitalize',
+														step.status === 'completed' ||
+															step.status === 'delivered'
+															? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600'
+															: step.status === 'failed'
+																? 'bg-destructive/10 text-destructive border-destructive/30'
+																: 'bg-muted text-muted-foreground',
+													)}
+												>
+													{step.status}
+												</Badge>
+											</div>
+										)
+									})}
 								</div>
 							</div>
 						)}

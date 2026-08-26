@@ -184,3 +184,135 @@ export async function fetchPublishedSitePage(options: {
 		!options.preview,
 	)
 }
+
+export type PublicShopProduct = {
+	name: string
+	description: string | null
+	priceCents: number
+	currency: string
+	platformFeePercent: number
+	platformFeeCents: number
+	orgPayoutCents: number
+}
+
+export type PublicShopPayload = {
+	available: true
+	organization: { name: string; slug: string }
+	product: PublicShopProduct
+}
+
+export type PublicShopOrderStatus = {
+	status: string
+	productName: string
+	amountCents: number | null
+	currency: string
+}
+
+export async function fetchPublishedShopProduct(options: {
+	slug?: string | null
+	host?: string | null
+}): Promise<PublicShopPayload | null> {
+	const params = new URLSearchParams()
+	if (options.slug) params.set('slug', options.slug)
+	if (options.host) params.set('host', options.host)
+	if (!params.size) return null
+
+	return fetchAppJson<PublicShopPayload>(
+		`${getAppUrl()}/resources/sites/shop?${params.toString()}`,
+	)
+}
+
+export async function fetchShopOrderStatus(options: {
+	slug?: string | null
+	host?: string | null
+	sessionId?: string | null
+	paymentIntentId?: string | null
+}): Promise<PublicShopOrderStatus | null> {
+	const params = new URLSearchParams()
+	if (options.sessionId) params.set('session_id', options.sessionId)
+	if (options.paymentIntentId) {
+		params.set('payment_intent', options.paymentIntentId)
+	}
+	if (options.slug) params.set('slug', options.slug)
+	if (options.host) params.set('host', options.host)
+	if (!params.has('session_id') && !params.has('payment_intent')) return null
+
+	return fetchAppJson<PublicShopOrderStatus>(
+		`${getAppUrl()}/resources/sites/shop/order?${params.toString()}`,
+		false,
+	)
+}
+
+/**
+ * Creates a Stripe Checkout session via the App. Pass the browser's
+ * `Authorization: Bearer <tenant access token>` when the customer is signed in;
+ * omit it for guest checkout (customer identity is never taken from the body).
+ */
+export async function createShopCheckoutSession(
+	body: { slug?: string; host?: string },
+	authorization?: string | null,
+) {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json',
+		Accept: 'application/json',
+	}
+	if (authorization) headers.Authorization = authorization
+
+	const response = await fetch(`${getAppUrl()}/resources/sites/shop/checkout`, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify(body),
+		signal: AbortSignal.timeout(10_000),
+	})
+
+	if (!response.ok) {
+		return null
+	}
+
+	return response.json() as Promise<{
+		checkoutUrl?: string
+		sessionId?: string
+		error?: string
+	}>
+}
+
+/**
+ * Creates a Stripe PaymentIntent via the App. Same auth model as checkout —
+ * signed-in customers forward `Authorization`; guests omit it.
+ */
+export async function createShopPaymentIntent(
+	body: { slug?: string; host?: string },
+	authorization?: string | null,
+) {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json',
+		Accept: 'application/json',
+	}
+	if (authorization) headers.Authorization = authorization
+
+	const response = await fetch(
+		`${getAppUrl()}/resources/sites/shop/payment-intent`,
+		{
+			method: 'POST',
+			headers,
+			body: JSON.stringify(body),
+			signal: AbortSignal.timeout(10_000),
+		},
+	)
+
+	if (!response.ok) {
+		try {
+			const data = (await response.json()) as { error?: string }
+			return { error: data.error || 'Payment setup failed' }
+		} catch {
+			return { error: 'Payment setup failed' }
+		}
+	}
+
+	return response.json() as Promise<{
+		clientSecret?: string
+		paymentIntentId?: string
+		publishableKey?: string
+		error?: string
+	}>
+}

@@ -2122,6 +2122,17 @@ export const Organization = sqliteTable(
 		siteIconKey: text(),
 		siteHeaderConfig: text(),
 		siteFooterConfig: text(),
+		stripeConnectAccountId: text(),
+		stripeConnectChargesEnabled: integer({ mode: 'boolean' })
+			.default(false)
+			.notNull(),
+		stripeConnectPayoutsEnabled: integer({ mode: 'boolean' })
+			.default(false)
+			.notNull(),
+		shopProductName: text(),
+		shopProductDescription: text(),
+		shopProductPriceCents: integer(),
+		shopEnabled: integer({ mode: 'boolean' }).default(false).notNull(),
 	},
 	(table) => [
 		uniqueIndex('Organization_customDomain_key').on(table.customDomain),

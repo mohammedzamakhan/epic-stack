@@ -45,9 +45,7 @@ export function useReportRunner(options: {
 					let response: Response
 					if (subject?.source === 'tenant-api') {
 						if (!options.tenantTokenUrl || !options.tenantApiUrl) {
-							throw new Error(
-								'Customer analytics requires a regional tenant API URL.',
-							)
+							throw new Error('Regional analytics requires a tenant API URL.')
 						}
 						const tokenResponse = await fetch(options.tenantTokenUrl, {
 							signal: controller.signal,
@@ -57,7 +55,7 @@ export function useReportRunner(options: {
 							throw new Error(
 								typeof tokenPayload.message === 'string'
 									? tokenPayload.message
-									: 'Could not authorize customer analytics.',
+									: 'Could not authorize regional analytics.',
 							)
 						}
 						response = await fetch(`${options.tenantApiUrl}/analytics/query`, {

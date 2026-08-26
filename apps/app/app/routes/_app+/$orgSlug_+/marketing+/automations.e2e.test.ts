@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as tenantApiServer from '#app/utils/tenant-api.server.ts'
-import { activateTestLingui } from './test-lingui.ts'
 import {
 	loader as runsLoader,
 	action as runsAction,
@@ -14,6 +13,7 @@ import {
 	action as indexAction,
 } from './automations._index.tsx'
 import { action as newAction } from './automations.new.tsx'
+import { activateTestLingui } from './test-lingui.ts'
 
 describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 	let mockFetchTenant: ReturnType<typeof vi.fn>

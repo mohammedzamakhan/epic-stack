@@ -5,6 +5,11 @@ import {
 	handleSubscriptionChange,
 	handleTrialEnd,
 } from '#app/utils/payments.server.ts'
+import {
+	handleConnectAccountUpdated,
+	recordShopOrderFromCheckoutSession,
+	recordShopOrderFromPaymentIntent,
+} from '#app/utils/shop.server.ts'
 
 /**
  * Helper function to process subscription events and extract the relevant data
@@ -92,6 +97,28 @@ export async function action({ request }: ActionFunctionArgs) {
 			case 'customer.subscription.resumed': {
 				const subscription = event.data.object as Stripe.Subscription
 				await processSubscriptionEvent(subscription)
+				break
+			}
+
+			case 'checkout.session.completed': {
+				const session = event.data.object as Stripe.Checkout.Session
+				if (session.metadata?.type === 'shop_order') {
+					await recordShopOrderFromCheckoutSession(session)
+				}
+				break
+			}
+
+			case 'payment_intent.succeeded': {
+				const paymentIntent = event.data.object as Stripe.PaymentIntent
+				if (paymentIntent.metadata?.type === 'shop_order') {
+					await recordShopOrderFromPaymentIntent(paymentIntent)
+				}
+				break
+			}
+
+			case 'account.updated': {
+				const account = event.data.object as Stripe.Account
+				await handleConnectAccountUpdated(account)
 				break
 			}
 

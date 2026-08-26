@@ -12,6 +12,24 @@ export function sitesConnectSrc(origins: string[]) {
 		.join(' ')
 }
 
+const STRIPE_SCRIPT = 'https://js.stripe.com'
+const STRIPE_API = 'https://api.stripe.com'
+const STRIPE_HOOKS = 'https://hooks.stripe.com'
+
+export function sitesStripeScriptSrc(enabled: boolean) {
+	return enabled ? ` ${STRIPE_SCRIPT}` : ''
+}
+
+export function sitesStripeConnectSrc(enabled: boolean) {
+	return enabled ? ` ${STRIPE_API}` : ''
+}
+
+export function sitesStripeFrameSrc(enabled: boolean) {
+	return enabled
+		? ` frame-src 'self' https://js.stripe.com ${STRIPE_HOOKS} https://checkout.stripe.com`
+		: ''
+}
+
 /** Prefer Vite `MODE` — a schema `DEV` flag used to shadow `import.meta.env.DEV`. */
 export function isSitesProduction() {
 	return import.meta.env.MODE === 'production'
@@ -29,11 +47,22 @@ export function shouldCachePublishedHtml(
 	return true
 }
 
-const APP_ROUTE_SLUGS = new Set(['login', 'verify', 'complete-name', 'profile'])
+const APP_ROUTE_SLUGS = new Set([
+	'login',
+	'verify',
+	'complete-name',
+	'profile',
+	'shop',
+])
+
+export function isSitesShopRoute(pathname: string) {
+	return pathname.replace(/^\/+|\/+$/g, '').startsWith('shop')
+}
 
 export function isSitesAppRoute(pathname: string) {
 	const slug = pathname.replace(/^\/+|\/+$/g, '')
-	return APP_ROUTE_SLUGS.has(slug)
+	if (APP_ROUTE_SLUGS.has(slug)) return true
+	return isSitesShopRoute(pathname)
 }
 
 export function publishedHtmlCacheUrl(requestUrl: URL, host: string | null) {

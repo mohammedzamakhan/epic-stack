@@ -13,6 +13,26 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Back to shop"
+msgstr "Back to shop"
+
+#: src/pages/profile.astro.ts:3
+msgid "Browse the shop"
+msgstr "Browse the shop"
+
+#: src/pages/shop.astro.ts:3
+msgid "Buy now"
+msgstr "Buy now"
+
+#: src/pages/shop.astro.ts:3
+msgid "Card number"
+msgstr "Card number"
+
+#: src/pages/profile.astro.ts:3
+msgid "Cards used on past shop purchases on this account."
+msgstr "Cards used on past shop purchases on this account."
+
 #: src/pages/verify.astro.ts:3
 msgid "Check your phone"
 msgstr "Check your phone"
@@ -21,6 +41,10 @@ msgstr "Check your phone"
 msgid "Continue"
 msgstr "Continue"
 
+#: src/pages/shop.astro.ts:3
+msgid "CVC"
+msgstr "CVC"
+
 #: src/pages/profile.astro.ts:3
 msgid "Email"
 msgstr "Email"
@@ -28,6 +52,14 @@ msgstr "Email"
 #: src/pages/login.astro.ts:3
 msgid "Enter your phone number. We'll send a verification code."
 msgstr "Enter your phone number. We'll send a verification code."
+
+#: src/pages/profile.astro.ts:3
+msgid "Expires"
+msgstr "Expires"
+
+#: src/pages/shop.astro.ts:3
+msgid "Expiry"
+msgstr "Expiry"
 
 #: src/pages/complete-name.astro.ts:3
 msgid "Full name"
@@ -60,9 +92,37 @@ msgstr "Name"
 msgid "Network error. Please try again."
 msgstr "Network error. Please try again."
 
+#: src/pages/profile.astro.ts:3
+msgid "No orders yet."
+msgstr "No orders yet."
+
+#: src/pages/profile.astro.ts:3
+msgid "No saved payment methods yet."
+msgstr "No saved payment methods yet."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Open menu"
 msgstr "Open menu"
+
+#: src/pages/shop/success.astro.ts:3
+msgid "Order confirmed"
+msgstr "Order confirmed"
+
+#: src/pages/profile.astro.ts:3
+msgid "Order history"
+msgstr "Order history"
+
+#: src/pages/shop.astro.ts:3
+msgid "Pay now"
+msgstr "Pay now"
+
+#: src/pages/shop.astro.ts:3
+msgid "Payment method"
+msgstr "Payment method"
+
+#: src/pages/profile.astro.ts:3
+msgid "Payment methods"
+msgstr "Payment methods"
 
 #: src/pages/login.astro.ts:3
 #: src/pages/profile.astro.ts:3
@@ -77,6 +137,10 @@ msgstr "Phone number cannot be changed at this time."
 msgid "Primary"
 msgstr "Primary"
 
+#: src/pages/shop.astro.ts:3
+msgid "Processing payment..."
+msgstr "Processing payment..."
+
 #: src/components/SiteHeader.astro.ts:3
 msgid "Profile"
 msgstr "Profile"
@@ -84,6 +148,10 @@ msgstr "Profile"
 #: src/pages/profile.astro.ts:3
 msgid "Profile updated successfully!"
 msgstr "Profile updated successfully!"
+
+#: src/pages/profile.astro.ts:3
+msgid "Purchases from the shop while signed in."
+msgstr "Purchases from the shop while signed in."
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -102,6 +170,10 @@ msgstr "Send Code"
 msgid "Sending..."
 msgstr "Sending..."
 
+#: src/pages/shop.astro.ts:3
+msgid "Shop"
+msgstr "Shop"
+
 #: src/components/SiteHeader.astro.ts:3
 #: src/pages/login.astro.ts:3
 msgid "Sign in"
@@ -113,9 +185,25 @@ msgstr "Sign in"
 msgid "Something went wrong."
 msgstr "Something went wrong."
 
+#: src/pages/shop/success.astro.ts:3
+msgid "Thank you for your purchase!"
+msgstr "Thank you for your purchase!"
+
+#: src/pages/shop.astro.ts:3
+msgid "This shop is not available right now."
+msgstr "This shop is not available right now."
+
+#: src/pages/shop.astro.ts:3
+msgid "Unable to start checkout. Please try again."
+msgstr "Unable to start checkout. Please try again."
+
 #: src/pages/profile.astro.ts:3
 msgid "Update your basic details below."
 msgstr "Update your basic details below."
+
+#: src/pages/shop.astro.ts:3
+msgid "Use a new card"
+msgstr "Use a new card"
 
 #: src/pages/verify.astro.ts:3
 msgid "Verification Code"
@@ -128,6 +216,10 @@ msgstr "Verify"
 #: src/pages/verify.astro.ts:3
 msgid "Verifying..."
 msgstr "Verifying..."
+
+#: src/pages/shop/success.astro.ts:3
+msgid "We could not confirm this order."
+msgstr "We could not confirm this order."
 
 #: src/pages/complete-name.astro.ts:3
 msgid "We'll use this on your profile. You can change it later."

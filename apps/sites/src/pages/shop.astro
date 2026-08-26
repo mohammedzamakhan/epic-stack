@@ -1,0 +1,186 @@
+---
+import { msg } from '@lingui/core/macro'
+import SitePage from '~/components/SitePage.astro'
+import { fetchPublishedShopProduct } from '~/lib/org'
+import { resolveShopPaymentMode } from '~/lib/shop'
+
+const organization = Astro.locals.organization
+const i18n = Astro.locals.i18n
+const orgSlug = Astro.locals.orgSlug
+const customHost = Astro.locals.customHost
+const paymentMode = resolveShopPaymentMode()
+
+const shopTitle = i18n._(msg`Shop`)
+const buyNow = i18n._(msg`Buy now`)
+const payNow = i18n._(msg`Pay now`)
+const cardNumber = i18n._(msg`Card number`)
+const expiry = i18n._(msg`Expiry`)
+const cvc = i18n._(msg`CVC`)
+const processing = i18n._(msg`Processing payment...`)
+const unavailable = i18n._(msg`This shop is not available right now.`)
+const checkoutError = i18n._(msg`Unable to start checkout. Please try again.`)
+const paymentMethodLabel = i18n._(msg`Payment method`)
+const useNewCard = i18n._(msg`Use a new card`)
+
+if (!organization) {
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
+}
+
+const shop = await fetchPublishedShopProduct({
+	slug: orgSlug,
+	host: customHost,
+})
+
+function formatMoney(cents: number, currency = 'usd') {
+	return new Intl.NumberFormat(Astro.locals.requestedLocale || 'en', {
+		style: 'currency',
+		currency,
+	}).format(cents / 100)
+}
+
+const cardFieldClass =
+	'shop-card-field flex min-h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background'
+---
+
+<SitePage
+	organization={organization}
+	page={{ id: 'shop', title: shopTitle, slug: 'shop', isHomePage: false, sections: [] }}
+	title={`${shopTitle} - ${organization.name}`}
+>
+	<div
+		id="shop-checkout-root"
+		class="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col justify-center px-4 py-12"
+		data-payment-mode={paymentMode}
+		data-org-slug={orgSlug || undefined}
+		data-custom-host={customHost || undefined}
+		data-buy-now={buyNow}
+		data-pay-now={payNow}
+		data-processing={processing}
+		data-checkout-error={checkoutError}
+		data-success-path="/shop/success"
+		data-payment-method-label={paymentMethodLabel}
+		data-use-new-card={useNewCard}
+	>
+		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+			{shop?.product ? (
+				<div class="space-y-6">
+					<div class="space-y-2 text-center">
+						<p class="text-sm text-muted-foreground">{shop.organization.name}</p>
+						<h1 class="font-heading text-3xl font-semibold tracking-tight text-foreground">
+							{shop.product.name}
+						</h1>
+						{shop.product.description ? (
+							<p class="text-sm text-muted-foreground">{shop.product.description}</p>
+						) : null}
+					</div>
+					<div class="rounded-lg border border-border bg-muted/30 p-4 text-center">
+						<p class="text-3xl font-semibold text-foreground">
+							{formatMoney(shop.product.priceCents, shop.product.currency)}
+						</p>
+					</div>
+
+					{paymentMode === 'inline' ? (
+						<div class="space-y-4">
+							<div id="shop-saved-payment-methods" class="hidden space-y-2">
+								<p class="text-sm font-medium text-foreground">{paymentMethodLabel}</p>
+								<div id="shop-payment-method-options" class="space-y-2"></div>
+							</div>
+							<div id="shop-new-card-fields" class="space-y-4">
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-foreground" for="shop-card-number">
+										{cardNumber}
+									</label>
+									<div class={cardFieldClass}>
+										<div id="shop-card-number" class="w-full"></div>
+									</div>
+								</div>
+								<div class="grid grid-cols-2 gap-4">
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-foreground" for="shop-card-expiry">
+											{expiry}
+										</label>
+										<div class={cardFieldClass}>
+											<div id="shop-card-expiry" class="w-full"></div>
+										</div>
+									</div>
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-foreground" for="shop-card-cvc">
+											{cvc}
+										</label>
+										<div class={cardFieldClass}>
+											<div id="shop-card-cvc" class="w-full"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<p id="shop-payment-error" class="text-destructive min-h-5 text-sm"></p>
+							<button
+								id="shop-pay-btn"
+								type="button"
+								class="inline-flex h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+							>
+								{payNow}
+							</button>
+						</div>
+					) : (
+						<button
+							id="shop-buy-btn"
+							type="button"
+							class="inline-flex h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+						>
+							{buyNow}
+						</button>
+					)}
+				</div>
+			) : (
+				<p class="text-center text-sm text-muted-foreground">{unavailable}</p>
+			)}
+		</div>
+	</div>
+
+	{shop?.product ? (
+		<script>
+			import '../scripts/shop-checkout.ts'
+		</script>
+	) : null}
+</SitePage>
+
+<style>
+	/* Stripe iframes break :focus-within; toggle .is-focused via Stripe element events. */
+	.shop-card-field.is-focused {
+		outline: none;
+		box-shadow:
+			0 0 0 2px var(--background),
+			0 0 0 4px var(--ring);
+	}
+
+	.shop-card-field iframe {
+		display: block;
+		width: 100% !important;
+		min-height: 1.25rem;
+	}
+
+	.shop-payment-option {
+		display: flex;
+		cursor: pointer;
+		align-items: center;
+		gap: 0.75rem;
+		border-radius: calc(var(--radius) - 2px);
+		border: 1px solid var(--input);
+		background: var(--background);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+	}
+
+	.shop-payment-option:has(input:checked) {
+		border-color: var(--ring);
+		box-shadow:
+			0 0 0 2px var(--background),
+			0 0 0 4px var(--ring);
+	}
+
+	.shop-payment-option input {
+		accent-color: var(--primary);
+	}
+</style>

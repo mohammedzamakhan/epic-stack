@@ -1,7 +1,13 @@
 import { Hono } from 'hono'
+import { eq } from 'drizzle-orm'
 import { ENV } from 'varlock/env'
 import { z } from 'zod'
-import { getTenantDb, customers, TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
+import {
+	getTenantDb,
+	customers,
+	shopOrders,
+	TENANT_ORG_ID_PATTERN,
+} from '@repo/tenant-db'
 import {
 	isReportRunError,
 	organizationCatalog,
@@ -20,6 +26,15 @@ const querySchema = z.object({
 	definition: reportDefinitionSchema,
 })
 
+const TENANT_ANALYTICS_SUBJECTS = new Set(['customers', 'shop_orders'])
+
+function formatMoney(cents: number, currency = 'usd') {
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: currency.toUpperCase(),
+	}).format(cents / 100)
+}
+
 function mapCustomer(row: {
 	createdAt: Date | null
 	phoneVerified: boolean | null
@@ -34,6 +49,31 @@ function mapCustomer(row: {
 		email: row.email ?? '',
 		name: row.name ?? '',
 		phone: row.phone ?? '',
+	}
+}
+
+function mapShopOrder(row: {
+	createdAt: Date | null
+	status: string
+	productName: string
+	amountCents: number
+	orgPayoutCents: number
+	currency: string
+	customerName: string | null
+	customerPhone: string | null
+	customerEmail: string | null
+}): ReportRecord {
+	const currency = row.currency || 'usd'
+	return {
+		createdAt: row.createdAt,
+		status: row.status,
+		productName: row.productName,
+		amount: formatMoney(row.amountCents, currency),
+		orgPayout: formatMoney(row.orgPayoutCents, currency),
+		currency,
+		customerName: row.customerName ?? '',
+		customerPhone: row.customerPhone ?? '',
+		customerEmail: row.customerEmail ?? '',
 	}
 }
 
@@ -77,11 +117,11 @@ analyticsRoutes.post('/query', async (c) => {
 	}
 
 	const { definition } = parsed.data
-	if (definition.subject !== 'customers') {
+	if (!TENANT_ANALYTICS_SUBJECTS.has(definition.subject)) {
 		return c.json(
 			{
 				error: 'unknown_subject',
-				message: 'This regional API only runs customer analytics.',
+				message: 'This regional API does not support that report subject.',
 			},
 			400,
 		)
@@ -113,6 +153,19 @@ analyticsRoutes.post('/query', async (c) => {
 		)
 	}
 
+	if (
+		definition.subject === 'shop_orders' &&
+		(organization.dataRegion || 'us') !== 'us'
+	) {
+		return c.json(
+			{
+				error: 'shop_not_available',
+				message: 'Shop order reports are only available for US organizations.',
+			},
+			403,
+		)
+	}
+
 	let db
 	try {
 		db = await getTenantDb(claims.orgId)
@@ -126,17 +179,36 @@ analyticsRoutes.post('/query', async (c) => {
 		)
 	}
 
-	const rows = await db
-		.select({
-			createdAt: customers.createdAt,
-			phoneVerified: customers.phoneVerified,
-			email: customers.email,
-			name: customers.name,
-			phone: customers.phone,
-		})
-		.from(customers)
+	let records: ReportRecord[]
+	if (definition.subject === 'customers') {
+		const rows = await db
+			.select({
+				createdAt: customers.createdAt,
+				phoneVerified: customers.phoneVerified,
+				email: customers.email,
+				name: customers.name,
+				phone: customers.phone,
+			})
+			.from(customers)
+		records = rows.map(mapCustomer)
+	} else {
+		const rows = await db
+			.select({
+				createdAt: shopOrders.createdAt,
+				status: shopOrders.status,
+				productName: shopOrders.productName,
+				amountCents: shopOrders.amountCents,
+				orgPayoutCents: shopOrders.orgPayoutCents,
+				currency: shopOrders.currency,
+				customerName: customers.name,
+				customerPhone: customers.phone,
+				customerEmail: customers.email,
+			})
+			.from(shopOrders)
+			.leftJoin(customers, eq(shopOrders.customerId, customers.id))
+		records = rows.map(mapShopOrder)
+	}
 
-	const records = rows.map(mapCustomer)
 	const result = runReport(organizationCatalog, definition, records)
 	if (isReportRunError(result)) {
 		const status = result.error === 'missing_group_by' ? 422 : 400

@@ -8,6 +8,7 @@ import { assertDataRegion, getNodeRegion } from './lib/region.ts'
 import { assertTenantApiSecrets } from './lib/secrets.ts'
 import { analyticsRoutes } from './routes/analytics.ts'
 import { authRoutes } from './routes/auth.ts'
+import { shopRoutes } from './routes/shop.ts'
 import { engagementSyncRoutes } from './routes/engagement-sync.ts'
 import {
 	journeyOperatorRoutes,
@@ -60,6 +61,7 @@ app.get('/health', (c) => {
 })
 
 app.route('/auth', authRoutes)
+app.route('/shop', shopRoutes)
 app.route('/analytics', analyticsRoutes)
 app.route('/api', provisionRoutes)
 app.route('/api/marketing', engagementSyncRoutes)

@@ -245,9 +245,12 @@ export default function MarketingOverview() {
 										<ItemContent>
 											<ItemTitle>{campaign.name}</ItemTitle>
 											<ItemDescription>
-												{_(
-													msg`${(campaign.targetAudienceCount ?? 0).toLocaleString()} recipients`,
-												)}
+												{(() => {
+													const recipientCount = (
+														campaign.targetAudienceCount ?? 0
+													).toLocaleString()
+													return _(msg`${recipientCount} recipients`)
+												})()}
 											</ItemDescription>
 										</ItemContent>
 										<ItemActions>
