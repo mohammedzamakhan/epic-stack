@@ -21,6 +21,9 @@ name = "epic-startup"
 [env.preview]
 name = "epic-startup-preview"
 
+[env.staging]
+name = "epic-startup-staging"
+
 # [[kv_namespaces]]
 # binding = "SESSION"
 # id = "your-kv-namespace-id"

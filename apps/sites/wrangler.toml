@@ -19,3 +19,6 @@ name = "epic-startup-sites"
 
 [env.preview]
 name = "epic-startup-sites-preview"
+
+[env.staging]
+name = "epic-startup-sites-staging"

@@ -208,25 +208,12 @@ jobs:
           cd apps/web
           npm run build
 
-      - name: 🚀 Deploy to Cloudflare Pages (Production)
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-web
-          directory: apps/web/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🚀 Deploy to Cloudflare Pages (Staging)
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-web-staging
-          directory: apps/web/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🚀 Deploy Web App to Cloudflare Workers
+        working-directory: apps/web
+        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-sites:
     name: 🌐 Deploy Sites
@@ -261,25 +248,12 @@ jobs:
             ${{ vars.TENANT_API_URL_KSA ||
             'https://tenant-ksa.example.com' }}
 
-      - name: 🚀 Deploy Sites to Cloudflare Pages (Production)
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-sites
-          directory: apps/sites/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🚀 Deploy Sites to Cloudflare Pages (Staging)
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: epic-startup-sites-staging
-          directory: apps/sites/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🚀 Deploy Sites to Cloudflare Workers
+        working-directory: apps/sites
+        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 
   # CMS is deployed to Cloudflare Workers (no container needed)
