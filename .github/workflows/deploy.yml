@@ -210,7 +210,9 @@ jobs:
 
       - name: 🚀 Deploy Web App to Cloudflare Workers
         working-directory: apps/web
-        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
+        run:
+          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
+          staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -245,16 +247,16 @@ jobs:
           TENANT_API_URL:
             ${{ vars.TENANT_API_URL || 'https://tenant-us.example.com' }}
           TENANT_API_URL_KSA:
-            ${{ vars.TENANT_API_URL_KSA ||
-            'https://tenant-ksa.example.com' }}
+            ${{ vars.TENANT_API_URL_KSA || 'https://tenant-ksa.example.com' }}
 
       - name: 🚀 Deploy Sites to Cloudflare Workers
         working-directory: apps/sites
-        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
+        run:
+          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
+          staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
 
   # CMS is deployed to Cloudflare Workers (no container needed)
 
@@ -308,7 +310,6 @@ jobs:
             ${{ steps.meta.outputs.image }}:${{ github.sha }}
             ${{ steps.meta.outputs.image }}:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
 
-
   deploy-app:
     name: 🚀 Deploy App (Cloudflare Workers)
     runs-on: ubuntu-24.04
@@ -335,7 +336,9 @@ jobs:
 
       - name: 🚀 Deploy App
         working-directory: apps/app
-        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
+        run:
+          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
+          staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -345,7 +348,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, affected]
     if:
-      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true' }}
+      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true'
+      }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -366,7 +370,9 @@ jobs:
 
       - name: 🚀 Deploy Admin
         working-directory: apps/admin
-        run: npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env staging' || '' }}
+        run:
+          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
+          staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
