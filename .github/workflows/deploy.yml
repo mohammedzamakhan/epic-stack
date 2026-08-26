@@ -86,7 +86,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql rolldown
+        run: npm rebuild sharp libsql rolldown @astrojs/compiler-binding
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -111,7 +111,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql rolldown
+        run: npm rebuild sharp libsql rolldown @astrojs/compiler-binding
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -139,7 +139,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql rolldown
+        run: npm rebuild sharp libsql rolldown @astrojs/compiler-binding
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -165,7 +165,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql rolldown
+        run: npm rebuild sharp libsql rolldown @astrojs/compiler-binding
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
@@ -209,7 +209,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp libsql rolldown
+        run: npm rebuild sharp libsql rolldown @astrojs/compiler-binding
 
       - name: 🏗 Build Web App
         run: |
