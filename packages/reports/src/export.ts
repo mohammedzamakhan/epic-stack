@@ -117,8 +117,8 @@ export function composeExportSvg(options: {
 	const titleBar = options.includeTitle ? TITLE_BAR_HEIGHT : 0
 	const chartHeight = Math.max(1, height - titleBar)
 	const inner = options.chartSvg
-		.replace(/<\?xml[^>]*>/u, '')
-		.replace(/<!DOCTYPE[^>]*>/u, '')
+		.replace(/^\s*<\?xml[^>]*>/u, '')
+		.replace(/^\s*<!DOCTYPE[^>]*>/u, '')
 		.trim()
 	const scaled = inner.replace(/<svg\b([^>]*)>/u, (_match, attrs: string) => {
 		const cleaned = String(attrs)
