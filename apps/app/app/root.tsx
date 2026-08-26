@@ -354,7 +354,7 @@ function Document({
 				<script
 					type="application/ld+json"
 					dangerouslySetInnerHTML={{
-						__html: JSON.stringify(organizationSchema),
+						__html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c'),
 					}}
 				/>
 				<Links nonce={nonce} />
@@ -370,7 +370,7 @@ function Document({
 				<script
 					nonce={nonce}
 					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
+						__html: `window.ENV = ${JSON.stringify(env).replace(/</g, '\\u003c')}`,
 					}}
 				/>
 				<ScrollRestoration nonce={nonce} />
