@@ -65,6 +65,7 @@ import {
 import { CacheConfirmationDialog } from '#app/components/admin-cache-confirmation-dialog.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { useToast } from '#app/components/toaster.tsx'
+import { isCloudflareWorkerRuntime } from '#app/utils/runtime.server.ts'
 import { type Route } from './+types/cache.ts'
 
 export const handle: SEOHandle = {
@@ -85,8 +86,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const currentInstanceInfo = await getInstanceInfo()
 	const instance =
 		searchParams.get('instance') ?? currentInstanceInfo.currentInstance
-	const instances = await getAllInstances()
-	await ensureInstance(instance)
+	const instances = isCloudflareWorkerRuntime()
+		? { [currentInstanceInfo.currentInstance]: 'cloudflare' }
+		: await getAllInstances()
+	if (!isCloudflareWorkerRuntime()) {
+		await ensureInstance(instance)
+	}
 
 	// Get toast message
 	const { toast } = await getToast(request)
@@ -136,7 +141,9 @@ export async function action({ request }: Route.ActionArgs) {
 		'actionType must be a string',
 	)
 	invariantResponse(typeof instance === 'string', 'instance must be a string')
-	await ensureInstance(instance)
+	if (!isCloudflareWorkerRuntime()) {
+		await ensureInstance(instance)
+	}
 
 	const url = new URL(request.url)
 

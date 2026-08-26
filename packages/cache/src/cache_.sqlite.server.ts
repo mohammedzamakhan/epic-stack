@@ -1,3 +1,4 @@
+import { isCloudflareWorkerRuntime } from '@repo/common'
 import { getInstanceInfo, getInternalInstanceDomain } from '@repo/common/litefs'
 
 export async function updatePrimaryCacheValue({
@@ -7,6 +8,10 @@ export async function updatePrimaryCacheValue({
 	key: string
 	cacheValue: any
 }) {
+	if (isCloudflareWorkerRuntime()) {
+		return new Response(null, { status: 204 })
+	}
+
 	const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
 	if (currentIsPrimary) {
 		throw new Error(

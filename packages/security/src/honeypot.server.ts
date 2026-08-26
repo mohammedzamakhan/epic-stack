@@ -1,9 +1,105 @@
-import { Honeypot, SpamError } from 'remix-utils/honeypot/server'
+import { SpamError } from 'remix-utils/honeypot/server'
 
-export const honeypot = new Honeypot({
-	validFromFieldName: process.env.NODE_ENV === 'test' ? null : undefined,
-	encryptionSeed: process.env.HONEYPOT_SECRET,
-})
+const DEFAULT_NAME_FIELD_NAME = 'name__confirm'
+const DEFAULT_VALID_FROM_FIELD_NAME = 'from__confirm'
+
+function webCrypto() {
+	const cryptoRef = globalThis.crypto
+	if (!cryptoRef?.getRandomValues || !cryptoRef.subtle) {
+		throw new Error('Web Crypto API is unavailable')
+	}
+	return cryptoRef
+}
+
+async function encrypt(value: string, seed: string) {
+	const cryptoRef = webCrypto()
+	const iv = cryptoRef.getRandomValues(new Uint8Array(12))
+	const seedBuffer = new TextEncoder().encode(seed)
+	const hash = await cryptoRef.subtle.digest('SHA-256', seedBuffer)
+	const key = await cryptoRef.subtle.importKey('raw', hash, 'AES-GCM', false, [
+		'encrypt',
+	])
+	const encrypted = await cryptoRef.subtle.encrypt(
+		{ name: 'AES-GCM', iv },
+		key,
+		new TextEncoder().encode(value),
+	)
+	const resultBuffer = new Uint8Array(iv.byteLength + encrypted.byteLength)
+	resultBuffer.set(iv)
+	resultBuffer.set(new Uint8Array(encrypted), iv.byteLength)
+	return btoa(String.fromCharCode(...resultBuffer))
+}
+
+async function decrypt(value: string, seed: string) {
+	const cryptoRef = webCrypto()
+	const binaryString = atob(value)
+	const encryptedBuffer = new Uint8Array(binaryString.length)
+	for (let i = 0; i < binaryString.length; i++) {
+		encryptedBuffer[i] = binaryString.charCodeAt(i)
+	}
+	const iv = encryptedBuffer.slice(0, 12)
+	const ciphertext = encryptedBuffer.slice(12)
+	const seedBuffer = new TextEncoder().encode(seed)
+	const hash = await cryptoRef.subtle.digest('SHA-256', seedBuffer)
+	const key = await cryptoRef.subtle.importKey(
+		'raw',
+		hash,
+		{ name: 'AES-GCM' },
+		false,
+		['decrypt'],
+	)
+	const decrypted = await cryptoRef.subtle.decrypt(
+		{ name: 'AES-GCM', iv },
+		key,
+		ciphertext,
+	)
+	return new TextDecoder().decode(decrypted)
+}
+
+class AppHoneypot {
+	#encryptionSeed = process.env.HONEYPOT_SECRET ?? 'honeypot-dev-seed'
+	#validFromFieldName =
+		process.env.NODE_ENV === 'test' ? null : DEFAULT_VALID_FROM_FIELD_NAME
+
+	async getInputProps({
+		validFromTimestamp = Date.now(),
+	}: { validFromTimestamp?: number } = {}) {
+		return {
+			nameFieldName: DEFAULT_NAME_FIELD_NAME,
+			validFromFieldName: this.#validFromFieldName,
+			encryptedValidFrom: this.#validFromFieldName
+				? await encrypt(String(validFromTimestamp), this.#encryptionSeed)
+				: '',
+		}
+	}
+
+	async check(formData: FormData) {
+		if (
+			!formData.has(DEFAULT_NAME_FIELD_NAME) &&
+			!(this.#validFromFieldName && formData.has(this.#validFromFieldName))
+		) {
+			return
+		}
+		if (!formData.has(DEFAULT_NAME_FIELD_NAME)) {
+			throw new SpamError('Missing honeypot input')
+		}
+		const honeypotValue = formData.get(DEFAULT_NAME_FIELD_NAME)
+		if (honeypotValue !== '') throw new SpamError('Honeypot input not empty')
+		if (!this.#validFromFieldName) return
+		const validFrom = formData.get(this.#validFromFieldName)
+		if (!validFrom) throw new SpamError('Missing honeypot valid from input')
+		const time = await decrypt(String(validFrom), this.#encryptionSeed)
+		const timestamp = Number(time)
+		if (!time || Number.isNaN(timestamp) || timestamp <= 0) {
+			throw new SpamError('Invalid honeypot valid from input')
+		}
+		if (timestamp > Date.now()) {
+			throw new SpamError('Honeypot valid from is in future')
+		}
+	}
+}
+
+export const honeypot = new AppHoneypot()
 
 export async function checkHoneypot(formData: FormData) {
 	try {

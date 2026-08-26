@@ -1,4 +1,5 @@
 export {
+	bindCacheKV,
 	cache,
 	lruCache,
 	cachified,
@@ -13,6 +14,7 @@ export {
 	invalidateUserCache,
 	invalidateUserSecurityCache,
 	invalidateUserOrganizationsCache,
+	type CacheKVNamespace,
 	type CacheKeyInfo,
 	type CacheStats,
 } from './src/cache.server.js'

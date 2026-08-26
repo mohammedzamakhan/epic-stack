@@ -50,6 +50,7 @@ import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
 } from '#app/utils/organization/organizations.server.ts'
+import { ensureLinguiRequestLocale } from '#app/modules/lingui/lingui.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import { type Route } from './+types/login.ts'
@@ -88,6 +89,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	await ensureLinguiRequestLocale(request)
 	await requireAnonymous(request)
 	const formData = await request.formData()
 	await checkHoneypot(formData)

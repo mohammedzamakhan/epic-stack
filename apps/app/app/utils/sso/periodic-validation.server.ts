@@ -1,3 +1,4 @@
+import { isCloudflareWorkerRuntime } from '@repo/common'
 import { logger } from '@repo/observability'
 import { ssoAuditLogger, SSOAuditEventType } from './audit-logging.server.ts'
 import { ssoConfigurationService } from './configuration.server.ts'
@@ -305,8 +306,8 @@ export class SSOPeriodicValidator {
 // Export singleton instance
 export const ssoPeriodicValidator = new SSOPeriodicValidator()
 
-// Auto-start in production environments
-if (process.env.NODE_ENV === 'production') {
+// Auto-start in production Node/Fly — Workers forbid timers in global scope
+if (process.env.NODE_ENV === 'production' && !isCloudflareWorkerRuntime()) {
 	// Start with a delay to allow application to fully initialize
 	setTimeout(() => {
 		ssoPeriodicValidator.start()
