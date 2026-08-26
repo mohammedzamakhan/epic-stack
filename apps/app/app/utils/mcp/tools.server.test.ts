@@ -53,6 +53,10 @@ async function addUserToOrganization(userId: string, organizationId: string) {
 // Generate unique slug per test run to avoid conflicts with parallel tests
 // REMOVED: const TEST_ORG_SLUG - now generated inside beforeEach
 
+function uniqueTestSuffix() {
+	return `${Date.now()}-${Math.random().toString(36).substring(7)}`
+}
+
 describe('MCP Tools Service', () => {
 	let mockContext: MCPContext
 	let testOrganization: any
@@ -95,6 +99,12 @@ describe('MCP Tools Service', () => {
 		// Clean up test data by specific IDs to avoid affecting parallel tests
 		try {
 			if (testOrganization?.id) {
+				const members = await db
+					.select({ userId: UserOrganization.userId })
+					.from(UserOrganization)
+					.where(eq(UserOrganization.organizationId, testOrganization.id))
+				const userIds = members.map((m) => m.userId)
+
 				await db
 					.delete(OrganizationNote)
 					.where(eq(OrganizationNote.organizationId, testOrganization.id))
@@ -114,11 +124,13 @@ describe('MCP Tools Service', () => {
 				await db
 					.delete(UserOrganization)
 					.where(eq(UserOrganization.organizationId, testOrganization.id))
+				if (userIds.length > 0) {
+					await db.delete(User).where(inArray(User.id, userIds))
+				}
 				await db
 					.delete(Organization)
 					.where(eq(Organization.id, testOrganization.id))
-			}
-			if (testUser?.id) {
+			} else if (testUser?.id) {
 				await db.delete(User).where(eq(User.id, testUser.id))
 			}
 			// Don't delete member role - it may be shared across tests
@@ -142,12 +154,13 @@ describe('MCP Tools Service', () => {
 		})
 
 		it('should find users by name', async () => {
+			const suffix = uniqueTestSuffix()
 			// Create additional users in the same organization
 			const [user2] = await db
 				.insert(User)
 				.values({
-					email: 'alice@example.com',
-					username: 'alice',
+					email: `alice-${suffix}@example.com`,
+					username: `alice-${suffix}`,
 					name: 'Alice Smith',
 				})
 				.returning()
@@ -164,11 +177,12 @@ describe('MCP Tools Service', () => {
 		})
 
 		it('should find users by username', async () => {
+			const suffix = uniqueTestSuffix()
 			const [user2] = await db
 				.insert(User)
 				.values({
-					email: 'bob@example.com',
-					username: 'bobsmith',
+					email: `bob-${suffix}@example.com`,
+					username: `bobsmith-${suffix}`,
 					name: 'Bob Smith',
 				})
 				.returning()
@@ -177,10 +191,13 @@ describe('MCP Tools Service', () => {
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
 			const tool = getTool('find_user')
-			const result = await tool?.handler({ query: 'bobsmith' }, mockContext)
+			const result = await tool?.handler(
+				{ query: `bobsmith-${suffix}` },
+				mockContext,
+			)
 
 			expect(result?.content).toBeDefined()
-			expect(result?.content![0]!.text).toContain('bobsmith')
+			expect(result?.content![0]!.text).toContain(`bobsmith-${suffix}`)
 		})
 
 		it('should return error for missing query', async () => {
@@ -307,12 +324,13 @@ describe('MCP Tools Service', () => {
 		})
 
 		it('should return no notes message when user has no notes', async () => {
+			const suffix = uniqueTestSuffix()
 			// Create another user with no notes
 			const [user2] = await db
 				.insert(User)
 				.values({
-					email: 'notnotes@example.com',
-					username: 'notnotes',
+					email: `notnotes-${suffix}@example.com`,
+					username: `notnotes-${suffix}`,
 					name: 'No Notes User',
 				})
 				.returning()
@@ -321,18 +339,22 @@ describe('MCP Tools Service', () => {
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
 			const tool = getTool('get_user_notes')
-			const result = await tool?.handler({ username: 'notnotes' }, mockContext)
+			const result = await tool?.handler(
+				{ username: `notnotes-${suffix}` },
+				mockContext,
+			)
 
 			expect(result?.content![0]!.text).toContain('No accessible notes found')
 		})
 
 		it('should only return public notes or notes shared with user', async () => {
+			const suffix = uniqueTestSuffix()
 			// Create another user
 			const [user2] = await db
 				.insert(User)
 				.values({
-					email: 'other@example.com',
-					username: 'other',
+					email: `other-${suffix}@example.com`,
+					username: `other-${suffix}`,
 					name: 'Other User',
 				})
 				.returning()
@@ -359,7 +381,10 @@ describe('MCP Tools Service', () => {
 			})
 
 			const tool = getTool('get_user_notes')
-			const result = await tool?.handler({ username: 'other' }, mockContext)
+			const result = await tool?.handler(
+				{ username: `other-${suffix}` },
+				mockContext,
+			)
 
 			// Should only see the public note
 			expect(result?.content![0]!.text).toContain('Public Note')

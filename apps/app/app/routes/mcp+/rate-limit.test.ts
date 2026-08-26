@@ -345,7 +345,7 @@ describe('Rate Limiting', () => {
 
 	describe('Rule namespacing (scope)', () => {
 		it('does not share buckets between different rules using the same key', async () => {
-			const ip = '10.0.0.99'
+			const ip = `10.0.0.${faker.number.int({ min: 1, max: 250 })}`
 			const ruleA = { scope: 'test-rule-a', maxRequests: 1, windowMs: 60_000 }
 			const ruleB = { scope: 'test-rule-b', maxRequests: 1, windowMs: 60_000 }
 
@@ -362,7 +362,7 @@ describe('Rate Limiting', () => {
 		})
 
 		it("does not let a short-window rule's cleanup delete a long-window rule's entries for the same key", async () => {
-			const ip = '10.0.0.100'
+			const ip = `10.0.1.${faker.number.int({ min: 1, max: 250 })}`
 			const shortRule = {
 				scope: 'test-short-window',
 				maxRequests: 100,

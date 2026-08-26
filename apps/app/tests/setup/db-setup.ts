@@ -23,6 +23,9 @@ beforeAll(async () => {
 	} else {
 		await fsExtra.remove(`${databasePath}-shm`).catch(() => {})
 	}
+
+	const { sqliteClient } = await import('@repo/database')
+	await sqliteClient.execute('PRAGMA busy_timeout = 30000')
 })
 
 afterAll(async () => {

@@ -228,7 +228,9 @@ export default defineConfig((config) => ({
 		environment: 'node',
 		envFile: '../../.env',
 		restoreMocks: true,
-		pool: 'threads',
+		// Forked workers get isolated process.env + SQLite files (threads shared one DB).
+		pool: 'forks',
+		maxWorkers: process.env.CI ? 2 : undefined,
 		coverage: {
 			include: ['app/**/*.{ts,tsx}'],
 			all: true,

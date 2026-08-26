@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import {
 	MCPAccessToken,
 	MCPAuthorization,
@@ -20,6 +21,9 @@ import {
 	RATE_LIMITS,
 	createRateLimitResponse,
 } from '#app/utils/rate-limit.server.ts'
+
+const testIp = () =>
+	`10.${faker.number.int({ min: 1, max: 250 })}.${faker.number.int({ min: 1, max: 250 })}.${faker.number.int({ min: 1, max: 250 })}`
 
 /**
  * Integration tests for rate limiting across MCP OAuth endpoints
@@ -96,9 +100,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			.from(MCPAuthorization)
 			.where(eq(MCPAuthorization.userId, testUserId))
 
-		await db
-			.delete(RateLimitEntry)
-			.where(eq(RateLimitEntry.keyValue, testUserId))
+		await db.delete(RateLimitEntry)
 		await db
 			.delete(MCPRefreshToken)
 			.where(inArray(MCPRefreshToken.authorizationId, authIds))
@@ -203,7 +205,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 
 	describe('Token Endpoint Rate Limiting (20 per hour per IP)', () => {
 		it('should allow token requests within the limit', async () => {
-			const ip = '192.168.1.100'
+			const ip = testIp()
 
 			for (let i = 0; i < 20; i++) {
 				const result = await checkRateLimit(
@@ -215,7 +217,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should reject token requests exceeding the limit', async () => {
-			const ip = '192.168.1.101'
+			const ip = testIp()
 
 			// Make 20 requests (at limit)
 			for (let i = 0; i < 20; i++) {
@@ -231,8 +233,8 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should isolate rate limits between different IPs', async () => {
-			const ip1 = '192.168.1.102'
-			const ip2 = '192.168.1.103'
+			const ip1 = testIp()
+			const ip2 = testIp()
 
 			// IP 1 makes 20 requests
 			for (let i = 0; i < 20; i++) {
@@ -484,7 +486,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should reset a full window from now for token limit when there is no prior entry', async () => {
-			const ip = '192.168.1.200'
+			const ip = testIp()
 
 			const result = await checkRateLimit(
 				{ type: 'ip', value: ip },
@@ -516,7 +518,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should not report an immediate reset while a 429 is still in effect', async () => {
-			const ip = '192.168.1.204'
+			const ip = testIp()
 
 			for (let i = 0; i < RATE_LIMITS.token.maxRequests; i++) {
 				await checkRateLimit({ type: 'ip', value: ip }, RATE_LIMITS.token)
@@ -546,7 +548,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should correctly calculate remaining requests for token endpoint', async () => {
-			const ip = '192.168.1.201'
+			const ip = testIp()
 
 			for (let i = 0; i < 5; i++) {
 				const result = await checkRateLimit(
@@ -592,7 +594,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 	describe('Cross-Endpoint Rate Limit Isolation', () => {
 		it('should not share rate limits between authorization and token endpoints', async () => {
 			const userId = testUserId
-			const ip = '192.168.1.202'
+			const ip = testIp()
 
 			// Make 10 authorization requests
 			for (let i = 0; i < 10; i++) {
@@ -612,7 +614,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should not share rate limits between token and tool invocation endpoints', async () => {
-			const ip = '192.168.1.203'
+			const ip = testIp()
 			const token = generateToken()
 
 			// Make 20 token requests
