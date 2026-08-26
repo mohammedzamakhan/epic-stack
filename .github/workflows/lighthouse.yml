@@ -21,6 +21,11 @@ env:
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+  # Force npm to resolve linux-x64 optional native bindings even when lockfile
+  # was generated on macOS. Fixes @rolldown/binding-linux-x64-gnu missing on CI.
+  npm_config_os: linux
+  npm_config_cpu: x64
+  npm_config_libc: glibc
 
 jobs:
   preview-deploy:
@@ -44,7 +49,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp
+        run: npm rebuild sharp rolldown
 
       - name: 🏗 Build Web App
         run: |

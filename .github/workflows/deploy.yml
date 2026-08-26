@@ -85,6 +85,9 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
+      - name: 🔧 Rebuild native dependencies
+        run: npm rebuild sharp libsql rolldown
+
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
 
@@ -108,7 +111,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp
+        run: npm rebuild sharp libsql rolldown
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -136,7 +139,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp
+        run: npm rebuild sharp libsql rolldown
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -162,7 +165,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp
+        run: npm rebuild sharp libsql rolldown
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
@@ -206,7 +209,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔧 Rebuild native dependencies
-        run: npm rebuild sharp rolldown
+        run: npm rebuild sharp libsql rolldown
 
       - name: 🏗 Build Web App
         run: |
