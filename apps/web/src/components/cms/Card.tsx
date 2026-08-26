@@ -1,6 +1,6 @@
 import React from 'react'
+import { type Post } from '../../lib/emdash'
 import { cn } from '../../lib/utils'
-import { type Post } from '@/lib/cms'
 
 export interface CardProps {
 	className?: string
@@ -13,8 +13,9 @@ export const Card: React.FC<CardProps> = ({
 	post,
 	showCategories = false,
 }) => {
-	const { slug, categories, meta, title } = post
-	const { description, image: metaImage } = meta || {}
+	const { slug, categories, title } = post
+	const seo = post.seo || (post as any).meta
+	const { description, image: metaImage } = seo || {}
 
 	const hasCategories =
 		categories && Array.isArray(categories) && categories.length > 0

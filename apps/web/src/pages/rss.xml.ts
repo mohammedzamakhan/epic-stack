@@ -1,22 +1,22 @@
 import rss from '@astrojs/rss'
 import { brand } from '@repo/config/brand'
 import { type APIContext } from 'astro'
-import { cmsClient } from '../lib/cms'
+import { getPosts } from '../lib/emdash'
 
 export async function GET(context: APIContext) {
-	const posts = await cmsClient.getPosts(1, 50)
+	const posts = await getPosts(1, 50)
 
 	return rss({
 		title: `${brand.name} Blog`,
 		description: brand.products.web.description,
 		site: context.site?.toString() || '',
-		items: posts.docs.map((post) => ({
+		items: posts.entries.map((post) => ({
 			title: post.title,
 			pubDate: post.publishedAt ? new Date(post.publishedAt) : new Date(),
-			description: post.meta?.description || '',
+			description: post.seo?.description || '',
 			link: `/blog/${post.slug}`,
 			categories:
-				post.categories?.map((cat: { title: string }) => cat.title) || [],
+				post.categories?.map((cat: { name: string }) => cat.name) || [],
 		})),
 		customData: `<language>en-us</language>
 <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>

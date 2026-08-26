@@ -4,34 +4,29 @@ import Header from '~/components/Header.astro'
 import Banner from '~/components/Banner.astro'
 import '../styles/tailwind.css'
 import { getThemeFromCookie } from '~/utils/theme'
-import { fetchBannerData } from '~/lib/fetchBanner'
+import { getBanner } from '~/lib/emdash'
+
+import { getDirection } from '@repo/i18n'
+
+const currentLocale = Astro.currentLocale ?? 'en'
+const dir = getDirection(currentLocale)
 
 // Get theme from cookie
 const cookieHeader = Astro.request.headers.get('cookie')
 const theme = getThemeFromCookie(cookieHeader)
 
 // Check if banner is enabled
-const banner = await fetchBannerData()
-const isBannerEnabled = banner?.isEnabled ?? false
-
-// CMS URL for resource hints
-const cmsUrl = (import.meta as any).env?.PUBLIC_CMS_URL || ''
-const cmsOrigin = cmsUrl ? new URL(cmsUrl).origin : null
+const banner = (await getBanner(currentLocale)) as any
+const isBannerEnabled: boolean = Boolean(banner?.isEnabled)
 ---
 
-<html class={theme} lang="en" dir="ltr">
+<html class={theme} lang={currentLocale} dir={dir}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-		<!-- Preconnect to CMS for images and API calls -->
-		{cmsOrigin && (
-			<>
-				<link rel="preconnect" href={cmsOrigin} crossorigin />
-				<link rel="dns-prefetch" href={cmsOrigin} />
-			</>
-		)}
+
 
 		<!-- Preconnect to external CDN for logo images -->
 		<link rel="preconnect" href="https://cdn.magicui.design" crossorigin />

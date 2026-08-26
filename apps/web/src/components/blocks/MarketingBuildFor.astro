@@ -1,0 +1,24 @@
+---
+import BuildFor from './BuildFor.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		items?: Array<{
+			title: string
+			description: string
+			tag?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle } = node
+---
+
+<BuildFor
+	title={title}
+	highlightText={subtitle}
+	blockType="buildFor"
+/>

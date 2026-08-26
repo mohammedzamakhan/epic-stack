@@ -1,0 +1,70 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro'
+import { getPage } from '../../lib/emdash'
+import PageContent from '../../components/PageContent.astro'
+import SEO from '../../components/SEO.astro'
+import Button from '../../components/ui/Button.astro'
+import GridDesign from '../../components/GridDesign.astro'
+
+const { slug } = Astro.params
+
+const currentLocale = Astro.currentLocale ?? 'en'
+let page = await getPage(slug, currentLocale)
+if (!page && currentLocale !== 'en') {
+  page = await getPage(slug, 'en')
+}
+if (!page) {
+  page = await getPage(slug)
+}
+
+if (!page) {
+  Astro.response.status = 404
+}
+const { title, content, hero, layout, seo } = (page || {}) as any
+---
+
+{page ? (
+  <MarketingLayout>
+    <Fragment slot="head">
+      <SEO
+        title={seo?.title || title}
+        description={seo?.description}
+        image={seo?.image}
+      />
+    </Fragment>
+
+    <PageContent title={title} content={content} hero={hero} layout={layout} meta={seo} />
+  </MarketingLayout>
+) : (
+  <MarketingLayout>
+    <Fragment slot="head">
+      <SEO
+        title="Page Not Found - Epic Startup"
+        description="The page you are looking for does not exist."
+      />
+    </Fragment>
+
+    <section class="relative min-h-[70vh] flex items-center justify-center py-24 text-center">
+      <GridDesign />
+      <div class="container relative z-10 mx-auto px-4 max-w-xl">
+        <div class="space-y-6">
+          <span class="text-primary font-mono text-sm font-semibold tracking-wider uppercase">// 404 ERROR</span>
+          <h1 class="text-4xl md:text-6xl font-title text-foreground font-bold tracking-tight">
+            Page not found
+          </h1>
+          <p class="text-muted-foreground text-lg leading-relaxed">
+            Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
+          </p>
+          <div class="flex flex-wrap justify-center gap-4 pt-4">
+            <Button href="/" variant="default" size="lg">
+              Return Home
+            </Button>
+            <Button href="/posts" variant="secondary" size="lg">
+              Visit Blog
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </MarketingLayout>
+)}

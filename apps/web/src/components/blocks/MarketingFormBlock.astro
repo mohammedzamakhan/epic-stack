@@ -1,0 +1,19 @@
+---
+import FormBlock from './FormBlock.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		formType?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, formType } = node
+---
+
+<FormBlock
+	form={{ id: formType || 'contact', title: title || 'Contact Us' }}
+	blockType="formBlock"
+/>

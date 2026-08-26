@@ -1,6 +1,6 @@
 ---
 import GridDesign from './GridDesign.astro'
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+import { PortableText } from 'emdash/ui'
 
 interface Props {
   title: string
@@ -13,7 +13,7 @@ interface Props {
     }
   }
   publishedAt?: string
-  categories?: Array<{ title: string } | string>
+  categories?: Array<{ title?: string; name?: string } | string>
   heroImage?: {
     url: string
     alt?: string
@@ -30,106 +30,18 @@ const formattedDate = publishedAt
     })
   : null
 
-// Enhanced content renderer for Lexical content
-const renderLexicalContent = (content: any) => {
-  if (!content || !content.root || !content.root.children) {
-    return ''
-  }
-
-  return content.root.children
-    .map((node: any) => {
-      if (node.type === 'paragraph' && node.children) {
-        const text = node.children
-          .map((child: any) => {
-            if (child.format && child.format > 0) {
-              let formattedText = child.text || ''
-              if (child.format & 1) formattedText = `<strong>${formattedText}</strong>`
-              if (child.format & 2) formattedText = `<em>${formattedText}</em>`
-              return formattedText
-            }
-            return child.text || ''
-          })
-          .join('')
-        return `<p class="text-lg leading-relaxed mb-6 text-foreground">${text}</p>`
-      }
-      if (node.type === 'heading' && node.children) {
-        const text = node.children
-          .map((child: any) => child.text || '')
-          .join('')
-        const tag = node.tag || 'h2'
-        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-        const headingClasses = {
-          h1: 'text-4xl md:text-5xl font-title font-semibold mb-8 text-foreground scroll-mt-24 relative',
-          h2: 'text-3xl md:text-4xl font-title font-semibold mb-6 text-foreground scroll-mt-24 relative',
-          h3: 'text-2xl md:text-3xl font-title font-medium mb-4 text-foreground scroll-mt-24 relative',
-          h4: 'text-xl md:text-2xl font-title font-medium mb-4 text-foreground scroll-mt-24 relative',
-          h5: 'text-lg md:text-xl font-title font-semibold mb-3 text-foreground scroll-mt-24 relative',
-          h6: 'text-base md:text-lg font-title font-semibold mb-3 text-foreground scroll-mt-24 relative',
-        }
-        const className = headingClasses[tag as keyof typeof headingClasses] || headingClasses.h2
-        return `<${tag} id="${id}" class="${className}"><strong>${text}</strong><a class="absolute top-0 left-0 w-full h-full" href="#${id}" aria-label="Link to ${text}"></a></${tag}>`
-      }
-      if (node.type === 'list' && node.children) {
-        const listItems = node.children
-          .map((item: any) => {
-            if (item.type === 'listitem' && item.children) {
-              const itemText = item.children
-                .map((child: any) => {
-                  if (child.type === 'paragraph' && child.children) {
-                    return child.children
-                      .map((textChild: any) => textChild.text || '')
-                      .join('')
-                  }
-                  return child.text || ''
-                })
-                .join('')
-              return `<li class="text-lg leading-relaxed mb-2">${itemText}</li>`
-            }
-            return ''
-          })
-          .join('')
-
-        if (node.listType === 'number') {
-          return `<ol class="list-decimal list-inside mb-6 space-y-2 pl-6">${listItems}</ol>`
-        } else {
-          return `<ul class="list-disc list-inside mb-6 space-y-2 pl-6">${listItems}</ul>`
-        }
-      }
-      if (node.type === 'quote' && node.children) {
-        const text = node.children
-          .map((child: any) => {
-            if (child.type === 'paragraph' && child.children) {
-              return child.children
-                .map((textChild: any) => textChild.text || '')
-                .join('')
-            }
-            return child.text || ''
-          })
-          .join('')
-        return `<blockquote class="border-l-4 border-primary bg-muted/50 p-6 my-8 text-lg italic text-muted-foreground">"${text}"</blockquote>`
-      }
-      return ''
-    })
-    .join('')
-}
-
-// Generate table of contents from content
 const generateTableOfContents = (content: any) => {
-  if (!content || !content.root || !content.root.children) {
-    return []
-  }
+  if (!Array.isArray(content)) return []
 
-  return content.root.children
-    .filter((node: any) => node.type === 'heading' && node.children)
-    .map((node: any, index: number) => {
-      const text = node.children
-        .map((child: any) => child.text || '')
-        .join('')
+  return content
+    .filter((block: any) => block._type === 'block' && /^h[1-6]$/.test(block.style))
+    .map((block: any) => {
+      const text = block.children?.map((child: any) => child.text || '').join('') || ''
       const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       return {
         id,
         text,
-        level: parseInt(node.tag?.replace('h', '') || '2')
+        level: parseInt(block.style.replace('h', '') || '2')
       }
     })
 }
@@ -144,9 +56,9 @@ const tableOfContents = generateTableOfContents(content)
     <div class="grid [grid-auto-rows:max-content] gap-4 md:gap-8 relative text-left ml-0 w-full max-w-none [grid-area:1/1/2/13]">
       <div class="relative w-full">
         {categories && categories.length > 0 && (
-          <a class="relative grid w-fit translate-x-[1px]" href="/blog">
+          <a class="relative grid w-fit translate-x-[1px]" href="/posts">
             <span class="px-2 pt-1 pb-1 font-mono text-base font-normal leading-none uppercase border select-none text-foreground bg-muted border-border relative z-30 grid w-fit">
-              {typeof categories[0] === 'object' ? categories[0].title : categories[0]}
+              {typeof categories[0] === 'object' ? (categories[0].title || categories[0].name) : categories[0]}
             </span>
           </a>
         )}
@@ -243,13 +155,13 @@ const tableOfContents = generateTableOfContents(content)
               height="575"
               decoding="async"
               class="w-full h-auto mb-8 relative z-10"
-              src={`${CMS_URL}${heroImage.url}`}
+              src={heroImage.url}
             />
           )}
           
           <div class="prose max-w-none prose-p:!text-foreground prose-a:underline prose-a:transition-colors prose-a:duration-100 prose-a:underline-offset-4 hover:prose-a:text-primary prose-blockquote:my-6 prose-headings:mb-4 prose-headings:mt-6 prose-h1:mt-8 prose-h2:mt-8 prose-inline-code:before:content-none prose-inline-code:after:content-none relative z-10">
             {content ? (
-              <div set:html={renderLexicalContent(content)} />
+              <PortableText value={content} />
             ) : (
               <p class="text-lg leading-relaxed mb-6 text-foreground">No content available.</p>
             )}
@@ -258,7 +170,7 @@ const tableOfContents = generateTableOfContents(content)
           <!-- Back to posts -->
           <div class="mt-12 pt-8 border-t border-border relative z-10">
             <a
-              href="/blog"
+              href="/posts"
               class="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors"
             >
               ← Back to all posts

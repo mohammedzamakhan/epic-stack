@@ -3,8 +3,6 @@ import GridDesign from './GridDesign.astro'
 import Badge from './ui/Badge.astro'
 import Button from './ui/Button.astro'
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
-
 interface Props {
 	richText?: any
 	media?: any
@@ -241,7 +239,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 					<section class="w-full mt-6 md:mt-8">
 						<img
 							class={imageClasses}
-							src={`${CMS_URL}${media.url}`}
+							src={media.url}
 							alt={media.alt || 'Hero image'}
 							width={media.width || 1000}
 							height={media.height || 1000}
@@ -251,7 +249,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 				) : (
 					<img
 						class={imageClasses}
-						src={`${CMS_URL}${media.url}`}
+						src={media.url}
 						alt={media.alt || 'Hero image'}
 						width={media.width || 1000}
 						height={media.height || 1000}
@@ -271,7 +269,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 							loop={videoLoop}
 							muted={videoMuted}
 							controls={videoControls}
-							poster={videoPoster ? `${CMS_URL}${videoPoster.url}` : undefined}
+							poster={videoPoster ? videoPoster.url : undefined}
 							playsinline
 						>
 							<source src={videoSrc} type="video/mp4" />
@@ -285,7 +283,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 						loop={videoLoop}
 						muted={videoMuted}
 						controls={videoControls}
-						poster={videoPoster ? `${CMS_URL}${videoPoster.url}` : undefined}
+						poster={videoPoster ? videoPoster.url : undefined}
 						playsinline
 					>
 						<source src={videoSrc} type="video/mp4" />

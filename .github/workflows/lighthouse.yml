@@ -50,9 +50,6 @@ jobs:
         run: |
           cd apps/web
           npm run build
-        env:
-          PUBLIC_CMS_URL:
-            ${{ vars.PUBLIC_CMS_URL || 'https://cms.epic-startup.me:2999' }}
 
       - name: 🚀 Deploy Preview to Cloudflare Pages
         id: deploy
@@ -60,7 +57,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_PREVIEW_ACCOUNT_ID }}
-          projectName: ${{ env.CLOUDFLARE_PROJECT_NAME }}
+          projectName: epic-startup
           directory: apps/web/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.head_ref }}

@@ -1,0 +1,25 @@
+---
+import Integration from './Integration.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		integrations?: Array<{
+			name: string
+			description?: string
+			icon?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle, integrations } = node
+---
+
+<Integration
+	title={title}
+	subtitle={subtitle}
+	integrations={integrations as any}
+	blockType="integration"
+/>

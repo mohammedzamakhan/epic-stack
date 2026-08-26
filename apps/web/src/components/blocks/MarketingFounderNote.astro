@@ -1,0 +1,25 @@
+---
+import FounderNote from './FounderNote.astro'
+
+interface Props {
+	node: {
+		title?: string
+		content?: string
+		founderName?: string
+		founderRole?: string
+		founderAvatar?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, content, founderName, founderRole, founderAvatar } = node
+---
+
+<FounderNote
+	heading={title || 'A Note from Our Founder'}
+	content={content}
+	authorName={founderName || 'Founder'}
+	authorTitle={founderRole || 'Founder & CEO'}
+	authorImage={founderAvatar ? { url: founderAvatar, alt: founderName } : undefined}
+	blockType="founderNote"
+/>

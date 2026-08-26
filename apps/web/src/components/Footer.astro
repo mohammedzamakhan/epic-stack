@@ -2,11 +2,11 @@
 import { brand, getCopyright } from '@repo/config/brand'
 import GridDesign from './GridDesign.astro'
 import Button from './ui/Button.astro'
-import { fetchFooterData } from '../lib/fetchFooter'
-import type { FooterData } from '../types/footer'
+import { getFooter } from '../lib/emdash'
 
-const footerData = await fetchFooterData()
-const columns = footerData?.columns || []
+const currentLocale = Astro.currentLocale ?? 'en'
+const footerData = (await getFooter(currentLocale)) as any
+const columns: any[] = Array.isArray(footerData?.columns) ? footerData.columns : []
 const copyrightText = footerData?.copyrightText || getCopyright()
 const tagline = footerData?.tagline || '// Built with ❤️ for developers'
 
@@ -216,13 +216,13 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 		>
 			{
 				hasDynamicColumns ? (
-					columns.map((column) => (
+					columns.map((column: any) => (
 						<div>
 							<h3 class="text-sm font-medium text-card-foreground mb-4">
 								{column.title}
 							</h3>
 							<ul class="space-y-3">
-								{column.links.map((linkRef) => {
+								{column.links?.map((linkRef: any) => {
 									const link = linkRef.link
 									const href = link.url || '#'
 									return (
@@ -263,7 +263,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 							<ul class="space-y-3">
 								<li>
 									<a
-										href="/blog"
+										href="/posts"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										Blog
@@ -271,7 +271,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 								</li>
 								<li>
 									<a
-										href="/pricing"
+										href="/pages/pricing"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										Pricing
@@ -295,7 +295,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 							<ul class="space-y-3">
 								<li>
 									<a
-										href="/features"
+										href="/pages/features"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										Features
@@ -327,7 +327,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 							<ul class="space-y-3">
 								<li>
 									<a
-										href="/about"
+										href="/pages/about"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										About

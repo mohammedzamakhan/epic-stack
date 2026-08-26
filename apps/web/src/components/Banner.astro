@@ -1,5 +1,5 @@
 ---
-import { fetchBannerData } from '~/lib/fetchBanner'
+import { getBanner } from '../lib/emdash'
 
 // Define valid banner types
 type BannerType = 'info' | 'warning' | 'error' | 'success'
@@ -7,13 +7,14 @@ type BannerType = 'info' | 'warning' | 'error' | 'success'
 // Define AriaRole type to match what Astro expects
 type AriaRole = 'alert' | 'status'
 
-const banner = await fetchBannerData()
-const isEnabled = banner?.isEnabled
+const currentLocale = Astro.currentLocale ?? 'en'
+const banner = (await getBanner(currentLocale)) as any
+const isEnabled = Boolean(banner?.isEnabled)
 
 const type: BannerType = (banner?.type as BannerType) || 'info'
-const content = banner?.content
-const addLink = banner?.addLink
-const link = banner?.link
+const content = banner?.content || ''
+const addLink = Boolean(banner?.addLink)
+const link = banner?.link as any
 
 const bgColors: Record<BannerType, string> = {
 	info: 'bg-primary',

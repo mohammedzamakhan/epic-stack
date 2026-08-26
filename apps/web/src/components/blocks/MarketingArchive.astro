@@ -1,0 +1,17 @@
+---
+import Archive from './Archive.astro'
+
+interface Props {
+	node: {
+		title?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title } = node
+---
+
+<Archive
+	populateBy={title}
+	blockType="archive"
+/>

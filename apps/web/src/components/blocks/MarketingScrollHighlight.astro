@@ -1,0 +1,19 @@
+---
+import ScrollHighlight from './ScrollHighlight.astro'
+
+interface Props {
+	node: {
+		heading?: string
+		text?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { heading, text } = node
+---
+
+<ScrollHighlight
+	title={heading}
+	text={text}
+	blockType="scrollHighlight"
+/>

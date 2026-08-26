@@ -1,0 +1,32 @@
+---
+import Team from './Team.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		members?: Array<{
+			name: string
+			role: string
+			avatar?: string
+			bio?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle, members } = node
+
+const mappedMembers = members?.map((m: any) => ({
+	name: m.name,
+	role: m.role,
+	photo: m.avatar ? { url: m.avatar, alt: m.name } : undefined,
+}))
+---
+
+<Team
+	title={title}
+	description={subtitle}
+	members={mappedMembers as any}
+	blockType="team"
+/>

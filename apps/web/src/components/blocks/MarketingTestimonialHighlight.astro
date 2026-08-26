@@ -1,0 +1,27 @@
+---
+import TestimonialHighlight from './TestimonialHighlight.astro'
+
+interface Props {
+	node: {
+		quote?: string
+		author?: string
+		role?: string
+		company?: string
+		avatar?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { quote, author, role, company, avatar } = node
+---
+
+<TestimonialHighlight
+	quote={quote}
+	author={{
+		name: author || 'Customer',
+		title: role || '',
+		company: company || '',
+		image: avatar || 'https://i.pravatar.cc/150?img=42',
+	}}
+	blockType="testimonialHighlight"
+/>

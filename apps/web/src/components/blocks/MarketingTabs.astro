@@ -1,0 +1,35 @@
+---
+import Tabs from './Tabs.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		tabs?: Array<{
+			label: string
+			title?: string
+			description?: string
+			imageUrl?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle, tabs } = node
+
+const mappedTabs = tabs?.map((t: any) => ({
+	label: t.label,
+	content: {
+		title: t.title || t.label,
+		description: t.description || '',
+		image: t.imageUrl ? { url: t.imageUrl, alt: t.title || t.label } : undefined,
+	},
+}))
+---
+
+<Tabs
+	title={title}
+	subtitle={subtitle}
+	tabs={mappedTabs as any}
+	blockType="tabs"
+/>

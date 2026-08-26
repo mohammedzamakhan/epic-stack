@@ -1,0 +1,31 @@
+---
+import Content from './Content.astro'
+
+interface Props {
+	node: {
+		body?: string
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { body } = node
+---
+
+<Content
+	columns={[
+		{
+			size: 'full',
+			richText: body ? {
+				root: {
+					children: [
+						{
+							type: 'paragraph',
+							children: [{ text: body }]
+						}
+					]
+				}
+			} : undefined
+		}
+	]}
+	blockType="content"
+/>

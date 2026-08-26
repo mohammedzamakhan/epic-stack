@@ -1,3 +1,5 @@
+> **Note: The CMS specific dev setup has been migrated to Emdash.**
+
 # Offline Development Guide
 
 The Epic Stack is designed to support offline development as much as possible,

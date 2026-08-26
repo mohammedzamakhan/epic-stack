@@ -10,11 +10,10 @@
     "build": "node packages/ui/generate-icons.js && turbo run build",
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 npm-run-all --parallel dev:proxy dev:all dev:tenant-api:ksa",
     "dev:http": "npm-run-all --parallel dev:proxy:http dev:all",
-    "dev:all": "turbo run dev --filter=app --filter=web --filter=cms --filter=admin --filter=studio --filter=docs --filter=sites --filter=tenant-api --filter=jobs-cron --concurrency=20",
+    "dev:all": "turbo run dev --filter=app --filter=web --filter=admin --filter=studio --filter=docs --filter=sites --filter=tenant-api --filter=jobs-cron --concurrency=20",
     "dev:proxy": "node dev-proxy.js",
     "dev:proxy:http": "PROXY_PROTOCOL=http node dev-proxy.js",
     "dev:web": "turbo run dev --filter=web",
-    "dev:cms": "turbo run dev --filter=cms",
     "dev:app": "turbo run dev --filter=app",
     "dev:sites": "turbo run dev --filter=sites",
     "dev:tenant-api": "turbo run dev --filter=tenant-api",
@@ -117,8 +116,6 @@
     "storybook": "^10.5.6",
     "protobufjs": "^8.7.1",
     "astro": "^7.1.6",
-    "@payloadcms/next": "^3.87.0",
-    "payload": "^3.87.0",
     "deepmerge-ts": "^8.0.1",
     "engine.io": "^6.6.9",
     "nanoid": "^3.3.18",
@@ -128,7 +125,6 @@
     "undici": "7.29.0",
     "@opentelemetry/propagator-jaeger": "$@opentelemetry/propagator-jaeger",
     "@opentelemetry/sdk-node": "$@opentelemetry/sdk-node",
-    "@payloadcms/graphql": "$@payloadcms/graphql",
     "turbo-stream": "$turbo-stream"
   }
 }

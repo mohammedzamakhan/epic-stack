@@ -1,3 +1,6 @@
+> **Note: The CMS has been migrated to Emdash (integrated into apps/web). The
+> documentation below is kept for historical reference.**
+
 # CMS Storage
 
 The CMS (`apps/cms`, Payload) has its own storage story, separate from the

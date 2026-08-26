@@ -55,7 +55,6 @@ const domain = getBrandDomain()
 const RESERVED_SUBDOMAINS = new Set([
 	'app',
 	'admin',
-	'cms',
 	'docs',
 	'studio',
 	'api',
@@ -79,7 +78,6 @@ const targets = {
 	[`studio.${domain}:${port}`]: 'http://localhost:3003',
 	[`docs.${domain}:${port}`]: 'http://localhost:3004',
 	[`admin.${domain}:${port}`]: 'http://localhost:3005',
-	[`cms.${domain}:${port}`]: 'http://localhost:3006',
 	[`api.${domain}:${port}`]: 'http://localhost:3007',
 	[`api-ksa.${domain}:${port}`]: 'http://localhost:3009',
 }

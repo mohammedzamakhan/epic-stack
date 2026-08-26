@@ -1,0 +1,31 @@
+---
+import StickyCards from './StickyCards.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		cards?: Array<{
+			title: string
+			description: string
+			tag?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle, cards } = node
+
+const mappedCards = cards?.map((c: any) => ({
+	title: c.title,
+	description: c.description,
+	tag: c.tag,
+}))
+---
+
+<StickyCards
+	title={title}
+	subtitle={subtitle}
+	cards={mappedCards as any}
+	blockType="stickyCards"
+/>

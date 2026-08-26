@@ -1,0 +1,25 @@
+---
+import StatsGrid from './StatsGrid.astro'
+
+interface Props {
+	node: {
+		title?: string
+		subtitle?: string
+		stats?: Array<{
+			value: string
+			label: string
+			description?: string
+		}>
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, subtitle, stats } = node
+---
+
+<StatsGrid
+	title={title}
+	subtitle={subtitle}
+	stats={stats as any}
+	blockType="statsGrid"
+/>

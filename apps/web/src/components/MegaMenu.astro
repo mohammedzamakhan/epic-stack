@@ -1,14 +1,12 @@
 ---
-import type { HeaderNavItem } from '../types/header'
-
 interface Props {
   menuLabel: string
-  columns: HeaderNavItem['megaMenuColumns']
+  columns?: any[]
   isMobile?: boolean
 }
 
 const { menuLabel, columns = [], isMobile = false } = Astro.props
-const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
+const uniqueId = `mega-menu-${Math.random().toString(36).slice(2, 11)}`
 ---
 
 {isMobile ? (
@@ -42,7 +40,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
       aria-labelledby={`${uniqueId}-trigger`}
     >
       {
-        columns.map((column) => (
+        columns.map((column: any) => (
           <div class="space-y-2">
             <h4 class="text-sm font-semibold text-foreground">
               {column.columnTitle}
@@ -53,7 +51,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
               </p>
             )}
             <ul class="space-y-1.5">
-              {column.links.map((linkItem) => {
+              {column.links?.map((linkItem: any) => {
                 const link = linkItem.link
                 const href =
                   link.type === 'custom'
@@ -110,7 +108,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
       <div class="p-6">
         <div class="grid gap-8" style={`grid-template-columns: repeat(${Math.min(columns.length, 4)}, minmax(200px, 1fr))`}>
           {
-            columns.map((column) => (
+            columns.map((column: any) => (
               <div class="space-y-3">
                 <div>
                   <h3 class="text-sm font-semibold text-foreground mb-1">
@@ -123,7 +121,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
                   )}
                 </div>
                 <ul class="space-y-2">
-                  {column.links.map((linkItem) => {
+                  {column.links?.map((linkItem: any) => {
                     const link = linkItem.link
                     const href =
                       link.type === 'custom'

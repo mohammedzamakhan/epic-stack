@@ -2,15 +2,21 @@
 import GridDesign from '../GridDesign.astro'
 import Button from '../ui/Button.astro'
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
-
 interface Props {
+	title?: string
+	description?: string
+	headline?: string
+	subheadline?: string
+	badge?: string
 	richText?: any
 	media?: any
 	links?: any[]
 }
 
-const { richText, media, links } = Astro.props
+const { title, description, headline, subheadline, badge, richText, media, links } = Astro.props
+
+const displayTitle = headline || title || ''
+const displayDescription = subheadline || description || ''
 
 const renderLexicalContent = (content: any) => {
 	if (!content || !content.root || !content.root.children) {
@@ -54,7 +60,7 @@ const renderLexicalContent = (content: any) => {
 		<div class="absolute inset-0 -z-10" role="img" aria-label={media.alt || 'Decorative hero background'}>
 			<img
 				class="w-full h-full object-cover"
-				src={`${CMS_URL}${media.url}`}
+				src={media.url}
 				alt=""
 				width={media.width || 1920}
 				height={media.height || 1080}
@@ -67,21 +73,42 @@ const renderLexicalContent = (content: any) => {
 	)}
 
 	<div class="container relative z-10 flex flex-col items-center justify-center text-center py-24 gap-8">
-		{richText && (
-			<div class="space-y-6 max-w-4xl mx-auto" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
+		{badge && (
+			<div class="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full text-xs font-semibold tracking-wide uppercase bg-primary/20 text-primary border border-primary/30">
+				<span>{badge}</span>
+			</div>
 		)}
+
+		{displayTitle ? (
+			<div class="space-y-6 max-w-4xl mx-auto">
+				<h1 id="hero-heading" class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-white leading-tight">
+					{displayTitle}
+				</h1>
+				{displayDescription && (
+					<p class="text-xl md:text-2xl leading-relaxed max-w-[600px] mx-auto text-white/90">
+						{displayDescription}
+					</p>
+				)}
+			</div>
+		) : richText ? (
+			<div class="space-y-6 max-w-4xl mx-auto" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
+		) : null}
 
 		{links && links.length > 0 && (
 			<div class="flex flex-wrap justify-center gap-4 mt-4">
-				{links.map((linkItem: any, i: number) => (
-					<Button
-						href={linkItem?.link?.url || '#'}
-						variant={i === 0 ? 'default' : 'outline'}
-						size="xl"
-					>
-						{linkItem?.link?.label || 'Learn more'}
-					</Button>
-				))}
+				{links.map((linkItem: any, i: number) => {
+					const href = linkItem?.url || linkItem?.link?.url || '#'
+					const label = linkItem?.label || linkItem?.link?.label || linkItem?.text || 'Learn more'
+					return (
+						<Button
+							href={href}
+							variant={i === 0 ? 'default' : 'outline'}
+							size="xl"
+						>
+							{label}
+						</Button>
+					)
+				})}
 			</div>
 		)}
 	</div>
