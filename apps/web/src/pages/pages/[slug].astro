@@ -8,6 +8,13 @@ import GridDesign from '../../components/GridDesign.astro'
 
 const { slug } = Astro.params
 
+if (!slug) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not found'
+  })
+}
+
 const currentLocale = Astro.currentLocale ?? 'en'
 let page = await getPage(slug, currentLocale)
 if (!page && currentLocale !== 'en') {

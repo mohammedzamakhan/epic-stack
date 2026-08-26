@@ -20,7 +20,7 @@ if (!post) {
 	Astro.response.status = 404
 }
 
-const { title = '', content, seo, publishedAt, updatedAt, categories, heroImage = post.featured_image } = (post || {}) as any
+const { title = '', content, seo, publishedAt, updatedAt, categories, heroImage } = (post || {}) as any
 
 // Calculate reading time (average 200 words per minute)
 function calculateReadingTime(postContent: unknown): number {
