@@ -1,0 +1,28 @@
+---
+import { cn } from '../../lib/utils'
+import SectionSeam from './SectionSeam.astro'
+
+interface Props {
+	class?: string
+	seam?: boolean
+	ticks?: boolean
+	id?: string
+}
+
+const {
+	class: className = '',
+	seam = true,
+	ticks = true,
+	id,
+	...rest
+} = Astro.props
+---
+
+<section
+	id={id}
+	class={cn('relative px-5 sm:px-8 lg:px-14', className)}
+	{...rest}
+>
+	{seam && <SectionSeam ticks={ticks} />}
+	<slot />
+</section>

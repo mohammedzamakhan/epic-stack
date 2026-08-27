@@ -1,0 +1,25 @@
+---
+import CapabilityGrid from './CapabilityGrid.astro'
+
+interface Props {
+	node: {
+		eyebrow?: string
+		title?: string
+		actionLabel?: string
+		actionUrl?: string
+		items?: any[]
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { eyebrow, title, actionLabel, actionUrl, items } = node
+---
+
+<CapabilityGrid
+	eyebrow={eyebrow}
+	title={title}
+	actionLabel={actionLabel}
+	actionUrl={actionUrl}
+	items={items}
+	blockType="capabilityGrid"
+/>

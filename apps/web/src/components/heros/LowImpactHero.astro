@@ -1,52 +1,34 @@
 ---
-import GridDesign from '../GridDesign.astro'
+import MarkdownText from '../site/MarkdownText.astro'
+import Section from '../site/Section.astro'
 
 interface Props {
+	title?: string
+	description?: string
+	headline?: string
+	subheadline?: string
 	richText?: any
 }
 
-const { richText } = Astro.props
+const { title, description, headline, subheadline } = Astro.props
 
-const renderLexicalContent = (content: any) => {
-	if (!content || !content.root || !content.root.children) {
-		return ''
-	}
-
-	return content.root.children
-		.map((node: any) => {
-			if (node.type === 'paragraph' && node.children) {
-				const text = node.children
-					.map((child: any) => {
-						if (child.format && child.format > 0) {
-							let formattedText = child.text || ''
-							if (child.format & 1)
-								formattedText = `<strong class="font-semibold">${formattedText}</strong>`
-							if (child.format & 2)
-								formattedText = `<em class="italic">${formattedText}</em>`
-							return formattedText
-						}
-						return child.text || ''
-					})
-					.join('')
-				return `<p class="text-lg text-muted-foreground leading-relaxed">${text}</p>`
-			}
-			if (node.type === 'heading' && node.children) {
-				const text = node.children
-					.map((child: any) => child.text || '')
-					.join('')
-				return `<h1 class="text-2xl md:text-4xl tracking-tight font-title text-foreground leading-tight">${text}</h1>`
-			}
-			return ''
-		})
-		.join('')
-}
+const displayTitle = headline || title || ''
+const displayDescription = subheadline || description || ''
 ---
 
-<section class="container mx-auto mt-16 py-8" aria-labelledby="hero-heading">
-	<GridDesign />
-	<div class="container px-6 max-w-3xl space-y-4">
-		{richText && (
-			<div class="space-y-4" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
-		)}
+<Section seam={false} class="pt-28 pb-8 sm:pt-32">
+	<div class="max-w-2xl space-y-4">
+		{
+			displayTitle && (
+				<h1 class="font-display text-balance text-[28px] font-medium tracking-[-0.02em] text-foreground sm:text-[36px]">
+					{displayTitle}
+				</h1>
+			)
+		}
+		{
+			displayDescription && (
+				<MarkdownText content={displayDescription} class="text-pretty text-[16px] leading-relaxed text-muted-foreground" />
+			)
+		}
 	</div>
-</section>
+</Section>

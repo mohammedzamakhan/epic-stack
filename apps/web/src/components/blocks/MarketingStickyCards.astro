@@ -17,9 +17,15 @@ const { node = {} as any } = Astro.props
 const { title, subtitle, cards } = node
 
 const mappedCards = cards?.map((c: any) => ({
-	title: c.title,
-	description: c.description,
-	tag: c.tag,
+	title: c.title || '',
+	description: c.description || '',
+	tagline: c.tag || c.tagline || '',
+	image: c.image || c.imageUrl ? { url: c.image || c.imageUrl, alt: c.title } : undefined,
+	backgroundImage: c.backgroundImage || c.backgroundImageUrl ? { url: c.backgroundImage || c.backgroundImageUrl, alt: c.title } : undefined,
+	primaryButtonText: c.primaryButtonText || 'View',
+	primaryButtonUrl: c.primaryButtonUrl || '#',
+	secondaryButtonText: c.secondaryButtonText || 'Learn More',
+	secondaryButtonUrl: c.secondaryButtonUrl || '#'
 }))
 ---
 

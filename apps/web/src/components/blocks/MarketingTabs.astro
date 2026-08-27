@@ -18,12 +18,10 @@ const { node = {} as any } = Astro.props
 const { title, subtitle, tabs } = node
 
 const mappedTabs = tabs?.map((t: any) => ({
-	label: t.label,
-	content: {
-		title: t.title || t.label,
-		description: t.description || '',
-		image: t.imageUrl ? { url: t.imageUrl, alt: t.title || t.label } : undefined,
-	},
+	title: t.title || t.label || '',
+	description: t.description || '',
+	icon: t.icon || '',
+	image: t.imageUrl || t.image ? { url: t.imageUrl || t.image, alt: t.title || t.label } : undefined,
 }))
 ---
 
@@ -31,5 +29,9 @@ const mappedTabs = tabs?.map((t: any) => ({
 	title={title}
 	subtitle={subtitle}
 	tabs={mappedTabs as any}
+	buttonText={node.buttonText || node.primaryButtonText}
+	buttonUrl={node.buttonUrl || node.primaryButtonUrl}
+	secondaryButtonText={node.secondaryButtonText}
+	secondaryButtonUrl={node.secondaryButtonUrl}
 	blockType="tabs"
 />

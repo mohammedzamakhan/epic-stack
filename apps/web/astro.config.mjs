@@ -12,6 +12,9 @@ import { sqlite } from 'emdash/db'
 import { fontless } from 'fontless'
 
 const domain = getBrandDomain()
+const isDevCommand =
+	process.env.npm_lifecycle_event === 'dev' ||
+	process.argv.includes('dev')
 const isCloudflareBuild =
 	process.env.npm_lifecycle_event === 'build' ||
 	process.env.CLOUDFLARE_BUILD === 'true'
@@ -113,6 +116,9 @@ export default defineConfig({
 	],
 
 	vite: {
+		resolve: {
+			dedupe: ['react', 'react-dom', '@emdash-cms/admin'],
+		},
 		plugins: [
 			{
 				name: 'fix-varlock-name',
@@ -126,12 +132,16 @@ export default defineConfig({
 			},
 			tailwindcss(),
 			fontless({
+				defaults: {
+					preload: true,
+					weights: [400, 500, 600, 700],
+					styles: ['normal'],
+					subsets: ['latin', 'latin-ext', 'arabic'],
+				},
 				families: [
-					{
-						name: 'GeistPixel',
-						weights: ['400'],
-						src: [{ url: '/fonts/GeistPixel-Square.woff2', format: 'woff2' }],
-					},
+					{ name: 'Geist', provider: 'google' },
+					{ name: 'Geist Mono', provider: 'google' },
+					{ name: 'Noto Sans Arabic', provider: 'google' },
 				],
 			}),
 		],
@@ -140,10 +150,18 @@ export default defineConfig({
 		},
 		optimizeDeps: {
 			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+			include: [
+				'react',
+				'react-dom',
+				'react/jsx-runtime',
+				'react/jsx-dev-runtime',
+				'@emdash-cms/admin',
+				'@astrojs/react/client.js',
+			],
 		},
 		define: {
 			'process.env.NODE_ENV': JSON.stringify(
-				process.env.NODE_ENV || 'production',
+				process.env.NODE_ENV ?? (isDevCommand ? 'development' : 'production'),
 			),
 		},
 	},

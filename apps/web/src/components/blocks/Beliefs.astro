@@ -1,0 +1,79 @@
+---
+import MarkdownText from '../site/MarkdownText.astro'
+import Section from '../site/Section.astro'
+import Eyebrow from '../site/Eyebrow.astro'
+import Button from '../ui/Button.astro'
+import { cn } from '../../lib/utils'
+
+interface Belief {
+  title: string
+  body: string
+}
+
+interface Props {
+  eyebrow?: string
+  title?: string
+  description?: string
+  ctaLabel?: string
+  ctaUrl?: string
+  beliefs?: Belief[]
+  blockType?: 'beliefs'
+}
+
+const {
+  eyebrow = 'Our beliefs',
+  title = 'What we believe in',
+  description = 'We are driven by a core set of values that guide every decision we make and every product we build.',
+  ctaLabel = 'Learn more',
+  ctaUrl = '/about',
+  beliefs = [
+    {
+      title: 'Built for longevity',
+      body: 'We design software to last, focusing on robust architecture and maintainable code over short-term hacks.',
+    },
+    {
+      title: 'Simplicity scales',
+      body: 'Complex problems rarely require complex solutions. We obsess over stripping away the unnecessary.',
+    },
+    {
+      title: 'Craftsmanship matters',
+      body: 'Every detail counts. From the user interface to the underlying database structure, we take pride in our work.',
+    },
+  ],
+  blockType = 'beliefs',
+} = Astro.props
+---
+
+<Section class="py-16 sm:py-20 lg:py-24">
+  <div class="grid grid-cols-1 gap-x-10 gap-y-12 lg:grid-cols-2">
+    <div class="lg:sticky lg:top-28 lg:self-start">
+      {eyebrow && <Eyebrow class="mb-4">{eyebrow}</Eyebrow>}
+      <h2 class="font-display max-w-md text-balance text-[32px] font-medium tracking-[-0.02em] sm:text-[40px]">
+        {title}
+      </h2>
+      {description && (
+        <MarkdownText content={description} class="mt-6 max-w-md text-pretty text-[16px] leading-relaxed text-muted-foreground" />
+      )}
+      {ctaLabel && ctaUrl && (
+        <div class="mt-8">
+          <Button variant="outline" href={ctaUrl}>
+            {ctaLabel}
+          </Button>
+        </div>
+      )}
+    </div>
+    
+    <div class="flex flex-col gap-px overflow-hidden rounded-2xl border border-hairline bg-hairline">
+      {beliefs.map((belief) => (
+        <div class="bg-card p-7">
+          <h3 class="text-[18px] font-medium tracking-[-0.01em]">
+            {belief.title}
+          </h3>
+          <p class="mt-3 text-pretty text-[15px] leading-relaxed text-muted-foreground">
+            {belief.body}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</Section>

@@ -1,20 +1,25 @@
 ---
+import Section from '../site/Section.astro'
+import SectionHead from '../site/SectionHead.astro'
+
 interface Props {
-  populateBy?: string
-  relationTo?: string
-  blockType: 'archive'
+	populateBy?: string
+	relationTo?: string
+	blockType: 'archive'
 }
 
 const { populateBy, relationTo } = Astro.props
 ---
 
-<section class="py-16" aria-labelledby="archive-heading">
-  <div class="container mx-auto px-4">
-    <div class="prose prose-lg max-w-none">
-      <h2 id="archive-heading">Archive Block</h2>
-      <p>This is a placeholder for the archive block. Implementation depends on your specific archive requirements.</p>
-      {populateBy && <p><strong>Populate by:</strong> {populateBy}</p>}
-      {relationTo && <p><strong>Relation to:</strong> {relationTo}</p>}
-    </div>
-  </div>
-</section>
+<Section class="py-16 sm:py-20">
+	<SectionHead
+		eyebrow="Archive"
+		title="Content archive"
+		description="Browse related content from across the site."
+	/>
+	<div class="mt-8 rounded-3xl border border-hairline bg-muted px-6 py-5 text-[14px] text-muted-foreground">
+		{populateBy && <p>Populate by: {populateBy}</p>}
+		{relationTo && <p>Relation to: {relationTo}</p>}
+		{!populateBy && !relationTo && <p>Archive content will appear here when configured in the CMS.</p>}
+	</div>
+</Section>

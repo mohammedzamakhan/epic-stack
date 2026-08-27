@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { JiraProvider } from '../../../src/providers/jira/provider'
 import { fixtures } from '../../utils/fixtures'
+import { mockJiraFetch } from './fetch-mock'
 import type { OAuthCallbackParams } from '../../../src/types'
 
 // Mock the encryption module
@@ -36,32 +37,7 @@ describe('JiraProvider - Callback Handling', () => {
 				state,
 			}
 
-			// Mock token exchange response
-			const mockTokenResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.oauthResponse),
-				text: vi.fn().mockResolvedValue(''),
-			}
-
-			// Mock user info response
-			const mockUserResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.currentUserResponse),
-			}
-
-			// Mock accessible resources response
-			const mockResourcesResponse = {
-				ok: true,
-				json: vi
-					.fn()
-					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
-			}
-
-			global.fetch = vi
-				.fn()
-				.mockResolvedValueOnce(mockTokenResponse) // Token exchange
-				.mockResolvedValueOnce(mockUserResponse) // User info
-				.mockResolvedValueOnce(mockResourcesResponse) // Accessible resources
+			global.fetch = mockJiraFetch()
 
 			const tokenData = await provider.handleCallback(callbackParams)
 
@@ -251,28 +227,10 @@ describe('JiraProvider - Callback Handling', () => {
 				state,
 			}
 
-			const mockTokenResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.oauthResponse),
-				text: vi.fn().mockResolvedValue(''),
-			}
-
-			const mockUserErrorResponse = {
-				ok: false,
-				statusText: 'Unauthorized',
-			}
-
-			global.fetch = vi
-				.fn()
-				.mockResolvedValueOnce(mockTokenResponse) // Token exchange
-				.mockResolvedValueOnce(mockUserErrorResponse) // User info failure
-				.mockResolvedValueOnce({
-					ok: true,
-					json: vi.fn().mockResolvedValue([]),
-				}) // Resources (won't be reached but needed for parallel call)
+			global.fetch = mockJiraFetch({ user: 'error' })
 
 			await expect(provider.handleCallback(callbackParams)).rejects.toThrow(
-				'Failed to get user info: Unauthorized',
+				'Failed to complete Jira OAuth: Failed to get user info: Unauthorized',
 			)
 		})
 
@@ -290,30 +248,10 @@ describe('JiraProvider - Callback Handling', () => {
 				state,
 			}
 
-			const mockTokenResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.oauthResponse),
-				text: vi.fn().mockResolvedValue(''),
-			}
-
-			const mockUserResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.currentUserResponse),
-			}
-
-			const mockResourcesErrorResponse = {
-				ok: false,
-				statusText: 'Forbidden',
-			}
-
-			global.fetch = vi
-				.fn()
-				.mockResolvedValueOnce(mockTokenResponse) // Token exchange
-				.mockResolvedValueOnce(mockUserResponse) // User info
-				.mockResolvedValueOnce(mockResourcesErrorResponse) // Resources failure
+			global.fetch = mockJiraFetch({ resources: 'error' })
 
 			await expect(provider.handleCallback(callbackParams)).rejects.toThrow(
-				'Failed to get accessible resources: Forbidden',
+				'Failed to complete Jira OAuth: Failed to get accessible resources: Forbidden',
 			)
 		})
 
@@ -331,32 +269,16 @@ describe('JiraProvider - Callback Handling', () => {
 				state,
 			}
 
-			const mockTokenResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue({
-					...fixtures.jira.oauthResponse,
-					expires_in: 7200, // 2 hours
-				}),
-				text: vi.fn().mockResolvedValue(''),
-			}
-
-			const mockUserResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.currentUserResponse),
-			}
-
-			const mockResourcesResponse = {
-				ok: true,
-				json: vi
-					.fn()
-					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
-			}
-
-			global.fetch = vi
-				.fn()
-				.mockResolvedValueOnce(mockTokenResponse)
-				.mockResolvedValueOnce(mockUserResponse)
-				.mockResolvedValueOnce(mockResourcesResponse)
+			global.fetch = mockJiraFetch({
+				token: {
+					ok: true,
+					json: async () => ({
+						...fixtures.jira.oauthResponse,
+						expires_in: 7200,
+					}),
+					text: async () => '',
+				},
+			})
 
 			const beforeTime = Date.now()
 			const tokenData = await provider.handleCallback(callbackParams)
@@ -384,34 +306,17 @@ describe('JiraProvider - Callback Handling', () => {
 				state,
 			}
 
-			const mockTokenResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue({
-					access_token: 'test-access-token',
-					refresh_token: 'test-refresh-token',
-					scope: 'read:jira-work write:jira-work',
-					// No expires_in
-				}),
-				text: vi.fn().mockResolvedValue(''),
-			}
-
-			const mockUserResponse = {
-				ok: true,
-				json: vi.fn().mockResolvedValue(fixtures.jira.currentUserResponse),
-			}
-
-			const mockResourcesResponse = {
-				ok: true,
-				json: vi
-					.fn()
-					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
-			}
-
-			global.fetch = vi
-				.fn()
-				.mockResolvedValueOnce(mockTokenResponse)
-				.mockResolvedValueOnce(mockUserResponse)
-				.mockResolvedValueOnce(mockResourcesResponse)
+			global.fetch = mockJiraFetch({
+				token: {
+					ok: true,
+					json: async () => ({
+						access_token: 'test-access-token',
+						refresh_token: 'test-refresh-token',
+						scope: 'read:jira-work write:jira-work',
+					}),
+					text: async () => '',
+				},
+			})
 
 			const tokenData = await provider.handleCallback(callbackParams)
 

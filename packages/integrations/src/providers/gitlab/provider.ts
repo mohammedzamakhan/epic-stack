@@ -2,7 +2,7 @@
  * GitLab integration provider implementation
  */
 
-import { validateInstanceUrl } from '@repo/security'
+import { ssrfSafeFetch, validateInstanceUrl } from '@repo/security'
 import {
 	type Integration,
 	type NoteIntegrationConnection,
@@ -222,7 +222,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			: `${this.authBaseUrl}/token`
 
 		try {
-			const tokenResponse = await fetch(tokenUrl, {
+			const tokenResponse = await ssrfSafeFetch(tokenUrl, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -480,7 +480,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		const baseUrl = instanceUrl ? `${instanceUrl}/api/v4` : this.apiBaseUrl
 		const url = `${baseUrl}/user`
 
-		const response = await fetch(url, {
+		const response = await ssrfSafeFetch(url, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				Accept: 'application/json',
@@ -555,7 +555,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		const baseUrl = this.getBaseUrl(integration)
 		const url = `${baseUrl}/projects?membership=true&per_page=100&order_by=last_activity_at`
 
-		const response = await fetch(url, {
+		const response = await ssrfSafeFetch(url, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				Accept: 'application/json',
@@ -582,7 +582,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	): Promise<GitLabProject> {
 		const baseUrl = this.getBaseUrl(integration)
 
-		const response = await fetch(
+		const response = await ssrfSafeFetch(
 			`${baseUrl}/projects/${encodeURIComponent(projectId)}`,
 			{
 				headers: {
@@ -610,7 +610,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	): Promise<GitLabCreateIssueResponse> {
 		const baseUrl = this.getBaseUrl(integration)
 
-		const response = await fetch(
+		const response = await ssrfSafeFetch(
 			`${baseUrl}/projects/${encodeURIComponent(projectId)}/issues`,
 			{
 				method: 'POST',
@@ -713,7 +713,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const baseUrl = this.getBaseUrl(integration)
 
-			const response = await fetch(
+			const response = await ssrfSafeFetch(
 				`${baseUrl}/projects/${encodeURIComponent(projectId)}/labels`,
 				{
 					headers: {
@@ -744,7 +744,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const baseUrl = this.getBaseUrl(integration)
 
-			const response = await fetch(
+			const response = await ssrfSafeFetch(
 				`${baseUrl}/projects/${encodeURIComponent(projectId)}/milestones?state=active`,
 				{
 					headers: {
@@ -781,7 +781,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				per_page: '20',
 			})
 
-			const response = await fetch(
+			const response = await ssrfSafeFetch(
 				`${baseUrl}/projects/${encodeURIComponent(projectId)}/users?${params}`,
 				{
 					headers: {

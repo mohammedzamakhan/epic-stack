@@ -24,6 +24,10 @@ import MarketingMediaBlock from "./blocks/MarketingMediaBlock.astro";
 import MarketingBlog from "./blocks/MarketingBlog.astro";
 import MarketingContent from "./blocks/MarketingContent.astro";
 import MarketingArchive from "./blocks/MarketingArchive.astro";
+import MarketingShowcaseCards from "./blocks/MarketingShowcaseCards.astro";
+import MarketingCapabilityGrid from "./blocks/MarketingCapabilityGrid.astro";
+import MarketingBeliefs from "./blocks/MarketingBeliefs.astro";
+import MarketingStickyShowcase from "./blocks/MarketingStickyShowcase.astro";
 
 interface Props {
 	value?: any;
@@ -58,8 +62,13 @@ const marketingComponents = {
 		"marketing.blog": MarketingBlog,
 		"marketing.content": MarketingContent,
 		"marketing.archive": MarketingArchive,
+		"marketing.showcaseCards": MarketingShowcaseCards,
+		"marketing.capabilityGrid": MarketingCapabilityGrid,
+		"marketing.beliefs": MarketingBeliefs,
+		"marketing.stickyShowcase": MarketingStickyShowcase,
 	},
 };
 ---
 
 {value && Array.isArray(value) && <PortableText value={value} components={marketingComponents} />}
+

@@ -15,11 +15,19 @@ interface Props {
 
 const { node = {} as any } = Astro.props
 const { title, subtitle, stats } = node
+
+const mappedStats = stats?.map((s: any) => ({
+	title: s.label,
+	value: s.value,
+	description: s.description || '',
+	variant: 'default',
+	colSpan: 'auto'
+})) || []
 ---
 
 <StatsGrid
 	title={title}
 	subtitle={subtitle}
-	stats={stats as any}
+	stats={mappedStats as any}
 	blockType="statsGrid"
 />

@@ -1,0 +1,76 @@
+---
+import { cn } from '../../lib/utils'
+import Section from '../site/Section.astro'
+import Eyebrow from '../site/Eyebrow.astro'
+
+interface Item {
+  tag: string
+  title: string
+  meta: string
+  url?: string
+}
+
+interface Props {
+  eyebrow?: string
+  title?: string
+  actionLabel?: string
+  actionUrl?: string
+  items?: Item[]
+  blockType: 'capabilityGrid'
+}
+
+const {
+  eyebrow = 'Features',
+  title = 'Everything you need to build',
+  actionLabel = 'View all features',
+  actionUrl = '#',
+  items = [
+    { tag: 'Performance', title: 'Lightning fast builds and instant reloads', meta: 'Uses latest build tech', url: '#' },
+    { tag: 'Design', title: 'Beautiful tokens and components out of the box', meta: 'Tailwind CSS v4', url: '#' },
+    { tag: 'DX', title: 'Type-safe routing and strict conventions', meta: 'TypeScript everywhere', url: '#' },
+    { tag: 'Deploy', title: 'Ship anywhere with edge support', meta: 'Global edge network', url: '#' }
+  ],
+  blockType
+} = Astro.props
+---
+
+<Section class="py-16 sm:py-20 lg:py-24">
+  <div class="flex flex-wrap items-end justify-between gap-6">
+    <div class="max-w-xl">
+      {eyebrow && <Eyebrow class="mb-4">{eyebrow}</Eyebrow>}
+      <h2 class="font-display text-balance text-[32px] font-medium tracking-[-0.02em] text-foreground sm:text-[40px]">
+        {title}
+      </h2>
+    </div>
+    {actionLabel && actionUrl && (
+      <a href={actionUrl} class="group inline-flex items-center gap-1.5 text-[15px] font-medium text-foreground transition-colors hover:text-muted-foreground">
+        {actionLabel}
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    )}
+  </div>
+  
+  <div class="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-hairline bg-hairline sm:grid-cols-2">
+    {items.map((item) => {
+      const Tag = item.url ? 'a' : 'div'
+      return (
+        <Tag href={item.url} class={cn("group flex flex-col gap-6 bg-card p-7 transition-colors", item.url && "hover:bg-secondary")}>
+          <div class="flex items-center justify-between">
+            <span class="rounded-full border border-hairline px-3 py-1 text-[12px] font-medium text-muted-foreground">
+              {item.tag}
+            </span>
+            {item.url && (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            )}
+          </div>
+          <h3 class="text-pretty text-[19px] font-medium leading-snug tracking-[-0.01em] text-foreground">
+            {item.title}
+          </h3>
+          <p class="mt-auto text-[13px] text-muted-foreground">
+            {item.meta}
+          </p>
+        </Tag>
+      )
+    })}
+  </div>
+</Section>
