@@ -51,8 +51,8 @@ const instanceId = `scroll-highlight-${Math.random().toString(36).slice(2, 11)}`
 
 <style is:global>
 	.scroll-word {
-		opacity: 0.2;
-		transition: opacity 0.3s ease-out, color 0.3s ease-out;
+		color: var(--muted-foreground);
+		transition: color 0.3s ease-out;
 	}
 
 	.scroll-word::after {
@@ -64,7 +64,6 @@ const instanceId = `scroll-highlight-${Math.random().toString(36).slice(2, 11)}`
 	}
 
 	.scroll-word.highlighted {
-		opacity: 1;
 		color: var(--brand);
 	}
 

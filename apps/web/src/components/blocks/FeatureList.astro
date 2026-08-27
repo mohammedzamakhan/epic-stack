@@ -196,7 +196,7 @@ const hasMultipleFeatures = features.length > 1
 				const backgroundUrl = getImageUrl(feature.backgroundImage)
 
 				return (
-					<article
+					<div
 						class:list={[
 							'feature-card',
 							hasMultipleFeatures && 'w-[min(90vw,544px)] shrink-0',
@@ -294,7 +294,7 @@ const hasMultipleFeatures = features.length > 1
 								)}
 							</div>
 						)}
-					</article>
+					</div>
 				)
 			})}
 		</div>

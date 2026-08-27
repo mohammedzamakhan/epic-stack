@@ -18,6 +18,9 @@ interface Plan {
 	monthlyPrice: string
 	yearlyPrice: string
 	buttonText: string
+	buttonUrl?: string
+	buttonTarget?: '_blank'
+	buttonRel?: string
 	badge?: string
 	features: Feature[]
 }
@@ -146,7 +149,7 @@ const gridCols =
 		</div>
 		{
 			yearlyDiscount > 0 && (
-				<p class="text-[13px] text-muted-foreground" id="discount-text">
+				<p class="hidden text-[13px] text-muted-foreground" id="discount-text">
 					Save up to {yearlyDiscount}% with yearly billing
 				</p>
 			)
@@ -214,7 +217,9 @@ const gridCols =
 
 					<footer class="mt-8">
 						<Button
-							href={`#plan-${plan.id}`}
+							href={plan.buttonUrl ?? `#plan-${plan.id}`}
+							target={plan.buttonTarget}
+							rel={plan.buttonRel}
 							variant={plan.highlight ? 'brand' : 'outline'}
 							class="w-full"
 						>
@@ -284,11 +289,11 @@ const gridCols =
 			if (period === 'yearly') {
 				monthlyPrices.forEach((el) => el.classList.add('hidden'))
 				yearlyPrices.forEach((el) => el.classList.remove('hidden'))
-				if (discountText) discountText.style.opacity = '1'
+				discountText?.classList.remove('hidden')
 			} else {
 				yearlyPrices.forEach((el) => el.classList.add('hidden'))
 				monthlyPrices.forEach((el) => el.classList.remove('hidden'))
-				if (discountText) discountText.style.opacity = '0.7'
+				discountText?.classList.add('hidden')
 			}
 
 			setActiveButton(period)
