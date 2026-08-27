@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { JiraProvider } from '../../../src/providers/jira/provider'
 import { fixtures } from '../../utils/fixtures'
+import { jiraApiRequestOptions } from './fetch-mock'
 import type {
 	Integration,
 	NoteIntegrationConnection,
@@ -121,15 +122,10 @@ describe('JiraProvider', () => {
 			const isValid = await provider.validateConnection(mockConnection)
 
 			expect(isValid).toBe(true)
-			expect(fetch).toHaveBeenCalledWith(
+			expect(fetch).toHaveBeenNthCalledWith(
+				2,
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/project/TEST?expand=lead,description',
-				{
-					headers: {
-						Authorization: 'Bearer decrypted-access-token',
-						Accept: 'application/json',
-					},
-					redirect: 'manual',
-				},
+				jiraApiRequestOptions(),
 			)
 		})
 
@@ -217,15 +213,10 @@ describe('JiraProvider', () => {
 				timeZone: 'America/New_York',
 			})
 
-			expect(fetch).toHaveBeenCalledWith(
+			expect(fetch).toHaveBeenNthCalledWith(
+				2,
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/myself',
-				{
-					headers: {
-						Authorization: 'Bearer decrypted-access-token',
-						Accept: 'application/json',
-					},
-					redirect: 'manual',
-				},
+				jiraApiRequestOptions(),
 			)
 		})
 
@@ -264,15 +255,10 @@ describe('JiraProvider', () => {
 			expect(users[0].displayName).toBe('John Doe')
 			expect(users[1].displayName).toBe('Jane Smith')
 
-			expect(fetch).toHaveBeenCalledWith(
+			expect(fetch).toHaveBeenNthCalledWith(
+				2,
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user/search?query=john',
-				{
-					headers: {
-						Authorization: 'Bearer decrypted-access-token',
-						Accept: 'application/json',
-					},
-					redirect: 'manual',
-				},
+				jiraApiRequestOptions(),
 			)
 		})
 
@@ -309,15 +295,10 @@ describe('JiraProvider', () => {
 				emailAddress: 'bot@example.com',
 			})
 
-			expect(fetch).toHaveBeenCalledWith(
+			expect(fetch).toHaveBeenNthCalledWith(
+				2,
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user?accountId=123456%3Abot-user',
-				{
-					headers: {
-						Authorization: 'Bearer decrypted-access-token',
-						Accept: 'application/json',
-					},
-					redirect: 'manual',
-				},
+				jiraApiRequestOptions(),
 			)
 		})
 
@@ -361,26 +342,16 @@ describe('JiraProvider', () => {
 
 			expect(validation).toEqual({ valid: true })
 
-			expect(fetch).toHaveBeenCalledWith(
+			expect(fetch).toHaveBeenNthCalledWith(
+				2,
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user?accountId=123456%3Abot-user',
-				{
-					headers: {
-						Authorization: 'Bearer decrypted-access-token',
-						Accept: 'application/json',
-					},
-					redirect: 'manual',
-				},
+				jiraApiRequestOptions(),
 			)
 
-			expect(fetch).toHaveBeenCalledWith(
+			expect(fetch).toHaveBeenNthCalledWith(
+				3,
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user/permission/search?permissions=CREATE_ISSUES&projectKey=TEST&accountId=123456%3Abot-user',
-				{
-					headers: {
-						Authorization: 'Bearer decrypted-access-token',
-						Accept: 'application/json',
-					},
-					redirect: 'manual',
-				},
+				jiraApiRequestOptions(),
 			)
 		})
 
