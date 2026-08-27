@@ -7,8 +7,7 @@ import {
 } from '#app/utils/payments.server.ts'
 import {
 	handleConnectAccountUpdated,
-	recordShopOrderFromCheckoutSession,
-	recordShopOrderFromPaymentIntent,
+	recordShopOrderFromConnectWebhook,
 } from '#app/utils/shop.server.ts'
 
 /**
@@ -102,17 +101,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			case 'checkout.session.completed': {
 				const session = event.data.object as Stripe.Checkout.Session
-				if (session.metadata?.type === 'shop_order') {
-					await recordShopOrderFromCheckoutSession(session)
-				}
+				await recordShopOrderFromConnectWebhook(session, event.type)
 				break
 			}
 
 			case 'payment_intent.succeeded': {
 				const paymentIntent = event.data.object as Stripe.PaymentIntent
-				if (paymentIntent.metadata?.type === 'shop_order') {
-					await recordShopOrderFromPaymentIntent(paymentIntent)
-				}
+				await recordShopOrderFromConnectWebhook(paymentIntent, event.type)
 				break
 			}
 

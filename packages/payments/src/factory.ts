@@ -32,6 +32,7 @@ export function createPaymentProvider(
 			return new PolarProvider({
 				apiKey: config.apiKey,
 				organizationId: config.organizationId,
+				server: config.server,
 			})
 		case 'lemon-squeezy':
 			throw new Error(
@@ -64,6 +65,7 @@ export function createStripeProvider(
 export function createPolarProvider(
 	apiKey: string,
 	organizationId?: string,
+	server?: 'sandbox' | 'production',
 ): PolarProvider {
-	return new PolarProvider({ apiKey, organizationId })
+	return new PolarProvider({ apiKey, organizationId, server })
 }

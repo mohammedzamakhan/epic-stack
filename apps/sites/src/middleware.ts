@@ -21,9 +21,9 @@ import {
 	shouldCachePublishedHtml,
 	sitesConnectSrc,
 	sitesScriptSrc,
-	sitesStripeConnectSrc,
-	sitesStripeFrameSrc,
-	sitesStripeScriptSrc,
+	sitesShopCheckoutConnectSrc,
+	sitesShopCheckoutFrameSrc,
+	sitesShopCheckoutScriptSrc,
 } from '~/lib/site-headers'
 
 export {
@@ -57,10 +57,14 @@ const tenantApiUrlKsa = (
 ).replace(/\/$/, '')
 const imgSrc = `img-src 'self' data: ${appUrl}`
 const fontSrc = `font-src 'self' data: ${appUrl}`
-const stripeEnabled = isInlineShopCheckoutEnabled()
+const inlineShopCheckoutEnabled = isInlineShopCheckoutEnabled()
+const shopCheckoutCsp = {
+	inlineCard: inlineShopCheckoutEnabled,
+	hostedEmbed: true,
+}
 const connectSrc = [
 	sitesConnectSrc([appUrl, tenantApiUrl, tenantApiUrlKsa]),
-	sitesStripeConnectSrc(stripeEnabled),
+	sitesShopCheckoutConnectSrc(shopCheckoutCsp),
 ]
 	.filter(Boolean)
 	.join(' ')
@@ -77,14 +81,14 @@ function securityHeadersFor(env: SiteHostEnv) {
 		'Content-Security-Policy': [
 			"default-src 'self'",
 			connectSrc,
-			`${sitesScriptSrc(!isProduction)}${sitesStripeScriptSrc(stripeEnabled)}`,
+			`${sitesScriptSrc(!isProduction)}${sitesShopCheckoutScriptSrc(shopCheckoutCsp)}`,
 			"style-src 'self' 'unsafe-inline'",
 			fontSrc,
 			imgSrc,
 			"object-src 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",
-			sitesStripeFrameSrc(stripeEnabled),
+			sitesShopCheckoutFrameSrc(shopCheckoutCsp),
 			`frame-ancestors 'self' ${frameAncestors} localhost:*`,
 		]
 			.filter(Boolean)

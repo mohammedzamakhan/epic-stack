@@ -16,7 +16,7 @@ export function getShopPaymentMode(): ShopPaymentMode {
 	return raw === 'inline' ? 'inline' : 'redirect'
 }
 
-/** Inline card fields need Stripe.js (CSP + script). */
+/** Inline card checkout needs extra script/connect CSP allowances. */
 export function isInlineShopCheckoutEnabled() {
 	return getShopPaymentMode() === 'inline'
 }

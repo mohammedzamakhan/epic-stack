@@ -15,10 +15,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
 	const sessionId = url.searchParams.get('session_id')
 	const paymentIntentId = url.searchParams.get('payment_intent')
+	const checkoutId = url.searchParams.get('checkout_id')
+	const checkoutPaymentId =
+		url.searchParams.get('cko_payment_id') ||
+		url.searchParams.get('cko-payment-id')
 	const slug = url.searchParams.get('slug')
 	const host = url.searchParams.get('host')
 
-	if ((!sessionId && !paymentIntentId) || (!slug && !host)) {
+	if (
+		(!sessionId && !paymentIntentId && !checkoutId && !checkoutPaymentId) ||
+		(!slug && !host)
+	) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
@@ -38,6 +45,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			host,
 			sessionId,
 			paymentIntentId,
+			checkoutId,
+			checkoutPaymentId,
 		})
 		return Response.json(order, {
 			headers: { 'Cache-Control': 'no-store' },

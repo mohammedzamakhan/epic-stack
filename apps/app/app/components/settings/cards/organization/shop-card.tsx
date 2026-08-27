@@ -14,13 +14,18 @@ import { Textarea } from '@repo/ui/textarea'
 import { Form } from 'react-router'
 import {
 	SHOP_PLATFORM_FEE_PERCENT,
+	SHOP_PROCESSOR_CATALOG,
+	getShopProcessorDefinition,
+	normalizeShopProcessor,
 	type ShopOrganization,
 	type ShopOrderSummary,
+	type ShopProcessorId,
 } from '#app/utils/shop.types.ts'
 
 type ShopCardProps = {
 	organization: ShopOrganization
 	orders: ShopOrderSummary[]
+	configuredProcessors?: ShopProcessorId[]
 }
 
 function formatMoney(cents: number, currency = 'usd') {
@@ -30,11 +35,25 @@ function formatMoney(cents: number, currency = 'usd') {
 	}).format(cents / 100)
 }
 
-export function ShopCard({ organization, orders }: ShopCardProps) {
+export function ShopCard({
+	organization,
+	orders,
+	configuredProcessors = [],
+}: ShopCardProps) {
 	const isUsRegion = (organization.dataRegion || 'us') === 'us'
-	const isConnected = Boolean(organization.stripeConnectAccountId)
+	const processor = normalizeShopProcessor(organization.shopPaymentProvider)
+	const processorDefinition = getShopProcessorDefinition(processor)
+	const connectReady = Boolean(organization.stripeConnectAccountId)
+	const hostedReady = Boolean(organization.polarProductId)
+	const checkoutReady =
+		Boolean(organization.checkoutSubEntityId) &&
+		organization.checkoutChargesEnabled
 	const canAcceptPayments =
-		isConnected && organization.stripeConnectChargesEnabled
+		processor === 'mor'
+			? hostedReady
+			: processor === 'checkout'
+				? checkoutReady
+				: connectReady && organization.stripeConnectChargesEnabled
 	const priceDollars =
 		typeof organization.shopProductPriceCents === 'number'
 			? (organization.shopProductPriceCents / 100).toFixed(2)
@@ -51,8 +70,7 @@ export function ShopCard({ organization, orders }: ShopCardProps) {
 					<CardDescription>
 						<Trans>
 							Sell one product on your public site. The platform keeps{' '}
-							{SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to your
-							connected Stripe account.
+							{SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to you.
 						</Trans>
 					</CardDescription>
 				</CardHeader>
@@ -70,13 +88,29 @@ export function ShopCard({ organization, orders }: ShopCardProps) {
 								<Badge variant={canAcceptPayments ? 'default' : 'secondary'}>
 									{canAcceptPayments ? (
 										<Trans>Payments enabled</Trans>
-									) : isConnected ? (
+									) : processor === 'mor' ? (
+										hostedReady ? (
+											<Trans>Setup incomplete</Trans>
+										) : (
+											<Trans>Hosted checkout not connected</Trans>
+										)
+									) : processor === 'checkout' ? (
+										checkoutReady ? (
+											<Trans>Setup incomplete</Trans>
+										) : (
+											<Trans>Checkout payout not connected</Trans>
+										)
+									) : connectReady ? (
 										<Trans>Setup incomplete</Trans>
 									) : (
 										<Trans>Not connected</Trans>
 									)}
 								</Badge>
-								{organization.stripeConnectPayoutsEnabled ? (
+								<Badge variant="outline">
+									{processorDefinition.shortLabel}
+								</Badge>
+								{processor === 'connect' &&
+								organization.stripeConnectPayoutsEnabled ? (
 									<Badge variant="outline">
 										<Trans>Payouts enabled</Trans>
 									</Badge>
@@ -85,27 +119,101 @@ export function ShopCard({ organization, orders }: ShopCardProps) {
 
 							<div className="flex flex-wrap gap-3">
 								<Form method="post">
-									<input type="hidden" name="intent" value="connect-stripe" />
-									<Button type="submit">
-										{isConnected ? (
-											<Trans>Continue Stripe setup</Trans>
+									<input type="hidden" name="intent" value="connect-payout" />
+									<Button
+										type="submit"
+										variant={processor === 'connect' ? 'default' : 'outline'}
+									>
+										{connectReady ? (
+											<Trans>Continue payout setup</Trans>
 										) : (
-											<Trans>Connect Stripe</Trans>
+											<Trans>Connect payout account</Trans>
 										)}
 									</Button>
 								</Form>
-								{isConnected ? (
+								{connectReady ? (
 									<Form method="post">
 										<input
 											type="hidden"
 											name="intent"
-											value="open-stripe-dashboard"
+											value="open-payout-dashboard"
 										/>
 										<Button type="submit" variant="outline">
-											<Trans>Open Stripe dashboard</Trans>
+											<Trans>Open payout dashboard</Trans>
 										</Button>
 									</Form>
 								) : null}
+								{configuredProcessors.includes('checkout') ? (
+									<>
+										<Form method="post">
+											<input
+												type="hidden"
+												name="intent"
+												value="invite-checkout-payout"
+											/>
+											<Button
+												type="submit"
+												variant={
+													processor === 'checkout' ? 'default' : 'outline'
+												}
+											>
+												{organization.checkoutSubEntityId ? (
+													<Trans>Refresh Checkout setup</Trans>
+												) : (
+													<Trans>Invite Checkout payout contact</Trans>
+												)}
+											</Button>
+										</Form>
+										<Form method="post">
+											<input
+												type="hidden"
+												name="intent"
+												value="open-checkout-dashboard"
+											/>
+											<Button type="submit" variant="outline">
+												<Trans>Open Checkout dashboard</Trans>
+											</Button>
+										</Form>
+									</>
+								) : null}
+								{configuredProcessors.includes('mor') ? (
+									<>
+										<Form method="post">
+											<input
+												type="hidden"
+												name="intent"
+												value="enable-hosted-checkout"
+											/>
+											<Button
+												type="submit"
+												variant={processor === 'mor' ? 'default' : 'outline'}
+											>
+												{hostedReady ? (
+													<Trans>Sync hosted product</Trans>
+												) : (
+													<Trans>Enable hosted checkout</Trans>
+												)}
+											</Button>
+										</Form>
+										<Form method="post">
+											<input
+												type="hidden"
+												name="intent"
+												value="open-hosted-dashboard"
+											/>
+											<Button type="submit" variant="outline">
+												<Trans>Open hosted dashboard</Trans>
+											</Button>
+										</Form>
+									</>
+								) : (
+									<p className="text-muted-foreground text-sm">
+										<Trans>
+											Hosted checkout becomes available once the platform
+											configures a merchant-of-record processor.
+										</Trans>
+									</p>
+								)}
 							</div>
 
 							<Form method="post" className="space-y-4 border-t pt-6">
@@ -114,6 +222,32 @@ export function ShopCard({ organization, orders }: ShopCardProps) {
 									name="intent"
 									value="update-shop-product"
 								/>
+
+								<fieldset className="space-y-2">
+									<legend className="text-sm font-medium">
+										<Trans>Checkout processor</Trans>
+									</legend>
+									<div className="flex flex-wrap gap-4 text-sm">
+										{SHOP_PROCESSOR_CATALOG.map((option) => (
+											<label
+												key={option.id}
+												className="flex items-center gap-2"
+											>
+												<input
+													type="radio"
+													name="paymentProcessor"
+													value={option.id}
+													defaultChecked={processor === option.id}
+													disabled={!configuredProcessors.includes(option.id)}
+												/>
+												{option.label}
+											</label>
+										))}
+									</div>
+									<p className="text-muted-foreground text-xs">
+										{processorDefinition.checkoutDescription}
+									</p>
+								</fieldset>
 
 								<div className="space-y-2">
 									<Label htmlFor="productName">
@@ -234,7 +368,11 @@ export function ShopCard({ organization, orders }: ShopCardProps) {
 											</p>
 										)}
 										<p className="text-muted-foreground">
-											{order.status} ·{' '}
+											{order.status}
+											{order.paymentProvider
+												? ` · ${normalizeShopProcessor(order.paymentProvider)}`
+												: ''}{' '}
+											·{' '}
 											{order.createdAt
 												? new Date(order.createdAt).toLocaleString()
 												: ''}
