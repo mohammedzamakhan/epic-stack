@@ -84,12 +84,12 @@ const definition: any = {
 						multiline: true,
 					},
 					{
-						type: 'text_input',
+						type: 'media_picker',
 						action_id: 'mediaUrl',
-						label: 'Media / Background Image URL',
+						label: 'Media / Background Image',
 					},
 					{
-						type: 'text_input',
+						type: 'media_picker',
 						action_id: 'videoUrl',
 						label: 'Video Stream / Embed URL (optional)',
 					},
@@ -153,9 +153,9 @@ const definition: any = {
 						fields: [
 							{ type: 'text_input', action_id: 'name', label: 'Company Name' },
 							{
-								type: 'text_input',
+								type: 'media_picker',
 								action_id: 'logoUrl',
-								label: 'Logo URL (SVG / PNG)',
+								label: 'Logo (SVG / PNG)',
 							},
 						],
 					},
@@ -241,9 +241,14 @@ const definition: any = {
 								multiline: true,
 							},
 							{
-								type: 'text_input',
+								type: 'media_picker',
 								action_id: 'imageUrl',
-								label: 'Feature Image URL',
+								label: 'Feature Image',
+							},
+							{
+								type: 'media_picker',
+								action_id: 'backgroundImageUrl',
+								label: 'Background Layer Image (optional)',
 							},
 							{
 								type: 'text_input',
@@ -329,13 +334,13 @@ const definition: any = {
 							},
 							{
 								type: 'text_input',
-								action_id: 'price',
-								label: 'Price (e.g. $29)',
+								action_id: 'monthlyPrice',
+								label: 'Monthly Price (e.g. $29)',
 							},
 							{
 								type: 'text_input',
-								action_id: 'period',
-								label: 'Period (e.g. /month)',
+								action_id: 'yearlyPrice',
+								label: 'Yearly Price (e.g. $199)',
 							},
 							{
 								type: 'text_input',
@@ -385,7 +390,7 @@ const definition: any = {
 							{ type: 'text_input', action_id: 'author', label: 'Author Name' },
 							{ type: 'text_input', action_id: 'role', label: 'Role / Title' },
 							{ type: 'text_input', action_id: 'company', label: 'Company' },
-							{ type: 'text_input', action_id: 'avatar', label: 'Avatar URL' },
+							{ type: 'media_picker', action_id: 'avatar', label: 'Avatar' },
 						],
 					},
 				],
@@ -407,7 +412,7 @@ const definition: any = {
 					{ type: 'text_input', action_id: 'author', label: 'Author Name' },
 					{ type: 'text_input', action_id: 'role', label: 'Role / Title' },
 					{ type: 'text_input', action_id: 'company', label: 'Company' },
-					{ type: 'text_input', action_id: 'avatar', label: 'Avatar URL' },
+					{ type: 'media_picker', action_id: 'avatar', label: 'Avatar' },
 				],
 			},
 
@@ -602,6 +607,26 @@ const definition: any = {
 						multiline: true,
 					},
 					{
+						type: 'text_input',
+						action_id: 'buttonText',
+						label: 'Primary Button Text',
+					},
+					{
+						type: 'text_input',
+						action_id: 'buttonUrl',
+						label: 'Primary Button URL',
+					},
+					{
+						type: 'text_input',
+						action_id: 'secondaryButtonText',
+						label: 'Secondary Button Text',
+					},
+					{
+						type: 'text_input',
+						action_id: 'secondaryButtonUrl',
+						label: 'Secondary Button URL',
+					},
+					{
 						type: 'repeater',
 						action_id: 'tabs',
 						label: 'Tabs',
@@ -618,8 +643,13 @@ const definition: any = {
 							},
 							{
 								type: 'text_input',
+								action_id: 'icon',
+								label: 'Tab Icon (SVG)',
+							},
+							{
+								type: 'media_picker',
 								action_id: 'imageUrl',
-								label: 'Tab Screenshot / Media URL',
+								label: 'Tab Screenshot / Media',
 							},
 						],
 					},
@@ -655,6 +685,27 @@ const definition: any = {
 								multiline: true,
 							},
 							{ type: 'text_input', action_id: 'tag', label: 'Tag / Category' },
+							{ type: 'media_picker', action_id: 'imageUrl', label: 'Image' },
+							{
+								type: 'text_input',
+								action_id: 'primaryButtonText',
+								label: 'Primary Button Text',
+							},
+							{
+								type: 'text_input',
+								action_id: 'primaryButtonUrl',
+								label: 'Primary Button URL',
+							},
+							{
+								type: 'text_input',
+								action_id: 'secondaryButtonText',
+								label: 'Secondary Button Text',
+							},
+							{
+								type: 'text_input',
+								action_id: 'secondaryButtonUrl',
+								label: 'Secondary Button URL',
+							},
 						],
 					},
 				],
@@ -685,9 +736,9 @@ const definition: any = {
 						label: 'Founder Title / Role',
 					},
 					{
-						type: 'text_input',
+						type: 'media_picker',
 						action_id: 'founderAvatar',
-						label: 'Founder Avatar URL',
+						label: 'Founder Avatar',
 					},
 				],
 			},
@@ -779,9 +830,9 @@ const definition: any = {
 								label: 'Role / Position',
 							},
 							{
-								type: 'text_input',
+								type: 'media_picker',
 								action_id: 'avatar',
-								label: 'Photo / Avatar URL',
+								label: 'Photo / Avatar',
 							},
 							{
 								type: 'text_input',
@@ -826,9 +877,9 @@ const definition: any = {
 				description: 'Full-width or framed screenshot, illustration, or video',
 				fields: [
 					{
-						type: 'text_input',
+						type: 'media_picker',
 						action_id: 'mediaUrl',
-						label: 'Image / Media URL',
+						label: 'Image / Media',
 					},
 					{
 						type: 'text_input',
@@ -874,6 +925,198 @@ const definition: any = {
 				description: 'Paginated or filtered archive of content entries',
 				fields: [
 					{ type: 'text_input', action_id: 'title', label: 'Archive Title' },
+				],
+			},
+
+			// 25. Showcase Cards (Horizontal Scroll)
+			{
+				type: 'marketing.showcaseCards',
+				label: 'Showcase Cards (Horizontal Scroll)',
+				category: 'Sections',
+				description:
+					'Full-bleed horizontal-scrolling portrait cards with image overlays, quotes, and stats',
+				fields: [
+					{ type: 'text_input', action_id: 'eyebrow', label: 'Eyebrow' },
+					{ type: 'text_input', action_id: 'title', label: 'Title' },
+					{
+						type: 'text_input',
+						action_id: 'description',
+						label: 'Description',
+						multiline: true,
+					},
+					{
+						type: 'repeater',
+						action_id: 'cards',
+						label: 'Cards',
+						item_label: 'Card',
+						min_items: 1,
+						max_items: 8,
+						fields: [
+							{
+								type: 'media_picker',
+								action_id: 'image',
+								label: 'Card Image',
+							},
+							{
+								type: 'text_input',
+								action_id: 'quote',
+								label: 'Quote',
+								multiline: true,
+							},
+							{ type: 'text_input', action_id: 'name', label: 'Name' },
+							{
+								type: 'text_input',
+								action_id: 'role',
+								label: 'Role / Location',
+							},
+							{
+								type: 'text_input',
+								action_id: 'stat',
+								label: 'Stat Value (e.g. Direct)',
+							},
+							{
+								type: 'text_input',
+								action_id: 'statLabel',
+								label: 'Stat Label (e.g. Guest relationships)',
+							},
+						],
+					},
+				],
+			},
+
+			// 26. Capability Grid
+			{
+				type: 'marketing.capabilityGrid',
+				label: 'Capability Grid',
+				category: 'Sections',
+				description:
+					'2-column grid with 1px borders — tag pills, titles, and arrow icons per cell',
+				fields: [
+					{ type: 'text_input', action_id: 'eyebrow', label: 'Eyebrow' },
+					{ type: 'text_input', action_id: 'title', label: 'Title' },
+					{
+						type: 'text_input',
+						action_id: 'actionLabel',
+						label: 'Action Link Label (optional)',
+					},
+					{
+						type: 'text_input',
+						action_id: 'actionUrl',
+						label: 'Action Link URL',
+					},
+					{
+						type: 'repeater',
+						action_id: 'items',
+						label: 'Items',
+						item_label: 'Item',
+						min_items: 1,
+						max_items: 12,
+						fields: [
+							{ type: 'text_input', action_id: 'tag', label: 'Tag / Category' },
+							{ type: 'text_input', action_id: 'title', label: 'Title' },
+							{
+								type: 'text_input',
+								action_id: 'meta',
+								label: 'Meta (e.g. Built in)',
+							},
+							{
+								type: 'text_input',
+								action_id: 'url',
+								label: 'Link URL (optional)',
+							},
+						],
+					},
+				],
+			},
+
+			// 27. Beliefs
+			{
+				type: 'marketing.beliefs',
+				label: 'Beliefs / Values',
+				category: 'Sections',
+				description:
+					'Sticky heading with stacked value/belief cards — great for philosophy sections',
+				fields: [
+					{ type: 'text_input', action_id: 'eyebrow', label: 'Eyebrow' },
+					{ type: 'text_input', action_id: 'title', label: 'Title' },
+					{
+						type: 'text_input',
+						action_id: 'description',
+						label: 'Description',
+						multiline: true,
+					},
+					{
+						type: 'text_input',
+						action_id: 'ctaLabel',
+						label: 'CTA Button Label',
+					},
+					{ type: 'text_input', action_id: 'ctaUrl', label: 'CTA Button URL' },
+					{
+						type: 'repeater',
+						action_id: 'beliefs',
+						label: 'Beliefs',
+						item_label: 'Belief',
+						min_items: 1,
+						max_items: 10,
+						fields: [
+							{ type: 'text_input', action_id: 'title', label: 'Belief Title' },
+							{
+								type: 'text_input',
+								action_id: 'body',
+								label: 'Body Text',
+								multiline: true,
+							},
+						],
+					},
+				],
+			},
+
+			// 28. Sticky Showcase
+			{
+				type: 'marketing.stickyShowcase',
+				label: 'Sticky Showcase',
+				category: 'Sections',
+				description:
+					'Sticky heading on the left with visual showcase rows scrolling on the right',
+				fields: [
+					{ type: 'text_input', action_id: 'title', label: 'Title' },
+					{
+						type: 'text_input',
+						action_id: 'description',
+						label: 'Description',
+						multiline: true,
+					},
+					{
+						type: 'repeater',
+						action_id: 'rows',
+						label: 'Showcase Rows',
+						item_label: 'Row',
+						min_items: 1,
+						max_items: 8,
+						fields: [
+							{
+								type: 'media_picker',
+								action_id: 'imageUrl',
+								label: 'Image',
+							},
+							{
+								type: 'text_input',
+								action_id: 'imageAlt',
+								label: 'Image Alt Text',
+							},
+							{
+								type: 'text_input',
+								action_id: 'lead',
+								label: 'Lead Text (bold opener)',
+							},
+							{
+								type: 'text_input',
+								action_id: 'copy',
+								label: 'Supporting Copy',
+								multiline: true,
+							},
+						],
+					},
 				],
 			},
 		],

@@ -17,10 +17,19 @@ interface Props {
 
 const { node = {} as any } = Astro.props
 const { headline, badge, testimonials } = node
+
+const mappedTestimonials = testimonials?.map((item: NonNullable<typeof testimonials>[number]) => ({
+	quote: item.quote,
+	authorName: item.author,
+	authorTitle: item.role || '',
+	authorCompany: item.company,
+	authorImage: item.avatar || null,
+}))
 ---
 
 <Testimonials
 	title={headline || 'What our customers say'}
 	subtitle={badge || 'Testimonials'}
+	testimonials={mappedTestimonials}
 	blockType="testimonials"
 />

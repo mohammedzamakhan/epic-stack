@@ -19,9 +19,10 @@ const { node = {} as any } = Astro.props
 const { title, subtitle, features } = node
 
 const mappedFeatures = features?.map((f: any) => ({
-	title: f.title,
-	description: f.description,
-	image: f.imageUrl ? { url: f.imageUrl, alt: f.title } : undefined,
+	title: f.title || '',
+	description: f.description || '',
+	image: f.imageUrl || f.image ? { url: f.imageUrl || f.image, alt: f.title } : undefined,
+	backgroundImage: f.backgroundImageUrl || f.backgroundImage ? { url: f.backgroundImageUrl || f.backgroundImage, alt: f.title } : undefined,
 	testimonial: f.testimonialText ? {
 		text: f.testimonialText,
 		companyName: f.companyName,

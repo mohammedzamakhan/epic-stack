@@ -1,0 +1,372 @@
+[
+	{
+		"_type": "marketing.hero",
+		"_key": "lumnlg09",
+		"variant": "highImpact",
+		"badge": "New Release",
+		"headline": "Experience all the new marketing blocks",
+		"subheadline": "We have added a ton of new, reusable marketing sections.",
+		"primaryCtaLabel": "Get Started",
+		"primaryCtaUrl": "/signup",
+		"secondaryCtaLabel": "Learn More",
+		"secondaryCtaUrl": "/docs"
+	},
+	{
+		"_type": "marketing.logos",
+		"_key": "8cbcq2wr",
+		"title": "Trusted by the best",
+		"companies": [
+			{ "name": "Google" },
+			{ "name": "Microsoft" },
+			{ "name": "Amazon" }
+		]
+	},
+	{
+		"_type": "marketing.showcaseCards",
+		"_key": "wyc0yfe7",
+		"eyebrow": "Showcase",
+		"title": "One platform, everywhere",
+		"description": "This is the new ShowcaseCards block with full-bleed scroll.",
+		"cards": [
+			{
+				"image": "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80",
+				"quote": "This platform fundamentally changed how we operate.",
+				"name": "Sarah Jenkins",
+				"role": "VP of Engineering",
+				"stat": "+140%",
+				"statLabel": "growth in users"
+			},
+			{
+				"image": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80",
+				"quote": "Deployment times went from hours to minutes.",
+				"name": "Michael Chen",
+				"role": "DevOps Lead",
+				"stat": "90%",
+				"statLabel": "reduction in deployment time"
+			}
+		]
+	},
+	{
+		"_type": "marketing.capabilityGrid",
+		"_key": "nlp5irxq",
+		"eyebrow": "Capabilities",
+		"title": "Everything you need to build",
+		"actionLabel": "View all",
+		"actionUrl": "#",
+		"items": [
+			{
+				"tag": "Performance",
+				"title": "Lightning fast builds",
+				"meta": "Uses latest tech"
+			},
+			{
+				"tag": "Design",
+				"title": "Beautiful tokens",
+				"meta": "Tailwind CSS v4"
+			},
+			{ "tag": "DX", "title": "Type-safe routing", "meta": "TypeScript" },
+			{ "tag": "Deploy", "title": "Ship anywhere", "meta": "Edge network" }
+		]
+	},
+	{
+		"_type": "marketing.beliefs",
+		"_key": "9fktze87",
+		"eyebrow": "Our Beliefs",
+		"title": "What we believe in",
+		"description": "Core values that guide our decisions.",
+		"beliefs": [
+			{ "title": "Built for longevity", "body": "Software designed to last." },
+			{
+				"title": "Simplicity scales",
+				"body": "Complex problems, simple solutions."
+			},
+			{ "title": "Craftsmanship matters", "body": "Every detail counts." }
+		]
+	},
+	{
+		"_type": "marketing.stickyShowcase",
+		"_key": "zvdzhbbj",
+		"title": "Sticky Showcase",
+		"description": "Sticky heading on the left, scrolling rows right.",
+		"rows": [
+			{
+				"imageUrl": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80",
+				"lead": "Analytics.",
+				"copy": "Deep insights."
+			},
+			{
+				"imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+				"lead": "Edge.",
+				"copy": "Global deployment."
+			}
+		]
+	},
+	{
+		"_type": "marketing.features",
+		"_key": "pkgcv13v",
+		"badge": "Features",
+		"headline": "The original feature grid",
+		"features": [
+			{
+				"title": "Fast",
+				"description": "Super fast.",
+				"icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M13 2L3 14h9l-1 8 10-12h-9l1-8z\"/></svg>"
+			},
+			{
+				"title": "Secure",
+				"description": "Super secure.",
+				"icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/></svg>"
+			},
+			{
+				"title": "Reliable",
+				"description": "100% Uptime.",
+				"icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 8v4l3 3\"/></svg>"
+			}
+		]
+	},
+	{
+		"_type": "marketing.featureList",
+		"_key": "td627okt",
+		"title": "Feature Carousel",
+		"subtitle": "Scroll horizontally",
+		"features": [
+			{
+				"title": "Feature 1",
+				"description": "Description 1",
+				"image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80"
+			},
+			{
+				"title": "Feature 2",
+				"description": "Description 2",
+				"image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
+			}
+		]
+	},
+	{
+		"_type": "marketing.featured",
+		"_key": "cz58a8em",
+		"title": "Highlight specific product",
+		"description": "A great way to show a new capability.",
+		"buttonText": "View features",
+		"buttonUrl": "#features",
+		"features": [
+			{ "title": "Auth", "description": "Complete auth system." },
+			{ "title": "Payments", "description": "Stripe integration." }
+		]
+	},
+	{
+		"_type": "marketing.pricing",
+		"_key": "b5z2xi25",
+		"badge": "Pricing",
+		"headline": "Simple, transparent pricing",
+		"plans": [
+			{
+				"id": "starter",
+				"title": "Starter",
+				"description": "For developers.",
+				"monthlyPrice": "0",
+				"yearlyPrice": "0",
+				"currency": "$",
+				"buttonText": "Start Building",
+				"features": [
+					{ "name": "Local SQLite", "icon": "check" },
+					{ "name": "Community Support", "icon": "check" }
+				]
+			}
+		]
+	},
+	{
+		"_type": "marketing.testimonials",
+		"_key": "94p8xr2c",
+		"badge": "Testimonials",
+		"headline": "What people are saying",
+		"testimonials": [
+			{
+				"quote": "This is amazing.",
+				"author": "John Doe",
+				"role": "CEO",
+				"company": "Acme",
+				"avatar": "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?w=120&h=120&fit=crop"
+			}
+		]
+	},
+	{
+		"_type": "marketing.testimonialHighlight",
+		"_key": "893gwysw",
+		"quote": "The best product I have ever used.",
+		"author": "Jane Smith",
+		"role": "CTO",
+		"company": "Globex"
+	},
+	{
+		"_type": "marketing.faq",
+		"_key": "9pfjmgh2",
+		"badge": "FAQ",
+		"headline": "Frequently Asked Questions",
+		"items": [
+			{ "question": "What is this?", "answer": "This is the FAQ block." }
+		]
+	},
+	{
+		"_type": "marketing.statsGrid",
+		"_key": "q8qfp5zu",
+		"title": "Stats Grid",
+		"subtitle": "Numbers that matter",
+		"stats": [
+			{
+				"value": "100%",
+				"label": "Uptime",
+				"description": "This metric helps you track your growth."
+			},
+			{
+				"value": "1M+",
+				"label": "Users",
+				"description": "This metric helps you track your growth."
+			}
+		]
+	},
+	{
+		"_type": "marketing.stats",
+		"_key": "bowhzap8",
+		"title": "Inline Stats",
+		"description": "Another way to show numbers.",
+		"stats": [{ "value": "24/7", "label": "Support" }]
+	},
+	{
+		"_type": "marketing.integration",
+		"_key": "ppl5mrik",
+		"title": "Integrations",
+		"subtitle": "Connect with tools",
+		"integrations": [
+			{ "name": "Slack", "icon": "slack" },
+			{ "name": "GitHub", "icon": "github" }
+		]
+	},
+	{
+		"_type": "marketing.tabs",
+		"_key": "phukpjhh",
+		"title": "Interactive Tabs",
+		"subtitle": "Click through features",
+		"tabs": [
+			{
+				"title": "Design",
+				"description": "Customize everything.",
+				"icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2L2 22h20L12 2z\"/></svg>",
+				"image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80",
+				"imageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80"
+			}
+		],
+		"buttonText": "See all features",
+		"buttonUrl": "/features",
+		"secondaryButtonText": "Documentation",
+		"secondaryButtonUrl": "/docs"
+	},
+	{
+		"_type": "marketing.stickyCards",
+		"_key": "uh11j2d4",
+		"title": "Sticky Scroll Cards",
+		"subtitle": "Tagline",
+		"description": "Stack of cards that pin.",
+		"cards": [
+			{
+				"tagline": "Tag 1",
+				"title": "Card 1",
+				"description": "This is card 1",
+				"image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80",
+				"primaryButtonText": "View feature",
+				"primaryButtonUrl": "#",
+				"imageUrl": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80",
+				"secondaryButtonText": "Learn more",
+				"secondaryButtonUrl": "#"
+			},
+			{
+				"tagline": "Tag 2",
+				"title": "Card 2",
+				"description": "This is card 2",
+				"image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+				"primaryButtonText": "View feature",
+				"primaryButtonUrl": "#",
+				"imageUrl": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80",
+				"secondaryButtonText": "Learn more",
+				"secondaryButtonUrl": "#"
+			}
+		]
+	},
+	{
+		"_type": "marketing.founderNote",
+		"_key": "jlkty04h",
+		"title": "A Note from Our Founder",
+		"content": "We built this to solve our own problems.\n\nWe care deeply about craftsmanship.",
+		"founderName": "John Doe",
+		"founderRole": "Founder & CEO",
+		"founderAvatar": "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?w=120&h=120&fit=crop"
+	},
+	{
+		"_type": "marketing.scrollHighlight",
+		"_key": "bnox2rje",
+		"title": "Scroll Highlight",
+		"text": "This text will highlight as you scroll down the page, creating a very cool effect."
+	},
+	{
+		"_type": "marketing.buildFor",
+		"_key": "626w4jjv",
+		"title": "Built by developers,",
+		"subtitle": "crafted for founders"
+	},
+	{
+		"_type": "marketing.team",
+		"_key": "miv112y2",
+		"title": "OUR AWESOME UNIQUE TEAM",
+		"subtitle": "The people behind the product",
+		"members": [
+			{
+				"name": "Alex Turner",
+				"role": "Founder & CEO",
+				"avatar": "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?w=400&h=400&fit=crop"
+			},
+			{
+				"name": "Jordan Lee",
+				"role": "CTO",
+				"avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop"
+			},
+			{
+				"name": "Sarah Chen",
+				"role": "Head of Design",
+				"avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop"
+			}
+		]
+	},
+	{
+		"_type": "marketing.formBlock",
+		"_key": "yf2evnqu",
+		"title": "Contact Us",
+		"subtitle": "We would love to hear from you.",
+		"formType": "contact"
+	},
+	{
+		"_type": "marketing.mediaBlock",
+		"_key": "r7ql883s",
+		"mediaUrl": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1200&h=600&fit=crop",
+		"caption": "A standalone media block"
+	},
+	{
+		"_type": "marketing.blog",
+		"_key": "xw0samd4",
+		"title": "From our blog",
+		"subtitle": "Latest insights"
+	},
+	{
+		"_type": "marketing.archive",
+		"_key": "bgro8bz8",
+		"title": "Content archive",
+		"subtitle": "Search through past content"
+	},
+	{
+		"_type": "marketing.cta",
+		"_key": "94s4d4xu",
+		"headline": "Ready to build faster?",
+		"subheadline": "Join thousands of developers.",
+		"ctaLabel": "Get Started",
+		"ctaUrl": "/signup"
+	}
+]

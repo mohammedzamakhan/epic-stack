@@ -1,0 +1,30 @@
+---
+import Tick from './Tick.astro'
+
+interface Props {
+	ticks?: boolean
+}
+
+const { ticks = true } = Astro.props
+---
+
+<div class="pointer-events-none absolute inset-x-0 top-0" aria-hidden="true">
+	<div class="h-px w-full bg-hairline"></div>
+	<div
+		class="absolute top-0 h-px bg-hairline"
+		style="width: calc(50vw - 50%); left: calc(-50vw + 50%);"
+	></div>
+	<div
+		class="absolute top-0 h-px bg-hairline"
+		style="width: calc(50vw - 50%); right: calc(-50vw + 50%);"
+	></div>
+</div>
+
+{
+	ticks && (
+		<>
+			<Tick class="left-0 top-0 -translate-x-1/2" />
+			<Tick class="right-0 top-0 translate-x-1/2" />
+		</>
+	)
+}

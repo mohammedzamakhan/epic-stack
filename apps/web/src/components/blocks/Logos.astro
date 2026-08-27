@@ -1,6 +1,6 @@
 ---
-import GridDesign from '../GridDesign.astro'
-import Badge from '../ui/Badge.astro'
+import Section from '../site/Section.astro'
+import Button from '../ui/Button.astro'
 
 interface Props {
 	companies?: Array<{ 
@@ -31,36 +31,41 @@ const {
 		{ name: 'Dropbox' },
 		{ name: 'Slack' },
 	],
-	title = '// TRUSTED BY LEADING TEAMS',
+	title = 'Trusted by teams building the next generation of startups',
 } = Astro.props
 ---
 
-<section id="logos" class="relative" aria-labelledby="logos-heading">
-	<GridDesign />
-	<div
-		class="container relative mx-auto px-4  md:px-6 flex justify-center flex-col"
-	>
-		<h2 id="logos-heading" class="sr-only">{title}</h2>
-		<div class="relative">
-			<div
-				class="grid grid-cols-4 border-l border-t border-dashed md:grid-cols-12"
-			>
-				{
-					companies.map((company, idx) => (
-						<div class="col-span-2 flex items-center justify-center border-b border-r border-dashed bg-background">
+<Section seam={false} class="pt-6 pb-4">
+	<div class="flex items-center justify-between gap-4 pb-2">
+		<h2 class="text-[15px] font-medium text-foreground">{title}</h2>
+		<Button href="/posts" variant="outline" size="sm">
+			See customer stories
+		</Button>
+	</div>
+
+	<div class="grid grid-cols-3 gap-y-10 border-t border-hairline py-12 sm:grid-cols-3 md:grid-cols-6">
+		{
+			companies.map((company) => (
+				<div class="flex items-center justify-center px-2">
+					{
+						company.logo ? (
 							<img
 								width={112}
 								height={40}
-								src={company.logo ? getImageUrl(company.logo) : `https://cdn.magicui.design/companies/${company.name}.svg`}
-								class="my-4 h-10 w-28"
+								src={getImageUrl(company.logo) || `https://cdn.magicui.design/companies/${company.name}.svg`}
+								class="h-8 w-auto max-w-[7rem] opacity-40 transition-opacity hover:opacity-70"
 								alt={`${company.name} logo`}
 								loading="lazy"
 								decoding="async"
 							/>
-						</div>
-					))
-				}
-			</div>
-		</div>
+						) : (
+							<span class="text-center text-[16px] font-semibold tracking-tight text-foreground/35 transition-colors hover:text-foreground/60">
+								{company.name}
+							</span>
+						)
+					}
+				</div>
+			))
+		}
 	</div>
-</section>
+</Section>

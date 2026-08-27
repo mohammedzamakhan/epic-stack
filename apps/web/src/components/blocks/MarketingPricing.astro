@@ -7,8 +7,9 @@ interface Props {
 		badge?: string
 		plans?: Array<{
 			name: string
-			price: string
-			period?: string
+			monthlyPrice?: string
+			yearlyPrice?: string
+			price?: string // legacy support
 			description?: string
 			features?: string
 			ctaLabel?: string
@@ -26,13 +27,18 @@ const mappedPlans = plans?.map((p: any, idx: number) => {
 		? p.features.split('\n').filter(Boolean).map((f: string) => ({ name: f.trim(), icon: 'check' }))
 		: []
 
+	const rawMonthly = p.monthlyPrice || p.price || '0'
+	const rawYearly = p.yearlyPrice || p.price || '0'
+	const extractCurrency = (str: string) => (str.match(/^[^0-9a-zA-Z]+/) || [''])[0].trim() || '$'
+	const currency = extractCurrency(rawMonthly)
+
 	return {
 		id: `plan-${idx}`,
-		title: p.name,
+		title: p.name || 'Plan',
 		description: p.description || '',
-		monthlyPrice: p.price.replace('$', ''),
-		yearlyPrice: p.price.replace('$', ''),
-		currency: p.price.startsWith('$') ? '$' : '',
+		monthlyPrice: rawMonthly.replace(/^[^0-9a-zA-Z]+/, '').trim(),
+		yearlyPrice: rawYearly.replace(/^[^0-9a-zA-Z]+/, '').trim(),
+		currency: currency,
 		buttonText: p.ctaLabel || 'Get Started',
 		highlight: !!p.highlighted,
 		badge: p.highlighted ? 'Popular' : undefined,

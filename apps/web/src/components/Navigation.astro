@@ -13,7 +13,7 @@ const headerData = (await getHeader(currentLocale)) as any
 const navItems: any[] = Array.isArray(headerData?.navItems) ? headerData.navItems : []
 ---
 
-<nav class={isMobile ? 'flex flex-col space-y-1' : 'flex gap-6 items-center'}>
+<nav class={isMobile ? 'flex flex-col gap-1' : 'flex items-center gap-7'}>
   {
     navItems.map((item) => {
       if (item.menuType === 'megaMenu' && item.megaMenuColumns) {
@@ -41,8 +41,8 @@ const navItems: any[] = Array.isArray(headerData?.navItems) ? headerData.navItem
           href={href}
           target={target}
           class={isMobile 
-            ? 'block text-lg py-2 text-foreground hover:text-primary transition-colors'
-            : 'text-sm font-medium hover:text-primary transition-colors font-title uppercase'
+            ? 'block rounded-xl px-3 py-3 text-[16px] font-medium text-foreground transition-colors hover:bg-muted'
+            : 'text-[15px] text-foreground/80 transition-colors hover:text-foreground'
           }
         >
           {item.menuLabel}

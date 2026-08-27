@@ -1,7 +1,6 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
 import Button from '../components/ui/Button.astro'
-import GridDesign from '../components/GridDesign.astro'
 import SEO from '../components/SEO.astro'
 ---
 
@@ -13,25 +12,22 @@ import SEO from '../components/SEO.astro'
 		/>
 	</Fragment>
 
-	<section class="relative min-h-[70vh] flex items-center justify-center py-24 text-center">
-		<GridDesign />
-		<div class="container relative z-10 mx-auto px-4 max-w-xl">
-			<div class="space-y-6">
-				<span class="text-primary font-mono text-sm font-semibold tracking-wider uppercase">// 404 ERROR</span>
-				<h1 class="text-4xl md:text-6xl font-title text-foreground font-bold tracking-tight">
-					Page not found
-				</h1>
-				<p class="text-muted-foreground text-lg leading-relaxed">
-					Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
-				</p>
-				<div class="flex flex-wrap justify-center gap-4 pt-4">
-					<Button href="/" variant="default" size="lg">
-						Return Home
-					</Button>
-					<Button href="/posts" variant="secondary" size="lg">
-						Visit Blog
-					</Button>
-				</div>
+	<section class="flex min-h-[70vh] items-center justify-center px-5 py-24 text-center sm:px-8">
+		<div class="mx-auto max-w-xl space-y-6">
+			<p class="text-[13px] font-medium text-brand">404</p>
+			<h1 class="font-display text-balance text-[40px] font-medium tracking-[-0.03em] text-foreground sm:text-[52px]">
+				Page not found
+			</h1>
+			<p class="text-[17px] leading-relaxed text-muted-foreground">
+				Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
+			</p>
+			<div class="flex flex-wrap justify-center gap-3 pt-2">
+				<Button href="/" variant="brand">
+					Return home
+				</Button>
+				<Button href="/posts" variant="outline">
+					Visit blog
+				</Button>
 			</div>
 		</div>
 	</section>

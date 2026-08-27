@@ -1,0 +1,23 @@
+---
+import ShowcaseCards from './ShowcaseCards.astro'
+
+interface Props {
+	node: {
+		eyebrow?: string
+		title?: string
+		description?: string
+		cards?: any[]
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { eyebrow, title, description, cards } = node
+---
+
+<ShowcaseCards
+	eyebrow={eyebrow}
+	title={title}
+	description={description}
+	cards={cards}
+	blockType="showcaseCards"
+/>

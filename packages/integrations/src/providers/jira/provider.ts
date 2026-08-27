@@ -2,7 +2,7 @@
  * Jira integration provider implementation
  */
 
-import { validateInstanceUrl } from '@repo/security'
+import { ssrfSafeFetch } from '@repo/security'
 import {
 	type Integration,
 	type NoteIntegrationConnection,
@@ -123,14 +123,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 		urlStr: string,
 		init?: RequestInit,
 	): Promise<Response> {
-		const validation = validateInstanceUrl(urlStr)
-		if (!validation.valid) {
-			throw new Error(`SSRF security validation failed: ${validation.reason}`)
-		}
-		return fetch(urlStr, {
-			...init,
-			redirect: 'manual',
-		})
+		return ssrfSafeFetch(urlStr, init)
 	}
 
 	private async getBaseUrl(

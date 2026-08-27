@@ -183,7 +183,7 @@ export function getPublicShopProduct(organization: ShopOrganization) {
 	}
 }
 
-function getSiteBaseUrl(organization: {
+export function getSiteBaseUrl(organization: {
 	slug: string
 	customDomain: string | null
 }) {

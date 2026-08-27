@@ -2,6 +2,7 @@
 import Footer from '~/components/Footer.astro'
 import Header from '~/components/Header.astro'
 import Banner from '~/components/Banner.astro'
+import Frame from '~/components/site/Frame.astro'
 import '../styles/tailwind.css'
 import { getThemeFromCookie } from '~/utils/theme'
 import { getBanner } from '~/lib/emdash'
@@ -11,11 +12,9 @@ import { getDirection } from '@repo/i18n'
 const currentLocale = Astro.currentLocale ?? 'en'
 const dir = getDirection(currentLocale)
 
-// Get theme from cookie
 const cookieHeader = Astro.request.headers.get('cookie')
 const theme = getThemeFromCookie(cookieHeader)
 
-// Check if banner is enabled
 const banner = (await getBanner(currentLocale)) as any
 const isBannerEnabled: boolean = Boolean(banner?.isEnabled)
 ---
@@ -25,15 +24,11 @@ const isBannerEnabled: boolean = Boolean(banner?.isEnabled)
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="theme-color" content={theme === 'dark' ? '#12140f' : '#fbfbf9'} />
 
-
-
-		<!-- Preconnect to external CDN for logo images -->
 		<link rel="preconnect" href="https://cdn.magicui.design" crossorigin />
 		<link rel="dns-prefetch" href="https://cdn.magicui.design" />
 
-
-		<!-- Favicons -->
 		<link rel="icon" href="/favicon.ico" sizes="48x48" />
 		<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
 		<link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png" />
@@ -41,18 +36,15 @@ const isBannerEnabled: boolean = Boolean(banner?.isEnabled)
 
 		<slot name="head" />
 	</head>
-	<body>
+	<body class="min-h-screen bg-background">
 		<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-background focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
 		<Banner />
 		<Header bannerEnabled={isBannerEnabled} />
-		<main id="main-content" class={isBannerEnabled ? 'mt-16 max-w-screen' : 'mt-16 max-w-screen'}>
-			<slot />
+		<main id="main-content" class="min-h-screen">
+			<Frame>
+				<slot />
+				<Footer />
+			</Frame>
 		</main>
-
-		<!-- Footer -->
-		<div class="dark">
-			<Footer />
-		</div>
 	</body>
 </html>
-

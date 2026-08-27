@@ -1,6 +1,5 @@
 ---
 import { brand } from '@repo/config/brand'
-import GridDesign from './GridDesign.astro'
 import ThemeSwitcher from './ThemeSwitcher.astro'
 import LanguageSwitcher from './LanguageSwitcher.astro'
 import Button from './ui/Button.astro'
@@ -12,294 +11,125 @@ interface Props {
 
 const { bannerEnabled = false } = Astro.props
 
-// Get the current URL and transform it for the app subdomain
 const currentUrl = Astro.url
 const protocol = currentUrl.protocol
 const hostname = currentUrl.hostname
 const port = currentUrl.port
 
-// Create app subdomain URL - works with any domain
 const appHostname = hostname.startsWith('app.') ? hostname : `app.${hostname}`
-const docsHostname = hostname.startsWith('docs.')
-	? hostname
-	: `docs.${hostname}`
 const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
-const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
+const loginUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/login`
 ---
 
-<nav class="border-b text-foreground bg-background">
-	<header
-		id="main-header"
-		data-banner-enabled={bannerEnabled}
-		class={`fixed ${bannerEnabled ? 'top-12' : 'top-0'} inset-x-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 m-auto transition-all duration-200`}
+<header class="fixed inset-x-0 top-0 z-50" data-banner-enabled={bannerEnabled}>
+	<div
+		id="site-header-bar"
+		class="border-b border-transparent transition-colors duration-300"
 	>
-		<GridDesign />
-		<div
-			class="container relative flex h-16 items-center justify-between py-4 px-6 md:px-10 mx-auto"
+		<nav
+			class="mx-auto flex h-16 max-w-[1312px] items-center justify-between px-5 sm:px-8 lg:px-14"
+			aria-label="Main navigation"
 		>
-			<div class="flex items-center space-x-12 relative z-10">
-				<a href="/" class="flex items-center space-x-2">
-					<div class="h-8 rounded flex gap-1 items-center justify-center">
-						<svg width="52" height="52" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="10.0592" y="6.54337" width="0.414346" height="3.45289" transform="rotate(45 10.0592 6.54337)" fill="black"/>
-<rect x="7.03169" y="8.98492" width="0.414346" height="4.41969" transform="rotate(45 7.03169 8.98492)" fill="#FF2424"/>
-<rect x="7.61766" y="8.98492" width="0.414346" height="4.41969" transform="rotate(45 7.61766 8.98492)" fill="#FF2424"/>
-<rect x="12.3055" y="13.6727" width="0.414346" height="4.41969" transform="rotate(45 12.3055 13.6727)" fill="#FF2424"/>
-<path d="M12.3055 14.2587L12.5984 14.5517L9.47325 17.6769L9.18026 17.3839L12.3055 14.2587Z" fill="#FF2424"/>
-<rect x="6.34805" y="10.8405" width="0.414346" height="1.7955" transform="rotate(45 6.34805 10.8405)" fill="#FF2424"/>
-<rect x="10.4499" y="14.9424" width="0.414346" height="1.7955" transform="rotate(45 10.4499 14.9424)" fill="#FF2424"/>
-<rect x="17.7257" y="3.56467" width="0.414346" height="3.72912" transform="rotate(45 17.7257 3.56467)" fill="#FF2424"/>
-<rect x="17.4327" y="4.44363" width="0.414346" height="2.96948" transform="rotate(45 17.4327 4.44363)" fill="#FF2424"/>
-<rect x="16.8468" y="3.85767" width="0.414346" height="2.96948" transform="rotate(45 16.8468 3.85767)" fill="#FF2424"/>
-<rect x="17.1397" y="5.3226" width="0.414346" height="1.65739" transform="rotate(45 17.1397 5.3226)" fill="#FF2424"/>
-<rect x="15.9678" y="4.15067" width="0.414346" height="1.65739" transform="rotate(45 15.9678 4.15067)" fill="#FF2424"/>
-<rect x="5.46909" y="9.96155" width="0.414346" height="3.03854" transform="rotate(45 5.46909 9.96155)" fill="#FF2424"/>
-<rect x="11.3288" y="15.8213" width="0.414346" height="3.03854" transform="rotate(45 11.3288 15.8213)" fill="#FF2424"/>
-<rect x="5.17611" y="9.66858" width="0.414346" height="3.86723" transform="rotate(45 5.17611 9.66858)" fill="#0E0E0E"/>
-<path d="M11.6218 16.1143L11.9148 16.4073L9.18026 19.1418L8.88727 18.8488L11.6218 16.1143Z" fill="#111111"/>
-<rect x="7.91065" y="9.27792" width="0.414346" height="2.20985" transform="rotate(45 7.91065 9.27792)" fill="#0E0E0E"/>
-<rect x="12.0125" y="13.3797" width="0.414346" height="2.20985" transform="rotate(45 12.0125 13.3797)" fill="#111111"/>
-<rect x="6.7387" y="8.69196" width="0.414346" height="1.7955" transform="rotate(45 6.7387 8.69196)" fill="#0E0E0E"/>
-<rect x="5.66442" y="12.6961" width="0.414346" height="1.24304" transform="rotate(45 5.66442 12.6961)" fill="#0E0E0E"/>
-<rect x="5.66441" y="14.454" width="0.414346" height="1.24304" transform="rotate(45 5.66441 14.454)" fill="black"/>
-<rect x="5.07844" y="13.868" width="0.414346" height="1.72644" transform="rotate(45 5.07844 13.868)" fill="black"/>
-<rect x="7.42234" y="16.2119" width="0.414346" height="1.72644" transform="rotate(45 7.42234 16.2119)" fill="black"/>
-<rect x="7.12936" y="15.9189" width="0.414346" height="1.72644" transform="rotate(45 7.12936 15.9189)" fill="#EE8A05"/>
-<rect x="5.37143" y="15.919" width="0.414346" height="0.966808" transform="rotate(45 5.37143 15.919)" fill="#FCE923"/>
-<rect x="6.15273" y="15.7236" width="0.414346" height="0.690577" transform="rotate(45 6.15273 15.7236)" fill="#FCE923"/>
-<rect x="5.56675" y="15.1377" width="0.414346" height="0.690577" transform="rotate(45 5.56675 15.1377)" fill="#FCE923"/>
-<rect x="5.37143" y="14.161" width="0.414346" height="1.72644" transform="rotate(45 5.37143 14.161)" fill="#EE8A05"/>
-<rect x="4.78545" y="15.333" width="0.414346" height="1.38115" transform="rotate(45 4.78545 15.333)" fill="#EE8A05"/>
-<rect x="5.9574" y="16.5049" width="0.414346" height="1.38115" transform="rotate(45 5.9574 16.5049)" fill="#EE8A05"/>
-<rect x="4.98078" y="16.8956" width="0.414346" height="1.24304" transform="rotate(45 4.98078 16.8956)" fill="#EE8A05"/>
-<rect x="4.3948" y="16.8956" width="0.414346" height="1.24304" transform="rotate(45 4.3948 16.8956)" fill="#EE8A05"/>
-<rect x="4.3948" y="16.3096" width="0.414346" height="1.24304" transform="rotate(45 4.3948 16.3096)" fill="#EE8A05"/>
-<rect x="6.83636" y="15.626" width="0.414346" height="1.24304" transform="rotate(45 6.83636 15.626)" fill="black"/>
-<rect x="5.66441" y="16.2119" width="0.414346" height="0.966808" transform="rotate(45 5.66441 16.2119)" fill="black"/>
-<rect x="5.90857" y="17.1397" width="0.414346" height="0.89775" transform="rotate(45 5.90857 17.1397)" fill="black"/>
-<rect x="4.15065" y="15.3818" width="0.414346" height="0.89775" transform="rotate(45 4.15065 15.3818)" fill="black"/>
-<rect x="3.80883" y="16.3096" width="0.414346" height="0.828693" transform="rotate(45 3.80883 16.3096)" fill="black"/>
-<rect x="4.98078" y="17.4816" width="0.414346" height="0.828693" transform="rotate(45 4.98078 17.4816)" fill="black"/>
-<rect x="5.07844" y="15.626" width="0.414346" height="0.966808" transform="rotate(45 5.07844 15.626)" fill="black"/>
-<path d="M8.66753 15.6992L8.96052 15.9922L8.08156 16.8712L7.78857 16.5782L8.66753 15.6992Z" fill="black"/>
-<rect x="6.64104" y="11.1335" width="0.414346" height="1.7955" transform="rotate(45 6.64104 11.1335)" fill="#0E0E0E"/>
-<rect x="12.5984" y="14.5517" width="0.414346" height="1.7955" transform="rotate(45 12.5984 14.5517)" fill="black"/>
-<rect x="10.1569" y="14.6494" width="0.414346" height="1.7955" transform="rotate(45 10.1569 14.6494)" fill="#111111"/>
-<rect x="14.747" y="11.2312" width="0.414346" height="3.45289" transform="rotate(45 14.747 11.2312)" fill="black"/>
-<rect x="15.8213" y="9.57089" width="0.414346" height="1.93362" transform="rotate(45 15.8213 9.57089)" fill="black"/>
-<rect x="11.7195" y="5.46909" width="0.414346" height="1.93362" transform="rotate(45 11.7195 5.46909)" fill="black"/>
-<rect x="13.0379" y="4.73663" width="0.414346" height="1.45021" transform="rotate(45 13.0379 4.73663)" fill="black"/>
-<rect x="13.9169" y="4.44363" width="0.414346" height="0.828693" transform="rotate(45 13.9169 4.44363)" fill="black"/>
-<rect x="14.7958" y="4.15067" width="0.414346" height="0.828693" transform="rotate(45 14.7958 4.15067)" fill="black"/>
-<rect x="14.7958" y="4.73663" width="0.414346" height="0.414346" transform="rotate(45 14.7958 4.73663)" fill="black"/>
-<rect x="14.7958" y="5.3226" width="0.414346" height="0.414346" transform="rotate(45 14.7958 5.3226)" fill="black"/>
-<rect x="16.5538" y="6.49454" width="0.414346" height="0.414346" transform="rotate(45 16.5538 6.49454)" fill="black"/>
-<rect x="15.9678" y="6.49454" width="0.414346" height="0.414346" transform="rotate(45 15.9678 6.49454)" fill="black"/>
-<rect x="16.8468" y="6.20157" width="0.414346" height="0.414346" transform="rotate(45 16.8468 6.20157)" fill="#FF2424"/>
-<rect x="15.0888" y="4.44363" width="0.414346" height="0.414346" transform="rotate(45 15.0888 4.44363)" fill="#FF2424"/>
-<rect x="12.5984" y="6.93402" width="0.414346" height="0.414346" transform="rotate(45 12.5984 6.93402)" fill="black"/>
-<rect x="11.4265" y="8.10599" width="0.414346" height="0.414346" transform="rotate(45 11.4265 8.10599)" fill="black"/>
-<rect x="11.4265" y="8.69196" width="0.414346" height="0.414346" transform="rotate(45 11.4265 8.69196)" fill="black"/>
-<rect x="7.32468" y="8.69196" width="0.414346" height="0.414346" transform="rotate(45 7.32468 8.69196)" fill="#0E0E0E"/>
-<rect x="5.07844" y="12.1101" width="0.414346" height="0.414346" transform="rotate(45 5.07844 12.1101)" fill="#060606"/>
-<rect x="4.49247" y="12.1101" width="0.414346" height="0.414346" transform="rotate(45 4.49247 12.1101)" fill="#060606"/>
-<rect x="3.90649" y="12.1101" width="0.414346" height="0.414346" transform="rotate(45 3.90649 12.1101)" fill="#0E0E0E"/>
-<rect x="3.32052" y="12.1101" width="0.414346" height="0.414346" transform="rotate(45 3.32052 12.1101)" fill="#0E0E0E"/>
-<path d="M12.5984 13.9657L12.8914 14.2587L12.5984 14.5517L12.3055 14.2587L12.5984 13.9657Z" fill="#111111"/>
-<path d="M9.18026 16.2119L9.47325 16.5049L9.18026 16.7979L8.88727 16.5049L9.18026 16.2119Z" fill="#111111"/>
-<path d="M9.18026 16.7979L9.47325 17.0909L9.18026 17.3839L8.88727 17.0909L9.18026 16.7979Z" fill="#111111"/>
-<path d="M9.18026 17.3839L9.47325 17.6769L9.18026 17.9699L8.88727 17.6769L9.18026 17.3839Z" fill="#111111"/>
-<path d="M9.18026 17.9699L9.47325 18.2629L9.18026 18.5559L8.88727 18.2629L9.18026 17.9699Z" fill="#111111"/>
-<rect x="13.1844" y="9.86389" width="0.414346" height="0.414346" transform="rotate(45 13.1844 9.86389)" fill="black"/>
-<rect x="12.5984" y="9.86389" width="0.414346" height="0.414346" transform="rotate(45 12.5984 9.86389)" fill="black"/>
-<rect x="5.85974" y="15.4306" width="0.414346" height="0.690577" transform="rotate(45 5.85974 15.4306)" fill="black"/>
-<rect x="3.51584" y="17.1886" width="0.414346" height="0.414346" transform="rotate(45 3.51584 17.1886)" fill="black"/>
-<rect x="4.10181" y="17.7745" width="0.414346" height="0.414346" transform="rotate(45 4.10181 17.7745)" fill="black"/>
-<rect x="3.51584" y="17.7745" width="0.414346" height="0.414346" transform="rotate(45 3.51584 17.7745)" fill="black"/>
-<rect x="4.68779" y="16.6026" width="0.414346" height="0.414346" transform="rotate(45 4.68779 16.6026)" fill="black"/>
-<rect x="10.694" y="10.5964" width="0.414346" height="0.414346" transform="rotate(45 10.694 10.5964)" fill="black"/>
-<rect x="10.694" y="11.1823" width="0.414346" height="6.42237" transform="rotate(45 10.694 11.1823)" fill="black"/>
-<rect x="13.3309" y="5.0296" width="0.414346" height="10.4277" transform="rotate(45 13.3309 5.0296)" fill="#E5E5E5"/>
-<rect x="16.2608" y="7.95947" width="0.414346" height="10.4277" transform="rotate(45 16.2608 7.95947)" fill="#E5E5E5"/>
-<rect x="15.5283" y="9.27792" width="0.414346" height="7.59635" transform="rotate(45 15.5283 9.27792)" fill="#E5E5E5"/>
-<rect x="13.4774" y="10.1569" width="0.414346" height="6.90577" transform="rotate(45 13.4774 10.1569)" fill="#E5E5E5"/>
-<rect x="11.1335" y="7.81299" width="0.414346" height="6.90577" transform="rotate(45 11.1335 7.81299)" fill="#E5E5E5"/>
-<rect x="11.1335" y="8.39896" width="0.414346" height="6.49143" transform="rotate(45 11.1335 8.39896)" fill="#E5E5E5"/>
-<rect x="12.8914" y="10.1569" width="0.414346" height="6.49143" transform="rotate(45 12.8914 10.1569)" fill="#E5E5E5"/>
-<rect x="12.3055" y="10.1569" width="0.414346" height="6.14614" transform="rotate(45 12.3055 10.1569)" fill="#E5E5E5"/>
-<rect x="11.7195" y="10.1569" width="0.414346" height="1.45021" transform="rotate(45 11.7195 10.1569)" fill="#E5E5E5"/>
-<rect x="11.4265" y="9.86389" width="0.414346" height="1.03587" transform="rotate(45 11.4265 9.86389)" fill="#E5E5E5"/>
-<rect x="11.1335" y="9.57089" width="0.414346" height="1.45021" transform="rotate(45 11.1335 9.57089)" fill="#E5E5E5"/>
-<rect x="11.1335" y="8.98492" width="0.414346" height="6.14614" transform="rotate(45 11.1335 8.98492)" fill="#E5E5E5"/>
-<rect x="12.0125" y="5.76208" width="0.414346" height="7.59635" transform="rotate(45 12.0125 5.76208)" fill="#E5E5E5"/>
-<rect x="10.3522" y="6.83636" width="0.414346" height="3.45289" transform="rotate(45 10.3522 6.83636)" fill="#E5E5E5"/>
-<rect x="14.454" y="10.9382" width="0.414346" height="3.45289" transform="rotate(45 14.454 10.9382)" fill="#E5E5E5"/>
-<rect x="16.5538" y="7.08051" width="0.414346" height="3.1076" transform="rotate(45 16.5538 7.08051)" fill="#E5E5E5"/>
-<rect x="16.2608" y="6.78754" width="0.414346" height="2.69325" transform="rotate(45 16.2608 6.78754)" fill="#E5E5E5"/>
-<rect x="14.5029" y="5.0296" width="0.414346" height="2.69325" transform="rotate(45 14.5029 5.0296)" fill="#E5E5E5"/>
-<rect x="14.5029" y="5.61557" width="0.414346" height="1.86456" transform="rotate(45 14.5029 5.61557)" fill="#E5E5E5"/>
-<rect x="15.6748" y="6.78754" width="0.414346" height="1.86456" transform="rotate(45 15.6748 6.78754)" fill="#E5E5E5"/>
-<rect x="15.0888" y="6.78754" width="0.414346" height="1.03587" transform="rotate(45 15.0888 6.78754)" fill="#E5E5E5"/>
-<rect x="14.7958" y="6.49454" width="0.414346" height="1.03587" transform="rotate(45 14.7958 6.49454)" fill="#E5E5E5"/>
-<rect x="7.71532" y="14.747" width="0.414346" height="0.828693" transform="rotate(45 7.71532 14.747)" fill="#E5E5E5"/>
-<rect x="6.54338" y="13.5751" width="0.414346" height="0.828693" transform="rotate(45 6.54338 13.5751)" fill="#E5E5E5"/>
-<rect x="8.00831" y="15.04" width="0.414346" height="0.828693" transform="rotate(45 8.00831 15.04)" fill="#E5E5E5"/>
-<path d="M6.25039 13.2821L6.54337 13.5751L5.9574 14.161L5.66441 13.868L6.25039 13.2821Z" fill="#E5E5E5"/>
-<rect x="8.3013" y="15.333" width="0.552462" height="0.828693" transform="rotate(45 8.3013 15.333)" fill="#E5E5E5"/>
-<rect x="5.9574" y="12.9891" width="0.414346" height="0.828693" transform="rotate(45 5.9574 12.9891)" fill="#E5E5E5"/>
-<rect x="14.5029" y="6.20157" width="0.414346" height="1.03587" transform="rotate(45 14.5029 6.20157)" fill="#E5E5E5"/>
-<rect x="14.2099" y="4.7366" width="0.414346" height="3.1076" transform="rotate(45 14.2099 4.7366)" fill="#E5E5E5"/>
-<rect x="10.401" y="10.8893" width="0.414346" height="6.42237" transform="rotate(45 10.401 10.8893)" fill="#FF2424"/>
-<rect x="10.1081" y="10.5963" width="0.414346" height="6.42237" transform="rotate(45 10.1081 10.5963)" fill="black"/>
-<rect x="11.4265" y="9.27792" width="1.24304" height="0.414346" transform="rotate(45 11.4265 9.27792)" fill="black"/>
-<rect x="14.3564" y="8.69196" width="0.414346" height="0.414346" transform="rotate(45 14.3564 8.69196)" fill="black"/>
-<rect x="14.3564" y="8.10596" width="0.414346" height="0.414346" transform="rotate(45 14.3564 8.10596)" fill="black"/>
-<rect x="13.1844" y="6.93402" width="0.414346" height="0.414346" transform="rotate(45 13.1844 6.93402)" fill="black"/>
-<rect x="13.7704" y="6.93402" width="1.24304" height="0.414346" transform="rotate(45 13.7704 6.93402)" fill="black"/>
-<rect x="5.9574" y="12.4031" width="1.65739" height="0.414346" transform="rotate(45 5.9574 12.4031)" fill="#0E0E0E"/>
-<rect x="8.00831" y="14.454" width="1.65739" height="0.414346" transform="rotate(45 8.00831 14.454)" fill="black"/>
-<rect x="7.12935" y="15.333" width="1.38115" height="0.414346" transform="rotate(45 7.12935 15.333)" fill="black"/>
-<rect x="5.37143" y="13.5751" width="1.24304" height="0.414346" transform="rotate(45 5.37143 13.5751)" fill="black"/>
-<rect x="14.7958" y="5.90857" width="1.24304" height="0.414346" transform="rotate(45 14.7958 5.90857)" fill="black"/>
-<rect x="15.6748" y="3.85767" width="0.414346" height="0.828693" transform="rotate(45 15.6748 3.85767)" fill="black"/>
-<rect x="16.5538" y="3.56467" width="0.414346" height="0.828693" transform="rotate(45 16.5538 3.56467)" fill="#D9D9D9"/>
-<rect x="17.7257" y="4.73663" width="0.414346" height="0.828693" transform="rotate(45 17.7257 4.73663)" fill="black"/>
-<rect x="16.5538" y="3.56467" width="0.414346" height="0.828693" transform="rotate(45 16.5538 3.56467)" fill="black"/>
-<rect x="17.4327" y="3.2717" width="0.414346" height="0.828693" transform="rotate(45 17.4327 3.2717)" fill="black"/>
-<rect x="18.0675" y="3.22287" width="0.414346" height="0.483404" transform="rotate(45 18.0675 3.22287)" fill="black"/>
-<rect x="18.0187" y="3.85767" width="0.414346" height="0.828693" transform="rotate(45 18.0187 3.85767)" fill="black"/>
-<rect x="17.4327" y="5.61557" width="0.414346" height="0.828693" transform="rotate(45 17.4327 5.61557)" fill="black"/>
-<rect x="17.1397" y="6.49454" width="0.414346" height="0.828693" transform="rotate(45 17.1397 6.49454)" fill="black"/>
-<rect x="16.8468" y="7.3735" width="0.414346" height="0.828693" transform="rotate(45 16.8468 7.3735)" fill="black"/>
-<rect x="16.5538" y="8.25247" width="0.414346" height="1.45021" transform="rotate(45 16.5538 8.25247)" fill="black"/>
-<rect x="12.0125" y="6.93402" width="0.414346" height="1.24304" transform="rotate(45 12.0125 6.93402)" fill="black"/>
-<rect x="14.3564" y="9.27792" width="0.414346" height="1.24304" transform="rotate(45 14.3564 9.27792)" fill="black"/>
-<rect x="13.4774" y="7.22702" width="0.414346" height="2.90042" transform="rotate(45 13.4774 7.22702)" fill="#05A8ED"/>
-<rect x="13.7704" y="7.51999" width="0.414346" height="2.90042" transform="rotate(45 13.7704 7.51999)" fill="#05A8ED"/>
-<rect x="14.0634" y="7.81299" width="0.414346" height="2.90042" transform="rotate(45 14.0634 7.81299)" fill="#05A8ED"/>
-<rect x="14.0634" y="8.39896" width="0.414346" height="2.07173" transform="rotate(45 14.0634 8.39896)" fill="#05A8ED"/>
-<rect x="12.8914" y="7.22702" width="0.414346" height="2.07173" transform="rotate(45 12.8914 7.22702)" fill="#05A8ED"/>
-<rect x="12.3055" y="7.22702" width="0.414346" height="1.24304" transform="rotate(45 12.3055 7.22702)" fill="#05A8ED"/>
-<rect x="14.0634" y="8.98492" width="0.414346" height="1.24304" transform="rotate(45 14.0634 8.98492)" fill="#05A8ED"/>
-</svg>
-
-						<span class="font-semibold text-md font-title uppercase">{brand.name}</span>
-					</div>
+			<div class="flex items-center gap-2">
+				<a href="/" aria-label={`${brand.name} home`} class="flex items-center gap-2.5 text-foreground">
+					<svg
+						aria-hidden="true"
+						class="size-5 text-brand"
+						viewBox="0 0 65 65"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill="currentColor"
+							d="M39.445 25.555 37 17.163 65 0 47.821 28l-8.376-2.445Zm-13.89 0L28 17.163 0 0l17.179 28 8.376-2.445Zm13.89 13.89L37 47.837 65 65 47.821 37l-8.376 2.445Zm-13.89 0L28 47.837 0 65l17.179-28 8.376 2.445Z"
+						/>
+					</svg>
+					<span id="header-wordmark" class="text-[19px] font-semibold leading-none tracking-[-0.025em]">
+						{brand.name}
+					</span>
 				</a>
-
-				<!-- Desktop Navigation -->
-				<div class="hidden lg:flex items-center space-x-8">
-					<Navigation />
-				</div>
 			</div>
 
-			<div class="hidden lg:flex items-center gap-3 relative z-10">
-				<LanguageSwitcher />
+			<ul
+				id="header-center-nav"
+				class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex"
+			>
+				<Navigation />
+			</ul>
+
+			<div class="flex items-center gap-2">
 				<ThemeSwitcher />
+				<LanguageSwitcher />
 				<Button
-					href={demoUrl}
+					id="header-login-btn"
+					href={loginUrl}
 					target="_blank"
-					size="xl"
+					variant="outline"
+					size="sm"
+					class="hidden sm:inline-flex"
 				>
+					Log in
+				</Button>
+				<Button href={demoUrl} target="_blank" variant="solid" size="sm">
 					Get started
 				</Button>
+				<button
+					id="mobile-menu-trigger"
+					type="button"
+					class="grid size-10 place-items-center rounded-full text-foreground transition-colors hover:bg-muted lg:hidden"
+					aria-label="Open menu"
+					aria-expanded="false"
+					aria-controls="mobile-menu-panel"
+				>
+					<svg id="mobile-menu-icon-open" class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+					<svg id="mobile-menu-icon-close" class="hidden size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
 			</div>
+		</nav>
 
-			<!-- Mobile Navigation -->
-			<button
-				id="mobile-menu-trigger"
-				class="lg:hidden inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative z-10"
-				aria-label="Open menu"
-				aria-expanded="false"
-				aria-controls="mobile-menu-content"
-			>
-				<svg
-					class="h-6 w-6"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"></path>
-				</svg>
-			</button>
-		</div>
-	</header>
-
-	<!-- Mobile Menu Overlay -->
-	<div
-		id="mobile-menu-overlay"
-		role="dialog"
-		aria-modal="true"
-		class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm opacity-0 invisible transition-all duration-300 lg:hidden"
-	>
 		<div
-			id="mobile-menu-content"
-			aria-label="Mobile navigation menu"
-			class={`fixed right-0 ${bannerEnabled ? 'top-28' : 'top-0'} ${bannerEnabled ? 'h-[calc(100vh-7rem)]' : 'h-full'} w-full sm:w-80 bg-background border-l shadow-lg transform translate-x-full transition-transform duration-300`}
+			id="mobile-menu-panel"
+			class="max-h-0 overflow-hidden border-t border-hairline bg-background/95 backdrop-blur-xl transition-[max-height] duration-300 lg:hidden"
 		>
-			<!-- Close Button -->
-			<button
-				id="mobile-menu-close"
-				class="absolute top-4 right-4 p-2 rounded-md hover:bg-accent transition-colors"
-				aria-label="Close menu"
-			>
-				<svg
-					class="h-5 w-5"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"></path>
-				</svg>
-			</button>
-
-			<div class="flex flex-col space-y-6 p-6 mt-8">
-				<div class="space-y-2">
-					<Navigation isMobile={true} />
-				</div>
-
-				<div class="space-y-4 pt-6 border-t border-border/50">
-					<div class="flex items-center justify-between gap-3">
-						<LanguageSwitcher />
-						<ThemeSwitcher />
-					</div>
-					<Button
-						href={demoUrl}
-						class="w-full"
-						size="xl"
-						target="_blank"
-					>
+			<ul class="flex flex-col gap-1 px-5 py-4 sm:px-8">
+				<Navigation isMobile={true} />
+				<li class="mt-2 flex gap-2 px-3">
+					<Button href={loginUrl} target="_blank" variant="outline" size="sm" class="flex-1">
+						Log in
+					</Button>
+					<Button href={demoUrl} target="_blank" variant="solid" size="sm" class="flex-1">
 						Get started
 					</Button>
-				</div>
-			</div>
+				</li>
+			</ul>
 		</div>
 	</div>
-</nav>
+</header>
 
 <script>
-	// Store cleanup function to avoid duplicate listeners
 	let cleanup: (() => void) | null = null
 
 	function initHeader() {
-		// Clean up previous listeners before adding new ones
 		if (cleanup) {
 			cleanup()
 			cleanup = null
 		}
 
-		const header = document.getElementById('main-header')!
-		if (!header) return
+		const header = document.querySelector('header[data-banner-enabled]') as HTMLElement | null
+		const bar = document.getElementById('site-header-bar')
+		const centerNav = document.getElementById('header-center-nav')
+		const wordmark = document.getElementById('header-wordmark')
+		const loginBtn = document.getElementById('header-login-btn')
+		const mobileTrigger = document.getElementById('mobile-menu-trigger')
+		const mobilePanel = document.getElementById('mobile-menu-panel')
+		const iconOpen = document.getElementById('mobile-menu-icon-open')
+		const iconClose = document.getElementById('mobile-menu-icon-close')
+
+		if (!header || !bar) return
 
 		const isBannerEnabled = header.dataset.bannerEnabled === 'true'
 		const listeners: Array<{ el: EventTarget; type: string; fn: EventListener }> = []
@@ -309,69 +139,67 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 			listeners.push({ el, type, fn })
 		}
 
-		if (isBannerEnabled) {
-			function handleScroll() {
-				const currentScrollY = window.scrollY
-				const scrollThreshold = 48 // Banner height (top-12 = 3rem = 48px)
-
-				if (currentScrollY > scrollThreshold) {
-					header.classList.remove('top-12')
-					header.classList.add('top-0')
-				} else {
-					header.classList.remove('top-0')
-					header.classList.add('top-12')
-				}
-			}
-
-			addListener(window, 'scroll', handleScroll, { passive: true })
-			handleScroll()
+		function setScrolled(scrolled: boolean) {
+			bar!.classList.toggle('border-hairline', scrolled)
+			bar!.classList.toggle('bg-background/80', scrolled)
+			bar!.classList.toggle('backdrop-blur-xl', scrolled)
+			bar!.classList.toggle('border-transparent', !scrolled)
+			centerNav?.classList.toggle('lg:hidden', scrolled)
+			wordmark?.classList.toggle('hidden', scrolled)
+			loginBtn?.classList.toggle('sm:hidden', scrolled)
 		}
 
-		// Mobile menu
-		const mobileMenuTrigger = document.getElementById('mobile-menu-trigger')
-		const mobileMenuOverlay = document.getElementById('mobile-menu-overlay')
-		const mobileMenuContent = document.getElementById('mobile-menu-content')
-		const mobileMenuClose = document.getElementById('mobile-menu-close')
+		function handleScroll() {
+			const threshold = isBannerEnabled ? 72 : 24
+			setScrolled(window.scrollY > threshold)
+
+			if (isBannerEnabled) {
+				header!.style.top = window.scrollY > 48 ? '0' : '3rem'
+			}
+		}
 
 		function closeMobileMenu() {
-			mobileMenuOverlay?.classList.add('opacity-0', 'invisible')
-			mobileMenuOverlay?.classList.remove('opacity-100', 'visible')
-			mobileMenuContent?.classList.add('translate-x-full')
-			mobileMenuTrigger?.setAttribute('aria-expanded', 'false')
-			document.body.style.overflow = ''
+			mobilePanel?.classList.remove('max-h-[480px]')
+			mobilePanel?.classList.add('max-h-0', 'border-t-0')
+			mobileTrigger?.setAttribute('aria-expanded', 'false')
+			iconOpen?.classList.remove('hidden')
+			iconClose?.classList.add('hidden')
 		}
 
 		function openMobileMenu() {
-			mobileMenuOverlay?.classList.remove('opacity-0', 'invisible')
-			mobileMenuOverlay?.classList.add('opacity-100', 'visible')
-			mobileMenuContent?.classList.remove('translate-x-full')
-			mobileMenuTrigger?.setAttribute('aria-expanded', 'true')
-			document.body.style.overflow = 'hidden'
+			mobilePanel?.classList.remove('max-h-0', 'border-t-0')
+			mobilePanel?.classList.add('max-h-[480px]')
+			mobileTrigger?.setAttribute('aria-expanded', 'true')
+			iconOpen?.classList.add('hidden')
+			iconClose?.classList.remove('hidden')
 		}
 
-		function handleOverlayClick(e: Event) {
-			if (e.target === mobileMenuOverlay) {
-				closeMobileMenu()
-			}
+		function toggleMobileMenu() {
+			const isOpen = mobileTrigger?.getAttribute('aria-expanded') === 'true'
+			if (isOpen) closeMobileMenu()
+			else openMobileMenu()
 		}
 
-		if (mobileMenuTrigger && mobileMenuOverlay && mobileMenuContent) {
-			addListener(mobileMenuTrigger, 'click', openMobileMenu)
-			addListener(mobileMenuOverlay, 'click', handleOverlayClick)
-			if (mobileMenuClose) {
-				addListener(mobileMenuClose, 'click', closeMobileMenu)
-			}
+		addListener(window, 'scroll', handleScroll, { passive: true })
+		handleScroll()
+
+		if (isBannerEnabled) {
+			header.style.top = '3rem'
 		}
 
-		// Store cleanup function
+		if (mobileTrigger) {
+			addListener(mobileTrigger, 'click', toggleMobileMenu)
+		}
+
+		mobilePanel?.querySelectorAll('a').forEach((link) => {
+			addListener(link, 'click', closeMobileMenu)
+		})
+
 		cleanup = () => {
 			listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn))
 		}
 	}
 
-	// Initialize on load
 	initHeader()
-
-	// Re-initialize on Astro page transitions
 	document.addEventListener('astro:page-load', initHeader)
 </script>

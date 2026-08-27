@@ -1,0 +1,21 @@
+---
+import StickyShowcase from './StickyShowcase.astro'
+
+interface Props {
+	node: {
+		title?: string
+		description?: string
+		rows?: any[]
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { title, description, rows } = node
+---
+
+<StickyShowcase
+	title={title}
+	description={description}
+	rows={rows}
+	blockType="stickyShowcase"
+/>

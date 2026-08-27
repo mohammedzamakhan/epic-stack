@@ -1,5 +1,6 @@
 ---
-import GridDesign from '../GridDesign.astro'
+import MarkdownText from '../site/MarkdownText.astro'
+import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 
 const {
 	title = 'Launch your SaaS faster than ever',
-	description = 'Everything you need to build a production-ready SaaS. Authentication, payments, emails, and more - all pre-built and ready to go.',
+	description = 'Everything you need to build a production-ready SaaS. Authentication, payments, emails, and more — all pre-built and ready to go.',
 	buttonText = 'View features',
 	buttonUrl = '#features',
 	features = [
@@ -38,53 +39,35 @@ const {
 		{
 			title: 'Infrastructure',
 			description:
-				'Production-ready setup with TypeScript, Remix, Drizzle, and modern tooling.',
+				'Production-ready setup with TypeScript, React Router, Drizzle, and modern tooling.',
 		},
 	],
 } = Astro.props
 ---
 
-<div class="dark">
-	<section class="w-full bg-background text-foreground py-16 md:py-24 relative">
-		<GridDesign />
-		<div class="container mx-auto px-4 md:px-6 relative">
-			<div class="grid lg:grid-cols-12 gap-8 lg:gap-0">
-				<div class="space-y-6 col-span-6 px-4">
-					<h2 class="text-4xl md:text-6xl tracking-tight font-title">
-						{title}
-					</h2>
-					<p class="text-xl text-muted-foreground max-w-[600px]">
-						{description}
-					</p>
-					<Button href={buttonUrl} variant="outline" size="lg">
-						{buttonText}
-					</Button>
-				</div>
-				<div class="grid sm:grid-cols-2 col-span-6 relative gap-2 p-2">
-					<div aria-hidden="true" class="absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.6),rgba(68,85,119,0.6)_1px,transparent_1px,transparent_5px)]" />
-
-					{
-						features.map((feature, idx) => (
-							<div class="bg-muted dark:bg-background p-[1px] relative z-10">
-								<div class="bg-card ring-border ring-1 shadow-sm overflow-hidden">
-									{/* Card Header */}
-									<header class="px-6 py-4">
-										<h3 class="text-base font-medium text-card-foreground flex items-center gap-2">
-											{feature.title}
-										</h3>
-									</header>
-									{/* Card Body */}
-									<div class="p-5.5 pt-0">
-										<p class="text-sm text-muted-foreground leading-relaxed">
-											{feature.description}
-										</p>
-									</div>
-								</div>
-							</div>
-						))
-					}
-				</div>
-			</div>
+<Section class="py-16 sm:py-20 lg:py-24">
+	<div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-start">
+		<div class="space-y-6">
+			<h2 class="font-display max-w-xl text-balance text-[32px] font-medium tracking-[-0.02em] sm:text-[40px]">
+				{title}
+			</h2>
+			<MarkdownText content={description} class="max-w-md text-pretty text-[16px] leading-relaxed text-muted-foreground" />
+			<Button href={buttonUrl} variant="brand">
+				{buttonText}
+			</Button>
 		</div>
-	</section>
-</div>
+
+		<ul class="grid grid-cols-1 gap-5 sm:grid-cols-2 list-none p-0 m-0">
+			{
+				features.map((feature) => (
+					<li class="rounded-3xl border border-hairline bg-card p-6">
+						<h3 class="text-[15px] font-semibold text-foreground">{feature.title}</h3>
+						<p class="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+							{feature.description}
+						</p>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</Section>
