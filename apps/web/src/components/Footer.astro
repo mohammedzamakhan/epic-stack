@@ -78,7 +78,7 @@ const displayColumns = hasDynamicColumns ? columns : fallbackColumns
 		{
 			displayColumns.map((column: any) => (
 				<nav aria-label={column.title} class="flex flex-col">
-					<h3 class="text-[13px] font-medium text-foreground">{column.title}</h3>
+					<p class="text-[13px] font-medium text-foreground">{column.title}</p>
 					<ul class="mt-4 flex flex-col gap-3">
 						{column.links?.map((linkRef: any) => {
 							const link = linkRef.link
