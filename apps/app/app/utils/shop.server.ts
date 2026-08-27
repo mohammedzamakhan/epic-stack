@@ -1,6 +1,6 @@
 /**
- * Organization shop utilities — Stripe Connect onboarding, product config,
- * checkout sessions, and order recording (US region only).
+ * Organization shop utilities — product config, checkout, and order recording
+ * (US region only). Payment processors are accessed via @repo/payments.
  */
 
 import { getDomainUrl } from '@repo/common'
@@ -15,14 +15,18 @@ import {
 } from '@repo/database'
 import {
 	calculateShopFees,
-	createConnectAccountLink,
-	createConnectExpressAccount,
-	createConnectLoginLink,
-	createShopCheckoutSession,
-	createShopPaymentIntent,
-	createStripeProvider,
-	retrieveConnectAccountStatus,
+	createShopCommerce,
+	createShopCommerceConfigFromEnv,
+	isShopAvailableForOrganization as isShopSnapshotAvailable,
+	mapOrganizationToShopSnapshot,
+	normalizeShopProcessor,
+	SHOP_ORDER_METADATA_TYPE,
 	SHOP_PLATFORM_FEE_PERCENT,
+	shopProcessorToDbValue,
+	type ShopCommerce,
+	type ShopOrderUpsert,
+	type ShopOrganizationSnapshot,
+	type ShopProcessorId,
 } from '@repo/payments'
 import {
 	getTenantDb,
@@ -30,125 +34,50 @@ import {
 	customers,
 	customerPaymentMethods,
 } from '@repo/tenant-db'
-import type Stripe from 'stripe'
 import { resolveVerifiedShopCustomer } from '#app/utils/tenant-customer-auth.server.ts'
-import { type ShopOrganization } from './shop.types.ts'
+import { type ShopOrganization, type ShopOrderSummary } from './shop.types.ts'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-	throw new Error('STRIPE_SECRET_KEY environment variable is not set!')
+let shopCommerce = createShopCommerce(
+	createShopCommerceConfigFromEnv(process.env),
+)
+
+function getShopCommerce() {
+	return shopCommerce
 }
 
-const paymentProvider = createStripeProvider(process.env.STRIPE_SECRET_KEY)
-const stripe = paymentProvider.getClient()
-
-let cachedStripePublishableKey: string | undefined
-
-function loadStripePublishableKey() {
-	const key = process.env.STRIPE_PUBLISHABLE_KEY?.trim()
-	if (!key) {
-		throw new Error('STRIPE_PUBLISHABLE_KEY environment variable is not set!')
-	}
-	if (shouldValidateShopStripeKeys()) {
-		assertStripePublishableKey(process.env.STRIPE_SECRET_KEY!, key)
-	}
-	return key
+export function configureShopCommerceForTests(
+	config: Parameters<typeof createShopCommerceConfigFromEnv>[0],
+) {
+	shopCommerce = createShopCommerce(createShopCommerceConfigFromEnv(config))
 }
 
-function shouldValidateShopStripeKeys() {
-	return process.env.MOCKS !== 'true' && process.env.NODE_ENV !== 'test'
+export {
+	SHOP_PLATFORM_FEE_PERCENT,
+	calculateShopFees,
+	isShopAvailableForOrganization,
+	normalizeShopProcessor,
+	SHOP_PROCESSOR_CATALOG,
+	getShopProcessorDefinition,
+	shopProcessorToDbValue,
+	type ShopOrganization,
+	type ShopOrderSummary,
+	type ShopProcessorId,
+} from './shop.types.ts'
+
+export function listConfiguredShopProcessors() {
+	return getShopCommerce().listConfiguredProcessors()
 }
 
-export { SHOP_PLATFORM_FEE_PERCENT, calculateShopFees } from '@repo/payments'
-export type { ShopOrganization, ShopOrderSummary } from './shop.types.ts'
-
-function getStripeErrorMessage(error: unknown) {
-	if (error instanceof Error && error.message) {
-		return error.message.replaceAll(
-			process.env.STRIPE_SECRET_KEY ?? '',
-			'[redacted]',
-		)
-	}
-	return 'Stripe request failed'
+export function isHostedShopConfigured() {
+	return getShopCommerce().isProcessorConfigured('mor')
 }
 
-async function withSafeStripe<T>(operation: () => Promise<T>): Promise<T> {
-	try {
-		return await operation()
-	} catch (error) {
-		throw new Error(getStripeErrorMessage(error))
-	}
+export function getHostedShopDashboardUrl() {
+	return getShopCommerce().getHostedDashboardUrl('mor')
 }
 
-function getStripeKeyPayload(key: string) {
-	return key.match(/^(?:sk|rk|pk)_(?:test|live)_(.+)$/)?.[1] ?? null
-}
-
-function getStripeKeyMode(key: string) {
-	if (key.startsWith('sk_test_') || key.startsWith('pk_test_')) return 'test'
-	if (key.startsWith('sk_live_') || key.startsWith('pk_live_')) return 'live'
-	return null
-}
-
-function assertStripePublishableKey(secretKey: string, publishableKey: string) {
-	if (publishableKey.includes('***')) {
-		throw new Error(
-			'STRIPE_PUBLISHABLE_KEY is still the schema placeholder. Add your real pk_test_ key to apps/app/.env.',
-		)
-	}
-
-	if (
-		!publishableKey.startsWith('pk_test_') &&
-		!publishableKey.startsWith('pk_live_')
-	) {
-		throw new Error(
-			'STRIPE_PUBLISHABLE_KEY must be a valid pk_test_ or pk_live_ key.',
-		)
-	}
-
-	const secretMode = getStripeKeyMode(secretKey)
-	const publishableMode = getStripeKeyMode(publishableKey)
-	if (secretMode && publishableMode && secretMode !== publishableMode) {
-		throw new Error(
-			'STRIPE_PUBLISHABLE_KEY mode does not match STRIPE_SECRET_KEY (test vs live).',
-		)
-	}
-
-	const secretPayload = getStripeKeyPayload(secretKey)
-	const publishablePayload = getStripeKeyPayload(publishableKey)
-	if (!secretPayload || !publishablePayload) return
-
-	// New-format keys embed the account id (51…). Legacy pk_test keys do not, so only
-	// compare when both keys use the new format.
-	const usesNewFormat = (payload: string) =>
-		payload.startsWith('51') && payload.length >= 20
-
-	if (usesNewFormat(secretPayload) && usesNewFormat(publishablePayload)) {
-		const compareLength = Math.min(
-			secretPayload.length,
-			publishablePayload.length,
-			14,
-		)
-		if (
-			secretPayload.slice(0, compareLength) !==
-			publishablePayload.slice(0, compareLength)
-		) {
-			throw new Error(
-				'STRIPE_PUBLISHABLE_KEY does not match STRIPE_SECRET_KEY (different Stripe accounts). Copy the publishable key from the same Stripe dashboard as your secret key.',
-			)
-		}
-		return
-	}
-
-	console.warn(
-		'STRIPE_PUBLISHABLE_KEY uses a legacy format; account-id cross-check was skipped. Ensure both keys belong to the same Stripe account.',
-	)
-}
-
-function getStripePublishableKey() {
-	if (!cachedStripePublishableKey) {
-		cachedStripePublishableKey = loadStripePublishableKey()
-	}
-	return cachedStripePublishableKey
+export function getCheckoutShopDashboardUrl() {
+	return getShopCommerce().getProcessorDashboardUrl('checkout')
 }
 
 const shopOrganizationColumns = {
@@ -159,14 +88,40 @@ const shopOrganizationColumns = {
 	hasProvisionedDb: OrganizationTable.hasProvisionedDb,
 	customDomain: OrganizationTable.customDomain,
 	sitePublished: OrganizationTable.sitePublished,
+	shopPaymentProvider: OrganizationTable.shopPaymentProvider,
 	stripeConnectAccountId: OrganizationTable.stripeConnectAccountId,
 	stripeConnectChargesEnabled: OrganizationTable.stripeConnectChargesEnabled,
 	stripeConnectPayoutsEnabled: OrganizationTable.stripeConnectPayoutsEnabled,
+	checkoutSubEntityId: OrganizationTable.checkoutSubEntityId,
+	checkoutChargesEnabled: OrganizationTable.checkoutChargesEnabled,
+	checkoutPayoutsEnabled: OrganizationTable.checkoutPayoutsEnabled,
+	polarProductId: OrganizationTable.polarProductId,
 	shopProductName: OrganizationTable.shopProductName,
 	shopProductDescription: OrganizationTable.shopProductDescription,
 	shopProductPriceCents: OrganizationTable.shopProductPriceCents,
 	shopEnabled: OrganizationTable.shopEnabled,
 } as const
+
+function toShopSnapshot(
+	organization: Pick<
+		ShopOrganization,
+		| 'dataRegion'
+		| 'shopPaymentProvider'
+		| 'shopEnabled'
+		| 'shopProductName'
+		| 'shopProductDescription'
+		| 'shopProductPriceCents'
+		| 'stripeConnectAccountId'
+		| 'stripeConnectChargesEnabled'
+		| 'stripeConnectPayoutsEnabled'
+		| 'checkoutSubEntityId'
+		| 'checkoutChargesEnabled'
+		| 'checkoutPayoutsEnabled'
+		| 'polarProductId'
+	>,
+): ShopOrganizationSnapshot {
+	return mapOrganizationToShopSnapshot(organization)
+}
 
 export async function findPublishedShopOrganization(options: {
 	slug?: string | null
@@ -199,33 +154,18 @@ export async function findPublishedShopOrganization(options: {
 		)
 		.limit(1)
 
-	return organization || null
-}
-
-export function isShopAvailableForOrganization(
-	organization: Pick<
-		ShopOrganization,
-		| 'dataRegion'
-		| 'stripeConnectAccountId'
-		| 'stripeConnectChargesEnabled'
-		| 'shopEnabled'
-		| 'shopProductName'
-		| 'shopProductPriceCents'
-	>,
-) {
-	return (
-		(organization.dataRegion || 'us') === 'us' &&
-		Boolean(organization.stripeConnectAccountId) &&
-		organization.stripeConnectChargesEnabled &&
-		organization.shopEnabled &&
-		Boolean(organization.shopProductName?.trim()) &&
-		typeof organization.shopProductPriceCents === 'number' &&
-		organization.shopProductPriceCents >= 50
-	)
+	return organization
+		? {
+				...organization,
+				shopPaymentProvider: normalizeShopProcessor(
+					organization.shopPaymentProvider,
+				),
+			}
+		: null
 }
 
 export function getPublicShopProduct(organization: ShopOrganization) {
-	if (!isShopAvailableForOrganization(organization)) return null
+	if (!isShopSnapshotAvailable(toShopSnapshot(organization))) return null
 
 	const { platformFeeCents, orgPayoutCents } = calculateShopFees(
 		organization.shopProductPriceCents!,
@@ -236,6 +176,7 @@ export function getPublicShopProduct(organization: ShopOrganization) {
 		description: organization.shopProductDescription,
 		priceCents: organization.shopProductPriceCents!,
 		currency: 'usd',
+		processor: normalizeShopProcessor(organization.shopPaymentProvider),
 		platformFeePercent: SHOP_PLATFORM_FEE_PERCENT,
 		platformFeeCents,
 		orgPayoutCents,
@@ -268,8 +209,8 @@ export async function syncConnectAccountStatus(organizationId: string) {
 
 	if (!organization?.stripeConnectAccountId) return null
 
-	const status = await withSafeStripe(() =>
-		retrieveConnectAccountStatus(stripe, organization.stripeConnectAccountId!),
+	const status = await getShopCommerce().retrieveConnectAccountStatus(
+		organization.stripeConnectAccountId,
 	)
 
 	await db
@@ -292,20 +233,17 @@ export async function startConnectOnboarding(
 	>,
 ) {
 	if ((organization.dataRegion || 'us') !== 'us') {
-		throw new Error(
-			'Stripe Connect shop is only available for US organizations.',
-		)
+		throw new Error('Shop payouts are only available for US organizations.')
 	}
 
 	let accountId = organization.stripeConnectAccountId
+	const commerce = getShopCommerce()
 
 	if (!accountId) {
-		const account = await withSafeStripe(() =>
-			createConnectExpressAccount(stripe, {
-				organizationId: organization.id,
-				organizationName: organization.name,
-			}),
-		)
+		const account = await commerce.createConnectExpressAccount({
+			organizationId: organization.id,
+			organizationName: organization.name,
+		})
 
 		const [claimed] = await db
 			.update(OrganizationTable)
@@ -338,25 +276,117 @@ export async function startConnectOnboarding(
 	}
 
 	const appBase = getDomainUrl(request)
-	const refreshUrl = `${appBase}/${organization.slug}/settings/shop?connect=refresh`
-	const returnUrl = `${appBase}/${organization.slug}/settings/shop?connect=return`
-
-	const accountLink = await withSafeStripe(() =>
-		createConnectAccountLink(stripe, {
-			accountId,
-			refreshUrl,
-			returnUrl,
-		}),
-	)
-
-	return accountLink.url
+	return commerce.createConnectOnboardingLink({
+		accountId: accountId!,
+		refreshUrl: `${appBase}/${organization.slug}/settings/shop?connect=refresh`,
+		returnUrl: `${appBase}/${organization.slug}/settings/shop?connect=return`,
+	})
 }
 
 export async function createConnectDashboardLink(accountId: string) {
-	const loginLink = await withSafeStripe(() =>
-		createConnectLoginLink(stripe, accountId),
+	return getShopCommerce().createConnectDashboardLink(accountId)
+}
+
+export async function syncCheckoutSubEntityStatus(organizationId: string) {
+	const [organization] = await db
+		.select({
+			id: OrganizationTable.id,
+			checkoutSubEntityId: OrganizationTable.checkoutSubEntityId,
+		})
+		.from(OrganizationTable)
+		.where(eq(OrganizationTable.id, organizationId))
+		.limit(1)
+
+	if (!organization?.checkoutSubEntityId) return null
+
+	const status = await getShopCommerce().retrieveCheckoutSubEntityStatus(
+		organization.checkoutSubEntityId,
 	)
-	return loginLink.url
+
+	await db
+		.update(OrganizationTable)
+		.set({
+			checkoutChargesEnabled: status.chargesEnabled,
+			checkoutPayoutsEnabled: status.payoutsEnabled,
+			updatedAt: new Date(),
+		})
+		.where(eq(OrganizationTable.id, organizationId))
+
+	return status
+}
+
+export async function inviteCheckoutSubEntityOnboarding(
+	organization: Pick<
+		ShopOrganization,
+		'id' | 'dataRegion' | 'checkoutSubEntityId'
+	>,
+	inviteeEmail: string,
+) {
+	if ((organization.dataRegion || 'us') !== 'us') {
+		throw new Error('Shop payouts are only available for US organizations.')
+	}
+
+	if (organization.checkoutSubEntityId) {
+		await syncCheckoutSubEntityStatus(organization.id)
+		return { id: organization.checkoutSubEntityId }
+	}
+
+	const entity = await getShopCommerce().inviteCheckoutSubEntity({
+		organizationId: organization.id,
+		inviteeEmail,
+	})
+
+	await db
+		.update(OrganizationTable)
+		.set({
+			shopPaymentProvider: shopProcessorToDbValue('checkout'),
+			checkoutSubEntityId: entity.id,
+			updatedAt: new Date(),
+		})
+		.where(eq(OrganizationTable.id, organization.id))
+
+	return entity
+}
+
+export async function syncHostedShopProduct(
+	organization: Pick<
+		ShopOrganization,
+		| 'id'
+		| 'name'
+		| 'dataRegion'
+		| 'polarProductId'
+		| 'shopProductName'
+		| 'shopProductDescription'
+		| 'shopProductPriceCents'
+	>,
+) {
+	if ((organization.dataRegion || 'us') !== 'us') {
+		throw new Error('Shop checkout is only available for US organizations.')
+	}
+
+	const productName =
+		organization.shopProductName?.trim() || `${organization.name} shop product`
+	const priceCents = organization.shopProductPriceCents ?? 1999
+
+	const product = await getShopCommerce().syncHostedCatalogProduct({
+		productId: organization.polarProductId,
+		organizationId: organization.id,
+		organizationName: organization.name,
+		productName,
+		productDescription: organization.shopProductDescription,
+		amountCents: priceCents,
+	})
+
+	await db
+		.update(OrganizationTable)
+		.set({
+			shopPaymentProvider: shopProcessorToDbValue('mor'),
+			polarProductId: product.id,
+			updatedAt: new Date(),
+		})
+		.where(eq(OrganizationTable.id, organization.id))
+
+	return product
 }
 
 export async function updateShopProduct(
@@ -366,8 +396,13 @@ export async function updateShopProduct(
 		productDescription?: string
 		priceCents: number
 		enabled: boolean
+		paymentProvider?: ShopProcessorId
 	},
 ) {
+	const provider = data.paymentProvider
+		? normalizeShopProcessor(data.paymentProvider)
+		: undefined
+
 	await db
 		.update(OrganizationTable)
 		.set({
@@ -375,6 +410,9 @@ export async function updateShopProduct(
 			shopProductDescription: data.productDescription?.trim() || null,
 			shopProductPriceCents: data.priceCents,
 			shopEnabled: data.enabled,
+			...(provider
+				? { shopPaymentProvider: shopProcessorToDbValue(provider) }
+				: {}),
 			updatedAt: new Date(),
 		})
 		.where(eq(OrganizationTable.id, organizationId))
@@ -386,6 +424,7 @@ export async function createPublicShopCheckoutSession(options: {
 	host?: string | null
 	customerId?: string | null
 	customerEmail?: string | null
+	embed?: boolean
 }) {
 	const organization = await findPublishedShopOrganization({
 		slug: options.slug,
@@ -400,7 +439,8 @@ export async function createPublicShopCheckoutSession(options: {
 		throw new Response('Shop is not available in this region', { status: 403 })
 	}
 
-	if (!isShopAvailableForOrganization(organization)) {
+	const snapshot = toShopSnapshot(organization)
+	if (!isShopSnapshotAvailable(snapshot)) {
 		throw new Response('Shop is not configured', { status: 404 })
 	}
 
@@ -413,15 +453,14 @@ export async function createPublicShopCheckoutSession(options: {
 	if (options.customerEmail) {
 		throw new Response(
 			'Customer email must not be supplied in the request body',
-			{
-				status: 400,
-			},
+			{ status: 400 },
 		)
 	}
 
+	const processor = normalizeShopProcessor(organization.shopPaymentProvider)
 	const siteBase = getSiteBaseUrl(organization)
 	const metadata: Record<string, string> = {
-		type: 'shop_order',
+		type: SHOP_ORDER_METADATA_TYPE,
 		orgId: organization.id,
 		productName: organization.shopProductName!,
 	}
@@ -430,20 +469,29 @@ export async function createPublicShopCheckoutSession(options: {
 		metadata.customerId = verifiedCustomer.customerId
 	}
 
-	const session = await withSafeStripe(() =>
-		createShopCheckoutSession(stripe, {
-			connectedAccountId: organization.stripeConnectAccountId!,
-			productName: organization.shopProductName!,
-			productDescription: organization.shopProductDescription,
-			amountCents: organization.shopProductPriceCents!,
-			successUrl: `${siteBase}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
-			cancelUrl: `${siteBase}/shop`,
-			metadata,
-			customerEmail: verifiedCustomer?.customerEmail ?? null,
-		}),
-	)
+	const session = await getShopCommerce().createCheckout({
+		processor,
+		productName: organization.shopProductName!,
+		productDescription: organization.shopProductDescription,
+		amountCents: organization.shopProductPriceCents!,
+		connectAccountId: organization.stripeConnectAccountId,
+		checkoutSubEntityId: organization.checkoutSubEntityId,
+		hostedProductId: organization.polarProductId,
+		successUrl:
+			processor === 'mor'
+				? `${siteBase}/shop/success?checkout_id={CHECKOUT_ID}`
+				: processor === 'checkout'
+					? `${siteBase}/shop/success`
+					: `${siteBase}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
+		cancelUrl: `${siteBase}/shop`,
+		returnUrl: `${siteBase}/shop`,
+		metadata,
+		customerEmail: verifiedCustomer?.customerEmail ?? null,
+		externalCustomerId: verifiedCustomer?.customerId ?? null,
+		embedOrigin: options.embed ? new URL(siteBase).origin : null,
+	})
 
-	return { session, organization }
+	return { session, organization, processor }
 }
 
 export async function createPublicShopPaymentIntent(options: {
@@ -465,8 +513,17 @@ export async function createPublicShopPaymentIntent(options: {
 		throw new Response('Shop is not available in this region', { status: 403 })
 	}
 
-	if (!isShopAvailableForOrganization(organization)) {
+	const snapshot = toShopSnapshot(organization)
+	if (!isShopSnapshotAvailable(snapshot)) {
 		throw new Response('Shop is not configured', { status: 404 })
+	}
+
+	const processor = normalizeShopProcessor(organization.shopPaymentProvider)
+	if (processor !== 'connect') {
+		throw new Response(
+			'This checkout processor uses hosted checkout instead of inline card payments',
+			{ status: 400 },
+		)
 	}
 
 	const verifiedCustomer = await resolveVerifiedShopCustomer(
@@ -476,7 +533,7 @@ export async function createPublicShopPaymentIntent(options: {
 	)
 
 	const metadata: Record<string, string> = {
-		type: 'shop_order',
+		type: SHOP_ORDER_METADATA_TYPE,
 		orgId: organization.id,
 		productName: organization.shopProductName!,
 	}
@@ -485,40 +542,35 @@ export async function createPublicShopPaymentIntent(options: {
 		metadata.customerId = verifiedCustomer.customerId
 	}
 
-	let stripeCustomerId: string | undefined
+	let platformCustomerId: string | undefined
 	if (verifiedCustomer?.customerId) {
 		const tenantDb = await getTenantDb(organization.id)
-		stripeCustomerId = await getOrCreateShopStripeCustomer(
+		platformCustomerId = await getOrCreateConnectPlatformCustomer(
 			tenantDb,
 			verifiedCustomer.customerId,
 		)
-		await syncCustomerPaymentMethodsToStripe(
+		await syncCustomerPaymentMethodsToConnect(
 			tenantDb,
 			verifiedCustomer.customerId,
-			stripeCustomerId,
+			platformCustomerId,
 		)
 	}
 
-	const paymentIntent = await withSafeStripe(() =>
-		createShopPaymentIntent(stripe, {
-			connectedAccountId: organization.stripeConnectAccountId!,
-			amountCents: organization.shopProductPriceCents!,
-			currency: 'usd',
-			metadata,
-			stripeCustomerId,
-			setupFutureUsage: stripeCustomerId ? 'off_session' : undefined,
-		}),
-	)
-
-	if (!paymentIntent.client_secret) {
-		throw new Response('Unable to create payment intent', { status: 500 })
-	}
+	const payment = await getShopCommerce().createInlineCardPayment({
+		connectAccountId: organization.stripeConnectAccountId!,
+		amountCents: organization.shopProductPriceCents!,
+		currency: 'usd',
+		metadata,
+		platformCustomerId,
+		saveForFutureUse: Boolean(platformCustomerId),
+	})
 
 	return {
-		clientSecret: paymentIntent.client_secret,
-		paymentIntentId: paymentIntent.id,
-		publishableKey: getStripePublishableKey(),
+		clientSecret: payment.clientSecret,
+		paymentIntentId: payment.paymentId,
+		publishableKey: payment.publishableKey,
 		organization,
+		processor: payment.processor,
 	}
 }
 
@@ -534,6 +586,7 @@ export async function listOrganizationShopOrders(organizationId: string) {
 				orgPayoutCents: shopOrders.orgPayoutCents,
 				currency: shopOrders.currency,
 				status: shopOrders.status,
+				paymentProvider: shopOrders.paymentProvider,
 				createdAt: shopOrders.createdAt,
 				customerName: customers.name,
 				customerPhone: customers.phone,
@@ -548,75 +601,141 @@ export async function listOrganizationShopOrders(organizationId: string) {
 	}
 }
 
-export async function recordShopOrderFromCheckoutSession(
-	session: Stripe.Checkout.Session,
-) {
-	if (session.metadata?.type !== 'shop_order') return null
-
-	const orgId = session.metadata.orgId
-	if (!orgId) return null
-
-	const amountCents = session.amount_total
-	if (amountCents == null) return null
-
-	const { platformFeeCents, orgPayoutCents } = calculateShopFees(amountCents)
-	const paymentIntentId =
-		typeof session.payment_intent === 'string'
-			? session.payment_intent
-			: session.payment_intent?.id || null
-
+export async function recordShopOrder(order: ShopOrderUpsert) {
 	const customerId = await resolveShopOrderCustomerId(
-		orgId,
-		session.metadata.customerId || null,
+		order.orgId,
+		order.customerIdFromMetadata,
 	)
-	const productName =
-		session.metadata.productName || session.metadata.product_name || 'Product'
+	const tenantDb = await getTenantDb(order.orgId)
+	return upsertShopOrder(tenantDb, order, customerId)
+}
 
-	const tenantDb = await getTenantDb(orgId)
-	const orderId = await upsertShopOrder(tenantDb, {
-		customerId,
-		productName,
-		amountCents,
-		platformFeeCents,
-		orgPayoutCents,
-		currency: session.currency || 'usd',
-		stripeCheckoutSessionId: session.id,
-		stripePaymentIntentId: paymentIntentId,
-		status: session.payment_status === 'paid' ? 'paid' : 'pending',
-	})
+export async function recordShopOrderFromConnectWebhook(
+	event: unknown,
+	eventType: string,
+) {
+	const commerce = getShopCommerce()
 
-	if (paymentIntentId && customerId && session.payment_status === 'paid') {
-		try {
-			const paymentIntent = await withSafeStripe(() =>
-				stripe.paymentIntents.retrieve(paymentIntentId, {
-					expand: ['payment_method'],
-				}),
-			)
-			await syncCustomerPaymentMethodFromIntent(
-				tenantDb,
-				customerId,
-				paymentIntent,
-			)
-		} catch (error) {
-			console.error(
-				'Failed to sync payment method from checkout session:',
-				error,
-			)
-		}
+	if (eventType === 'checkout.session.completed') {
+		const order = commerce.mapConnectCheckoutSessionToOrder(
+			event as Parameters<ShopCommerce['mapConnectCheckoutSessionToOrder']>[0],
+		)
+		if (!order) return null
+		return recordShopOrder(order)
 	}
 
-	return orderId
+	if (eventType === 'payment_intent.succeeded') {
+		const order = commerce.mapConnectPaymentIntentToOrder(
+			event as Parameters<ShopCommerce['mapConnectPaymentIntentToOrder']>[0],
+		)
+		if (!order) return null
+		const orderId = await recordShopOrder(order)
+
+		if (order.customerIdFromMetadata && order.status === 'paid') {
+			try {
+				const paymentIntent = await commerce.retrievePaymentIntent(
+					order.processorPaymentId!,
+				)
+				const tenantDb = await getTenantDb(order.orgId)
+				await syncCustomerPaymentMethodFromConnectIntent(
+					tenantDb,
+					order.customerIdFromMetadata,
+					paymentIntent,
+				)
+			} catch (error) {
+				console.error(
+					'Failed to sync payment method from connect checkout:',
+					error,
+				)
+			}
+		}
+
+		return orderId
+	}
+
+	return null
 }
 
-function mapPaymentIntentStatus(
-	status: Stripe.PaymentIntent.Status,
-): 'paid' | 'pending' | 'failed' {
-	if (status === 'succeeded') return 'paid'
-	if (status === 'canceled') return 'failed'
-	return 'pending'
+export async function recordShopOrderFromCheckoutWebhook(
+	payload: string,
+	signature: string,
+) {
+	const event = getShopCommerce().parseCheckoutWebhookEvent(
+		getShopCommerce().verifyCheckoutWebhook(payload, signature),
+	)
+	if (!event) return null
+	return recordShopOrder(event.order)
 }
 
-async function getOrCreateShopStripeCustomer(
+export async function handleConnectAccountUpdated(event: unknown) {
+	const update = getShopCommerce().mapConnectAccountUpdate(
+		event as Parameters<ShopCommerce['mapConnectAccountUpdate']>[0],
+	)
+	if (!update) return
+
+	await db
+		.update(OrganizationTable)
+		.set({
+			stripeConnectChargesEnabled: update.chargesEnabled,
+			stripeConnectPayoutsEnabled: update.payoutsEnabled,
+			updatedAt: new Date(),
+		})
+		.where(
+			and(
+				eq(OrganizationTable.id, update.organizationId),
+				eq(OrganizationTable.stripeConnectAccountId, update.accountId),
+			),
+		)
+}
+
+export async function getPublicShopOrderStatus(options: {
+	slug?: string | null
+	host?: string | null
+	sessionId?: string | null
+	paymentIntentId?: string | null
+	checkoutId?: string | null
+	checkoutPaymentId?: string | null
+}) {
+	const organization = await findPublishedShopOrganization({
+		slug: options.slug,
+		host: options.host,
+	})
+
+	if (!organization) {
+		throw new Response('Organization not found', { status: 404 })
+	}
+
+	const processor = normalizeShopProcessor(organization.shopPaymentProvider)
+
+	try {
+		const result = await getShopCommerce().getOrderStatus({
+			processor,
+			organizationId: organization.id,
+			sessionId: options.sessionId,
+			paymentId: options.checkoutPaymentId || options.paymentIntentId,
+			checkoutId: options.checkoutId,
+		})
+
+		if (result.order) {
+			try {
+				await recordShopOrder(result.order)
+			} catch (error) {
+				console.error('Failed to record shop order:', error)
+			}
+		}
+
+		return {
+			status: result.status,
+			productName: result.productName,
+			amountCents: result.amountCents,
+			currency: result.currency,
+		}
+	} catch {
+		throw new Response('Order not found', { status: 404 })
+	}
+}
+
+async function getOrCreateConnectPlatformCustomer(
 	tenantDb: Awaited<ReturnType<typeof getTenantDb>>,
 	customerId: string,
 ) {
@@ -640,50 +759,29 @@ async function getOrCreateShopStripeCustomer(
 		return customer.stripeCustomerId
 	}
 
-	const stripeCustomer = await withSafeStripe(() =>
-		stripe.customers.create({
+	const platformCustomerId =
+		await getShopCommerce().createConnectPlatformCustomer({
 			name: customer.name,
-			email: customer.email || undefined,
-			phone: customer.phone || undefined,
+			email: customer.email,
+			phone: customer.phone,
 			metadata: { tenantCustomerId: customer.id },
-		}),
-	)
+		})
 
 	await tenantDb
 		.update(customers)
 		.set({
-			stripeCustomerId: stripeCustomer.id,
+			stripeCustomerId: platformCustomerId,
 			updatedAt: new Date(),
 		})
 		.where(eq(customers.id, customer.id))
 
-	return stripeCustomer.id
+	return platformCustomerId
 }
 
-async function attachPaymentMethodToStripeCustomer(
-	stripeCustomerId: string,
-	paymentMethodId: string,
-) {
-	try {
-		await withSafeStripe(() =>
-			stripe.paymentMethods.attach(paymentMethodId, {
-				customer: stripeCustomerId,
-			}),
-		)
-	} catch (error) {
-		const code =
-			error && typeof error === 'object' && 'code' in error
-				? String((error as { code?: string }).code)
-				: ''
-		if (code === 'resource_already_exists') return
-		throw error
-	}
-}
-
-async function syncCustomerPaymentMethodsToStripe(
+async function syncCustomerPaymentMethodsToConnect(
 	tenantDb: Awaited<ReturnType<typeof getTenantDb>>,
 	customerId: string,
-	stripeCustomerId: string,
+	platformCustomerId: string,
 ) {
 	const methods = await tenantDb
 		.select({
@@ -692,29 +790,48 @@ async function syncCustomerPaymentMethodsToStripe(
 		.from(customerPaymentMethods)
 		.where(eq(customerPaymentMethods.customerId, customerId))
 
+	const commerce = getShopCommerce()
 	for (const method of methods) {
 		try {
-			await attachPaymentMethodToStripeCustomer(
-				stripeCustomerId,
+			await commerce.attachPaymentMethodToCustomer(
+				platformCustomerId,
 				method.stripePaymentMethodId,
 			)
 		} catch (error) {
 			console.error(
-				'Failed to attach saved payment method to Stripe customer:',
+				'Failed to attach saved payment method to platform customer:',
 				error,
 			)
 		}
 	}
 }
 
-async function resolvePaymentMethodFromIntent(
-	paymentIntent: Stripe.PaymentIntent,
-): Promise<Stripe.PaymentMethod | null> {
+async function syncCustomerPaymentMethodFromConnectIntent(
+	tenantDb: Awaited<ReturnType<typeof getTenantDb>>,
+	customerId: string | null,
+	paymentIntent: Awaited<ReturnType<ShopCommerce['retrievePaymentIntent']>>,
+) {
+	if (!customerId || paymentIntent.status !== 'succeeded') return
+
+	try {
+		const paymentMethod =
+			await resolvePaymentMethodFromConnectIntent(paymentIntent)
+		if (paymentMethod?.card) {
+			await recordCustomerPaymentMethod(tenantDb, customerId, paymentMethod)
+		}
+	} catch (error) {
+		console.error('Failed to record customer payment method:', error)
+	}
+}
+
+async function resolvePaymentMethodFromConnectIntent(
+	paymentIntent: Awaited<ReturnType<ShopCommerce['retrievePaymentIntent']>>,
+) {
 	if (
 		typeof paymentIntent.payment_method === 'object' &&
 		paymentIntent.payment_method
 	) {
-		return paymentIntent.payment_method as Stripe.PaymentMethod
+		return paymentIntent.payment_method
 	}
 
 	const paymentMethodId =
@@ -723,13 +840,32 @@ async function resolvePaymentMethodFromIntent(
 			: null
 	if (!paymentMethodId) return null
 
-	return withSafeStripe(() => stripe.paymentMethods.retrieve(paymentMethodId))
+	const commerce = getShopCommerce()
+	const paymentIntentWithMethod = await commerce.retrievePaymentIntent(
+		paymentIntent.id,
+	)
+	if (
+		typeof paymentIntentWithMethod.payment_method === 'object' &&
+		paymentIntentWithMethod.payment_method
+	) {
+		return paymentIntentWithMethod.payment_method
+	}
+
+	return null
 }
 
 async function recordCustomerPaymentMethod(
 	tenantDb: Awaited<ReturnType<typeof getTenantDb>>,
 	customerId: string,
-	paymentMethod: Stripe.PaymentMethod,
+	paymentMethod: {
+		id: string
+		card?: {
+			brand: string
+			last4: string
+			exp_month: number
+			exp_year: number
+		} | null
+	},
 ) {
 	if (!paymentMethod.card) return
 
@@ -753,8 +889,6 @@ async function recordCustomerPaymentMethod(
 		.limit(1)
 
 	if (existing) {
-		// First customer to save a Stripe PM id owns the tenant row; later customers
-		// with the same PM (e.g. shared family card) are not re-linked.
 		if (existing.customerId !== customerId) {
 			console.warn(
 				'Skipping payment method sync: card already saved for another customer',
@@ -776,67 +910,11 @@ async function recordCustomerPaymentMethod(
 		.limit(1)
 
 	if (customer?.stripeCustomerId) {
-		await attachPaymentMethodToStripeCustomer(
+		await getShopCommerce().attachPaymentMethodToCustomer(
 			customer.stripeCustomerId,
 			paymentMethod.id,
 		)
 	}
-}
-
-async function syncCustomerPaymentMethodFromIntent(
-	tenantDb: Awaited<ReturnType<typeof getTenantDb>>,
-	customerId: string | null,
-	paymentIntent: Stripe.PaymentIntent,
-) {
-	if (!customerId || paymentIntent.status !== 'succeeded') return
-
-	try {
-		const paymentMethod = await resolvePaymentMethodFromIntent(paymentIntent)
-		if (paymentMethod) {
-			await recordCustomerPaymentMethod(tenantDb, customerId, paymentMethod)
-		}
-	} catch (error) {
-		console.error('Failed to record customer payment method:', error)
-	}
-}
-
-export async function recordShopOrderFromPaymentIntent(
-	paymentIntent: Stripe.PaymentIntent,
-) {
-	if (paymentIntent.metadata?.type !== 'shop_order') return null
-
-	const orgId = paymentIntent.metadata.orgId
-	if (!orgId) return null
-
-	const amountCents = paymentIntent.amount
-	if (amountCents == null) return null
-
-	const { platformFeeCents, orgPayoutCents } = calculateShopFees(amountCents)
-	const customerId = await resolveShopOrderCustomerId(
-		orgId,
-		paymentIntent.metadata.customerId || null,
-	)
-	const productName =
-		paymentIntent.metadata.productName ||
-		paymentIntent.metadata.product_name ||
-		'Product'
-
-	const tenantDb = await getTenantDb(orgId)
-	const orderId = await upsertShopOrder(tenantDb, {
-		customerId,
-		productName,
-		amountCents,
-		platformFeeCents,
-		orgPayoutCents,
-		currency: paymentIntent.currency || 'usd',
-		stripeCheckoutSessionId: null,
-		stripePaymentIntentId: paymentIntent.id,
-		status: mapPaymentIntentStatus(paymentIntent.status),
-	})
-
-	await syncCustomerPaymentMethodFromIntent(tenantDb, customerId, paymentIntent)
-
-	return orderId
 }
 
 async function resolveShopOrderCustomerId(
@@ -855,43 +933,48 @@ async function resolveShopOrderCustomerId(
 	return customerRow?.id ?? null
 }
 
-type ShopOrderUpsertInput = {
-	customerId: string | null
-	productName: string
-	amountCents: number
-	platformFeeCents: number
-	orgPayoutCents: number
-	currency: string
-	stripeCheckoutSessionId: string | null
-	stripePaymentIntentId: string | null
-	status: 'paid' | 'pending' | 'failed'
-}
-
 async function upsertShopOrder(
 	tenantDb: Awaited<ReturnType<typeof getTenantDb>>,
-	order: ShopOrderUpsertInput,
+	order: ShopOrderUpsert,
+	customerId: string | null,
 ) {
+	const paymentProvider = shopProcessorToDbValue(order.processor)
 	const updateSet = {
 		status: order.status,
-		customerId: order.customerId,
-		stripeCheckoutSessionId: order.stripeCheckoutSessionId,
-		stripePaymentIntentId: order.stripePaymentIntentId,
+		customerId,
+		paymentProvider,
+		stripeCheckoutSessionId:
+			order.processor === 'connect' ? order.processorCheckoutId : null,
+		stripePaymentIntentId:
+			order.processor === 'connect' ? order.processorPaymentId : null,
+		polarCheckoutId:
+			order.processor === 'mor' ? order.processorCheckoutId : null,
+		polarOrderId: order.processor === 'mor' ? order.processorOrderId : null,
+		checkoutSessionId:
+			order.processor === 'checkout' ? order.processorCheckoutId : null,
+		checkoutPaymentId:
+			order.processor === 'checkout' ? order.processorPaymentId : null,
 		updatedAt: new Date(),
 	}
 
 	const values = {
-		customerId: order.customerId,
+		customerId,
 		productName: order.productName,
 		amountCents: order.amountCents,
 		platformFeeCents: order.platformFeeCents,
 		orgPayoutCents: order.orgPayoutCents,
 		currency: order.currency,
-		stripeCheckoutSessionId: order.stripeCheckoutSessionId,
-		stripePaymentIntentId: order.stripePaymentIntentId,
+		paymentProvider,
+		stripeCheckoutSessionId: updateSet.stripeCheckoutSessionId,
+		stripePaymentIntentId: updateSet.stripePaymentIntentId,
+		polarCheckoutId: updateSet.polarCheckoutId,
+		polarOrderId: updateSet.polarOrderId,
+		checkoutSessionId: updateSet.checkoutSessionId,
+		checkoutPaymentId: updateSet.checkoutPaymentId,
 		status: order.status,
 	}
 
-	if (order.stripeCheckoutSessionId) {
+	if (values.stripeCheckoutSessionId) {
 		const [row] = await tenantDb
 			.insert(shopOrders)
 			.values(values)
@@ -903,7 +986,7 @@ async function upsertShopOrder(
 		if (row?.id) return row.id
 	}
 
-	if (order.stripePaymentIntentId) {
+	if (values.stripePaymentIntentId) {
 		const [row] = await tenantDb
 			.insert(shopOrders)
 			.values(values)
@@ -912,104 +995,56 @@ async function upsertShopOrder(
 				set: updateSet,
 			})
 			.returning({ id: shopOrders.id })
+		if (row?.id) return row.id
+	}
+
+	if (values.polarCheckoutId) {
+		const [row] = await tenantDb
+			.insert(shopOrders)
+			.values(values)
+			.onConflictDoUpdate({
+				target: shopOrders.polarCheckoutId,
+				set: updateSet,
+			})
+			.returning({ id: shopOrders.id })
+		if (row?.id) return row.id
+	}
+
+	if (values.polarOrderId) {
+		const [row] = await tenantDb
+			.insert(shopOrders)
+			.values(values)
+			.onConflictDoUpdate({
+				target: shopOrders.polarOrderId,
+				set: updateSet,
+			})
+			.returning({ id: shopOrders.id })
+		if (row?.id) return row.id
+	}
+
+	if (values.checkoutSessionId) {
+		const [row] = await tenantDb
+			.insert(shopOrders)
+			.values(values)
+			.onConflictDoUpdate({
+				target: shopOrders.checkoutSessionId,
+				set: updateSet,
+			})
+			.returning({ id: shopOrders.id })
+		if (row?.id) return row.id
+	}
+
+	if (values.checkoutPaymentId) {
+		const [row] = await tenantDb
+			.insert(shopOrders)
+			.values(values)
+			.onConflictDoUpdate({
+				target: shopOrders.checkoutPaymentId,
+				set: updateSet,
+			})
+			.returning({ id: shopOrders.id })
 		return row?.id ?? null
 	}
 
 	return null
-}
-
-export async function handleConnectAccountUpdated(account: Stripe.Account) {
-	const organizationId = account.metadata?.organizationId
-	if (!organizationId) return
-
-	await db
-		.update(OrganizationTable)
-		.set({
-			stripeConnectChargesEnabled: Boolean(account.charges_enabled),
-			stripeConnectPayoutsEnabled: Boolean(account.payouts_enabled),
-			updatedAt: new Date(),
-		})
-		.where(
-			and(
-				eq(OrganizationTable.id, organizationId),
-				eq(OrganizationTable.stripeConnectAccountId, account.id),
-			),
-		)
-}
-
-export async function getPublicShopOrderStatus(options: {
-	slug?: string | null
-	host?: string | null
-	sessionId?: string | null
-	paymentIntentId?: string | null
-}) {
-	const organization = await findPublishedShopOrganization({
-		slug: options.slug,
-		host: options.host,
-	})
-
-	if (!organization) {
-		throw new Response('Organization not found', { status: 404 })
-	}
-
-	if (options.paymentIntentId) {
-		const paymentIntent = await withSafeStripe(() =>
-			stripe.paymentIntents.retrieve(options.paymentIntentId!, {
-				expand: ['payment_method'],
-			}),
-		)
-
-		if (paymentIntent.metadata?.orgId !== organization.id) {
-			throw new Response('Order not found', { status: 404 })
-		}
-
-		if (
-			paymentIntent.status === 'succeeded' &&
-			paymentIntent.metadata?.type === 'shop_order'
-		) {
-			try {
-				await recordShopOrderFromPaymentIntent(paymentIntent)
-			} catch (error) {
-				console.error('Failed to record shop order from payment intent:', error)
-			}
-		}
-
-		return {
-			status:
-				paymentIntent.status === 'succeeded' ? 'paid' : paymentIntent.status,
-			productName: paymentIntent.metadata.productName || 'Product',
-			amountCents: paymentIntent.amount,
-			currency: paymentIntent.currency || 'usd',
-		}
-	}
-
-	if (!options.sessionId) {
-		throw new Response('Order not found', { status: 404 })
-	}
-
-	const session = await withSafeStripe(() =>
-		stripe.checkout.sessions.retrieve(options.sessionId!),
-	)
-
-	if (session.metadata?.orgId !== organization.id) {
-		throw new Response('Order not found', { status: 404 })
-	}
-
-	if (
-		session.payment_status === 'paid' &&
-		session.metadata?.type === 'shop_order'
-	) {
-		try {
-			await recordShopOrderFromCheckoutSession(session)
-		} catch (error) {
-			console.error('Failed to record shop order from checkout session:', error)
-		}
-	}
-
-	return {
-		status: session.payment_status,
-		productName: session.metadata.productName || 'Product',
-		amountCents: session.amount_total,
-		currency: session.currency || 'usd',
-	}
 }

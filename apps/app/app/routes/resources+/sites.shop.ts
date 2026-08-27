@@ -48,6 +48,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	return Response.json(
 		{
 			available: true as const,
+			processor: product.processor,
 			organization: {
 				name: organization.name,
 				slug: organization.slug,

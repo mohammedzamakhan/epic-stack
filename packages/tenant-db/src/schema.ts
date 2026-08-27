@@ -349,8 +349,17 @@ export const shopOrders = sqliteTable(
 		platformFeeCents: integer('platform_fee_cents').notNull(),
 		orgPayoutCents: integer('org_payout_cents').notNull(),
 		currency: text('currency').notNull().default('usd'),
+		paymentProvider: text('payment_provider', {
+			enum: ['stripe', 'polar', 'checkout'],
+		})
+			.notNull()
+			.default('stripe'),
 		stripeCheckoutSessionId: text('stripe_checkout_session_id'),
 		stripePaymentIntentId: text('stripe_payment_intent_id'),
+		polarCheckoutId: text('polar_checkout_id'),
+		polarOrderId: text('polar_order_id'),
+		checkoutSessionId: text('checkout_session_id'),
+		checkoutPaymentId: text('checkout_payment_id'),
 		status: text('status', {
 			enum: ['pending', 'paid', 'failed', 'refunded'],
 		})
@@ -371,6 +380,16 @@ export const shopOrders = sqliteTable(
 		),
 		uniqueIndex('shop_orders_stripe_payment_intent_id_unique').on(
 			table.stripePaymentIntentId,
+		),
+		uniqueIndex('shop_orders_polar_checkout_id_unique').on(
+			table.polarCheckoutId,
+		),
+		uniqueIndex('shop_orders_polar_order_id_unique').on(table.polarOrderId),
+		uniqueIndex('shop_orders_checkout_session_id_unique').on(
+			table.checkoutSessionId,
+		),
+		uniqueIndex('shop_orders_checkout_payment_id_unique').on(
+			table.checkoutPaymentId,
 		),
 	],
 )

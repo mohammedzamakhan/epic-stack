@@ -13,10 +13,11 @@ const checkoutSchema = z.object({
 	host: z.string().optional(),
 	customerId: z.string().optional(),
 	customerEmail: z.string().email().optional().or(z.literal('')),
+	embed: z.boolean().optional(),
 })
 
 /**
- * Creates a Stripe Checkout session for a tenant site shop purchase.
+ * Creates a shop checkout session for a tenant site purchase.
  */
 export async function action({ request }: ActionFunctionArgs) {
 	if (request.method !== 'POST') {
@@ -50,12 +51,13 @@ export async function action({ request }: ActionFunctionArgs) {
 	}
 
 	try {
-		const { session } = await createPublicShopCheckoutSession({
+		const { session, processor } = await createPublicShopCheckoutSession({
 			request,
 			slug: parsed.data.slug,
 			host: parsed.data.host,
 			customerId: parsed.data.customerId,
 			customerEmail: parsed.data.customerEmail || null,
+			embed: parsed.data.embed,
 		})
 
 		if (!session.url) {
@@ -65,7 +67,11 @@ export async function action({ request }: ActionFunctionArgs) {
 			)
 		}
 
-		return Response.json({ checkoutUrl: session.url, sessionId: session.id })
+		return Response.json({
+			checkoutUrl: session.url,
+			sessionId: session.id,
+			processor,
+		})
 	} catch (error) {
 		if (error instanceof Response) throw error
 		console.error('Shop checkout error:', error)

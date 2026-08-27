@@ -190,6 +190,7 @@ export type PublicShopProduct = {
 	description: string | null
 	priceCents: number
 	currency: string
+	processor?: 'connect' | 'mor' | 'checkout'
 	platformFeePercent: number
 	platformFeeCents: number
 	orgPayoutCents: number
@@ -197,6 +198,7 @@ export type PublicShopProduct = {
 
 export type PublicShopPayload = {
 	available: true
+	processor?: 'connect' | 'mor' | 'checkout'
 	organization: { name: string; slug: string }
 	product: PublicShopProduct
 }
@@ -227,15 +229,28 @@ export async function fetchShopOrderStatus(options: {
 	host?: string | null
 	sessionId?: string | null
 	paymentIntentId?: string | null
+	checkoutId?: string | null
+	checkoutPaymentId?: string | null
 }): Promise<PublicShopOrderStatus | null> {
 	const params = new URLSearchParams()
 	if (options.sessionId) params.set('session_id', options.sessionId)
 	if (options.paymentIntentId) {
 		params.set('payment_intent', options.paymentIntentId)
 	}
+	if (options.checkoutId) params.set('checkout_id', options.checkoutId)
+	if (options.checkoutPaymentId) {
+		params.set('cko_payment_id', options.checkoutPaymentId)
+	}
 	if (options.slug) params.set('slug', options.slug)
 	if (options.host) params.set('host', options.host)
-	if (!params.has('session_id') && !params.has('payment_intent')) return null
+	if (
+		!params.has('session_id') &&
+		!params.has('payment_intent') &&
+		!params.has('checkout_id') &&
+		!params.has('cko_payment_id')
+	) {
+		return null
+	}
 
 	return fetchAppJson<PublicShopOrderStatus>(
 		`${getAppUrl()}/resources/sites/shop/order?${params.toString()}`,
@@ -249,7 +264,7 @@ export async function fetchShopOrderStatus(options: {
  * omit it for guest checkout (customer identity is never taken from the body).
  */
 export async function createShopCheckoutSession(
-	body: { slug?: string; host?: string },
+	body: { slug?: string; host?: string; embed?: boolean },
 	authorization?: string | null,
 ) {
 	const headers: Record<string, string> = {
@@ -272,12 +287,13 @@ export async function createShopCheckoutSession(
 	return response.json() as Promise<{
 		checkoutUrl?: string
 		sessionId?: string
+		processor?: 'connect' | 'mor' | 'checkout'
 		error?: string
 	}>
 }
 
 /**
- * Creates a Stripe PaymentIntent via the App. Same auth model as checkout —
+ * Creates an inline card payment via the App. Same auth model as checkout —
  * signed-in customers forward `Authorization`; guests omit it.
  */
 export async function createShopPaymentIntent(

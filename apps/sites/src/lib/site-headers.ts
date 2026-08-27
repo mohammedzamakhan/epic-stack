@@ -1,3 +1,10 @@
+import { type ShopCheckoutCspOptions } from '@repo/payments/shop/client'
+import {
+	getShopCheckoutConnectSrc,
+	getShopCheckoutFrameSrc,
+	getShopCheckoutScriptSrc,
+} from '@repo/payments/shop/client'
+
 const CLOUDFLARE_INSIGHTS_SCRIPT = 'https://static.cloudflareinsights.com'
 const CLOUDFLARE_INSIGHTS_CONNECT = 'https://cloudflareinsights.com'
 
@@ -12,22 +19,16 @@ export function sitesConnectSrc(origins: string[]) {
 		.join(' ')
 }
 
-const STRIPE_SCRIPT = 'https://js.stripe.com'
-const STRIPE_API = 'https://api.stripe.com'
-const STRIPE_HOOKS = 'https://hooks.stripe.com'
-
-export function sitesStripeScriptSrc(enabled: boolean) {
-	return enabled ? ` ${STRIPE_SCRIPT}` : ''
+export function sitesShopCheckoutScriptSrc(options: ShopCheckoutCspOptions) {
+	return getShopCheckoutScriptSrc(options)
 }
 
-export function sitesStripeConnectSrc(enabled: boolean) {
-	return enabled ? ` ${STRIPE_API}` : ''
+export function sitesShopCheckoutConnectSrc(options: ShopCheckoutCspOptions) {
+	return getShopCheckoutConnectSrc(options)
 }
 
-export function sitesStripeFrameSrc(enabled: boolean) {
-	return enabled
-		? ` frame-src 'self' https://js.stripe.com ${STRIPE_HOOKS} https://checkout.stripe.com`
-		: ''
+export function sitesShopCheckoutFrameSrc(options: ShopCheckoutCspOptions) {
+	return getShopCheckoutFrameSrc(options)
 }
 
 /** Prefer Vite `MODE` — a schema `DEV` flag used to shadow `import.meta.env.DEV`. */

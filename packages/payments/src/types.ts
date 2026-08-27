@@ -178,4 +178,5 @@ export interface PaymentProviderConfig {
 	webhookSecret?: string
 	apiVersion?: string
 	organizationId?: string // Required for Polar
+	server?: 'sandbox' | 'production' // Polar sandbox vs production API
 }

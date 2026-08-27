@@ -2129,6 +2129,15 @@ export const Organization = sqliteTable(
 		stripeConnectPayoutsEnabled: integer({ mode: 'boolean' })
 			.default(false)
 			.notNull(),
+		checkoutSubEntityId: text(),
+		checkoutChargesEnabled: integer({ mode: 'boolean' })
+			.default(false)
+			.notNull(),
+		checkoutPayoutsEnabled: integer({ mode: 'boolean' })
+			.default(false)
+			.notNull(),
+		shopPaymentProvider: text().default('stripe').notNull(),
+		polarProductId: text(),
 		shopProductName: text(),
 		shopProductDescription: text(),
 		shopProductPriceCents: integer(),

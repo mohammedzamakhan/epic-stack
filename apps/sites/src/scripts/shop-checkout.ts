@@ -1,8 +1,14 @@
+import {
+	SHOP_HOSTED_EMBED_SDK_URL,
+	SHOP_INLINE_CARD_SDK_URL,
+} from '@repo/payments/shop/client'
 import { getAccessToken, tenantFetch } from '~/lib/client-auth'
 
 type ShopCheckoutRoot = HTMLElement & {
 	dataset: DOMStringMap & {
 		paymentMode?: string
+		shopProcessor?: string
+		checkoutUi?: string
 		orgSlug?: string
 		customHost?: string
 		buyNow?: string
@@ -28,7 +34,20 @@ type SavedPaymentMethod = {
 declare global {
 	interface Window {
 		Stripe?: (key: string) => StripeClient
+		PolarEmbedCheckout?: {
+			create: (
+				url: string,
+				theme?: 'auto' | 'dark' | 'light',
+			) => Promise<PolarEmbedCheckoutHandle>
+		}
 	}
+}
+
+type PolarEmbedCheckoutHandle = {
+	addEventListener: (
+		event: 'success' | 'close' | 'confirmed',
+		handler: (event: { detail?: { checkoutId?: string } }) => void,
+	) => void
 }
 
 type StripeClient = {
@@ -69,10 +88,11 @@ function bindCardFieldFocusRing(element: StripeElement, host: HTMLElement) {
 	})
 }
 
-function buildCheckoutBody(root: ShopCheckoutRoot) {
-	const body: { slug?: string; host?: string } = {}
+function buildCheckoutBody(root: ShopCheckoutRoot, embed = false) {
+	const body: { slug?: string; host?: string; embed?: boolean } = {}
 	if (root.dataset.customHost) body.host = root.dataset.customHost
 	else if (root.dataset.orgSlug) body.slug = root.dataset.orgSlug
+	if (embed) body.embed = true
 	return body
 }
 
@@ -321,33 +341,55 @@ function isUsingNewCard() {
 	return getSelectedPaymentMethodId() === null
 }
 
-async function loadStripe() {
+async function loadInlineCardSdk() {
 	if (window.Stripe) return window.Stripe
 
 	await new Promise<void>((resolve, reject) => {
 		const script = document.createElement('script')
-		script.src = 'https://js.stripe.com/v3/'
+		script.src = SHOP_INLINE_CARD_SDK_URL
 		script.async = true
 		script.onload = () => resolve()
-		script.onerror = () => reject(new Error('Failed to load Stripe.js'))
+		script.onerror = () => reject(new Error('Failed to load card checkout SDK'))
 		document.head.appendChild(script)
 	})
 
 	if (!window.Stripe) {
-		throw new Error('Stripe.js did not initialize')
+		throw new Error('Card checkout SDK did not initialize')
 	}
 
 	return window.Stripe
 }
 
+async function loadHostedEmbedSdk() {
+	if (window.PolarEmbedCheckout) return window.PolarEmbedCheckout
+
+	await new Promise<void>((resolve, reject) => {
+		const script = document.createElement('script')
+		script.src = SHOP_HOSTED_EMBED_SDK_URL
+		script.async = true
+		script.onload = () => resolve()
+		script.onerror = () =>
+			reject(new Error('Failed to load hosted checkout embed'))
+		document.head.appendChild(script)
+	})
+
+	if (!window.PolarEmbedCheckout) {
+		throw new Error('Hosted checkout embed did not initialize')
+	}
+
+	return window.PolarEmbedCheckout
+}
+
 async function startRedirectCheckout(
 	root: ShopCheckoutRoot,
 	button: HTMLButtonElement,
+	embed = false,
 ) {
 	const processing = root.dataset.processing || 'Redirecting…'
 	const checkoutError =
 		root.dataset.checkoutError || 'Unable to start checkout. Please try again.'
 	const buyNow = root.dataset.buyNow || 'Buy now'
+	const successPath = root.dataset.successPath || '/shop/success'
 
 	button.setAttribute('disabled', 'true')
 	button.textContent = processing
@@ -356,12 +398,32 @@ async function startRedirectCheckout(
 		const response = await fetch('/api/shop/checkout', {
 			method: 'POST',
 			headers: buildCheckoutHeaders(),
-			body: JSON.stringify(buildCheckoutBody(root)),
+			body: JSON.stringify(buildCheckoutBody(root, embed)),
 		})
 		const data = await response.json()
 		if (!response.ok || !data.checkoutUrl) {
 			throw new Error(data.error || 'checkout failed')
 		}
+
+		if (embed && root.dataset.checkoutUi === 'hosted-embed') {
+			const HostedEmbedCheckout = await loadHostedEmbedSdk()
+			const checkout = await HostedEmbedCheckout.create(
+				data.checkoutUrl,
+				'auto',
+			)
+			checkout.addEventListener('success', () => {
+				const checkoutId = data.sessionId
+					? `?checkout_id=${encodeURIComponent(data.sessionId)}`
+					: ''
+				window.location.href = `${successPath}${checkoutId}`
+			})
+			checkout.addEventListener('close', () => {
+				button.removeAttribute('disabled')
+				button.textContent = buyNow
+			})
+			return
+		}
+
 		window.location.href = data.checkoutUrl
 	} catch {
 		button.removeAttribute('disabled')
@@ -406,7 +468,7 @@ async function initInlineCheckout(root: ShopCheckoutRoot) {
 
 		const savedPaymentMethods = await loadSavedPaymentMethods()
 
-		const Stripe = await loadStripe()
+		const Stripe = await loadInlineCardSdk()
 		const stripe = Stripe(data.publishableKey)
 		const elementStyle = buildCardElementStyle(buildShopThemeColors())
 		const elements = stripe.elements()
@@ -508,7 +570,7 @@ function initShopCheckout() {
 	if (!root || root.dataset.checkoutInitialized === 'true') return
 	root.dataset.checkoutInitialized = 'true'
 
-	if (root.dataset.paymentMode === 'inline') {
+	if (root.dataset.checkoutUi === 'inline-card') {
 		void initInlineCheckout(root)
 		return
 	}
@@ -517,7 +579,13 @@ function initShopCheckout() {
 		'shop-buy-btn',
 	) as HTMLButtonElement | null
 	button?.addEventListener('click', () => {
-		if (button) void startRedirectCheckout(root, button)
+		if (button) {
+			void startRedirectCheckout(
+				root,
+				button,
+				root.dataset.checkoutUi === 'hosted-embed',
+			)
+		}
 	})
 }
 

@@ -1,5 +1,6 @@
 ---
 import { msg } from '@lingui/core/macro'
+import { getShopCheckoutUiForProcessor } from '@repo/payments/shop/client'
 import SitePage from '~/components/SitePage.astro'
 import { fetchPublishedShopProduct } from '~/lib/org'
 import { resolveShopPaymentMode } from '~/lib/shop'
@@ -31,6 +32,14 @@ const shop = await fetchPublishedShopProduct({
 	host: customHost,
 })
 
+const processor =
+	shop?.product?.processor || shop?.processor || 'connect'
+const checkoutUi = getShopCheckoutUiForProcessor(
+	processor,
+	paymentMode === 'inline',
+)
+const useInlineCard = checkoutUi === 'inline-card'
+
 function formatMoney(cents: number, currency = 'usd') {
 	return new Intl.NumberFormat(Astro.locals.requestedLocale || 'en', {
 		style: 'currency',
@@ -51,6 +60,8 @@ const cardFieldClass =
 		id="shop-checkout-root"
 		class="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col justify-center px-4 py-12"
 		data-payment-mode={paymentMode}
+		data-shop-processor={processor}
+		data-checkout-ui={checkoutUi}
 		data-org-slug={orgSlug || undefined}
 		data-custom-host={customHost || undefined}
 		data-buy-now={buyNow}
@@ -79,7 +90,7 @@ const cardFieldClass =
 						</p>
 					</div>
 
-					{paymentMode === 'inline' ? (
+					{useInlineCard ? (
 						<div class="space-y-4">
 							<div id="shop-saved-payment-methods" class="hidden space-y-2">
 								<p class="text-sm font-medium text-foreground">{paymentMethodLabel}</p>

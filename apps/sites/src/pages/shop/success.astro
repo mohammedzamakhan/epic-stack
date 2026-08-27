@@ -9,6 +9,10 @@ const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
 const sessionId = Astro.url.searchParams.get('session_id')
 const paymentIntentId = Astro.url.searchParams.get('payment_intent')
+const checkoutPaymentId =
+	Astro.url.searchParams.get('cko-payment-id') ||
+	Astro.url.searchParams.get('cko_payment_id')
+const checkoutId = Astro.url.searchParams.get('checkout_id')
 
 const orderConfirmed = i18n._(msg`Order confirmed`)
 const thankYou = i18n._(msg`Thank you for your purchase!`)
@@ -20,10 +24,12 @@ if (!organization) {
 }
 
 const order =
-	sessionId || paymentIntentId ?
+	sessionId || paymentIntentId || checkoutId || checkoutPaymentId ?
 		await fetchShopOrderStatus({
 			sessionId,
 			paymentIntentId,
+			checkoutId,
+			checkoutPaymentId,
 			slug: orgSlug,
 			host: customHost,
 		})

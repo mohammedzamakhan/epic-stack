@@ -26,13 +26,18 @@ export class PolarProvider implements PaymentProvider {
 	private polar: Polar
 	private organizationId?: string
 
-	constructor(config: { apiKey: string; organizationId?: string }) {
+	constructor(config: {
+		apiKey: string
+		organizationId?: string
+		server?: 'sandbox' | 'production'
+	}) {
 		if (!config.apiKey) {
 			throw new Error('Polar access token is required')
 		}
 
 		this.polar = new Polar({
 			accessToken: config.apiKey,
+			server: config.server,
 		})
 
 		this.organizationId = config.organizationId

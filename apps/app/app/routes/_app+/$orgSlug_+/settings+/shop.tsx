@@ -1,4 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
+import { requireUserId } from '@repo/auth'
+import { db, eq, User as UserTable } from '@repo/database'
 import { redirectWithToast } from '@repo/common/toast'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
@@ -21,11 +23,19 @@ import {
 } from '#app/utils/rate-limit.server.ts'
 import {
 	createConnectDashboardLink,
+	getCheckoutShopDashboardUrl,
+	getHostedShopDashboardUrl,
+	inviteCheckoutSubEntityOnboarding,
+	isHostedShopConfigured,
+	listConfiguredShopProcessors,
 	listOrganizationShopOrders,
 	startConnectOnboarding,
+	syncCheckoutSubEntityStatus,
 	syncConnectAccountStatus,
+	syncHostedShopProduct,
 	updateShopProduct,
 } from '#app/utils/shop.server.ts'
+import { normalizeShopProcessor } from '#app/utils/shop.types.ts'
 
 const shopFields = {
 	id: true,
@@ -35,9 +45,14 @@ const shopFields = {
 	hasProvisionedDb: true,
 	customDomain: true,
 	sitePublished: true,
+	shopPaymentProvider: true,
 	stripeConnectAccountId: true,
 	stripeConnectChargesEnabled: true,
 	stripeConnectPayoutsEnabled: true,
+	checkoutSubEntityId: true,
+	checkoutChargesEnabled: true,
+	checkoutPayoutsEnabled: true,
+	polarProductId: true,
 	shopProductName: true,
 	shopProductDescription: true,
 	shopProductPriceCents: true,
@@ -61,7 +76,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			await syncConnectAccountStatus(organization.id)
 		} catch (error) {
 			console.error(
-				'Failed to sync Stripe Connect status:',
+				'Failed to sync payout account status:',
+				error instanceof Error ? error.message : error,
+			)
+		}
+	}
+
+	if (organization.checkoutSubEntityId) {
+		try {
+			await syncCheckoutSubEntityStatus(organization.id)
+		} catch (error) {
+			console.error(
+				'Failed to sync Checkout.com sub-entity status:',
 				error instanceof Error ? error.message : error,
 			)
 		}
@@ -79,8 +105,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	)
 
 	return {
-		organization: refreshedOrg,
+		organization: {
+			...refreshedOrg,
+			shopPaymentProvider: normalizeShopProcessor(
+				refreshedOrg.shopPaymentProvider,
+			),
+		},
 		orders,
+		configuredProcessors: listConfiguredShopProcessors(),
 	}
 }
 
@@ -98,6 +130,7 @@ const ShopProductSchema = z.object({
 		.string()
 		.optional()
 		.transform((value) => value === 'on' || value === 'true'),
+	paymentProcessor: z.enum(['connect', 'mor', 'checkout']).optional(),
 })
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -116,12 +149,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 
-	if (intent === 'connect-stripe') {
+	if (intent === 'connect-payout') {
 		if (organization.dataRegion !== 'us') {
 			return redirectWithToast(`/${organization.slug}/settings/shop`, {
 				title: 'US only',
-				description:
-					'Stripe Connect shop payouts are available for US organizations only.',
+				description: 'Shop payouts are available for US organizations only.',
 				type: 'error',
 			})
 		}
@@ -134,7 +166,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return redirectWithToast(`/${organization.slug}/settings/shop`, {
 				title: 'Please wait',
 				description:
-					'Stripe Connect onboarding can only be started once every 30 seconds.',
+					'Payout onboarding can only be started once every 30 seconds.',
 				type: 'error',
 			})
 		}
@@ -146,18 +178,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			const description =
 				error instanceof Error ? error.message : 'Unable to start onboarding'
 			return redirectWithToast(`/${organization.slug}/settings/shop`, {
-				title: 'Stripe Connect failed',
+				title: 'Payout setup failed',
 				description,
 				type: 'error',
 			})
 		}
 	}
 
-	if (intent === 'open-stripe-dashboard') {
+	if (intent === 'open-payout-dashboard') {
 		if (!organization.stripeConnectAccountId) {
 			return redirectWithToast(`/${organization.slug}/settings/shop`, {
 				title: 'Not connected',
-				description: 'Connect Stripe before opening the dashboard.',
+				description: 'Connect a payout account before opening the dashboard.',
 				type: 'error',
 			})
 		}
@@ -171,13 +203,127 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			const description =
 				error instanceof Error
 					? error.message
-					: 'Unable to open Stripe dashboard'
+					: 'Unable to open payout dashboard'
 			return redirectWithToast(`/${organization.slug}/settings/shop`, {
-				title: 'Stripe dashboard unavailable',
+				title: 'Dashboard unavailable',
 				description,
 				type: 'error',
 			})
 		}
+	}
+
+	if (intent === 'invite-checkout-payout') {
+		if (organization.dataRegion !== 'us') {
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'US only',
+				description: 'Shop payouts are available for US organizations only.',
+				type: 'error',
+			})
+		}
+
+		const userId = await requireUserId(request)
+		const [user] = await db
+			.select({ email: UserTable.email })
+			.from(UserTable)
+			.where(eq(UserTable.id, userId))
+			.limit(1)
+
+		if (!user?.email) {
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Email required',
+				description:
+					'Add an email to your operator account before inviting a Checkout.com payout contact.',
+				type: 'error',
+			})
+		}
+
+		try {
+			await inviteCheckoutSubEntityOnboarding(organization, user.email)
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Checkout.com invite sent',
+				description:
+					'Checkout.com emailed your payout contact a hosted onboarding invite.',
+				type: 'success',
+			})
+		} catch (error) {
+			const description =
+				error instanceof Error
+					? error.message
+					: 'Unable to invite Checkout.com payout contact'
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Checkout.com setup failed',
+				description,
+				type: 'error',
+			})
+		}
+	}
+
+	if (intent === 'open-checkout-dashboard') {
+		const url = getCheckoutShopDashboardUrl()
+		if (!url) {
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Dashboard unavailable',
+				description: 'Checkout.com is not configured on this platform.',
+				type: 'error',
+			})
+		}
+		return redirect(url)
+	}
+
+	if (intent === 'enable-hosted-checkout') {
+		if (organization.dataRegion !== 'us') {
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'US only',
+				description: 'Shop checkout is available for US organizations only.',
+				type: 'error',
+			})
+		}
+
+		if (!isHostedShopConfigured()) {
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Hosted checkout unavailable',
+				description:
+					'Ask a platform admin to configure hosted checkout before enabling it.',
+				type: 'error',
+			})
+		}
+
+		try {
+			await syncHostedShopProduct({
+				...organization,
+				shopProductName: organization.shopProductName,
+				shopProductDescription: organization.shopProductDescription,
+				shopProductPriceCents: organization.shopProductPriceCents,
+			})
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Hosted checkout enabled',
+				description:
+					'Your shop will use hosted checkout. Save your product to keep the listing in sync.',
+				type: 'success',
+			})
+		} catch (error) {
+			const description =
+				error instanceof Error
+					? error.message
+					: 'Unable to enable hosted checkout'
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Hosted checkout setup failed',
+				description,
+				type: 'error',
+			})
+		}
+	}
+
+	if (intent === 'open-hosted-dashboard') {
+		const url = getHostedShopDashboardUrl()
+		if (!url) {
+			return redirectWithToast(`/${organization.slug}/settings/shop`, {
+				title: 'Dashboard unavailable',
+				description: 'Hosted checkout is not configured on this platform.',
+				type: 'error',
+			})
+		}
+		return redirect(url)
 	}
 
 	if (intent === 'update-shop-product') {
@@ -196,7 +342,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			productDescription: submission.value.productDescription,
 			priceCents,
 			enabled: submission.value.enabled,
+			paymentProvider: submission.value.paymentProcessor,
 		})
+
+		if (submission.value.paymentProcessor === 'mor') {
+			try {
+				await syncHostedShopProduct({
+					...organization,
+					shopProductName: submission.value.productName,
+					shopProductDescription: submission.value.productDescription ?? null,
+					shopProductPriceCents: priceCents,
+				})
+			} catch (error) {
+				const description =
+					error instanceof Error
+						? error.message
+						: 'Product saved, but hosted listing could not be synced'
+				return redirectWithToast(`/${organization.slug}/settings/shop`, {
+					title: 'Hosted sync failed',
+					description,
+					type: 'error',
+				})
+			}
+		}
 
 		return redirectWithToast(`/${organization.slug}/settings/shop`, {
 			title: 'Shop updated',
@@ -209,12 +377,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function ShopSettingsRoute() {
-	const { organization, orders } = useLoaderData<typeof loader>()
+	const { organization, orders, configuredProcessors } =
+		useLoaderData<typeof loader>()
 
 	return (
 		<AnnotatedLayout>
 			<AnnotatedSection>
-				<ShopCard organization={organization} orders={orders} />
+				<ShopCard
+					organization={organization}
+					orders={orders}
+					configuredProcessors={configuredProcessors}
+				/>
 			</AnnotatedSection>
 		</AnnotatedLayout>
 	)

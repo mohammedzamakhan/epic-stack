@@ -15,6 +15,20 @@
 			"when": 1788000000001,
 			"tag": "0001_shop_orders",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1788000000002,
+			"tag": "0002_shop_polar_orders",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1788000000003,
+			"tag": "0003_shop_checkout_orders",
+			"breakpoints": true
 		}
 	]
 }

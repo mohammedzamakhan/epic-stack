@@ -6,6 +6,7 @@ export async function POST({ request }: { request: Request }) {
 	let body: {
 		slug?: string
 		host?: string
+		embed?: boolean
 	}
 
 	try {
@@ -43,6 +44,7 @@ export async function POST({ request }: { request: Request }) {
 		JSON.stringify({
 			checkoutUrl: result.checkoutUrl,
 			sessionId: result.sessionId,
+			processor: result.processor,
 		}),
 		{
 			status: 200,

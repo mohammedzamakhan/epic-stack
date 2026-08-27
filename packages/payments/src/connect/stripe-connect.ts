@@ -3,22 +3,15 @@
  */
 
 import type Stripe from 'stripe'
+import { calculateShopFees } from './shop-fees'
 
-export const SHOP_PLATFORM_FEE_PERCENT = 20
+export { SHOP_PLATFORM_FEE_PERCENT, calculateShopFees } from './shop-fees'
 
 export type ConnectAccountStatus = {
 	accountId: string
 	chargesEnabled: boolean
 	payoutsEnabled: boolean
 	detailsSubmitted: boolean
-}
-
-export function calculateShopFees(amountCents: number) {
-	const platformFeeCents = Math.round(
-		amountCents * (SHOP_PLATFORM_FEE_PERCENT / 100),
-	)
-	const orgPayoutCents = amountCents - platformFeeCents
-	return { platformFeeCents, orgPayoutCents, amountCents }
 }
 
 export async function createConnectExpressAccount(
