@@ -21,7 +21,7 @@ test.describe('File Operations', () => {
 			})
 
 			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/<account-id>.r2.cloudflarestorage.com/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
+				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
 			)
 
 			const dialogHeading = page.getByRole('heading', {
@@ -83,7 +83,7 @@ test.describe('File Operations', () => {
 			})
 
 			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/<account-id>.r2.cloudflarestorage.com/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
+				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
 			)
 
 			await page.waitForTimeout(2000)
@@ -299,7 +299,7 @@ test.describe('File Operations', () => {
 			})
 
 			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/<account-id>.r2.cloudflarestorage.com/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
+				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
 			)
 
 			await page.waitForTimeout(2000)
@@ -396,7 +396,7 @@ test.describe('File Operations', () => {
 			})
 
 			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/<account-id>.r2.cloudflarestorage.com/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
+				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
 			)
 
 			await page.waitForTimeout(2000)
