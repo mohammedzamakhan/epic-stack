@@ -153,7 +153,7 @@ export async function syncEmailEngagementForAllOrgs(options?: {
 	const events = await fetchOciEngagementEvents({
 		lookbackHours: options?.lookbackHours,
 	})
-	const orgIds = new Set<string>(listTenantOrgIds())
+	const orgIds = new Set<string>(await listTenantOrgIds())
 	for (const event of events) {
 		if (event.orgId) orgIds.add(event.orgId)
 	}

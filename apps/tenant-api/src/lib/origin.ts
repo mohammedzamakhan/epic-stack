@@ -54,6 +54,10 @@ async function lookupOrganizationFromDatabase(where: {
 	slug?: string
 	host?: string
 }): Promise<PublishedOrganization | null> {
+	if (process.env.TENANT_API_RUNTIME === 'workers') {
+		return null
+	}
+
 	try {
 		const identity = where.id
 			? eq(Organization.id, where.id)

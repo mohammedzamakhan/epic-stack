@@ -8,7 +8,8 @@ Cloudflare-based architecture.
 - **Main App & Admin App**: Cloudflare Workers with Cloudflare D1
 - **Marketing Site & Tenant Sites**: Cloudflare Pages
 - **CMS**: Vercel (using Turso + R2 S3)
-- **Tenant-API**: OCI Ampere VMs with per-org SQLite
+- **Tenant-API**: US on Cloudflare Containers; KSA on OCI Ampere VMs with
+  per-org SQLite
 - **Jobs Cron**: Cloudflare Workers
 
 ## Prerequisites
@@ -54,12 +55,35 @@ cd apps/web && npx wrangler pages deploy ./dist
 cd ../sites && npx wrangler pages deploy ./dist
 ```
 
-## Step 4: Deploy Tenant-API (OCI)
+## Step 4: Deploy Tenant-API (dual region)
 
-- [ ] Build the `linux/arm64` image for tenant-api.
-- [ ] Push to GHCR or your preferred registry.
-- [ ] SSH into your OCI VMs in Riyadh/Ashburn and pull/run the image mapping the
+### US — Cloudflare Worker + Durable Objects
+
+- [ ] Enable Durable Objects on your Cloudflare account.
+- [ ] Set Wrangler secrets on `epic-startup-tenant-api-us` (see
+      `apps/tenant-api/wrangler.jsonc` comments).
+- [ ] Set `TENANT_API_URL` GitHub variable for CI health checks.
+- [ ] Push to `main`/`dev` — CI runs `deploy-tenant-api-us-cf` automatically.
+
+Manual deploy:
+
+```bash
+cd apps/tenant-api
+npm run deploy:cf
+```
+
+### KSA — OCI (required for Saudi residency)
+
+- [ ] Build the `linux/arm64` image for tenant-api (CI does this on push).
+- [ ] SSH into your OCI VM in Riyadh and pull/run the image mapping the
       `/data/tenants` volume.
+- [ ] Set `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_KEY`, and `TENANT_API_URL_KSA`
+      for CI deploy + health checks.
+
+### Verify both regions
+
+- [ ] `curl $TENANT_API_URL/health` → `"region":"us"`
+- [ ] `curl $TENANT_API_URL_KSA/health` → `"region":"ksa"`
 
 ## Step 5: Test & Verify
 

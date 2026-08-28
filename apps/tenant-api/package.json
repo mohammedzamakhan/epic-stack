@@ -10,7 +10,8 @@
     "start": "node --import=tsx src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "deploy:cf": "node scripts/generate-do-migrations.mjs && wrangler deploy"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
@@ -29,8 +30,10 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250811.0",
     "@types/node": "^22.19.6",
     "typescript": "^5.8.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.118.0"
   }
 }

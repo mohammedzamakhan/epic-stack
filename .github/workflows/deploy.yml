@@ -405,7 +405,52 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-  deploy-tenant-api:
+  deploy-tenant-api-us-cf:
+    name: 🚀 Deploy Tenant API US (Cloudflare)
+    runs-on: ubuntu-24.04
+    needs: [lint, typecheck, vitest, container-tenant-api, affected]
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.tenant_api ==
+      'true' }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
+
+      - name: 🚀 Deploy US tenant-api (Cloudflare Workers + DO SQLite)
+        working-directory: apps/tenant-api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy:cf
+
+      - name: 🩺 Health check US (Cloudflare)
+        if: ${{ vars.TENANT_API_URL != '' }}
+        env:
+          TENANT_API_URL: ${{ vars.TENANT_API_URL }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            body="$(curl -fsS "${TENANT_API_URL}/health" || true)"
+            if echo "$body" | grep -q '"region":"us"'; then
+              echo "US tenant-api healthy on Cloudflare"
+              exit 0
+            fi
+            echo "Attempt ${attempt}/5: waiting for US tenant-api..."
+            sleep 30
+          done
+          echo "US tenant-api health check failed"
+          exit 1
+
+  deploy-tenant-api-oci:
     name: 🚀 Deploy Tenant API (OCI)
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, container-tenant-api, affected]
@@ -413,7 +458,7 @@ jobs:
       ${{ github.event_name == 'push' && needs.affected.outputs.tenant_api ==
       'true' }}
     steps:
-      - name: 🚀 Deploy US (Ashburn)
+      - name: 🚀 Deploy US (Ashburn, optional OCI fallback)
         if: ${{ vars.OCI_TENANT_US_HOST != '' }}
         env:
           HOST: ${{ vars.OCI_TENANT_US_HOST }}
@@ -456,3 +501,21 @@ jobs:
              cd /opt/tenant-api
              TENANT_API_IMAGE='${IMAGE}' docker compose pull
              TENANT_API_IMAGE='${IMAGE}' docker compose up -d"
+
+      - name: 🩺 Health check KSA (OCI)
+        if: ${{ vars.TENANT_API_URL_KSA != '' }}
+        env:
+          TENANT_API_URL_KSA: ${{ vars.TENANT_API_URL_KSA }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            body="$(curl -fsS "${TENANT_API_URL_KSA}/health" || true)"
+            if echo "$body" | grep -q '"region":"ksa"'; then
+              echo "KSA tenant-api healthy on OCI"
+              exit 0
+            fi
+            echo "Attempt ${attempt}/5: waiting for KSA tenant-api..."
+            sleep 15
+          done
+          echo "KSA tenant-api health check failed"
+          exit 1

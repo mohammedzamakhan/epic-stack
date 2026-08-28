@@ -12,7 +12,7 @@ function isInsecureSecret(value: string) {
 	return INSECURE_SECRET_MARKERS.some((marker) => lower.includes(marker))
 }
 
-export function getBearerToken(header: string | undefined) {
+export function getBearerToken(header: string | null | undefined) {
 	return header?.startsWith('Bearer ') ? header.substring(7) : ''
 }
 

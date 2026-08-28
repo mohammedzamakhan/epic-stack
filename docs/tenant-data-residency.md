@@ -35,7 +35,8 @@ browser therefore calls **that org’s regional tenant-api directly**.
 ```
 US (control plane)                         Regional data plane (US and/or KSA)
 ─────────────────                          ──────────────────────────────────
-App, Admin                                 Tenant API  (one OCI VM per region)
+App, Admin                                 Tenant API  (US: CF Containers or OCI;
+                                           KSA: OCI VM + block volume)
 Control-plane SQLite                       Per-org SQLite  tenant_{orgId}.db
   org flags, CMS, billing                  customers (name, email, phone, hashes)
 Sites SSR (CMS HTML only)  ─browser JS──►  In-region tenant-api (auth + PII)
@@ -48,8 +49,8 @@ Sites SSR (CMS HTML only)  ─browser JS──►  In-region tenant-api (auth + 
 | Sites       | Often US (CMS SSR) | Public org JSON and HTML. Injects the regional API URL. **Must not** proxy customer PII. |
 | Tenant API  | **Per region**     | Customer PII and auth. Rejects orgs whose `dataRegion` does not match `DATA_REGION`.     |
 
-Never share one SQLite volume across US and KSA. Each region is its own OCI VM
-and block volume.
+Never share one SQLite volume across US and KSA. Each region is an isolated
+deployment (Cloudflare Container singleton for US, or OCI VM + block volume).
 
 ## What lives where
 
@@ -215,34 +216,36 @@ Shared local secrets (not for production) live in `.env.schema`:
 Local schema values contain `do-not-use-in-prod` and are rejected at tenant-api
 startup in production.
 
-## Production / OCI
+## Production deployment
 
-App and Admin stay on Cloudflare Workers in the US. **Tenant-api** runs on
-**Oracle Cloud**: one Ampere A1 VM and one block volume per `dataRegion`, so
-customer SQLite never shares App’s LiteFS volume.
+App and Admin stay on Cloudflare Workers in the US. **Tenant-api** is regional:
 
 | Logical `dataRegion` | Where to run tenant-api                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------- |
-| `us`                 | OCI US East (Ashburn) `us-ashburn-1` (paid A1)                                          |
+| `us`                 | **Cloudflare Worker + Durable Objects** (default) or optional OCI Ashburn               |
 | `ksa`                | OCI Saudi Arabia Central (Riyadh) `me-riyadh-1` (Always Free A1 in the **home** region) |
+
+KSA customer PII must stay on the Riyadh OCI VM with a block volume — never on
+Cloudflare Workers or US infrastructure. US tenant-api runs as a native Worker
+with one SQLite-backed Durable Object per org, or on OCI if you set
+`OCI_TENANT_US_HOST`.
 
 Set home region to Riyadh when you create the tenancy. Always Free resources
 cannot be created in Ashburn if Riyadh is home. AWS still has no generally
-available Kingdom region; do not use Bahrain, UAE, or standard Cloudflare as a
-KSA stand-in.
+available Kingdom region; do not use Bahrain or UAE as a KSA stand-in.
 
-Same Docker image (`apps/tenant-api/Dockerfile`, `linux/arm64`) for both. SQLite
-files live on the attached volume at `TENANT_DB_DIR=/data/tenants`. Run a
-**single writer** per region (`docker compose` on the VM). Leave LiteFS unset.
+OCI uses `linux/arm64`; Cloudflare Containers use `linux/amd64`. SQLite files
+live at `TENANT_DB_DIR=/data/tenants` (OCI block volume or container disk). Run
+a **single writer** per region. Leave LiteFS unset.
 
 App stays in the US and only sends `{ orgId, slug, dataRegion }` to the matching
 regional URL. Set `APP_URL` on each tenant-api so it can resolve org flags
 without the control-plane SQLite volume.
 
-GitHub Actions builds the ARM image and pushes it to GHCR
-(`ghcr.io/<owner>/<repo>/tenant-api:<sha>`). Optional SSH deploy uses
-`OCI_TENANT_US_HOST` / `OCI_TENANT_KSA_HOST`. Sites still deploy to Cloudflare
-Pages.
+GitHub Actions builds both architectures and pushes to GHCR. CI always deploys
+US to Cloudflare (`deploy-tenant-api-us-cf`) and KSA to OCI when
+`OCI_TENANT_KSA_HOST` is set (`deploy-tenant-api-oci`). Sites still deploy to
+Cloudflare Pages.
 
 See [Deployment](./deployment.md#regional-tenant-data-plane) and the
 [deployment checklist](./deployment-checklist.md).

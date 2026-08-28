@@ -1,0 +1,42 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "epic-startup-tenant-api-us",
+	"main": "./workers/index.ts",
+	"account_id": "8870705ba38bb749459b00ab2949f857",
+	"compatibility_date": "2026-08-13",
+	"compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+	"workers_dev": true,
+	"observability": {
+		"enabled": true,
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "TENANT_ORG",
+				"class_name": "TenantOrg",
+			},
+			{
+				"name": "TENANT_REGISTRY",
+				"class_name": "TenantRegistry",
+			},
+		],
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["TenantOrg", "TenantRegistry"],
+		},
+	],
+	// Secrets — set via `wrangler secret put <NAME>` (never commit values):
+	// JWT_SECRET, AUTH_HMAC_SECRET, INTERNAL_COMMAND_TOKEN, TENANT_OPERATOR_TOKEN,
+	// TWILIO_AUTH_TOKEN, OCI_PRIVATE_KEY, OCI_EMAIL_COMPARTMENT_ID,
+	// OCI_EMAIL_SENDER_OCID, OCI_EMAIL_LOG_OCID
+	"vars": {
+		"DATA_REGION": "us",
+		"NODE_ENV": "production",
+		"TENANT_API_RUNTIME": "workers",
+		"APP_URL": "https://epic-startup-app.zama-887.workers.dev",
+		"ROOT_APP": "zama-887.workers.dev",
+		"GLOBAL_SMS_CAP": "500",
+	},
+}

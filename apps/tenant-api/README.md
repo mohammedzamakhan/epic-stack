@@ -12,18 +12,30 @@ they only POST `{ orgId, slug, dataRegion }` to provision or wipe a database.
 Browsers on tenant Sites call this API **directly**. Do not proxy auth through
 `apps/sites`.
 
-## Production (OCI)
+## Production (dual deploy)
 
-App/Admin stay on Cloudflare Workers. Tenant-api runs on **Oracle Cloud Ampere
-A1** VMs:
+| Region                      | Platform                            | Storage                         | CI job                    |
+| --------------------------- | ----------------------------------- | ------------------------------- | ------------------------- |
+| **US** (`DATA_REGION=us`)   | Cloudflare Worker + Durable Objects | SQLite per org (`TenantOrg` DO) | `deploy-tenant-api-us-cf` |
+| **KSA** (`DATA_REGION=ksa`) | OCI Ampere VM + block volume        | `tenant_{orgId}.db` on disk     | `deploy-tenant-api-oci`   |
 
-- **US:** Ashburn `us-ashburn-1`, paid A1, `DATA_REGION=us`
-- **KSA:** Riyadh `me-riyadh-1` (tenancy **home region**), Always Free A1,
-  `DATA_REGION=ksa`
+Both deploy jobs run on every tenant-api change so neither region is skipped.
 
-Use `apps/tenant-api/Dockerfile` (`linux/arm64`). Mount a block volume at
-`TENANT_DB_DIR=/data/tenants`. Run `docker-compose.yml` on the VM. Set `APP_URL`
-to the US App.
+### US — Cloudflare (native Worker)
+
+- Entry: `apps/tenant-api/workers/index.ts` routes requests to a `TenantOrg`
+  Durable Object per `orgId` (Drizzle `durable-sqlite` + existing schema
+  migrations)
+- Deploy: `cd apps/tenant-api && npm run deploy:cf` (no Docker)
+- Set secrets with `wrangler secret put` (see `wrangler.jsonc` comments)
+- Point App/Sites `TENANT_API_URL` at the Worker custom domain
+
+### KSA — OCI
+
+- **KSA:** Riyadh `me-riyadh-1` (tenancy **home region**), Always Free A1
+- Mount block volume at `TENANT_DB_DIR=/data/tenants`
+- Run `docker-compose.yml` on the VM; CI SSH-deploys when `OCI_TENANT_KSA_HOST`
+  is set
 
 Canonical guide:
 [docs/tenant-data-residency.md](../../docs/tenant-data-residency.md). Deploy:

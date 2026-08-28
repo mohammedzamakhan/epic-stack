@@ -1,9 +1,15 @@
 {
 	"extends": ["@epic-web/config/typescript"],
-	"include": ["src/**/*", "env.d.ts"],
+	"include": ["src/**/*", "workers/**/*", "env.d.ts"],
+	"exclude": [
+		"src/**/*.test.ts",
+		"src/**/*integration.test.ts",
+		"src/**/*adversarial.test.ts"
+	],
 	"compilerOptions": {
 		"moduleResolution": "Bundler",
 		"allowImportingTsExtensions": true,
-		"noEmit": true
+		"noEmit": true,
+		"types": ["@cloudflare/workers-types"]
 	}
 }

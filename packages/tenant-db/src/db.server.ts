@@ -7,6 +7,8 @@ import { remember } from '@epic-web/remember'
 import { LRUCache } from 'lru-cache'
 import { sql } from 'drizzle-orm'
 import * as schema from './schema.ts'
+import { resolveTenantDb, resolveTenantOrgIds } from './resolver.ts'
+import type { TenantDatabase } from './types.ts'
 import { TENANT_ORG_ID_PATTERN } from './regions.ts'
 
 type TenantDbInstance = {
@@ -60,7 +62,7 @@ function getTenantDbFilePath(orgId: string) {
 /**
  * Lists org IDs that have a provisioned tenant SQLite file on this node.
  */
-export function listTenantOrgIds(): string[] {
+function listTenantOrgIdsFromFilesystem(): string[] {
 	const dir = getTenantDbDirectory()
 	if (!fs.existsSync(dir)) return []
 
@@ -73,13 +75,17 @@ export function listTenantOrgIds(): string[] {
 		.filter((orgId) => TENANT_ORG_ID_PATTERN.test(orgId))
 }
 
+export async function listTenantOrgIds(): Promise<string[]> {
+	return resolveTenantOrgIds(listTenantOrgIdsFromFilesystem)
+}
+
 /**
  * Returns an asynchronous Drizzle database instance for the specified tenant using @libsql/client.
  * WAL journal mode is set during connection setup (single-writer VM, not LiteFS).
  * @param orgId The organization ID
  * @param options.createIfMissing If true, creates the database file if it doesn't exist
  */
-export async function getTenantDb(
+async function getTenantDbFromFilesystem(
 	orgId: string,
 	options: { createIfMissing?: boolean } = {},
 ) {
@@ -134,6 +140,13 @@ export async function getTenantDb(
 	} finally {
 		pendingConnections.delete(orgId)
 	}
+}
+
+export async function getTenantDb(
+	orgId: string,
+	options: { createIfMissing?: boolean } = {},
+): Promise<TenantDatabase> {
+	return resolveTenantDb(orgId, options, getTenantDbFromFilesystem)
 }
 
 /**
