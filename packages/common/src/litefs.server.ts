@@ -1,5 +1,4 @@
-// litefs-js should be used server-side only. It imports `fs` which breaks Workers
-// bundling, so we load it dynamically only on Fly production.
+// Instance info utilities for Cloudflare Workers
 import { isCloudflareWorkerRuntime } from './runtime.ts'
 
 export type InstanceInfo = {
@@ -14,83 +13,44 @@ const LOCAL_INSTANCE_INFO: InstanceInfo = {
 	currentIsPrimary: true,
 }
 
-function isFlyProduction(): boolean {
-	if (isCloudflareWorkerRuntime()) return false
-
-	const fly = process.env.FLY
-	if (fly === 'true' || fly === '1') return true
-
-	return Boolean(process.env.FLY_APP_NAME)
-}
-
-let litefsModule: typeof import('litefs-js') | null = null
-let litefsRemixModule: typeof import('litefs-js/remix') | null = null
-
-async function getLitefsModule() {
-	if (!litefsModule) {
-		litefsModule = await import('litefs-js')
-	}
-	return litefsModule
-}
-
-async function getLitefsRemixModule() {
-	if (!litefsRemixModule) {
-		litefsRemixModule = await import('litefs-js/remix')
-	}
-	return litefsRemixModule
+// Detect if running in Cloudflare Workers
+function isCloudflareProduction(): boolean {
+	return isCloudflareWorkerRuntime()
 }
 
 export async function getInstanceInfo(
 	litefsDir?: string,
 ): Promise<InstanceInfo> {
-	if (!isFlyProduction()) return LOCAL_INSTANCE_INFO
-	return (await getLitefsModule()).getInstanceInfo(litefsDir)
+	// Cloudflare Workers - D1 handles database
+	return LOCAL_INSTANCE_INFO
 }
 
 export function getInstanceInfoSync(litefsDir?: string): InstanceInfo {
-	if (!isFlyProduction()) return LOCAL_INSTANCE_INFO
-
-	if (!litefsModule) {
-		throw new Error(
-			'getInstanceInfoSync requires litefs-js on Fly; call getInstanceInfo() first or await module init',
-		)
-	}
-
-	return litefsModule.getInstanceInfoSync(litefsDir)
+	return LOCAL_INSTANCE_INFO
 }
 
 export async function getAllInstances(): Promise<
 	Record<string, string | string[]>
 > {
-	if (!isFlyProduction()) return { local: 'local' }
-	return (await getLitefsModule()).getAllInstances()
+	// Cloudflare Workers - single instance
+	return { local: 'local' }
 }
 
 export function getInternalInstanceDomain(
 	instance: string,
 	port?: string | void,
 ): string {
-	if (!isFlyProduction()) return `http://${instance}.local:8081`
-
-	if (!litefsModule) {
-		throw new Error(
-			'getInternalInstanceDomain requires litefs-js on Fly; call getInstanceInfo() first',
-		)
-	}
-
-	return litefsModule.getInternalInstanceDomain(instance, port)
+	// Cloudflare Workers - use Workers internal routing
+	if (isCloudflareProduction()) return `https://${instance}.workers.dev`
+	return `http://${instance}.local:8081`
 }
 
 export async function ensurePrimary(): Promise<boolean> {
-	if (!isFlyProduction()) return true
-	return (await getLitefsRemixModule()).ensurePrimary()
+	// Cloudflare Workers - always primary (single instance model)
+	return true
 }
 
 export async function ensureInstance(instance: string): Promise<true> {
-	if (!isFlyProduction()) return true
-	return (await getLitefsRemixModule()).ensureInstance(instance)
-}
-
-if (isFlyProduction()) {
-	void getLitefsModule()
+	// Cloudflare Workers - single instance, no need to ensure
+	return true
 }

@@ -145,9 +145,9 @@ While local development is offline-first, CI/CD pipelines require internet for:
 
 - Installing dependencies
 - Running tests
-- Building Docker images (App, Admin) and the CMS Worker bundle
-- Deploying App/Admin to Fly.io, CMS to Cloudflare Workers, and Sites/Web to
-  Cloudflare Pages
+- Building the App, Admin, and CMS Worker bundle
+- Deploying App/Admin to Cloudflare Workers, CMS to Cloudflare Workers, and
+  Sites/Web to Cloudflare Pages
 
 This is expected and doesn't impact local development experience.
 

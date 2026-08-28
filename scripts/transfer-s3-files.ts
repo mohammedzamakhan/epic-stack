@@ -12,7 +12,7 @@
  * Usage:
  *   npx tsx scripts/transfer-s3-files.ts \
  *     --source-bucket=old-bucket \
- *     --source-endpoint=https://fly.storage.tigris.dev \
+ *     --source-endpoint=https://<account-id>.r2.cloudflarestorage.com \
  *     --source-access-key=... \
  *     --source-secret-key=... \
  *     --dest-bucket=new-bucket \

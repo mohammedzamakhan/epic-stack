@@ -27,8 +27,6 @@ function cloudflareWorkerAliasPlugin(): Plugin | null {
 		'@sentry/react-router': workerFile('sentry-stub.ts'),
 	}
 	const always: Record<string, string> = {
-		'litefs-js/remix': workerFile('litefs-stub.ts'),
-		'litefs-js': workerFile('litefs-stub.ts'),
 		'@sentry/profiling-node': workerFile('litefs-stub.ts'),
 		'node:sqlite': workerFile('node-sqlite-stub.ts'),
 	}

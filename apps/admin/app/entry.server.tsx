@@ -30,12 +30,13 @@ function createNonce() {
 	)
 }
 
-async function setFlyHeaders(responseHeaders: Headers) {
+async function setRuntimeHeaders(responseHeaders: Headers) {
 	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	responseHeaders.set('fly-region', ENV.FLY_REGION ?? 'unknown')
-	responseHeaders.set('fly-app', ENV.FLY_APP_NAME ?? 'unknown')
-	responseHeaders.set('fly-primary-instance', primaryInstance)
-	responseHeaders.set('fly-instance', currentInstance)
+
+	// Cloudflare Workers deployment
+	responseHeaders.set('cf-worker', 'epic-startup-admin')
+	responseHeaders.set('cf-instance', currentInstance)
+	responseHeaders.set('cf-primary-instance', primaryInstance)
 }
 
 function setSecurityHeaders(responseHeaders: Headers) {
@@ -109,7 +110,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 		new Response(null, { status: responseStatusCode }),
 	)
 
-	await setFlyHeaders(responseHeaders)
+	await setRuntimeHeaders(responseHeaders)
 	setSecurityHeaders(responseHeaders)
 
 	const userAgent = request.headers.get('user-agent')
@@ -168,10 +169,11 @@ export default async function handleRequest(...args: DocRequestArgs) {
 
 export async function handleDataRequest(response: Response) {
 	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	response.headers.set('fly-region', ENV.FLY_REGION ?? 'unknown')
-	response.headers.set('fly-app', ENV.FLY_APP_NAME ?? 'unknown')
-	response.headers.set('fly-primary-instance', primaryInstance)
-	response.headers.set('fly-instance', currentInstance)
+
+	// Cloudflare Workers deployment
+	response.headers.set('cf-worker', 'epic-startup-admin')
+	response.headers.set('cf-instance', currentInstance)
+	response.headers.set('cf-primary-instance', primaryInstance)
 
 	return response
 }

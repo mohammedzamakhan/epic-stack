@@ -1,13 +1,14 @@
 # Redirects
 
-We handle redirects in Express. Incoming requests are handled by Express before
-they pass through to Remix, so by redirecting earlier you improve performance.
+We handle redirects in Express (or via Cloudflare Pages / Workers routing). By
+redirecting early, you improve performance.
 
 ## HTTP to HTTPS
 
 We force all traffic to HTTPS automatically. That way, no part of your
 application is open to request interception. This does not affect localhost, as
-we use Fly's request headers for determining when to redirect.
+we use request headers (like `X-Forwarded-Proto`) for determining when to
+redirect.
 
 ```ts
 app.use((req, res, next) => {
@@ -46,20 +47,11 @@ app.use((req, res, next) => {
 
 ## www subdomains
 
-You can redirect root domain traffic to your www subdomain or vice versa.
+You can redirect root domain traffic to your www subdomain or vice versa. The
+recommended way to implement this redirect is in your application code, or by
+configuring Page Rules / Bulk Redirects in the Cloudflare Dashboard.
 
-[DNS level redirects do not work with Fly](https://community.fly.io/t/how-to-redirect-from-non-www-to-www/5795/2).
-The recommended way to implement this redirect is in your application code.
-
-First, you will need to register SSL certificates for both the www and the root
-domain. You can
-[register an SSL certificate for your domains in the terminal](https://fly.io/docs/getting-started/working-with-fly-apps/#fly-io-and-custom-domains)
-or in your [Fly dashboard](https://fly.io/dashboard/) by navigating to your app
-and selecting "Certificates" on the sidebar.
-
-After registering the two SSL certificates, Fly will allow traffic from either
-source to hit your application, and then you can redirect to your preferred
-domain in code.
+If implementing in code:
 
 **To redirect non-www traffic to www**
 

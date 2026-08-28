@@ -46,13 +46,12 @@
 		"TRIAL_DAYS": "14",
 		"CREDIT_CARD_REQUIRED_FOR_TRIAL": "manual",
 		"AWS_REGION": "auto",
-		"AWS_ENDPOINT_URL_S3": "https://fly.storage.tigris.dev",
+		"AWS_ENDPOINT_URL_S3": "https://<account-id>.r2.cloudflarestorage.com",
 		"BUCKET_NAME": "mock-bucket",
 		"AWS_ACCESS_KEY_ID": "mock-access-key",
 		"GITHUB_CLIENT_ID": "MOCK_GITHUB_CLIENT_ID",
 		"SENTRY_DSN": "your-dsn",
 		"STRIPE_PORTAL_URL": "",
-		"FLY_REGION": "",
-		"FLY_APP_NAME": "",
+		
 	},
 }

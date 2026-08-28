@@ -7,18 +7,17 @@ description: 'Deployment options for Epic Stack'
 
 Epic Stack is designed to be deployed to various platforms with minimal configuration.
 
-## Fly.io Deployment
+## Cloudflare Workers Deployment
 
-App and Admin deploy to Fly.io:
+App and Admin deploy to Cloudflare Workers with D1 (SQLite):
 
-- Docker-based deployment
-- Automatic scaling
-- LiteFS for control-plane SQLite replication (US only)
+- Serverless deployment with automatic scaling
+- D1 for control-plane SQLite database
+- Zero configuration required
 
-## Cloudflare Deployment
+## CMS and jobs-cron Deployment
 
-The **CMS** and **jobs-cron** Worker deploy to **Cloudflare Workers** — not
-Fly.io. The CMS uses OpenNext; jobs-cron uses Cron Triggers only.
+The **CMS** and **jobs-cron** Worker deploy to **Cloudflare Workers**. The CMS uses OpenNext; jobs-cron uses Cron Triggers only.
 
 `wrangler.jsonc` for CMS declares Cloudflare **D1** (SQLite) and **R2**
 (media storage) bindings, but Payload isn't wired to use either yet;

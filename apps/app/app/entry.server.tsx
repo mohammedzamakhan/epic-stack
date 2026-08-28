@@ -56,17 +56,17 @@ function applySecurityHeaders(responseHeaders: Headers) {
 function applyRuntimeHeaders(responseHeaders: Headers) {
 	if (isCloudflareWorkerRuntime()) {
 		responseHeaders.set('cf-worker', 'epic-startup-app')
+		// Cloudflare Workers deployment info
+		responseHeaders.set('cf-datacenter', process.env.CF_DATACENTER ?? 'unknown')
 		return
 	}
-
-	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown')
-	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
 }
 
 async function applyInstanceHeaders(responseHeaders: Headers) {
 	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	responseHeaders.set('fly-primary-instance', primaryInstance)
-	responseHeaders.set('fly-instance', currentInstance)
+	// Cloudflare Workers instance headers
+	responseHeaders.set('cf-instance', currentInstance)
+	responseHeaders.set('cf-primary-instance', primaryInstance)
 }
 
 function applyContentSecurity(

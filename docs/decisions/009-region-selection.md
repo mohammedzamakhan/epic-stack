@@ -6,11 +6,10 @@ Status: accepted
 
 ## Context
 
-Fly supports running your app in
-[34 regions](https://fly.io/docs/reference/regions/) all over the world. The
-Epic Stack is set up to allow you to run in as many of these regions as you
-like, but for cost reasons, it's best to start out with a single region until
-your app needs that level of scale.
+Cloudflare Workers runs your app in hundreds of data centers all over the world.
+The Epic Stack is set up to allow you to take advantage of this global network,
+but for the tenant databases (which are regional), it's best to start out with a
+single region until your app needs that level of scale.
 
 Region selection has an important impact on the performance of your app. When
 you're choosing a single region, you're choosing who your app is going to be

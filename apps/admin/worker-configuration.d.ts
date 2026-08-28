@@ -18,8 +18,6 @@ interface Env {
 	GITHUB_CLIENT_ID: string
 	SENTRY_DSN: string
 	STRIPE_PORTAL_URL: string
-	FLY_REGION: string
-	FLY_APP_NAME: string
 	SESSION_SECRET: string
 	HONEYPOT_SECRET: string
 	INTERNAL_COMMAND_TOKEN: string

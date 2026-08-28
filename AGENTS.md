@@ -13,10 +13,9 @@ auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
 **Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Drizzle,
 Tailwind CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites).
-App/Admin deploy on Fly.io with LiteFS. CMS deploys on Vercel Hobby (Turso + R2
-via S3). Cloudflare Workers is an optional paid path (D1 + R2 binding) once the
-gzip bundle fits the 10 MiB plan. Regional tenant-api deploys on OCI Ampere
-(Riyadh + Ashburn) with per-org SQLite on a block volume.
+App/Admin deploy on Cloudflare Workers with D1. CMS deploys on Vercel (Turso +
+R2 via S3). Regional tenant-api deploys on OCI Ampere (Riyadh + Ashburn) with
+per-org SQLite on a block volume.
 
 **Monorepo Structure**:
 
@@ -454,15 +453,16 @@ npm run db:studio    # Opens Drizzle Studio on localhost:5555
 Call sites use `import { db } from '@repo/database'` with Drizzle tables and
 queries. Native SQL/query helpers also live on `db` from the same package.
 
-**LiteFS Notes**:
+**Database Notes**:
 
-- SQLite replication across Fly.io regions
-- Database at `/litefs/data/sqlite.db` in production
+- Control-plane SQLite with D1 on Cloudflare Workers
+- Database at `/tmp/sqlite.db` in production (Cloudflare Workers ephemeral
+  filesystem)
 - Local: `./packages/database/data.db`
 - Use "widen then narrow" migration strategy for zero-downtime
-- App/Admin LiteFS is the **US control plane**. Customer PII uses a **separate**
-  OCI VM + block volume per `dataRegion` (`us` | `ksa`). Never put KSA SQLite on
-  the US App LiteFS cluster.
+- App/Admin D1 is the **US control plane**. Customer PII uses a **separate** OCI
+  VM + block volume per `dataRegion` (`us` | `ksa`). Never put KSA SQLite on the
+  US App D1 cluster.
 
 **Tenant SQLite (regional customer data plane):**
 
@@ -474,9 +474,8 @@ queries. Native SQL/query helpers also live on `db` from the same package.
 
 ## Deployment
 
-**Platform**: Fly.io (App/Admin) + Vercel (CMS) + Cloudflare Workers (jobs-cron;
-optional CMS on paid plan) + OCI Ampere (tenant-api) + Cloudflare Pages (Sites /
-marketing web)
+**Platform**: Cloudflare Workers (App/Admin) + Vercel (CMS) + Cloudflare Workers
+(jobs-cron) + OCI Ampere (tenant-api) + Cloudflare Pages (Sites / marketing web)
 
 **Deployment Trigger**: Push to `main` (production) or `dev` (staging)
 
@@ -486,17 +485,14 @@ marketing web)
 2. Build + TypeCheck
 3. Unit tests (Vitest)
 4. E2E tests (Playwright, 60min timeout)
-5. Docker build (app, admin on Fly)
-6. Deploy App/Admin to Fly.io; CMS to Vercel; jobs-cron to Cloudflare Workers;
-   Sites and marketing web to Cloudflare Pages
-7. Tenant-api: build `linux/arm64`, push GHCR, SSH to OCI Ashburn + Riyadh VMs
+5. Deploy App/Admin to Cloudflare Workers; CMS to Vercel; jobs-cron to
+   Cloudflare Workers; Sites and marketing web to Cloudflare Pages
+6. Tenant-api: build `linux/arm64`, push GHCR, SSH to OCI Ashburn + Riyadh VMs
 
 **Zero-Downtime Deployments**:
 
-- Multiple App/Admin instances run simultaneously
-- LiteFS handles control-plane SQLite replication (US only)
-- Health checks: `/resources/healthcheck`, `/litefs/health` (App/Admin);
-  tenant-api `/health`
+- Cloudflare Workers handles deployment with instant routing
+- Health checks: `/resources/healthcheck` (App/Admin); tenant-api `/health`
 
 ## Internationalization
 

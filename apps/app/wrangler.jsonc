@@ -38,7 +38,7 @@
 		"TRIAL_DAYS": "14",
 		"SSO_ENABLED": "false",
 		"AWS_REGION": "auto",
-		"AWS_ENDPOINT_URL_S3": "https://fly.storage.tigris.dev",
+		"AWS_ENDPOINT_URL_S3": "https://<account-id>.r2.cloudflarestorage.com",
 		"BUCKET_NAME": "mock-bucket",
 		"BASE_URL": "https://epic-startup-app.zama-887.workers.dev",
 		"ROOT_APP": "zama-887.workers.dev",

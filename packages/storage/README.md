@@ -151,7 +151,7 @@ interface StorageConfig {
 ## Environment Variables
 
 ```env
-AWS_ENDPOINT_URL_S3=https://fly.storage.tigris.dev
+AWS_ENDPOINT_URL_S3=https://<account-id>.r2.cloudflarestorage.com
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=auto

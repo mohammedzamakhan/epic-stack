@@ -499,7 +499,7 @@ export class SSOMonitoringService {
 // Export singleton instance
 export const ssoMonitoringService = new SSOMonitoringService()
 
-// Start monitoring in production Node/Fly — Workers forbid timers in global scope
+// Start monitoring in production — Workers forbid timers in global scope
 if (process.env.NODE_ENV === 'production' && !isCloudflareWorkerRuntime()) {
 	ssoMonitoringService.startMonitoring()
 }

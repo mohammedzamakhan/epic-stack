@@ -3,25 +3,7 @@ import { getClientIp } from './ip-address.server.js'
 
 describe('getClientIp', () => {
 	describe('Web API Request (Remix)', () => {
-		it('should extract IP from Fly-Client-IP header (highest priority)', () => {
-			const request = {
-				headers: {
-					get: (name: string) => {
-						const headers: Record<string, string> = {
-							'fly-client-ip': '1.2.3.4',
-							'cf-connecting-ip': '5.6.7.8',
-							'x-real-ip': '9.10.11.12',
-							'x-forwarded-for': '13.14.15.16',
-						}
-						return headers[name.toLowerCase()] || null
-					},
-				},
-			}
-
-			expect(getClientIp(request)).toBe('1.2.3.4')
-		})
-
-		it('should extract IP from CF-Connecting-IP header when Fly-Client-IP is not present', () => {
+		it('should extract IP from CF-Connecting-IP header (highest priority)', () => {
 			const request = {
 				headers: {
 					get: (name: string) => {
@@ -36,6 +18,22 @@ describe('getClientIp', () => {
 			}
 
 			expect(getClientIp(request)).toBe('5.6.7.8')
+		})
+
+		it('should extract IP from X-Real-IP header when CF-Connecting-IP is not present', () => {
+			const request = {
+				headers: {
+					get: (name: string) => {
+						const headers: Record<string, string> = {
+							'x-real-ip': '9.10.11.12',
+							'x-forwarded-for': '13.14.15.16',
+						}
+						return headers[name.toLowerCase()] || null
+					},
+				},
+			}
+
+			expect(getClientIp(request)).toBe('9.10.11.12')
 		})
 
 		it('should parse X-Forwarded-For right-to-left based on trustedProxyCount to prevent client spoofing', () => {
@@ -93,18 +91,17 @@ describe('getClientIp', () => {
 	})
 
 	describe('Express-style Request', () => {
-		it('should extract IP from Fly-Client-IP header using .get() method', () => {
+		it('should extract IP from CF-Connecting-IP header using .get() method', () => {
 			const request = {
 				get: (name: string) => {
 					const headers: Record<string, string> = {
-						'fly-client-ip': '1.2.3.4',
 						'cf-connecting-ip': '5.6.7.8',
 					}
 					return headers[name.toLowerCase()]
 				},
 			}
 
-			expect(getClientIp(request)).toBe('1.2.3.4')
+			expect(getClientIp(request)).toBe('5.6.7.8')
 		})
 
 		it('should extract IP from X-Forwarded-For using .get() method', () => {

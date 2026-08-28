@@ -16,14 +16,14 @@ the instances. This token can be stored in the environment variables of the
 instances.
 
 Originally, this token was manually generated once and set as a secret in the
-Fly app. This token was then used in the application code to authenticate the
-requests.
+Cloudflare Worker. This token was then used in the application code to
+authenticate the requests.
 
 However, this manual process is error-prone and can lead to security issues if
 the token is leaked.
 
 An alternative is to generate the token in the Dockerfile and set it as an
-environment variable in the Fly app. This way, the token is generated
+environment variable in the Cloudflare Worker. This way, the token is generated
 automatically and is unique for each deployment.
 
 One drawback to this is during the deployment process, an old replica might
@@ -35,7 +35,7 @@ benefit anyway.
 ## Decision
 
 We will generate the internal command token in the Dockerfile and set it as an
-environment variable in the Fly app.
+environment variable in the Cloudflare Worker.
 
 ## Consequences
 

@@ -1,4 +1,4 @@
-// learn more: https://fly.io/docs/reference/configuration/#services-http_checks
+// Health check endpoint - validates database connection and self-reachability
 import { getValidatedHost } from '@repo/common/headers'
 import { countUsers } from '@repo/database'
 import { ENV } from 'varlock/env'

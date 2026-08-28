@@ -2,20 +2,20 @@
 
 The Epic Stack uses [Tigris](https://www.tigrisdata.com), an S3-compatible
 object storage service, for storing and serving uploaded images. Tigris is
-integrated tightly with Fly.io, so you don't need to worry about setting up an
+integrated with Cloudflare, so you don't need to worry about setting up an
 account or configuring any credentials.
 
 ## Configuration
 
 To use Tigris for image storage, you need to configure the following environment
-variables. These are automatically set for you on Fly.io when you create storage
-for your app which happens when you create a new Epic Stack project.
+variables. These are automatically set for you on Cloudflare R2 for your app
+which happens when you create a new Epic Stack project.
 
 ```sh
 AWS_ACCESS_KEY_ID="mock-access-key"
 AWS_SECRET_ACCESS_KEY="mock-secret-key"
 AWS_REGION="auto"
-AWS_ENDPOINT_URL_S3="https://fly.storage.tigris.dev"
+AWS_ENDPOINT_URL_S3="https://<account-id>.r2.cloudflarestorage.com"
 BUCKET_NAME="mock-bucket"
 ```
 

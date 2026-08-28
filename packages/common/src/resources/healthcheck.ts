@@ -1,5 +1,3 @@
-// learn more: https://fly.io/docs/reference/configuration/#services-http_checks
-
 import { getDomainUrl } from '@repo/common'
 import { countUsers } from '@repo/database'
 

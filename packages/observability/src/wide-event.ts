@@ -110,12 +110,12 @@ export function wideEventMiddleware(
 				// Service info
 				service: serviceName,
 				version: serviceVersion,
-				region: process.env.FLY_REGION || process.env.REGION || undefined,
+				region: process.env.CF_DATACENTER || process.env.REGION || undefined,
 				deploymentId: process.env.DEPLOYMENT_ID || undefined,
 
 				// Request info
 				...(traceId && { traceId }),
-				ip: req.get('fly-client-ip') || req.ip || undefined,
+				ip: req.get('cf-connecting-ip') || req.ip || undefined,
 				userAgent: req.get('user-agent'),
 				referer: req.get('referer'),
 

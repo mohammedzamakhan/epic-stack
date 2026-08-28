@@ -1,6 +1,6 @@
 # Build from the monorepo root:
 #   docker build -f apps/tenant-api/Dockerfile -t tenant-api .
-# Production is linux/arm64 (OCI Ampere A1). Leave LITEFS_DIR unset.
+# Production is linux/arm64 (OCI Ampere A1). 
 
 FROM node:22-bookworm-slim AS base
 

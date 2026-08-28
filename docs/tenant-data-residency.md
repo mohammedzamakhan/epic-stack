@@ -217,9 +217,9 @@ startup in production.
 
 ## Production / OCI
 
-App and Admin stay on Fly in the US. **Tenant-api** runs on **Oracle Cloud**:
-one Ampere A1 VM and one block volume per `dataRegion`, so customer SQLite never
-shares App’s LiteFS volume.
+App and Admin stay on Cloudflare Workers in the US. **Tenant-api** runs on
+**Oracle Cloud**: one Ampere A1 VM and one block volume per `dataRegion`, so
+customer SQLite never shares App’s LiteFS volume.
 
 | Logical `dataRegion` | Where to run tenant-api                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------- |
@@ -228,7 +228,8 @@ shares App’s LiteFS volume.
 
 Set home region to Riyadh when you create the tenancy. Always Free resources
 cannot be created in Ashburn if Riyadh is home. AWS still has no generally
-available Kingdom region; do not use Bahrain, UAE, or Fly as a KSA stand-in.
+available Kingdom region; do not use Bahrain, UAE, or standard Cloudflare as a
+KSA stand-in.
 
 Same Docker image (`apps/tenant-api/Dockerfile`, `linux/arm64`) for both. SQLite
 files live on the attached volume at `TENANT_DB_DIR=/data/tenants`. Run a

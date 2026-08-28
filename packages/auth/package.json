@@ -41,7 +41,6 @@
     "@sentry/react-router": "10.29.0",
     "ai": "5.0.108",
     "bcryptjs": "^3.0.2",
-    "litefs-js": "2.0.2",
     "react-router": "^8.3.0",
     "remix-auth-github": "^3.0.2",
     "remix-utils": "^8.5.0",

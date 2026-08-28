@@ -3,14 +3,13 @@
 Here are a few things you get today:
 
 - [Remix](https://remix.run/) is the Web Framework of choice
-- [Fly app deployment](https://fly.io/) with [Docker](https://www.docker.com/)
+- [Cloudflare Workers deployment](https://workers.cloudflare.com/)
 - Multi-region, distributed, production-ready
   [SQLite Database](https://sqlite.org/) with
-  [LiteFS](https://fly.io/docs/litefs/)
+  [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - Healthcheck endpoint for
-  [Fly backups region fallbacks](https://fly.io/docs/reference/configuration/#services-http_checks)
-- [Grafana](https://fly-metrics.net/) dashboards of the running app via Fly
-  Metrics
+- [Cloudflare Analytics](https://developers.cloudflare.com/analytics) of the
+  running app Metrics
 - [GitHub Actions](https://github.com/features/actions) with testing and deploy
   on merge for both production and staging environments
 - Email/Password Authentication with

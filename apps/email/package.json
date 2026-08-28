@@ -15,7 +15,6 @@
     "@repo/email": "*",
     "@sentry/react-router": "10.29.0",
     "ai": "5.0.108",
-    "litefs-js": "2.0.2",
     "react": "^19.1.1",
     "react-email": "4.3.2",
     "react-router": "^8.3.0"

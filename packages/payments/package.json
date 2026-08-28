@@ -39,7 +39,6 @@
     "@sentry/react-router": "10.29.0",
     "ai": "5.0.108",
     "checkout-sdk-node": "^4.1.0",
-    "litefs-js": "2.0.2",
     "react-router": "^8.3.0",
     "stripe": "^18.5.0"
   },

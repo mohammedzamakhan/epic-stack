@@ -23,11 +23,12 @@ filling out the signup form.
 ## Setting up the sentry-vite plugin
 
 Once you see the onboarding page which has the DSN, copy that somewhere (this
-becomes `SENTRY_DSN`). Now, set the sentry dsn secret in Fly.io to be used as an
-env var during runtime:
+becomes `SENTRY_DSN`). Now, set the sentry dsn secret in Cloudflare Workers to
+be used as an env var during runtime:
 
 ```sh
-fly secrets set SENTRY_DSN=<your_dsn>
+npx wrangler secret put SENTRY_DSN
+# (Provide the <your_dsn> value when prompted)
 ```
 
 See the guides for React Router v7

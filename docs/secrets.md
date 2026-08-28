@@ -1,57 +1,38 @@
 # Secrets
 
 Managing secrets in the Epic Stack is done using environment variables and the
-`fly secrets` command.
+`wrangler secret` command.
 
 > **Warning**: It is very important that you do NOT hard code any secrets in the
-> source code. Even if your app source is not public, there are a lot of reasons
-> this is dangerous and in the epic stack we default to creating source maps
-> which will reveal your hard coded secrets to the public. Read more about this
-> in [the source map decision document](./decisions/016-source-maps.md).
+> code! This includes the `SESSION_SECRET` which is used to sign the session
+> cookie! Doing so could put your application at risk for XSS and other attacks.
 
-## Local development
+## Local Environment
 
-When you need to create a new secret, it's best to add a line to your
-`.env.example` file so folks know that secret is necessary. The value you put in
-here should be not real because this file is committed to the repository.
+When developing locally, secrets are stored in a `.env` file at the root of the
+project. This file is not checked into version control. It's automatically
+created for you when you run the initial setup script `npm run setup`. And is
+based on the `.env.example` file.
 
-To keep everything in line with the [guiding principle](./guiding-principles.md)
-of "Offline Development," you should also strive make it so whatever service
-you're interacting with can be mocked out using MSW in the `test/mocks`
-directory.
+## Production Environment
 
-Tenant Sites phone auth adds secrets that **do not belong on Sites**:
+The Epic Stack applications use Cloudflare Workers and OCI instances. They do
+not share a single `.env` file or environment.
 
-| Secret                     | Where                              | Purpose                                                                                                                              |
-| -------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`               | Each tenant-api                    | Sign customer access tokens. Unique per region.                                                                                      |
-| `AUTH_HMAC_SECRET`         | Each tenant-api                    | Hash OTP codes and refresh tokens.                                                                                                   |
-| `INTERNAL_COMMAND_TOKEN`   | App + every tenant-api + jobs-cron | Provision/deprovision on tenant-api; cron POSTs to `/resources/jobs/*` on App. ≥16 chars.                                            |
-| `JOBS_CRON_WORKER_URL`     | App only                           | Public URL of `apps/jobs-cron`; starts storage migration workflows.                                                                  |
-| `MEDIA_TRANSFORM_BASE_URL` | App only                           | Cloudflare-proxied app URL with Media Transformations enabled. On-demand video posters/clips. Optional in dev.                       |
-| `EMAIL_PROVIDER`           | App + Admin                        | `resend` (default) or `oci`. When `oci`, set `OCI_*` on the same app. See [platform marketing email](./platform-marketing-email.md). |
+App/Admin production secrets use `wrangler secret put`. Tenant-api production
+secrets live in `/opt/tenant-api/.env` on each OCI VM. The jobs-cron Worker also
+uses `wrangler secret put` (see [scheduled jobs](./scheduled-jobs.md)).
 
-Sites only needs tenant-api **URLs** (`TENANT_API_URL`, `TENANT_API_URL_KSA`)
-injected into HTML. Local `.env.schema` values contain `do-not-use-in-prod` and
-are rejected at tenant-api startup in production. Full list:
-[tenant data residency](./tenant-data-residency.md).
-
-App/Admin production secrets use `fly secrets set`. Tenant-api production
-secrets live in `/opt/tenant-api/.env` on each OCI VM. The jobs-cron Worker uses
-`wrangler secret put` (see [scheduled jobs](./scheduled-jobs.md)).
-
-You can also put the real value of the secret in `.env` which is `.gitignore`d
-so you can interact with the real service if you need to during development.
-
-## Production secrets
+### Adding secrets
 
 To publish a secret to your production and staging applications, you can use the
-`fly secrets set` command. For example, if you were integrating with the `tito`
-API, to set the `TITO_API_SECRET` secret, you would run the following command:
+`wrangler secret put` command. For example, if you were integrating with the
+`tito` API, to set the `TITO_API_SECRET` secret, you would run the following
+command for your apps:
 
 ```sh
-fly secrets set TITO_API_SECRET=some_secret_value
-fly secrets set TITO_API_SECRET=some_secret_value --app [YOUR_STAGING_APP_NAME]
+npx wrangler secret put TITO_API_SECRET --env production
+npx wrangler secret put TITO_API_SECRET --env staging
 ```
 
-This will redeploy your app with that environment variable set.
+Wrangler will prompt you to enter the secret value securely.
