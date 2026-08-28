@@ -2,8 +2,9 @@
 import MarketingLayout from '../../../layouts/MarketingLayout.astro'
 import { getPosts } from '../../../lib/emdash'
 import SEO from '../../../components/SEO.astro'
-import Button from '../../../components/ui/Button.astro'
 import { getPageTitle, brand } from '@repo/config/brand'
+import Section from '../../../components/site/Section.astro'
+import Button from '../../../components/ui/Button.astro'
 
 const { page } = Astro.params
 const pageNumber = parseInt(page as string)
@@ -13,10 +14,12 @@ let posts = await getPosts(pageNumber, 12, currentLocale)
 if ((!posts.entries || posts.entries.length === 0) && currentLocale !== 'en') {
   posts = await getPosts(pageNumber, 12, 'en')
 }
+// If still no posts, try without any locale (in case they are not localized)
 if (!posts.entries || posts.entries.length === 0) {
   posts = await getPosts(pageNumber, 12)
 }
 
+// Breadcrumbs for SEO
 const breadcrumbs = [
 	{ name: 'Home', url: '/' },
 	{ name: 'Blog', url: '/posts' },
@@ -27,7 +30,7 @@ const pageTitle = pageNumber === 1
 	? getPageTitle('Blog') 
 	: getPageTitle(`Blog - Page ${pageNumber}`)
 
-const pageDescription = `Discover the latest insights, tutorials, and updates from ${brand.name}.`
+const pageDescription = `Discover the latest insights, tutorials, and updates from ${brand.name}. Learn about best practices and product updates.`
 ---
 
 <MarketingLayout>
@@ -41,25 +44,27 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 		{posts.totalPages > pageNumber && <link rel="next" href={`/posts/page/${pageNumber + 1}`} />}
 	</Fragment>
 
-	<main class="px-5 pt-28 pb-20 sm:px-8 sm:pt-32">
-		<div class="mx-auto max-w-3xl text-center">
-			<p class="text-[13px] font-medium text-brand">Blog</p>
-			<h1 class="mt-3 font-display text-[40px] font-medium tracking-[-0.03em] text-foreground sm:text-[52px]">
-				Latest posts
+	<Section class="py-24 sm:py-32">
+		<div class="flex flex-col items-center text-center mb-16">
+			<h1 class="font-display text-balance text-[40px] font-medium leading-[1.05] tracking-[-0.03em] sm:text-[58px] lg:text-[64px]">
+				Blog Posts
 			</h1>
-			<p class="mt-4 text-[17px] text-muted-foreground">
-				Page {pageNumber}
+			<p class="mt-6 max-w-2xl text-pretty text-[17px] leading-relaxed text-muted-foreground">
+				Discover the latest insights, tutorials, and updates from our team — Page {pageNumber}
 			</p>
 		</div>
 
 		{
 			posts.entries && posts.entries.length > 0 ? (
-				<div class="mx-auto mt-12 max-w-6xl">
-					<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+				<div class="mx-auto w-full max-w-[1200px]">
+					<div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
 						{posts.entries.map((post) => {
-							const imageUrl = (post as any).heroImage?.url || post.seo?.image?.url
-							const imageAlt = (post as any).heroImage?.alt || post.seo?.image?.alt || post.title
-							const category = (post as any).category || 'Blog'
+							const imageUrl = post.heroImage?.url || post.seo?.image?.url
+							const imageAlt =
+								post.heroImage?.alt ||
+								post.seo?.image?.alt ||
+								`Featured image for ${post.title}`
+							const category = (post as any).category || (post.categories && post.categories[0] ? (typeof post.categories[0] === 'object' ? post.categories[0].name : post.categories[0]) : 'Blog')
 							const publishedDate = post.publishedAt
 								? new Date(post.publishedAt).toLocaleDateString('en-US', {
 										year: 'numeric',
@@ -87,7 +92,7 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 											<span class="text-[13px] text-muted-foreground">{publishedDate}</span>
 										)}
 									</div>
-									<h2 class="mt-3 flex items-start gap-1 text-pretty text-[18px] font-medium leading-snug tracking-[-0.01em]">
+									<h3 class="mt-3 flex items-start gap-1 text-pretty text-[18px] font-medium leading-snug tracking-[-0.01em]">
 										<span set:html={post.title} />
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -105,14 +110,14 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 											<path d="M7 7h10v10" />
 											<path d="M7 17 17 7" />
 										</svg>
-									</h2>
+									</h3>
 								</a>
 							)
 						})}
 					</div>
 
 					{posts.totalPages > 1 && (
-						<div class="mt-12 flex items-center justify-center gap-3">
+						<div class="flex items-center justify-center gap-4 mt-16 pt-8 border-t border-hairline">
 							{posts.page > 1 && (
 								<Button
 									href={posts.page === 2 ? '/posts' : `/posts/page/${posts.page - 1}`}
@@ -121,11 +126,14 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 									Previous
 								</Button>
 							)}
-							<span class="px-2 text-[14px] text-muted-foreground">
+							<span class="text-[14px] font-medium text-muted-foreground">
 								Page {posts.page} of {posts.totalPages}
 							</span>
 							{posts.page < posts.totalPages && (
-								<Button href={`/posts/page/${posts.page + 1}`} variant="outline">
+								<Button
+									href={`/posts/page/${posts.page + 1}`}
+									variant="outline"
+								>
 									Next
 								</Button>
 							)}
@@ -133,8 +141,10 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 					)}
 				</div>
 			) : (
-				<p class="mt-12 text-center text-[17px] text-muted-foreground">No posts found.</p>
+				<div class="flex items-center justify-center py-20 text-center">
+					<p class="text-[17px] text-muted-foreground">No posts found.</p>
+				</div>
 			)
 		}
-	</main>
+	</Section>
 </MarketingLayout>

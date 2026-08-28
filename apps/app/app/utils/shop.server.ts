@@ -35,7 +35,7 @@ import {
 	customerPaymentMethods,
 } from '@repo/tenant-db'
 import { resolveVerifiedShopCustomer } from '#app/utils/tenant-customer-auth.server.ts'
-import { type ShopOrganization, type ShopOrderSummary } from './shop.types.ts'
+import { type ShopOrganization } from './shop.types.ts'
 
 let shopCommerce = createShopCommerce(
 	createShopCommerceConfigFromEnv(process.env),

@@ -28,7 +28,7 @@ const activeLocale = locales.find((locale) => locale.code === currentLocale) ?? 
 		type="button"
 		class:list={[
 			'language-switcher-trigger inline-flex items-center gap-1.5 rounded-full border border-hairline text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20',
-			variant === 'header' ? 'h-10 px-3 text-[13px] font-medium' : 'h-9 px-3 text-[13px] font-medium',
+			variant === 'header' ? 'h-9 px-3.5 text-[13px] font-medium' : 'h-9 px-3 text-[13px] font-medium',
 		]}
 		aria-haspopup="listbox"
 		aria-expanded="false"

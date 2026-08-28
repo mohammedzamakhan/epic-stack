@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { calculateShopFees, SHOP_PLATFORM_FEE_PERCENT } from './shop-fees'
 import {
 	mapPolarShopOrder,
 	polarCheckoutStatusToOrderStatus,
 } from './polar-shop'
+import { calculateShopFees, SHOP_PLATFORM_FEE_PERCENT } from './shop-fees'
 
 describe('shop fees', () => {
 	it('keeps a 20% platform share', () => {

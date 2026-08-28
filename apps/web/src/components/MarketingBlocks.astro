@@ -1,5 +1,6 @@
 ---
 import { PortableText } from "emdash/ui";
+import { normalizeLinkPickFields } from "../plugins/marketing-blocks/content-links";
 import MarketingHero from "./blocks/MarketingHero.astro";
 import MarketingLogos from "./blocks/MarketingLogos.astro";
 import MarketingFeatures from "./blocks/MarketingFeatures.astro";
@@ -34,6 +35,11 @@ interface Props {
 }
 
 const { value } = Astro.props;
+
+const normalizedValue =
+	value && Array.isArray(value)
+		? (normalizeLinkPickFields(value) as typeof value)
+		: value;
 
 const marketingComponents = {
 	type: {
@@ -70,5 +76,5 @@ const marketingComponents = {
 };
 ---
 
-{value && Array.isArray(value) && <PortableText value={value} components={marketingComponents} />}
+{normalizedValue && Array.isArray(normalizedValue) && <PortableText value={normalizedValue} components={marketingComponents} />}
 

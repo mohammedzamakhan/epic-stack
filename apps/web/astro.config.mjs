@@ -66,6 +66,10 @@ export default defineConfig({
 				{
 					id: 'marketing-blocks',
 					version: '0.1.0',
+					adminEntry: new URL(
+						'./src/plugins/marketing-blocks/admin.tsx',
+						import.meta.url,
+					).href,
 					entrypoint: new URL(
 						'./src/plugins/marketing-blocks/index.ts',
 						import.meta.url,

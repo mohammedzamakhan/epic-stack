@@ -1,0 +1,24 @@
+---
+import { cn } from '../../lib/utils'
+
+interface Props {
+	class?: string
+}
+
+const { class: className = '' } = Astro.props
+---
+
+<div
+	class={cn('pointer-events-none absolute inset-x-0 top-0', className)}
+	aria-hidden="true"
+>
+	<div class="h-px w-full bg-hairline"></div>
+	<div
+		class="absolute top-0 h-px bg-hairline"
+		style="width: calc(50vw - 50%); left: calc(-50vw + 50%);"
+	></div>
+	<div
+		class="absolute top-0 h-px bg-hairline"
+		style="width: calc(50vw - 50%); right: calc(-50vw + 50%);"
+	></div>
+</div>

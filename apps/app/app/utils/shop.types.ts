@@ -70,4 +70,4 @@ export type ShopOrderSummary = {
 }
 
 /** @deprecated Use ShopProcessorId from @repo/payments */
-export type ShopPaymentProvider = import('@repo/payments').ShopProcessorId
+export type ShopPaymentProvider = ShopProcessorId

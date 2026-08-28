@@ -13,7 +13,7 @@ import {
 	getCheckoutDashboardUrl,
 	getPolarDashboardUrl,
 	inviteCheckoutSubEntity,
-	mapCheckoutShopPayment,
+	type mapCheckoutShopPayment,
 	mapCheckoutWebhookToPayment,
 	mapPolarShopOrder,
 	checkoutPaymentStatusToOrderStatus,
@@ -27,11 +27,11 @@ import {
 	type PolarShopCheckout,
 	type PolarShopOrder,
 } from '../connect'
-import { createPolarProvider, createStripeProvider } from '../factory'
 import {
 	calculateShopFees,
 	SHOP_PLATFORM_FEE_PERCENT,
 } from '../connect/shop-fees'
+import { createPolarProvider, createStripeProvider } from '../factory'
 import { type ShopCommerceConfig } from './config'
 import {
 	getShopProcessorDefinition,

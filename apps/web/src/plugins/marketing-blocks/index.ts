@@ -5,6 +5,14 @@
  * so editors can visually insert, configure, and reorder all components.
  */
 
+import { definePlugin } from 'emdash'
+
+import {
+	buildContentLinkOptions,
+	linkSettingsField,
+	normalizeLinkPickFields,
+} from './content-links'
+
 const ICON_OPTIONS = [
 	{ label: 'Lightning / Zap', value: 'zap' },
 	{ label: 'Shield / Security', value: 'shield' },
@@ -48,14 +56,50 @@ const FORM_TYPE_OPTIONS = [
 	{ label: 'Request a Demo', value: 'demo' },
 ]
 
-const definition: any = {
+const definition = {
 	id: 'marketing-blocks',
-	version: '0.2.0',
-	capabilities: [],
-	hooks: {},
-	routes: {},
+	version: '0.2.4',
+	capabilities: ['content:read', 'content:write'] as const,
+	hooks: {
+		'content:beforeSave': async (event: {
+			content: Record<string, unknown>
+		}) => {
+			const content = { ...event.content }
+			for (const [key, value] of Object.entries(content)) {
+				if (Array.isArray(value)) {
+					content[key] = normalizeLinkPickFields(value)
+				}
+			}
+			return content
+		},
+	},
+	routes: {
+		'content-link-options': {
+			handler: async (ctx: Parameters<typeof buildContentLinkOptions>[0]) => ({
+				items: await buildContentLinkOptions(ctx, 'all'),
+			}),
+		},
+		'content-link-pages': {
+			handler: async (ctx: Parameters<typeof buildContentLinkOptions>[0]) => ({
+				items: await buildContentLinkOptions(ctx, 'pages'),
+			}),
+		},
+		'content-link-posts': {
+			handler: async (ctx: Parameters<typeof buildContentLinkOptions>[0]) => ({
+				items: await buildContentLinkOptions(ctx, 'posts'),
+			}),
+		},
+	},
 
 	admin: {
+		entry: '/src/plugins/marketing-blocks/admin.tsx',
+		fieldWidgets: [
+			{
+				name: 'link_settings',
+				label: 'Link Settings',
+				fieldTypes: ['json'],
+			},
+		],
 		portableTextBlocks: [
 			// 1. Hero (Advanced Multi-Variant)
 			{
@@ -114,21 +158,13 @@ const definition: any = {
 						action_id: 'primaryCtaLabel',
 						label: 'Primary CTA Label',
 					},
-					{
-						type: 'text_input',
-						action_id: 'primaryCtaUrl',
-						label: 'Primary CTA URL',
-					},
+					linkSettingsField('primaryCtaUrl', 'Primary CTA URL'),
 					{
 						type: 'text_input',
 						action_id: 'secondaryCtaLabel',
 						label: 'Secondary CTA Label',
 					},
-					{
-						type: 'text_input',
-						action_id: 'secondaryCtaUrl',
-						label: 'Secondary CTA URL',
-					},
+					linkSettingsField('secondaryCtaUrl', 'Secondary CTA URL'),
 				],
 			},
 
@@ -145,11 +181,17 @@ const definition: any = {
 						label: 'Section Title (e.g. // TRUSTED BY LEADING TEAMS)',
 					},
 					{
+						type: 'text_input',
+						action_id: 'actionButtonText',
+						label: 'Action Button Text',
+					},
+					linkSettingsField('actionButtonUrl', 'Action Button URL'),
+					{
 						type: 'repeater',
 						action_id: 'companies',
 						label: 'Companies',
 						item_label: 'Company',
-						min_items: 1,
+						min_items: 0,
 						fields: [
 							{ type: 'text_input', action_id: 'name', label: 'Company Name' },
 							{
@@ -280,6 +322,8 @@ const definition: any = {
 						label: 'Subtitle',
 						multiline: true,
 					},
+					{ type: 'text_input', action_id: 'buttonText', label: 'Button Text' },
+					linkSettingsField('buttonUrl', 'Button URL'),
 					{
 						type: 'repeater',
 						action_id: 'features',
@@ -354,7 +398,7 @@ const definition: any = {
 								multiline: true,
 							},
 							{ type: 'text_input', action_id: 'ctaLabel', label: 'CTA Label' },
-							{ type: 'text_input', action_id: 'ctaUrl', label: 'CTA URL' },
+							linkSettingsField('ctaUrl', 'CTA URL'),
 							{
 								type: 'toggle',
 								action_id: 'highlighted',
@@ -426,6 +470,23 @@ const definition: any = {
 					{ type: 'text_input', action_id: 'badge', label: 'Badge' },
 					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
 					{
+						type: 'text_input',
+						action_id: 'supportText',
+						label: 'Support Prompt',
+					},
+					{
+						type: 'text_input',
+						action_id: 'supportLinkLabel',
+						label: 'Support Link Label',
+					},
+					linkSettingsField('supportLinkUrl', 'Support Link URL'),
+					{
+						type: 'text_input',
+						action_id: 'getStartedLabel',
+						label: 'Primary Button Label',
+					},
+					linkSettingsField('getStartedUrl', 'Primary Button URL'),
+					{
 						type: 'repeater',
 						action_id: 'items',
 						label: 'FAQ Questions',
@@ -464,21 +525,13 @@ const definition: any = {
 						action_id: 'primaryButtonText',
 						label: 'Primary Button Text',
 					},
-					{
-						type: 'text_input',
-						action_id: 'primaryButtonUrl',
-						label: 'Primary Button URL',
-					},
+					linkSettingsField('primaryButtonUrl', 'Primary Button URL'),
 					{
 						type: 'text_input',
 						action_id: 'secondaryButtonText',
 						label: 'Secondary Button Text',
 					},
-					{
-						type: 'text_input',
-						action_id: 'secondaryButtonUrl',
-						label: 'Secondary Button URL',
-					},
+					linkSettingsField('secondaryButtonUrl', 'Secondary Button URL'),
 				],
 			},
 
@@ -611,21 +664,13 @@ const definition: any = {
 						action_id: 'buttonText',
 						label: 'Primary Button Text',
 					},
-					{
-						type: 'text_input',
-						action_id: 'buttonUrl',
-						label: 'Primary Button URL',
-					},
+					linkSettingsField('buttonUrl', 'Primary Button URL'),
 					{
 						type: 'text_input',
 						action_id: 'secondaryButtonText',
 						label: 'Secondary Button Text',
 					},
-					{
-						type: 'text_input',
-						action_id: 'secondaryButtonUrl',
-						label: 'Secondary Button URL',
-					},
+					linkSettingsField('secondaryButtonUrl', 'Secondary Button URL'),
 					{
 						type: 'repeater',
 						action_id: 'tabs',
@@ -691,21 +736,13 @@ const definition: any = {
 								action_id: 'primaryButtonText',
 								label: 'Primary Button Text',
 							},
-							{
-								type: 'text_input',
-								action_id: 'primaryButtonUrl',
-								label: 'Primary Button URL',
-							},
+							linkSettingsField('primaryButtonUrl', 'Primary Button URL'),
 							{
 								type: 'text_input',
 								action_id: 'secondaryButtonText',
 								label: 'Secondary Button Text',
 							},
-							{
-								type: 'text_input',
-								action_id: 'secondaryButtonUrl',
-								label: 'Secondary Button URL',
-							},
+							linkSettingsField('secondaryButtonUrl', 'Secondary Button URL'),
 						],
 					},
 				],
@@ -783,7 +820,7 @@ const definition: any = {
 						action_id: 'items',
 						label: 'Persona Items',
 						item_label: 'Persona',
-						min_items: 1,
+						min_items: 0,
 						fields: [
 							{
 								type: 'text_input',
@@ -898,6 +935,17 @@ const definition: any = {
 				fields: [
 					{ type: 'text_input', action_id: 'title', label: 'Heading' },
 					{ type: 'text_input', action_id: 'subtitle', label: 'Subtitle' },
+					{
+						type: 'toggle',
+						action_id: 'showViewAll',
+						label: 'Show View All Link',
+					},
+					{
+						type: 'text_input',
+						action_id: 'viewAllLabel',
+						label: 'View All Label',
+					},
+					linkSettingsField('viewAllUrl', 'View All URL'),
 				],
 			},
 
@@ -999,11 +1047,7 @@ const definition: any = {
 						action_id: 'actionLabel',
 						label: 'Action Link Label (optional)',
 					},
-					{
-						type: 'text_input',
-						action_id: 'actionUrl',
-						label: 'Action Link URL',
-					},
+					linkSettingsField('actionUrl', 'Action Link URL'),
 					{
 						type: 'repeater',
 						action_id: 'items',
@@ -1019,11 +1063,7 @@ const definition: any = {
 								action_id: 'meta',
 								label: 'Meta (e.g. Built in)',
 							},
-							{
-								type: 'text_input',
-								action_id: 'url',
-								label: 'Link URL (optional)',
-							},
+							linkSettingsField('url', 'Link URL (optional)'),
 						],
 					},
 				],
@@ -1050,7 +1090,7 @@ const definition: any = {
 						action_id: 'ctaLabel',
 						label: 'CTA Button Label',
 					},
-					{ type: 'text_input', action_id: 'ctaUrl', label: 'CTA Button URL' },
+					linkSettingsField('ctaUrl', 'CTA Button URL'),
 					{
 						type: 'repeater',
 						action_id: 'beliefs',
@@ -1124,6 +1164,6 @@ const definition: any = {
 }
 
 export function createPlugin() {
-	return definition
+	return definePlugin(definition as any)
 }
 export default createPlugin

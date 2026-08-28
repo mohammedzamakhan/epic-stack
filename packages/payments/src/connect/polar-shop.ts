@@ -7,7 +7,7 @@
  * proceeds to the platform Polar account.
  */
 
-import { Polar } from '@polar-sh/sdk'
+import { type Polar } from '@polar-sh/sdk'
 import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks'
 
 export type PolarShopCheckout = {

@@ -208,7 +208,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 	<div class={containerClasses} style={`min-height: ${minHeight}px;`}>
 		<div class={contentClasses}>
 			<div class="space-y-6">
-				<Badge variant="brand" size="sm" badgeText="NEW">
+				<Badge variant="default" size="sm" badgeText="NEW">
 					BY THE MAKERS OF BUGBASHER.DEV
 				</Badge>
 				{richText && (
@@ -221,11 +221,11 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 
 			{!isClosedBeta && links && links.length > 0 && (
 				<div class={buttonsContainerClasses}>
-					<Button href={links[0]?.url || '#'} variant="brand" size="md">
+					<Button href={links[0]?.url || '#'} target={links[0]?.target} rel={links[0]?.rel} variant="default" size="default">
 						{links[0]?.link?.label || 'Get started'}
 					</Button>
 					{links[1] && (
-						<Button href={links[1]?.url || '#'} variant="outline" size="md">
+						<Button href={links[1]?.url || '#'} target={links[1]?.target} rel={links[1]?.rel} variant="outline" size="default">
 							{links[1]?.link?.label || 'Learn more'}
 						</Button>
 					)}
