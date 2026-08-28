@@ -125,6 +125,22 @@ export default defineConfig({
 		},
 		plugins: [
 			{
+				name: 'block-emdash-on-client',
+				enforce: 'pre',
+				resolveId(id) {
+					if (id !== 'emdash') return
+					const environmentName = this.environment?.name
+					if (environmentName === 'client') {
+						return '\0emdash-client-empty'
+					}
+				},
+				load(id) {
+					if (id === '\0emdash-client-empty') {
+						return 'export {}'
+					}
+				},
+			},
+			{
 				name: 'fix-varlock-name',
 				enforce: 'pre',
 				transform(code, id) {
@@ -153,7 +169,11 @@ export default defineConfig({
 			allowedHosts: [domain, 'localhost'],
 		},
 		optimizeDeps: {
-			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+			exclude: [
+				'@sentry/profiling-node',
+				'@sentry-internal/node-cpu-profiler',
+				'emdash',
+			],
 			include: [
 				'react',
 				'react-dom',

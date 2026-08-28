@@ -3,8 +3,6 @@
  * admin, flattened to URL strings (+ optional target) for Astro components.
  */
 
-import { type PluginContext, type PortableTextBlockField } from 'emdash'
-
 export const LINK_PICK_SUFFIX = '__pick'
 export const LINK_TARGET_SUFFIX = 'Target'
 
@@ -39,13 +37,37 @@ export function isMarketingLinkValue(
 	return typeof record.type === 'string'
 }
 
+export type LinkSettingsBlockField = {
+	type: 'link_settings'
+	action_id: string
+	label: string
+}
+
+/** Minimal plugin host surface used by link option loaders. */
+export interface ContentLinkPluginContext {
+	content?: {
+		list: (
+			collection: string,
+			options: {
+				limit: number
+				cursor?: string
+				where: { status: string }
+			},
+		) => Promise<{
+			items: Array<{ slug: string | null; data: Record<string, unknown> }>
+			hasMore: boolean
+			cursor?: string
+		}>
+	}
+}
+
 /** Block Kit field: Webflow-style link settings widget. */
 export function linkSettingsField(
 	actionId: string,
 	label: string,
-): PortableTextBlockField {
+): LinkSettingsBlockField {
 	return {
-		type: 'link_settings' as any,
+		type: 'link_settings',
 		action_id: actionId,
 		label,
 	}
@@ -55,7 +77,7 @@ export function linkSettingsField(
 export function contentLinkFields(
 	actionId: string,
 	label: string,
-): PortableTextBlockField[] {
+): LinkSettingsBlockField[] {
 	return [linkSettingsField(actionId, label)]
 }
 
@@ -253,7 +275,7 @@ function pagePath(slug: string): string {
 type LinkCollectionKind = 'pages' | 'posts' | 'all'
 
 export async function buildContentLinkOptions(
-	ctx: PluginContext,
+	ctx: ContentLinkPluginContext,
 	kind: LinkCollectionKind = 'all',
 ): Promise<Array<{ id: string; name: string }>> {
 	const items: Array<{ id: string; name: string }> = []

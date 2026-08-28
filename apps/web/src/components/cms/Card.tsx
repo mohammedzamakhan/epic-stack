@@ -1,5 +1,5 @@
 import React from 'react'
-import { type Post } from '../../lib/emdash'
+import { type Post } from '../../lib/content-types.ts'
 import { cn } from '../../lib/utils'
 
 export interface CardProps {
