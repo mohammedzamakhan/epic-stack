@@ -3,7 +3,7 @@
  * admin, flattened to URL strings (+ optional target) for Astro components.
  */
 
-import { type PluginContext, type PortableTextBlockField } from 'emdash'
+import type { PluginContext, PortableTextBlockField } from 'emdash'
 
 export const LINK_PICK_SUFFIX = '__pick'
 export const LINK_TARGET_SUFFIX = 'Target'
