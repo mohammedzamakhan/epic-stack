@@ -1,5 +1,4 @@
 ---
-import GridDesign from './GridDesign.astro'
 import { PortableText } from 'emdash/ui'
 
 interface Props {
@@ -50,50 +49,33 @@ const tableOfContents = generateTableOfContents(content)
 ---
 
 <!-- Hero Section -->
-<section class="relative overflow-hidden">
-    <GridDesign />
-  <div class="container mx-auto w-full px-4 md:px-10 relative items-center h-full text-left py-10 grid-layout place-content-center">
-    <div class="grid [grid-auto-rows:max-content] gap-4 md:gap-8 relative text-left ml-0 w-full max-w-none [grid-area:1/1/2/13]">
-      <div class="relative w-full">
-        {categories && categories.length > 0 && (
-          <a class="relative grid w-fit translate-x-[1px]" href="/posts">
-            <span class="px-2 pt-1 pb-1 font-mono text-base font-normal leading-none uppercase border select-none text-foreground bg-muted border-border relative z-30 grid w-fit">
-              {typeof categories[0] === 'object' ? (categories[0].title || categories[0].name) : categories[0]}
-            </span>
-          </a>
-        )}
-      </div>
-      
-      <div class="relative z-20 w-full">
-        <h1 class="font-title text-4xl md:text-6xl font-semibold pb-1 pt-1 md:pt-0 translate-y-[-1px] z-30 !text-balance md:max-w-[770px] md:!max-w-none">
-          {title}
-        </h1>
-      </div>
-      
-      {meta?.description && (
-        <div class="relative z-20 w-full">
-          <p class="font-sans text-lg md:text-xl text-muted-foreground translate-x-[1px] md:max-w-[770px] md:!max-w-none !text-pretty">
-            {meta.description}
-          </p>
-        </div>
-      )}
-    </div>
+<section class="px-5 pt-28 pb-10 sm:px-8 sm:pt-32">
+  <div class="max-w-3xl">
+    {categories && categories.length > 0 && (
+      <p class="mb-4 text-[13px] font-medium text-brand">
+        {typeof categories[0] === 'object' ? (categories[0].title || categories[0].name) : categories[0]}
+      </p>
+    )}
+    <h1 class="font-display text-balance text-[36px] font-medium tracking-[-0.03em] text-foreground sm:text-[48px]">
+      {title}
+    </h1>
+    {meta?.description && (
+      <p class="mt-5 max-w-2xl text-pretty text-[17px] leading-relaxed text-muted-foreground">
+        {meta.description}
+      </p>
+    )}
   </div>
 </section>
 
 <!-- Main Content Section -->
-<section class="relative">
-  <div class="container mx-auto w-full px-4 relative">
-    <GridDesign />
-    
-    <!-- Grid Layout: Sidebar left, Content right -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+<section class="px-5 pb-20 sm:px-8">
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-12">
       <!-- Sidebar -->
-      <div class="md:col-span-4 sticky hidden md:flex flex-col gap-8 pt-10 pl-6 pb-36 top-20 h-fit max-h-screen">
+      <div class="sticky top-24 hidden h-fit flex-col gap-8 md:col-span-4 md:flex">
         {formattedDate && (
           <div class="flex flex-col gap-2">
-            <h2 class="!text-pretty font-sans text-lg font-semibold">Last updated</h2>
-            <p class="font-mono text-sm uppercase flex gap-2 items-center !leading-none text-muted-foreground">
+            <h2 class="text-[15px] font-semibold text-foreground">Last updated</h2>
+            <p class="flex items-center gap-2 text-[13px] text-muted-foreground">
               <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -107,12 +89,12 @@ const tableOfContents = generateTableOfContents(content)
         
         {tableOfContents.length > 0 && (
           <nav aria-label="Table of contents" class="flex flex-col gap-4 flex-1 min-h-0">
-            <h2 class="!text-pretty font-sans text-lg font-semibold">Table of contents</h2>
+            <h2 class="text-[15px] font-semibold text-foreground">Table of contents</h2>
             <div class="relative flex flex-1 min-h-0">
               <ul class="flex flex-col overflow-y-auto min-h-[auto] flex-1">
                 {tableOfContents.map((item: { id: string; text: string; level: number }, index: number) => (
-                  <li class="transition-all duration-200 relative pl-1 before:absolute before:bg-border before:w-[4px] before:h-full before:left-0 before:top-0 after:absolute after:bg-primary after:w-[4px] after:h-0 after:top-0 after:left-0 after:transition-all after:duration-100 bg-background hover:bg-muted text-muted-foreground hover:text-foreground">
-                    <a class="block p-2 overflow-hidden font-mono font-normal leading-none text-sm" href={`#${item.id}`}>
+                  <li class="relative border-l-2 border-hairline pl-3 transition-colors hover:border-brand">
+                    <a class="block py-2 text-[13px] text-muted-foreground hover:text-foreground" href={`#${item.id}`}>
                       {item.text}
                     </a>
                   </li>
@@ -123,17 +105,17 @@ const tableOfContents = generateTableOfContents(content)
         )}
         
         <div>
-          <h2 class="!text-pretty font-sans text-lg font-semibold">Share</h2>
+          <h2 class="text-[15px] font-semibold text-foreground">Share</h2>
           <ul class="flex gap-3 items-center pt-4 text-foreground">
             <li>
-              <a class="hover:text-primary transition-colors duration-200 size-6" href={`https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(Astro.url.href)}`} aria-label="Share on X (Twitter)">
+              <a class="size-6 transition-colors hover:text-brand" href={`https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(Astro.url.href)}`} aria-label="Share on X (Twitter)">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 17" class="w-6 h-6" aria-hidden="true">
                   <path fill="currentColor" d="m.039 1.173 6.177 8.26L0 16.147h1.4l5.442-5.88 4.397 5.88H16L9.475 7.424l5.786-6.251h-1.4L8.85 6.588 4.8 1.173H.039Zm2.057 1.03h2.188l9.658 12.915h-2.187L2.096 2.203Z"></path>
                 </svg>
               </a>
             </li>
             <li>
-              <a class="hover:text-primary transition-colors duration-200 size-6" href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.url.href)}&title=${encodeURIComponent(title)}`} aria-label="Share on LinkedIn">
+              <a class="size-6 transition-colors hover:text-brand" href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.url.href)}&title=${encodeURIComponent(title)}`} aria-label="Share on LinkedIn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6" aria-hidden="true">
                   <path fill="currentColor" d="M22.223 0H1.772C.792 0 0 .773 0 1.73v20.536C0 23.222.792 24 1.772 24h20.451c.98 0 1.777-.778 1.777-1.73V1.73C24 .773 23.203 0 22.223 0ZM7.12 20.452H3.558V8.995H7.12v11.457ZM5.34 7.434a2.064 2.064 0 1 1 0-4.125 2.063 2.063 0 0 1 0 4.125Zm15.112 13.018h-3.558v-5.57c0-1.326-.024-3.037-1.852-3.037-1.851 0-2.133 1.449-2.133 2.944v5.663H9.356V8.995h3.413v1.566h.047c.473-.9 1.636-1.852 3.365-1.852 3.605 0 4.27 2.372 4.27 5.457v6.286Z"></path>
                 </svg>
@@ -144,8 +126,7 @@ const tableOfContents = generateTableOfContents(content)
       </div>
       
       <!-- Main Content -->
-      <div class="md:col-span-8">
-        <article class="relative px-4 pt-10 overflow-clip pb-36 md:px-6 md:pl-3">
+        <article class="md:col-span-8">
           {heroImage && typeof heroImage === 'object' && heroImage.url && (
             <img
               alt={heroImage.alt || title}
@@ -154,12 +135,12 @@ const tableOfContents = generateTableOfContents(content)
               width="1200"
               height="575"
               decoding="async"
-              class="w-full h-auto mb-8 relative z-10"
+              class="mb-8 w-full rounded-3xl border border-hairline"
               src={heroImage.url}
             />
           )}
           
-          <div class="prose max-w-none prose-p:!text-foreground prose-a:underline prose-a:transition-colors prose-a:duration-100 prose-a:underline-offset-4 hover:prose-a:text-primary prose-blockquote:my-6 prose-headings:mb-4 prose-headings:mt-6 prose-h1:mt-8 prose-h2:mt-8 prose-inline-code:before:content-none prose-inline-code:after:content-none relative z-10">
+          <div class="prose max-w-none prose-p:text-foreground prose-a:text-brand prose-headings:font-display prose-headings:tracking-[-0.02em]">
             {content ? (
               <PortableText value={content} />
             ) : (
@@ -168,17 +149,13 @@ const tableOfContents = generateTableOfContents(content)
           </div>
           
           <!-- Back to posts -->
-          <div class="mt-12 pt-8 border-t border-border relative z-10">
-            <a
-              href="/posts"
-              class="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors"
+          <div class="mt-12 border-t border-hairline pt-8">
+            <a href="/posts" class="inline-flex items-center text-[15px] font-medium text-foreground transition-colors hover:text-brand">
             >
               ← Back to all posts
             </a>
           </div>
         </article>
-      </div>
-    </div>
   </div>
 </section>
 

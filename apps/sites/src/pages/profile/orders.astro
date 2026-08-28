@@ -1,0 +1,104 @@
+---
+import { msg } from '@lingui/core/macro'
+import { getLocaleHref } from '@repo/common/site-locales'
+import AccountShell from '~/components/AccountShell.astro'
+import SitePage from '~/components/SitePage.astro'
+import {
+	siteBtnPrimaryClass,
+	siteCardClass,
+	siteEmptyStateClass,
+	siteEmptyStateIconClass,
+	siteListClass,
+	siteSectionHeaderClass,
+} from '~/lib/form-classes'
+
+const organization = Astro.locals.organization
+const i18n = Astro.locals.i18n
+const requestedLocale = Astro.locals.requestedLocale
+const defaultLocale = Astro.locals.defaultLocale
+
+const ordersTitle = i18n._(msg`Orders`)
+const ordersDescription = i18n._(
+	msg`Purchases from the shop while signed in to this account.`,
+)
+const orderHistory = i18n._(msg`Order history`)
+const orderHistoryHint = i18n._(
+	msg`Receipts for completed purchases appear here with status and amount.`,
+)
+const noOrders = i18n._(msg`No orders yet.`)
+const noOrdersHint = i18n._(
+	msg`When you buy something from the shop, your receipts will show up here.`,
+)
+const browseShop = i18n._(msg`Browse the shop`)
+
+const shopHref = getLocaleHref('/shop', requestedLocale, requestedLocale, defaultLocale)
+
+if (!organization) {
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
+}
+---
+
+<SitePage
+	organization={organization}
+	page={{ id: 'profile-orders', title: ordersTitle, slug: 'profile/orders', isHomePage: false, sections: [] }}
+	title={`${ordersTitle} - ${organization.name}`}
+>
+	<AccountShell current="orders" title={ordersTitle} description={ordersDescription}>
+		<div
+			id="profile-orders-root"
+			class="contents"
+			data-no-orders={noOrders}
+			data-no-orders-hint={noOrdersHint}
+			data-browse-shop={browseShop}
+			data-shop-href={shopHref}
+		>
+		<section class={siteCardClass}>
+			<div class={siteSectionHeaderClass}>
+				<h2 class="font-heading text-lg font-semibold text-foreground">{orderHistory}</h2>
+				<p class="text-sm text-muted-foreground">{orderHistoryHint}</p>
+			</div>
+
+			<div id="order-history-loading" class="space-y-3" aria-hidden="true">
+				<div class="h-[4.5rem] animate-pulse rounded-lg border border-border bg-muted/30"></div>
+				<div class="h-[4.5rem] animate-pulse rounded-lg border border-border bg-muted/30"></div>
+			</div>
+
+			<ul id="order-history" class={`hidden ${siteListClass}`}>
+				<li class={siteEmptyStateClass}>
+					<span class={siteEmptyStateIconClass} aria-hidden="true">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.75"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="size-5"
+						>
+							<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+							<path d="M3 6h18" />
+							<path d="M16 10a4 4 0 0 1-8 0" />
+						</svg>
+					</span>
+					<div class="space-y-3">
+						<div class="space-y-1">
+							<p class="text-sm font-medium text-foreground">{noOrders}</p>
+							<p class="max-w-sm text-xs leading-relaxed text-muted-foreground">
+								{noOrdersHint}
+							</p>
+						</div>
+						<a href={shopHref} class={`${siteBtnPrimaryClass} sm:min-w-[9.5rem]`}>
+							{browseShop}
+						</a>
+					</div>
+				</li>
+			</ul>
+		</section>
+		</div>
+	</AccountShell>
+
+	<script>
+		import '../../scripts/profile-orders.ts'
+	</script>
+</SitePage>

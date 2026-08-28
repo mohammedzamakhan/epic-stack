@@ -1,0 +1,117 @@
+---
+import { msg } from '@lingui/core/macro'
+import { getLocaleHref } from '@repo/common/site-locales'
+
+interface Props {
+	current: 'account' | 'orders'
+	title: string
+	description?: string
+}
+
+const { current, title, description } = Astro.props
+const i18n = Astro.locals.i18n
+const requestedLocale = Astro.locals.requestedLocale
+const defaultLocale = Astro.locals.defaultLocale
+
+const accountNav = i18n._(msg`Account`)
+const ordersNav = i18n._(msg`Orders`)
+const accountSettings = i18n._(msg`Account settings`)
+
+const accountHref = getLocaleHref(
+	'/profile',
+	requestedLocale,
+	requestedLocale,
+	defaultLocale,
+)
+const ordersHref = getLocaleHref(
+	'/profile/orders',
+	requestedLocale,
+	requestedLocale,
+	defaultLocale,
+)
+
+const navItems = [
+	{ id: 'account' as const, label: accountNav, href: accountHref },
+	{ id: 'orders' as const, label: ordersNav, href: ordersHref },
+]
+
+function navClass(active: boolean) {
+	return [
+		'flex min-h-10 items-center gap-2.5 rounded-[calc(var(--radius)*0.7)] px-3 py-2 text-sm font-medium transition-colors',
+		active
+			? 'bg-background text-foreground shadow-sm ring-1 ring-border lg:bg-muted'
+			: 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+	].join(' ')
+}
+---
+
+<div class="mx-auto flex min-h-[60vh] w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:py-12">
+	<header class="space-y-1.5">
+		<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
+			{title}
+		</h1>
+		{description ? (
+			<p class="max-w-prose text-sm leading-relaxed text-muted-foreground">{description}</p>
+		) : null}
+	</header>
+
+	<div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+		<nav
+			class="lg:w-48 lg:shrink-0"
+			aria-label={accountSettings}
+		>
+			<ul
+				class="flex gap-1 overflow-x-auto border-b border-border pb-px lg:flex-col lg:gap-0.5 lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:bg-muted/20 lg:p-1.5 lg:pb-1.5"
+				role="list"
+			>
+				{navItems.map((item) => (
+					<li class="shrink-0 lg:shrink">
+						<a
+							href={item.href}
+							class={navClass(current === item.id)}
+							aria-current={current === item.id ? 'page' : undefined}
+						>
+							{item.id === 'account' ? (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.75"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="size-4 shrink-0 opacity-70"
+									aria-hidden="true"
+								>
+									<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+									<circle cx="12" cy="7" r="4" />
+								</svg>
+							) : (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.75"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="size-4 shrink-0 opacity-70"
+									aria-hidden="true"
+								>
+									<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+									<path d="M3 6h18" />
+									<path d="M16 10a4 4 0 0 1-8 0" />
+								</svg>
+							)}
+							{item.label}
+						</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+
+		<div class="min-w-0 flex-1 space-y-6">
+			<slot />
+		</div>
+	</div>
+</div>
