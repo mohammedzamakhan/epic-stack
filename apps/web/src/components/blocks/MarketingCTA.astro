@@ -1,6 +1,7 @@
 ---
+import MarkdownText from '../site/MarkdownText.astro'
+import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
-import GridDesign from '../GridDesign.astro'
 
 interface Props {
 	node: {
@@ -24,40 +25,33 @@ const {
 } = node
 ---
 
-<section class="relative w-full py-20 md:py-28" aria-labelledby="cta-heading">
-	<GridDesign aria-hidden="true" />
-	<div class="container relative mx-auto px-4 text-center">
-		<div class="max-w-4xl mx-auto">
-			<div class="bg-muted dark:bg-background rounded-2xl p-1">
-				<div class="bg-card ring-border rounded-2lg p-8 md:p-12 shadow-sm ring-1">
-					<h2 id="cta-heading" class="text-3xl md:text-5xl font-title text-foreground mb-4">
-						{title}
-					</h2>
-					{description && (
-						<p class="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-8">
-							{description}
-						</p>
-					)}
-					<div class="flex flex-wrap justify-center gap-3 mt-6">
-						<Button
-							href={primaryButtonUrl}
-							variant="default"
-							size="lg"
-						>
-							{primaryButtonText}
+<Section class="py-10 sm:py-16" aria-labelledby="cta-heading">
+	<div class="grain relative overflow-hidden rounded-3xl bg-brand-soft px-7 py-16 sm:px-12 sm:py-20">
+		<div
+			aria-hidden="true"
+			class="absolute inset-x-[20%] top-[20%] h-72 rounded-full bg-brand/40 blur-3xl"
+		></div>
+		<div class="relative mx-auto max-w-2xl text-center">
+			<h2 id="cta-heading" class="font-display text-balance text-[40px] font-medium tracking-[-0.03em] text-foreground sm:text-[56px]">
+				{title}
+			</h2>
+			{
+				description && (
+					<MarkdownText content={description} class="mx-auto mt-6 max-w-lg text-pretty text-[17px] leading-relaxed text-foreground/65" />
+				)
+			}
+			<div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+				<Button href={primaryButtonUrl} variant="solid" class="h-14 px-8 text-[17px]">
+					{primaryButtonText}
+				</Button>
+				{
+					secondaryButtonText && (
+						<Button href={secondaryButtonUrl || '#'} variant="outline" class="h-14 px-8 text-[17px]">
+							{secondaryButtonText}
 						</Button>
-						{secondaryButtonText && (
-							<Button
-								href={secondaryButtonUrl || '#'}
-								variant="secondary"
-								size="lg"
-							>
-								{secondaryButtonText}
-							</Button>
-						)}
-					</div>
-				</div>
+					)
+				}
 			</div>
 		</div>
 	</div>
-</section>
+</Section>

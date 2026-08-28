@@ -1,14 +1,19 @@
 ---
 import { cn } from '../../lib/utils'
+
 interface Props {
 	variant?:
+		| 'solid'
+		| 'brand'
+		| 'outline'
+		| 'ghost'
+		| 'invert'
+		| 'ghostInvert'
 		| 'default'
 		| 'destructive'
-		| 'outline'
 		| 'secondary'
-		| 'ghost'
 		| 'link'
-	size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'
+	size?: 'xs' | 'sm' | 'md' | 'default' | 'lg' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'
 	href?: string
 	class?: string
 	disabled?: boolean
@@ -19,8 +24,8 @@ interface Props {
 }
 
 const {
-	variant = 'default',
-	size = 'default',
+	variant = 'solid',
+	size = 'md',
 	href,
 	class: className = '',
 	disabled = false,
@@ -32,51 +37,50 @@ const {
 } = Astro.props
 
 const baseClasses =
-	"focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding text-sm font-title uppercase font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-[3px] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+	'inline-flex items-center justify-center gap-1.5 rounded-full font-medium whitespace-nowrap transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 disabled:opacity-50 disabled:pointer-events-none'
 
-const variantClasses = {
-	default: 'bg-primary text-primary-foreground hover:bg-primary/80',
-	outline:
-		'border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground',
-	secondary:
-		'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
-	ghost:
-		'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
-	destructive:
-		'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
-	link: 'text-primary underline-offset-4 hover:underline',
+const variantClasses: Record<string, string> = {
+	solid: 'bg-foreground text-background hover:bg-foreground/85',
+	brand: 'bg-brand text-brand-foreground hover:bg-brand/90',
+	outline: 'border border-border bg-background text-foreground hover:bg-muted',
+	ghost: 'text-foreground hover:bg-muted',
+	invert: 'bg-background text-foreground hover:bg-background/85',
+	ghostInvert: 'border border-background/25 text-background hover:bg-background/10',
+	default: 'bg-foreground text-background hover:bg-foreground/85',
+	destructive: 'bg-destructive/10 text-destructive hover:bg-destructive/20',
+	secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+	link: 'text-brand underline-offset-4 hover:underline',
 }
 
-const sizeClasses = {
-	default:
-		'h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-	xs: "relative after:absolute after:-inset-2 md:after:hidden h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-	sm: "relative after:absolute after:-inset-2 md:after:hidden h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-	lg: 'h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
-	xl: 'h-11 gap-2 px-4 text-md has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5',
-	icon: 'relative after:absolute after:-inset-2 md:after:hidden size-8',
-	'icon-xs':
-		"relative after:absolute after:-inset-2 md:after:hidden size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
-	'icon-sm':
-		'relative after:absolute after:-inset-2 md:after:hidden size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
-	'icon-lg': 'size-9',
+const sizeClasses: Record<string, string> = {
+	xs: 'h-8 px-3 text-[12px]',
+	sm: 'h-9 px-4 text-[13px]',
+	md: 'h-11 px-5 text-[15px]',
+	default: 'h-11 px-5 text-[15px]',
+	lg: 'h-11 px-5 text-[15px]',
+	xl: 'h-12 px-6 text-[16px]',
+	icon: 'size-10',
+	'icon-xs': 'size-8',
+	'icon-sm': 'size-9',
+	'icon-lg': 'size-11',
 }
 
-const classes = [
+const resolvedVariant =
+	variant === 'default' ? 'solid' : variant === 'secondary' ? 'outline' : variant
+
+const classes = cn(
 	baseClasses,
-	variantClasses[variant],
-	sizeClasses[size],
+	variantClasses[resolvedVariant] ?? variantClasses.solid,
+	sizeClasses[size] ?? sizeClasses.md,
 	className,
-]
-	.filter(Boolean)
-	.join(' ')
+)
 
 const Element = href ? 'a' : 'button'
 ---
 
 <Element
 	data-slot="button"
-	class={cn(classes)}
+	class={classes}
 	href={href}
 	disabled={disabled && !href ? disabled : undefined}
 	type={!href ? type : undefined}

@@ -1,7 +1,7 @@
 ---
-import GridDesign from '../GridDesign.astro'
+import Section from '../site/Section.astro'
+import SectionHead from '../site/SectionHead.astro'
 import Button from '../ui/Button.astro'
-import Badge from '../ui/Badge.astro'
 
 interface Feature {
 	name: string
@@ -18,6 +18,9 @@ interface Plan {
 	monthlyPrice: string
 	yearlyPrice: string
 	buttonText: string
+	buttonUrl?: string
+	buttonTarget?: '_blank'
+	buttonRel?: string
 	badge?: string
 	features: Feature[]
 }
@@ -34,7 +37,7 @@ interface Props {
 
 const {
 	title = 'Choose your plan',
-	subtitle = 'Select the perfect plan for your needs',
+	subtitle = 'Pricing',
 	plans = [
 		{
 			id: 'starter',
@@ -88,11 +91,9 @@ const {
 	footerButtonText = 'Apply now',
 } = Astro.props
 
-// Calculate discount percentage
 const calculateDiscount = (monthlyPrice: string, yearlyPrice: string): number => {
 	const monthly = parseFloat(monthlyPrice)
 	const yearly = parseFloat(yearlyPrice)
-
 	if (
 		monthlyPrice.toLowerCase() === 'custom' ||
 		yearlyPrice.toLowerCase() === 'custom' ||
@@ -102,227 +103,211 @@ const calculateDiscount = (monthlyPrice: string, yearlyPrice: string): number =>
 	) {
 		return 0
 	}
-
-	const discount = ((monthly * 12 - yearly) / (monthly * 12)) * 100
-	return Math.round(discount)
+	return Math.round(((monthly * 12 - yearly) / (monthly * 12)) * 100)
 }
 
 const yearlyDiscount = plans.length
 	? Math.max(...plans.map((plan) => calculateDiscount(plan.monthlyPrice, plan.yearlyPrice)))
 	: 0
+
+const gridCols =
+	plans.length === 1
+		? 'grid-cols-1 max-w-md mx-auto'
+		: plans.length === 2
+			? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
+			: 'grid-cols-1 md:grid-cols-3'
 ---
 
-<section class="relative w-full py-16 md:py-24">
-	<GridDesign />
-	<div class="container relative mx-auto px-4 md:px-6">
-		<!-- Header -->
-		<div class="text-center mb-12">
-			<Badge variant="outline" size="sm">
-				PRICING PLANS
-			</Badge>
-			<h2 class="text-4xl md:text-6xl tracking-tight font-title mb-4">
-				{title}
-			</h2>
-			<p class="text-xl text-muted-foreground max-w-[600px] mx-auto">
-				{subtitle}
-			</p>
-		</div>
+<Section class="py-16 sm:py-20 lg:py-24" aria-labelledby="pricing-title">
+	<SectionHead eyebrow={subtitle} title={title} />
 
-		<!-- Pricing Toggle -->
-		<div class="flex flex-col justify-center items-center mb-12">
-			<div class="inline-flex items-center justify-center bg-muted p-[1px] text-muted-foreground" id="pricing-toggle" role="group" aria-label="Billing period">
-				<button 
-					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground border border-border shadow-sm cursor-pointer" 
-					data-period="monthly"
-					id="monthly-btn"
-					aria-pressed="true"
-				>
-					Monthly
-				</button>
-				<button 
-					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground cursor-pointer" 
-					data-period="yearly"
-					id="yearly-btn"
-					aria-pressed="false"
-				>
-					Yearly
-				</button>
-			</div>
-			{yearlyDiscount > 0 && (
-				<div class="flex items-center gap-2 mt-4">
-					<div class="w-2 h-2 bg-primary rounded-sm" aria-hidden="true"></div>
-					<span class="text-sm text-muted-foreground" id="discount-text">
-						Save up to {yearlyDiscount}% with yearly plan
-					</span>
-				</div>
-			)}
+	<div class="mt-10 flex flex-col items-center gap-4">
+		<div
+			class="inline-flex items-center rounded-full border border-hairline bg-muted p-1"
+			id="pricing-toggle"
+			role="group"
+			aria-label="Billing period"
+		>
+			<button
+				class="rounded-full bg-background px-5 py-2 text-[13px] font-medium text-foreground shadow-sm"
+				data-period="monthly"
+				id="monthly-btn"
+				aria-pressed="true"
+				type="button"
+			>
+				Monthly
+			</button>
+			<button
+				class="rounded-full px-5 py-2 text-[13px] font-medium text-muted-foreground"
+				data-period="yearly"
+				id="yearly-btn"
+				aria-pressed="false"
+				type="button"
+			>
+				Yearly
+			</button>
 		</div>
+		{
+			yearlyDiscount > 0 && (
+				<p class="hidden text-[13px] text-muted-foreground" id="discount-text">
+					Save up to {yearlyDiscount}% with yearly billing
+				</p>
+			)
+		}
+	</div>
 
-		<!-- Pricing Cards -->
-		<div class={`grid p-[1px] ${
-			plans.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
-			plans.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' :
-			plans.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
-			'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-		}`}>
-			{plans.map((plan) => (
-				<article 
-					class={`group relative transition-all duration-200 ${
-						plan.highlight 
-							? 'ring-2 ring-primary/50 hover:ring-primary z-10' 
-							: 'hover:shadow-lg'
-					}`}
+	<div class={`mt-12 grid gap-5 ${gridCols}`}>
+		{
+			plans.map((plan) => (
+				<article
+					class:list={[
+						'relative flex flex-col rounded-3xl border bg-card p-7 sm:p-8',
+						plan.highlight ? 'border-brand shadow-sm' : 'border-hairline',
+					]}
 					aria-label={`${plan.title} pricing tier`}
 				>
 					{plan.badge && (
-						<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 text-xs rounded-full border-[0.5px] border-white/20 shadow-sm shadow-black/8">
+						<span class="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-[12px] font-medium text-brand-foreground">
 							{plan.badge}
-						</div>
+						</span>
 					)}
-					
-					<div class="bg-card overflow-hidden shadow-sm flex flex-col h-full">
-						<!-- Card Header -->
-						<header class="px-6 py-4">
-							<div class="space-y-1">
-								<h3 class="text-base font-medium text-card-foreground flex items-center gap-2">
-									{plan.title}
-								</h3>
-								<p class="text-sm text-muted-foreground leading-relaxed text-pretty">
-									{plan.description}
-								</p>
-							</div>
-						</header>
-						
-						<!-- Card Body - Pricing -->
-						<div class="border-t border-border/50 px-6 py-5 space-y-1">
-							<!-- Monthly Price -->
-							<div class="pricing-monthly">
-								<div class="flex items-baseline gap-1">
-									<span class="text-3xl font-bold text-primary">
-										{parseFloat(plan.monthlyPrice) >= 0 && plan.currency}
-										{plan.monthlyPrice}
-									</span>
-									{parseFloat(plan.monthlyPrice) >= 0 && (
-										<span class="text-muted-foreground text-sm">/month</span>
-									)}
-								</div>
-							</div>
-							<!-- Yearly Price -->
-							<div class="pricing-yearly hidden flex gap-4">
-								<div class="flex items-baseline gap-1">
-									<span class="text-3xl font-bold text-primary">
-										{parseFloat(plan.yearlyPrice) >= 0 && plan.currency}
-										{plan.yearlyPrice}
-									</span>
-									{parseFloat(plan.yearlyPrice) >= 0 && (
-										<span class="text-muted-foreground text-sm">/year</span>
-									)}
-								</div>
-								{calculateDiscount(plan.monthlyPrice, plan.yearlyPrice) > 0 && (
-									<div class="mt-1">
-										<span class="inline-flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-											Save {calculateDiscount(plan.monthlyPrice, plan.yearlyPrice)}%
-										</span>
-									</div>
+					<header class="space-y-2">
+						<h3 class="text-[20px] font-semibold text-foreground">{plan.title}</h3>
+						<p class="text-[14px] leading-relaxed text-muted-foreground">{plan.description}</p>
+					</header>
+
+					<div class="mt-6 border-t border-hairline pt-6">
+						<div class="pricing-monthly">
+							<div class="flex items-baseline gap-1">
+								<span class="font-display text-[40px] font-medium tracking-[-0.03em] text-foreground">
+									{parseFloat(plan.monthlyPrice) >= 0 && plan.currency}
+									{plan.monthlyPrice}
+								</span>
+								{parseFloat(plan.monthlyPrice) >= 0 && (
+									<span class="text-[14px] text-muted-foreground">/month</span>
 								)}
 							</div>
 						</div>
-
-						<!-- Card Body - Features -->
-						<div class="border-t border-border/50 p-5.5 space-y-3 flex-1">
-							<ul class="space-y-3" aria-label={`${plan.title} plan features`}>
-								{plan.features.map((feature) => (
-									<li class="flex items-start gap-3">
-										<div class="w-2 h-2 bg-primary rounded-sm shrink-0 mt-1.5" aria-hidden="true"></div>
-										<span class="text-sm text-card-foreground leading-relaxed flex-1">{feature.name}</span>
-									</li>
-								))}
-							</ul>
+						<div class="pricing-yearly hidden">
+							<div class="flex flex-wrap items-baseline gap-2">
+								<span class="font-display text-[40px] font-medium tracking-[-0.03em] text-foreground">
+									{parseFloat(plan.yearlyPrice) >= 0 && plan.currency}
+									{plan.yearlyPrice}
+								</span>
+								{parseFloat(plan.yearlyPrice) >= 0 && (
+									<span class="text-[14px] text-muted-foreground">/year</span>
+								)}
+								{calculateDiscount(plan.monthlyPrice, plan.yearlyPrice) > 0 && (
+									<span class="rounded-full bg-brand-soft px-2.5 py-1 text-[12px] font-medium text-brand">
+										Save {calculateDiscount(plan.monthlyPrice, plan.yearlyPrice)}%
+									</span>
+								)}
+							</div>
 						</div>
-
-						<!-- Card Footer -->
-						<footer class="border-t border-border/50 px-5 py-3 pb-4">
-							<Button
-								href={`#plan-${plan.id}`}
-								variant={plan.highlight ? 'default' : 'secondary'}
-								class="w-full"
-							>
-								{plan.buttonText}
-							</Button>
-						</footer>
 					</div>
-				</article>
-			))}
-		</div>
 
-		<!-- Footer -->
-		{showFooter && (
-			<div class={`px-[1px] mt-2 ${
-				plans.length === 1 ? 'max-w-md mx-auto' :
-				plans.length === 2 ? 'max-w-4xl mx-auto' : ''
-			}`}>
-				<div class="bg-card p-6 border-y border-border border-dashed">
-					<div class="flex flex-col md:flex-row gap-4 justify-between items-center w-full">
-						<p class="text-base text-card-foreground text-left flex-1">
-							{footerText}
-						</p>
+					<ul class="mt-6 flex-1 space-y-3" aria-label={`${plan.title} plan features`}>
+						{plan.features.map((feature) => (
+							<li class="flex items-start gap-3 text-[14px] text-foreground">
+								<span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand" aria-hidden="true"></span>
+								{feature.name}
+							</li>
+						))}
+					</ul>
+
+					<footer class="mt-8">
 						<Button
-							href="#apply"
-							variant="secondary"
-							class="whitespace-nowrap"
+							href={plan.buttonUrl ?? `#plan-${plan.id}`}
+							target={plan.buttonTarget}
+							rel={plan.buttonRel}
+							variant={plan.highlight ? 'brand' : 'outline'}
+							class="w-full"
 						>
-							{footerButtonText}
+							{plan.buttonText}
 						</Button>
-					</div>
+					</footer>
+				</article>
+			))
+		}
+	</div>
+
+	{
+		showFooter && (
+			<div class="mt-8 rounded-3xl border border-hairline bg-muted px-6 py-5 sm:px-8">
+				<div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+					<p class="text-[15px] text-foreground">{footerText}</p>
+					<Button href="#apply" variant="outline">
+						{footerButtonText}
+					</Button>
 				</div>
 			</div>
-		)}
-	</div>
-</section>
+		)
+	}
+</Section>
 
 <script>
-	// Pricing toggle functionality
-	document.addEventListener('DOMContentLoaded', function() {
+	let pricingCleanup: (() => void) | null = null
+
+	function initPricingToggle() {
+		if (pricingCleanup) {
+			pricingCleanup()
+			pricingCleanup = null
+		}
+
 		const monthlyBtn = document.getElementById('monthly-btn')
 		const yearlyBtn = document.getElementById('yearly-btn')
 		const discountText = document.getElementById('discount-text')
-		
 		if (!monthlyBtn || !yearlyBtn) return
 
-		function setActiveButton(activeBtn: HTMLElement, inactiveBtn: HTMLElement) {
-			// Update active button styles
-			activeBtn.classList.add('bg-background', 'text-foreground', 'border', 'border-border', 'shadow-sm')
+		const listeners: Array<{ el: EventTarget; type: string; fn: EventListener }> = []
+
+		function addListener(el: EventTarget, type: string, fn: EventListener) {
+			el.addEventListener(type, fn)
+			listeners.push({ el, type, fn })
+		}
+
+		function setActiveButton(period: 'monthly' | 'yearly') {
+			const monthly = document.getElementById('monthly-btn')
+			const yearly = document.getElementById('yearly-btn')
+			if (!monthly || !yearly) return
+
+			const activeBtn = period === 'monthly' ? monthly : yearly
+			const inactiveBtn = period === 'monthly' ? yearly : monthly
+
+			activeBtn.classList.add('bg-background', 'text-foreground', 'shadow-sm')
 			activeBtn.classList.remove('text-muted-foreground')
 			activeBtn.setAttribute('aria-pressed', 'true')
-			
-			// Update inactive button styles
-			inactiveBtn.classList.remove('bg-background', 'text-foreground', 'border', 'border-border', 'shadow-sm')
+			inactiveBtn.classList.remove('bg-background', 'text-foreground', 'shadow-sm')
 			inactiveBtn.classList.add('text-muted-foreground')
 			inactiveBtn.setAttribute('aria-pressed', 'false')
 		}
 
-		function togglePricing(period: string) {
+		function togglePricing(period: 'monthly' | 'yearly') {
 			const monthlyPrices = document.querySelectorAll('.pricing-monthly')
 			const yearlyPrices = document.querySelectorAll('.pricing-yearly')
-			
+
 			if (period === 'yearly') {
-				monthlyPrices.forEach(el => el.classList.add('hidden'))
-				yearlyPrices.forEach(el => el.classList.remove('hidden'))
-				setActiveButton(yearlyBtn as HTMLElement, monthlyBtn as HTMLElement)
-				if (discountText) discountText.style.opacity = '1'
+				monthlyPrices.forEach((el) => el.classList.add('hidden'))
+				yearlyPrices.forEach((el) => el.classList.remove('hidden'))
+				discountText?.classList.remove('hidden')
 			} else {
-				yearlyPrices.forEach(el => el.classList.add('hidden'))
-				monthlyPrices.forEach(el => el.classList.remove('hidden'))
-				setActiveButton(monthlyBtn as HTMLElement, yearlyBtn as HTMLElement)
-				if (discountText) discountText.style.opacity = '0.7'
+				yearlyPrices.forEach((el) => el.classList.add('hidden'))
+				monthlyPrices.forEach((el) => el.classList.remove('hidden'))
+				discountText?.classList.add('hidden')
 			}
+
+			setActiveButton(period)
 		}
 
-		// Add click event listeners
-		monthlyBtn.addEventListener('click', () => togglePricing('monthly'))
-		yearlyBtn.addEventListener('click', () => togglePricing('yearly'))
-		
-		// Initialize with monthly view
+		addListener(monthlyBtn, 'click', () => togglePricing('monthly'))
+		addListener(yearlyBtn, 'click', () => togglePricing('yearly'))
 		togglePricing('monthly')
-	})
+
+		pricingCleanup = () => {
+			listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn))
+		}
+	}
+
+	initPricingToggle()
+	document.addEventListener('astro:page-load', initPricingToggle)
 </script>

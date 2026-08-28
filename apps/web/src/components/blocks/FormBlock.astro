@@ -1,7 +1,10 @@
 ---
+import Section from '../site/Section.astro'
+import Button from '../ui/Button.astro'
+
 interface Props {
-  form?: any
-  blockType: 'formBlock'
+	form?: any
+	blockType: 'formBlock'
 }
 
 const { form } = Astro.props
@@ -9,79 +12,62 @@ const formId = typeof form === 'object' ? form.id : form
 const formTitle = typeof form === 'object' ? form.title : 'Contact Us'
 ---
 
-<section class="py-16">
-  <div class="container mx-auto px-4">
-    <div class="prose prose-lg max-w-none">
-      <h2 id={`form-heading-${formId}`}>{formTitle}</h2>
-      <form
-        id={formId}
-        aria-labelledby={`form-heading-${formId}`}
-        class="mt-8 space-y-6"
-        method="post"
-      >
-        <div>
-          <label for={`name-${formId}`} class="block text-sm font-medium">
-            Name <span aria-hidden="true">*</span>
-          </label>
-          <input
-            type="text"
-            id={`name-${formId}`}
-            name="name"
-            required
-            aria-required="true"
-            aria-describedby={`name-help-${formId}`}
-            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-          />
-          <p id={`name-help-${formId}`} class="mt-1 text-sm text-gray-500">
-            Enter your full name
-          </p>
-        </div>
+<Section class="py-16 sm:py-20">
+	<div class="mx-auto max-w-xl">
+		<h2 id={`form-heading-${formId}`} class="font-display text-[32px] font-medium tracking-[-0.02em] text-foreground sm:text-[40px]">
+			{formTitle}
+		</h2>
+		<form
+			id={formId}
+			aria-labelledby={`form-heading-${formId}`}
+			class="mt-8 space-y-5"
+			method="post"
+		>
+			<div>
+				<label for={`name-${formId}`} class="mb-2 block text-[14px] font-medium text-foreground">
+					Name <span aria-hidden="true">*</span>
+				</label>
+				<input
+					type="text"
+					id={`name-${formId}`}
+					name="name"
+					required
+					aria-required="true"
+					class="h-11 w-full rounded-full border border-hairline bg-background px-4 text-[15px] outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+				/>
+			</div>
 
-        <div>
-          <label for={`email-${formId}`} class="block text-sm font-medium">
-            Email <span aria-hidden="true">*</span>
-          </label>
-          <input
-            type="email"
-            id={`email-${formId}`}
-            name="email"
-            required
-            aria-required="true"
-            aria-describedby={`email-help-${formId}`}
-            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-          />
-          <p id={`email-help-${formId}`} class="mt-1 text-sm text-gray-500">
-            We'll never share your email
-          </p>
-        </div>
+			<div>
+				<label for={`email-${formId}`} class="mb-2 block text-[14px] font-medium text-foreground">
+					Email <span aria-hidden="true">*</span>
+				</label>
+				<input
+					type="email"
+					id={`email-${formId}`}
+					name="email"
+					required
+					aria-required="true"
+					class="h-11 w-full rounded-full border border-hairline bg-background px-4 text-[15px] outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+				/>
+			</div>
 
-        <div>
-          <label for={`message-${formId}`} class="block text-sm font-medium">
-            Message <span aria-hidden="true">*</span>
-          </label>
-          <textarea
-            id={`message-${formId}`}
-            name="message"
-            rows="4"
-            required
-            aria-required="true"
-            aria-describedby={`message-help-${formId}`}
-            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-          ></textarea>
-          <p id={`message-help-${formId}`} class="mt-1 text-sm text-gray-500">
-            Your message (minimum 10 characters)
-          </p>
-        </div>
+			<div>
+				<label for={`message-${formId}`} class="mb-2 block text-[14px] font-medium text-foreground">
+					Message <span aria-hidden="true">*</span>
+				</label>
+				<textarea
+					id={`message-${formId}`}
+					name="message"
+					required
+					aria-required="true"
+					rows="5"
+					class="w-full rounded-3xl border border-hairline bg-background px-4 py-3 text-[15px] outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+				></textarea>
+			</div>
 
-        <div>
-          <button
-            type="submit"
-            class="inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Submit
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</section>
+			<Button type="submit" variant="brand">
+				Submit
+			</Button>
+		</form>
+	</div>
+</Section>

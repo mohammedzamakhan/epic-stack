@@ -1,0 +1,83 @@
+---
+import MarkdownText from '../site/MarkdownText.astro'
+import { cn } from '../../lib/utils'
+import Section from '../site/Section.astro'
+import Reveal from '../site/Reveal.astro'
+
+interface ShowcaseRow {
+	imageUrl?: string
+	imageAlt?: string
+	lead: string
+	copy: string
+}
+
+interface Props {
+	title?: string
+	description?: string
+	rows?: ShowcaseRow[]
+	blockType?: 'stickyShowcase'
+}
+
+const {
+	title = 'Built for scale',
+	description = 'Our platform is designed to handle your growth, from day one to IPO.',
+	rows = [
+		{
+			imageUrl: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop',
+			imageAlt: 'Dashboard preview',
+			lead: 'Advanced Analytics.',
+			copy: ' Get deep insights into your usage patterns and optimize your workflow with our advanced analytics dashboard.',
+		},
+		{
+			imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=400&fit=crop',
+			imageAlt: 'Global network',
+			lead: 'Global Edge Network.',
+			copy: ' Deploy your application closer to your users with our global edge network, ensuring blazing fast load times anywhere in the world.',
+		},
+		{
+			imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop',
+			imageAlt: 'Security',
+			lead: 'Enterprise Grade Security.',
+			copy: ' Rest easy knowing your data is protected by enterprise-grade security features, including end-to-end encryption and regular security audits.',
+		},
+	],
+} = Astro.props
+---
+
+<Section class="py-16 sm:py-20 lg:py-24">
+	<div class="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+		<div class="lg:sticky lg:top-28 lg:self-start">
+			<h2 class="font-display max-w-md text-balance text-[36px] font-medium tracking-[-0.02em] sm:text-[52px]">
+				{title}
+			</h2>
+			<MarkdownText content={description} class="mt-5 max-w-sm text-pretty text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]" />
+		</div>
+		<div class="flex flex-col gap-16 sm:gap-24">
+			{
+				rows.map((row, i) => (
+					<Reveal delay={i * 60}>
+						<div class="flex flex-col gap-5">
+							<div class="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl border border-hairline bg-card p-6 sm:min-h-[420px] sm:p-10">
+								{row.imageUrl ? (
+									<img
+										src={row.imageUrl}
+										alt={row.imageAlt || ''}
+										class="max-h-[300px] w-auto max-w-full object-contain sm:max-h-[360px]"
+									/>
+								) : (
+									<div class="flex h-full w-full items-center justify-center bg-secondary/50 text-muted-foreground">
+										Image placeholder
+									</div>
+								)}
+							</div>
+							<p class="max-w-2xl text-pretty text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]">
+								<span class="font-medium text-foreground">{row.lead}</span>
+								{row.copy}
+							</p>
+						</div>
+					</Reveal>
+				))
+			}
+		</div>
+	</div>
+</Section>

@@ -1,6 +1,6 @@
 ---
+import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
-import GridDesign from '../GridDesign.astro'
 
 interface Props {
 	richText?: any
@@ -10,7 +10,6 @@ interface Props {
 
 const { richText, links } = Astro.props
 
-// Simple content renderer for Lexical content
 const renderLexicalContent = (content: any) => {
 	if (!content || !content.root || !content.root.children) {
 		return ''
@@ -19,19 +18,14 @@ const renderLexicalContent = (content: any) => {
 	return content.root.children
 		.map((node: any) => {
 			if (node.type === 'paragraph' && node.children) {
-				const text = node.children
-					.map((child: any) => child.text || '')
-					.join('')
-				return `<p class="text-lg text-muted-foreground leading-relaxed">${text}</p>`
+				const text = node.children.map((child: any) => child.text || '').join('')
+				return `<p class="text-[17px] leading-relaxed text-foreground/65">${text}</p>`
 			}
 			if (node.type === 'heading' && node.children) {
-				const text = node.children
-					.map((child: any) => child.text || '')
-					.join('')
+				const text = node.children.map((child: any) => child.text || '').join('')
 				const tag = node.tag === 'h1' ? 'h2' : node.tag || 'h2'
-				const headingClass = 'text-3xl md:text-5xl font-title text-foreground mb-4'
 				const idAttr = tag === 'h2' ? ' id="cta-heading"' : ''
-				return `<${tag}${idAttr} class="${headingClass}">${text}</${tag}>`
+				return `<${tag}${idAttr} class="font-display text-balance text-[40px] font-medium tracking-[-0.03em] text-foreground sm:text-[52px]">${text}</${tag}>`
 			}
 			return ''
 		})
@@ -39,40 +33,29 @@ const renderLexicalContent = (content: any) => {
 }
 ---
 
-<section class="relative w-full py-20 md:py-28" aria-labelledby="cta-heading">
-	<GridDesign aria-hidden="true" />
-	<div class="container relative mx-auto px-4 text-center">
-		<div class="max-w-4xl mx-auto">
-			<div class="bg-muted dark:bg-background rounded-2xl p-1">
-				<div
-					class="bg-card ring-border rounded-2lg p-8 md:p-12 shadow-sm ring-1"
-				>
-					{
-						richText && (
-							<div class="prose prose-lg max-w-none mb-8 space-y-4">
-								<div set:html={renderLexicalContent(richText)} />
-							</div>
-						)
-					}
-
-					{
-						links && links.length > 0 && (
-							<div class="flex flex-wrap justify-center gap-3 mt-8">
-								{links.map((link, index) => (
-									<Button
-										href={link.url || '#'}
-										variant={index === 0 ? 'default' : 'secondary'}
-										size="lg"
-										aria-label={link.label || 'Call to action'}
-									>
-										{link.label}
-									</Button>
-								))}
-							</div>
-						)
-					}
-				</div>
-			</div>
+<Section class="py-10 sm:py-16" aria-labelledby="cta-heading">
+	<div class="grain relative overflow-hidden rounded-3xl bg-brand-soft px-7 py-16 sm:px-12 sm:py-20">
+		<div
+			aria-hidden="true"
+			class="absolute inset-x-[20%] top-[20%] h-72 rounded-full bg-brand/40 blur-3xl"
+		></div>
+		<div class="relative mx-auto max-w-2xl text-center">
+			{richText && <div class="space-y-4" set:html={renderLexicalContent(richText)} />}
+			{
+				links && links.length > 0 && (
+					<div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+						{links.map((link, index) => (
+							<Button
+								href={link.url || '#'}
+								variant={index === 0 ? 'solid' : 'outline'}
+								class="h-14 px-8 text-[17px]"
+							>
+								{link.label}
+							</Button>
+						))}
+					</div>
+				)
+			}
 		</div>
 	</div>
-</section>
+</Section>

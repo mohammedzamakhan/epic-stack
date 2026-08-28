@@ -1,5 +1,7 @@
 ---
-import GridDesign from '../GridDesign.astro'
+import MarkdownText from '../site/MarkdownText.astro'
+import Section from '../site/Section.astro'
+import Reveal from '../site/Reveal.astro'
 import Button from '../ui/Button.astro'
 
 interface Props {
@@ -13,103 +15,79 @@ interface Props {
 	links?: any[]
 }
 
-const { title, description, headline, subheadline, badge, richText, media, links } = Astro.props
+const { title, description, headline, subheadline, badge, media, links } = Astro.props
 
 const displayTitle = headline || title || ''
 const displayDescription = subheadline || description || ''
-
-const renderLexicalContent = (content: any) => {
-	if (!content || !content.root || !content.root.children) {
-		return ''
-	}
-
-	return content.root.children
-		.map((node: any) => {
-			if (node.type === 'paragraph' && node.children) {
-				const text = node.children
-					.map((child: any) => {
-						if (child.format && child.format > 0) {
-							let formattedText = child.text || ''
-							if (child.format & 1)
-								formattedText = `<strong class="font-semibold">${formattedText}</strong>`
-							if (child.format & 2)
-								formattedText = `<em class="italic">${formattedText}</em>`
-							return formattedText
-						}
-						return child.text || ''
-					})
-					.join('')
-				return `<p class="text-xl md:text-2xl leading-relaxed max-w-[600px] text-white/90">${text}</p>`
-			}
-			if (node.type === 'heading' && node.children) {
-				const text = node.children
-					.map((child: any) => child.text || '')
-					.join('')
-				return `<h1 class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-white leading-tight">${text}</h1>`
-			}
-			return ''
-		})
-		.join('')
-}
 ---
 
-<section class="relative -mt-[10.4rem] min-h-[80vh] flex items-center justify-center text-white" data-theme="dark" aria-labelledby="hero-heading">
-	<GridDesign />
-
-	{media && typeof media === 'object' && (
-		<div class="absolute inset-0 -z-10" role="img" aria-label={media.alt || 'Decorative hero background'}>
-			<img
-				class="w-full h-full object-cover"
-				src={media.url}
-				alt=""
-				width={media.width || 1920}
-				height={media.height || 1080}
-				loading="eager"
-				fetchpriority="high"
-				decoding="async"
-			/>
-			<div class="absolute inset-0 bg-black/50"></div>
-		</div>
-	)}
-
-	<div class="container relative z-10 flex flex-col items-center justify-center text-center py-24 gap-8">
-		{badge && (
-			<div class="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full text-xs font-semibold tracking-wide uppercase bg-primary/20 text-primary border border-primary/30">
-				<span>{badge}</span>
-			</div>
-		)}
-
-		{displayTitle ? (
-			<div class="space-y-6 max-w-4xl mx-auto">
-				<h1 id="hero-heading" class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-white leading-tight">
-					{displayTitle}
-				</h1>
-				{displayDescription && (
-					<p class="text-xl md:text-2xl leading-relaxed max-w-[600px] mx-auto text-white/90">
-						{displayDescription}
+<Section seam={false} class="pt-28 pb-6 sm:pt-32 lg:pt-36">
+	<div class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:items-end">
+		<div>
+			{
+				badge && (
+					<p class="mb-5 text-[13px] text-muted-foreground">
+						<span class="font-semibold text-foreground">{badge}</span>
 					</p>
-				)}
-			</div>
-		) : richText ? (
-			<div class="space-y-6 max-w-4xl mx-auto" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
-		) : null}
+				)
+			}
+			<h1 class="font-display text-balance text-[40px] font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[58px] lg:text-[64px]">
+				{displayTitle}
+			</h1>
+		</div>
+		{
+			displayDescription && (
+				<div class="flex flex-col gap-7">
+					<MarkdownText content={displayDescription} class="max-w-md text-pretty text-[17px] leading-relaxed text-muted-foreground" />
+				</div>
+			)
+		}
+	</div>
 
-		{links && links.length > 0 && (
-			<div class="flex flex-wrap justify-center gap-4 mt-4">
+	{
+		links && links.length > 0 && (
+			<div class="mt-8 flex flex-wrap items-center gap-3">
 				{links.map((linkItem: any, i: number) => {
 					const href = linkItem?.url || linkItem?.link?.url || '#'
 					const label = linkItem?.label || linkItem?.link?.label || linkItem?.text || 'Learn more'
 					return (
 						<Button
 							href={href}
-							variant={i === 0 ? 'default' : 'outline'}
-							size="xl"
+							variant={i === 0 ? 'brand' : 'outline'}
+							size="md"
 						>
 							{label}
 						</Button>
 					)
 				})}
 			</div>
-		)}
-	</div>
-</section>
+		)
+	}
+
+	{
+		media && typeof media === 'object' && (
+			<Reveal class="relative mt-14 overflow-hidden rounded-[28px] border border-hairline bg-card px-6 py-12 sm:px-10 sm:py-16">
+				<div
+					aria-hidden="true"
+					class="pointer-events-none absolute inset-0 opacity-[0.5]"
+					style="background-image: radial-gradient(circle at 1px 1px, var(--color-hairline) 1px, transparent 0); background-size: 22px 22px;"
+				></div>
+				<div class="relative overflow-hidden rounded-2xl border border-hairline">
+					<img
+						class="w-full object-cover"
+						src={media.url}
+						alt={media.alt || displayTitle || 'Hero visual'}
+						width={media.width || 1200}
+						height={media.height || 720}
+						loading="eager"
+						fetchpriority="high"
+						decoding="async"
+					/>
+				</div>
+				<p class="relative mt-10 text-center text-[13px] text-muted-foreground">
+					Built for modern teams — from idea to production
+				</p>
+			</Reveal>
+		)
+	}
+</Section>

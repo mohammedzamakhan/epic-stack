@@ -1,5 +1,6 @@
 ---
-import Badge from '../ui/Badge.astro' 
+import Section from '../site/Section.astro'
+import Eyebrow from '../site/Eyebrow.astro'
 
 interface Author {
 	name: string
@@ -29,7 +30,7 @@ interface Props {
 
 const {
 	tagline = 'Used by the best developers',
-	quote = 'The Pro Blocks are a game-changer. They are easy to use and customize, and they are a great way to build with shadcn/ui faster.',
+	quote = 'The starter kit is a game-changer. Easy to customize and fast to ship with.',
 	author = {
 		name: 'OrcDev',
 		title: 'Creator of',
@@ -40,7 +41,6 @@ const {
 	testimonial,
 } = Astro.props
 
-// Transform CMS testimonial to consistent structure if provided
 const finalTestimonial = testimonial
 	? {
 			tagline: testimonial.tagline || tagline,
@@ -50,57 +50,49 @@ const finalTestimonial = testimonial
 				title: testimonial.authorTitle,
 				company: testimonial.authorCompany,
 				companyUrl: testimonial.authorCompanyUrl,
-				image: typeof testimonial.authorImage === 'string' 
-					? testimonial.authorImage 
-					: testimonial.authorImage?.url || author.image,
+				image:
+					typeof testimonial.authorImage === 'string'
+						? testimonial.authorImage
+						: testimonial.authorImage?.url || author.image,
 			},
 		}
 	: { tagline, quote, author }
 ---
 
-<section class="relative border-b border-dashed" aria-labelledby="testimonial-heading">
-	<h2 id="testimonial-heading" class="sr-only">Customer Testimonial</h2>
-	<div class="container mx-auto text-center relative z-10 px-4 md:px-6">
-	<div class="absolute inset-0" aria-hidden="true" />
-		<figure class="relative bg-muted w-full h-full flex flex-col items-center justify-center gap-4 md:gap-6 border-x border-dashed px-4 py-12 sm:p-12">
-			<Badge class="bg-transparent" variant="outline" size="sm">
-				{finalTestimonial.tagline}
-			</Badge>
-			
-			<blockquote class="text-foreground max-w-2xl text-lg font-medium md:text-xl">
-				<p>"{finalTestimonial.quote}"</p>
-			</blockquote>
-			
-			<figcaption class="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
-				<div class="relative flex shrink-0 overflow-hidden rounded-full size-12">
-					<img
-						class="aspect-square size-full object-cover"
-						alt={finalTestimonial.author.name}
-						src={finalTestimonial.author.image}
-						aria-hidden="true"
-						width="48"
-						height="48"
-					/>
-				</div>
-				<div class="flex flex-col">
-					<cite class="font-semibold not-italic">{finalTestimonial.author.name}</cite>
-					<p class="text-muted-foreground">
-						{finalTestimonial.author.title}
-						{finalTestimonial.author.companyUrl ? (
-							<a
-								target="_blank"
-								rel="noopener noreferrer"
-								class="underline hover:text-foreground"
-								href={finalTestimonial.author.companyUrl}
-							>
-								{finalTestimonial.author.company}
-							</a>
-						) : (
-							finalTestimonial.author.company
-						)}
-					</p>
-				</div>
-			</figcaption>
-		</figure>
-	</div>
-</section>
+<Section class="py-16 sm:py-20" aria-labelledby="testimonial-heading">
+	<figure class="mx-auto max-w-3xl text-center">
+		<Eyebrow class="mb-5">{finalTestimonial.tagline}</Eyebrow>
+		<blockquote class="font-display text-balance text-[28px] font-medium tracking-[-0.02em] text-foreground sm:text-[36px]">
+			<p>"{finalTestimonial.quote}"</p>
+		</blockquote>
+		<figcaption class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+			<img
+				class="size-12 rounded-full object-cover"
+				alt={finalTestimonial.author.name}
+				src={finalTestimonial.author.image}
+				width="48"
+				height="48"
+			/>
+			<div class="text-center sm:text-left">
+				<cite class="text-[15px] font-semibold not-italic text-foreground">
+					{finalTestimonial.author.name}
+				</cite>
+				<p class="text-[14px] text-muted-foreground">
+					{finalTestimonial.author.title}{' '}
+					{finalTestimonial.author.companyUrl ? (
+						<a
+							target="_blank"
+							rel="noopener noreferrer"
+							class="underline-offset-4 hover:underline"
+							href={finalTestimonial.author.companyUrl}
+						>
+							{finalTestimonial.author.company}
+						</a>
+					) : (
+						finalTestimonial.author.company
+					)}
+				</p>
+			</div>
+		</figcaption>
+	</figure>
+</Section>

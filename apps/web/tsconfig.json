@@ -8,6 +8,12 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["src/**/*", "public/**/*", "env.d.ts", "emdash-env.d.ts"],
+	"include": [
+		"src/**/*",
+		"public/**/*",
+		"env.d.ts",
+		"emdash-env.d.ts",
+		"check-type.ts"
+	],
 	"exclude": ["dist", "node_modules"]
 }

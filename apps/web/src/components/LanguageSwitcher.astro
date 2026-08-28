@@ -3,9 +3,10 @@ import { getRelativeLocaleUrl } from 'astro:i18n'
 
 interface Props {
 	class?: string
+	variant?: 'header' | 'footer'
 }
 
-const { class: className = '' } = Astro.props
+const { class: className = '', variant = 'header' } = Astro.props
 
 const currentLocale = Astro.currentLocale ?? 'en'
 
@@ -15,67 +16,170 @@ const locales = [
 	{ code: 'ar', label: 'العربية', short: 'AR' },
 ]
 
-// Strip existing locale prefix to get canonical pathname
 const currentPathname = Astro.url.pathname.replace(/^\/(es|ar)(\/|$)/, '/')
+const activeLocale = locales.find((locale) => locale.code === currentLocale) ?? locales[0]
 ---
 
-<div class={`relative inline-flex items-center language-switcher ${className}`}>
-	<label for="language-select" class="sr-only">Select language</label>
-	<div class="relative flex items-center">
+<div
+	class:list={['language-switcher relative', className]}
+	data-variant={variant}
+>
+	<button
+		type="button"
+		class:list={[
+			'language-switcher-trigger inline-flex items-center gap-1.5 rounded-full border border-hairline text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20',
+			variant === 'header' ? 'h-9 px-3.5 text-[13px] font-medium' : 'h-9 px-3 text-[13px] font-medium',
+		]}
+		aria-haspopup="listbox"
+		aria-expanded="false"
+		aria-label={`Language: ${activeLocale.label}`}
+	>
 		<svg
-			class="pointer-events-none absolute left-2.5 h-4 w-4 text-muted-foreground"
+			class="size-4 shrink-0 text-muted-foreground"
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
-			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
 		>
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"
-				stroke-width="2"
-				d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-			></path>
+				stroke-width="1.75"
+				d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"
+			/>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="1.75"
+				d="M3.6 9h16.8M3.6 15h16.8M12 3c2.2 2.5 3.4 5.7 3.4 9s-1.2 6.5-3.4 9c-2.2-2.5-3.4-5.7-3.4-9s1.2-6.5 3.4-9Z"
+			/>
 		</svg>
-		<select
-			id="language-select"
-			class="h-9 cursor-pointer appearance-none rounded-md border border-border bg-background/80 py-1 pl-8 pr-7 text-xs font-medium uppercase tracking-wider text-foreground backdrop-blur transition-colors hover:bg-accent focus:outline-none focus:ring-1 focus:ring-ring"
-			aria-label="Language selector"
-		>
-			{
-				locales.map((loc) => {
-					const targetUrl = getRelativeLocaleUrl(loc.code, currentPathname)
-					return (
-						<option value={targetUrl} selected={loc.code === currentLocale}>
-							{loc.short} - {loc.label}
-						</option>
-					)
-				})
-			}
-		</select>
+		<span class="language-switcher-label">
+			{variant === 'header' ? activeLocale.short : activeLocale.label}
+		</span>
 		<svg
-			class="pointer-events-none absolute right-2 h-3.5 w-3.5 text-muted-foreground"
+			class="language-switcher-chevron size-3.5 shrink-0 text-muted-foreground transition-transform duration-200"
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
-			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
 		>
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
 		</svg>
+	</button>
+
+	<div
+		class="language-switcher-menu pointer-events-none invisible absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[11rem] translate-y-1 overflow-hidden rounded-2xl border border-hairline bg-background p-1 opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.12)] transition-[opacity,transform,visibility] duration-200"
+		role="listbox"
+		aria-label="Select language"
+		hidden
+	>
+		{
+			locales.map((locale) => {
+				const targetUrl = getRelativeLocaleUrl(locale.code, currentPathname)
+				const isActive = locale.code === currentLocale
+
+				return (
+					<a
+						href={targetUrl}
+						class:list={[
+							'flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-[13px] transition-colors hover:bg-muted',
+							isActive ? 'bg-muted font-medium text-foreground' : 'text-foreground/90',
+						]}
+						role="option"
+						aria-selected={isActive}
+						lang={locale.code}
+					>
+						<span>{locale.label}</span>
+						<span class="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+							{locale.short}
+						</span>
+					</a>
+				)
+			})
+		}
 	</div>
 </div>
 
 <script>
+	let cleanup: (() => void) | null = null
+
+	function closeMenu(switcher: HTMLElement) {
+		const trigger = switcher.querySelector('.language-switcher-trigger') as HTMLButtonElement | null
+		const menu = switcher.querySelector('.language-switcher-menu') as HTMLElement | null
+		const chevron = switcher.querySelector('.language-switcher-chevron')
+
+		if (!trigger || !menu) return
+
+		trigger.setAttribute('aria-expanded', 'false')
+		menu.hidden = true
+		menu.classList.add('pointer-events-none', 'invisible', 'opacity-0', 'translate-y-1')
+		menu.classList.remove('pointer-events-auto', 'visible', 'opacity-100', 'translate-y-0')
+		chevron?.classList.remove('rotate-180')
+	}
+
+	function openMenu(switcher: HTMLElement) {
+		const trigger = switcher.querySelector('.language-switcher-trigger') as HTMLButtonElement | null
+		const menu = switcher.querySelector('.language-switcher-menu') as HTMLElement | null
+		const chevron = switcher.querySelector('.language-switcher-chevron')
+
+		if (!trigger || !menu) return
+
+		document.querySelectorAll('.language-switcher').forEach((other) => {
+			if (other !== switcher) closeMenu(other as HTMLElement)
+		})
+
+		trigger.setAttribute('aria-expanded', 'true')
+		menu.hidden = false
+		menu.classList.remove('pointer-events-none', 'invisible', 'opacity-0', 'translate-y-1')
+		menu.classList.add('pointer-events-auto', 'visible', 'opacity-100', 'translate-y-0')
+		chevron?.classList.add('rotate-180')
+	}
+
 	function initLanguageSwitcher() {
-		const selects = document.querySelectorAll<HTMLSelectElement>('#language-select')
-		selects.forEach((select) => {
-			select.addEventListener('change', () => {
-				if (select.value) {
-					window.location.href = select.value
-				}
+		if (cleanup) {
+			cleanup()
+			cleanup = null
+		}
+
+		const listeners: Array<{ el: EventTarget; type: string; fn: EventListener }> = []
+
+		function addListener(el: EventTarget, type: string, fn: EventListener) {
+			el.addEventListener(type, fn)
+			listeners.push({ el, type, fn })
+		}
+
+		document.querySelectorAll('.language-switcher').forEach((switcher) => {
+			const root = switcher as HTMLElement
+			const trigger = root.querySelector('.language-switcher-trigger') as HTMLButtonElement | null
+
+			if (!trigger) return
+
+			addListener(trigger, 'click', (event) => {
+				event.stopPropagation()
+				const isOpen = trigger.getAttribute('aria-expanded') === 'true'
+				if (isOpen) closeMenu(root)
+				else openMenu(root)
 			})
 		})
+
+		addListener(document, 'click', () => {
+			document.querySelectorAll('.language-switcher').forEach((switcher) => {
+				closeMenu(switcher as HTMLElement)
+			})
+		})
+
+		addListener(document, 'keydown', (event) => {
+			if ((event as KeyboardEvent).key === 'Escape') {
+				document.querySelectorAll('.language-switcher').forEach((switcher) => {
+					closeMenu(switcher as HTMLElement)
+				})
+			}
+		})
+
+		cleanup = () => {
+			listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn))
+		}
 	}
 
 	initLanguageSwitcher()

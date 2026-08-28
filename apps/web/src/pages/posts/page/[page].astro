@@ -3,7 +3,8 @@ import MarketingLayout from '../../../layouts/MarketingLayout.astro'
 import { getPosts } from '../../../lib/emdash'
 import SEO from '../../../components/SEO.astro'
 import { getPageTitle, brand } from '@repo/config/brand'
-import GridDesign from '../../../components/GridDesign.astro'
+import Section from '../../../components/site/Section.astro'
+import Button from '../../../components/ui/Button.astro'
 
 const { page } = Astro.params
 const pageNumber = parseInt(page as string)
@@ -43,116 +44,107 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 		{posts.totalPages > pageNumber && <link rel="next" href={`/posts/page/${pageNumber + 1}`} />}
 	</Fragment>
 
-	<main class="relative min-h-screen py-24">
-		<GridDesign />
-		<div class="container mx-auto px-4 mb-16">
-			<div class="prose dark:prose-invert max-w-none">
-				<h1 class="text-4xl font-bold text-center mb-8 font-title">Blog Posts</h1>
-				<p class="text-xl text-center text-gray-600 mb-12">
-					Discover the latest insights and updates from our team - Page {
-						pageNumber
-					}
-				</p>
-			</div>
+	<Section class="py-24 sm:py-32">
+		<div class="flex flex-col items-center text-center mb-16">
+			<h1 class="font-display text-balance text-[40px] font-medium leading-[1.05] tracking-[-0.03em] sm:text-[58px] lg:text-[64px]">
+				Blog Posts
+			</h1>
+			<p class="mt-6 max-w-2xl text-pretty text-[17px] leading-relaxed text-muted-foreground">
+				Discover the latest insights, tutorials, and updates from our team — Page {pageNumber}
+			</p>
 		</div>
 
 		{
 			posts.entries && posts.entries.length > 0 ? (
-				<div class="container mx-auto px-6">
-					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-						{posts.entries.map((post) => (
-							<article class="border border-border overflow-hidden bg-background hover:shadow-lg transition-shadow relative z-1">
-								{post.seo?.image && (
-									<img
-										src={post.seo.image.url}
-										alt={post.seo.image.alt || post.title}
-										class="w-full h-48 object-cover"
-									/>
-								)}
-								<div class="p-6">
-									{post.categories && post.categories.length > 0 && (
-										<div class="mb-4">
-											{post.categories.map((category) => (
-												<span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full mr-2">
-													{typeof category === 'object'
-														? category.name
-														: category}
-												</span>
-											))}
+				<div class="mx-auto w-full max-w-[1200px]">
+					<div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+						{posts.entries.map((post) => {
+							const imageUrl = post.heroImage?.url || post.seo?.image?.url
+							const imageAlt =
+								post.heroImage?.alt ||
+								post.seo?.image?.alt ||
+								`Featured image for ${post.title}`
+							const category = (post as any).category || (post.categories && post.categories[0] ? (typeof post.categories[0] === 'object' ? post.categories[0].name : post.categories[0]) : 'Blog')
+							const publishedDate = post.publishedAt
+								? new Date(post.publishedAt).toLocaleDateString('en-US', {
+										year: 'numeric',
+										month: 'long',
+									})
+								: undefined
+
+							return (
+								<a href={`/posts/${post.slug}`} class="group flex flex-col">
+									{imageUrl && (
+										<div class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-hairline">
+											<img
+												src={imageUrl}
+												alt={imageAlt}
+												class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+												loading="lazy"
+											/>
 										</div>
 									)}
-									<h2 class="text-xl font-semibold mb-3">
-										<a
-											href={`/posts/${post.slug}`}
-											class="hover:text-primary font-title transition-colors"
-											set:html={post.title}
-										/>
-									</h2>
-									{post.seo?.description && (
-										<p
-											class="text-gray-600 mb-4"
-											set:html={post.seo.description}
-										/>
-									)}
-									<div class="flex justify-between items-center text-sm text-gray-500">
-										{post.publishedAt && (
-											<time datetime={post.publishedAt}>
-												{new Date(post.publishedAt).toLocaleDateString(
-													'en-US',
-													{
-														year: 'numeric',
-														month: 'long',
-														day: 'numeric',
-													},
-												)}
-											</time>
+									<div class="mt-5 flex items-center gap-3">
+										<span class="rounded-full border border-hairline px-3 py-1 text-[12px] font-medium text-muted-foreground">
+											{category}
+										</span>
+										{publishedDate && (
+											<span class="text-[13px] text-muted-foreground">{publishedDate}</span>
 										)}
-										<a
-											href={`/posts/${post.slug}`}
-											class="text-primary hover:text-primary/80 font-medium"
-										>
-											Read more →
-										</a>
 									</div>
-								</div>
-							</article>
-						))}
+									<h3 class="mt-3 flex items-start gap-1 text-pretty text-[18px] font-medium leading-snug tracking-[-0.01em]">
+										<span set:html={post.title} />
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											class="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+											aria-hidden="true"
+										>
+											<path d="M7 7h10v10" />
+											<path d="M7 17 17 7" />
+										</svg>
+									</h3>
+								</a>
+							)
+						})}
 					</div>
 
-					{/* Simple pagination - following guide pattern */}
 					{posts.totalPages > 1 && (
-						<div class="flex justify-center items-center mt-12 space-x-4">
+						<div class="flex items-center justify-center gap-4 mt-16 pt-8 border-t border-hairline">
 							{posts.page > 1 && (
-								<a
-									href={
-										posts.page === 2
-											? '/posts'
-											: `/posts/page/${posts.page - 1}`
-									}
-									class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700"
+								<Button
+									href={posts.page === 2 ? '/posts' : `/posts/page/${posts.page - 1}`}
+									variant="outline"
 								>
 									Previous
-								</a>
+								</Button>
 							)}
-							<span class="px-4 py-2">
+							<span class="text-[14px] font-medium text-muted-foreground">
 								Page {posts.page} of {posts.totalPages}
 							</span>
 							{posts.page < posts.totalPages && (
-								<a
+								<Button
 									href={`/posts/page/${posts.page + 1}`}
-									class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700"
+									variant="outline"
 								>
 									Next
-								</a>
+								</Button>
 							)}
 						</div>
 					)}
 				</div>
 			) : (
-				<div class="container mx-auto px-4 text-center">
-					<p class="text-gray-600 text-lg">No posts found.</p>
+				<div class="flex items-center justify-center py-20 text-center">
+					<p class="text-[17px] text-muted-foreground">No posts found.</p>
 				</div>
 			)
 		}
-	</main>
+	</Section>
 </MarketingLayout>

@@ -1,7 +1,8 @@
 ---
-import GridDesign from './GridDesign.astro'
+import MarkdownText from './site/MarkdownText.astro'
 import Badge from './ui/Badge.astro'
 import Button from './ui/Button.astro'
+import Section from './site/Section.astro'
 
 interface Props {
 	richText?: any
@@ -126,7 +127,7 @@ const renderLexicalContent = (content: any, textAlign: string) => {
 						return applyTextState(child.text || '', child)
 					})
 					.join('')
-				return `<h1 class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-foreground leading-tight ${alignClass}">${text}</h1>`
+				return `<h1 class="font-display text-4xl md:text-6xl lg:text-7xl tracking-[-0.03em] text-foreground leading-tight ${alignClass}">${text}</h1>`
 			}
 			return ''
 		})
@@ -134,9 +135,9 @@ const renderLexicalContent = (content: any, textAlign: string) => {
 }
 
 const sectionClasses = [
-	'relative w-full flex flex-col justify-center items-center gap-8 py-12 lg:py-16',
-	withBackground && variant === 'primary' ? 'bg-primary/5' : '',
-	withBackground && variant === 'secondary' ? 'bg-secondary/5' : '',
+	'relative w-full',
+	withBackground && variant === 'primary' ? 'bg-brand-soft/30' : '',
+	withBackground && variant === 'secondary' ? 'bg-muted' : '',
 	withBackgroundGlow || imagePerspective !== 'none' ? 'overflow-hidden' : '',
 	imagePerspective === 'paper' ? 'md:pb-24' : '',
 ].filter(Boolean).join(' ')
@@ -190,8 +191,7 @@ const buttonsContainerClasses = [
 const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoSrc)
 ---
 
-<section class={sectionClasses}>
-	<GridDesign />
+<Section seam={false} class={`pt-28 pb-10 sm:pt-32 ${sectionClasses}`}>
 
 	{hasAsset && withBackgroundGlow && (
 		<div class="hidden lg:flex justify-center w-full h-full absolute pointer-events-none">
@@ -208,7 +208,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 	<div class={containerClasses} style={`min-height: ${minHeight}px;`}>
 		<div class={contentClasses}>
 			<div class="space-y-6">
-				<Badge variant="outline" size="sm" badgeText="NEW">
+				<Badge variant="default" size="sm" badgeText="NEW">
 					BY THE MAKERS OF BUGBASHER.DEV
 				</Badge>
 				{richText && (
@@ -221,11 +221,11 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 
 			{!isClosedBeta && links && links.length > 0 && (
 				<div class={buttonsContainerClasses}>
-					<Button href={links[0]?.url || '#'} variant="default" size="xl">
+					<Button href={links[0]?.url || '#'} target={links[0]?.target} rel={links[0]?.rel} variant="default" size="default">
 						{links[0]?.link?.label || 'Get started'}
 					</Button>
 					{links[1] && (
-						<Button href={links[1]?.url || '#'} variant="outline" size="xl">
+						<Button href={links[1]?.url || '#'} target={links[1]?.target} rel={links[1]?.rel} variant="outline" size="default">
 							{links[1]?.link?.label || 'Learn more'}
 						</Button>
 					)}
@@ -293,7 +293,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 			</>
 		)}
 	</div>
-</section>
+</Section>
 
 <style>
 	.perspective-left {

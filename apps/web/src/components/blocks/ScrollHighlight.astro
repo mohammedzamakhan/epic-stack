@@ -1,6 +1,6 @@
 ---
-import GridDesign from '../GridDesign.astro'
-import Badge from '../ui/Badge.astro'
+import Section from '../site/Section.astro'
+import SectionHead from '../site/SectionHead.astro'
 
 interface Props {
 	title?: string
@@ -13,185 +13,114 @@ interface Props {
 const {
 	title = 'How it works',
 	subtitle = 'Scroll to reveal',
-	text = 'As you scroll down this page, each word will progressively highlight, creating an engaging reading experience that guides your attention through the content. This technique is perfect for hero sections, key messages, or storytelling elements where you want to capture and maintain user attention.',
+	text = 'As you scroll down this page, each word will progressively highlight, creating an engaging reading experience that guides your attention through the content.',
 	highlightColor = 'primary',
 } = Astro.props
 
-// Split text into words for individual highlighting
-const words = text.split(/\s+/).filter(word => word.length > 0)
-
-// Generate unique ID for this instance
-const instanceId = `scroll-highlight-${Math.random().toString(36).substr(2, 9)}`
+const words = text.split(/\s+/).filter((word) => word.length > 0)
+const instanceId = `scroll-highlight-${Math.random().toString(36).slice(2, 11)}`
 ---
 
-<section 
-	class="scroll-highlight-section relative w-full py-8 overflow-hidden"
+<Section
+	class="py-12 sm:py-16"
 	id={instanceId}
-	aria-labelledby={`${instanceId}-title`}
-	data-highlight-color={highlightColor}
+	seam={true}
+	aria-labelledby={title ? `${instanceId}-title` : undefined}
 >
-	<GridDesign />
-	<div class="container relative mx-auto px-4 md:px-6">
-		<!-- Header -->
-		<header >
-			<div class="mx-auto">
-				{subtitle && (
-					<div class="mb-4">
-						<Badge variant="outline">
-							{subtitle}
-						</Badge>
-					</div>
-				)}
-				{title && (
-					<h2 id={`${instanceId}-title`} class="text-3xl md:text-4xl font-title text-foreground mb-6">
-						{title}
-					</h2>
-				)}
-			</div>
-		</header>
+	<div
+		class="scroll-highlight-section"
+		data-highlight-color={highlightColor}
+	>
+		{(subtitle || title) && (
+			<SectionHead eyebrow={subtitle || 'Highlight'} title={title || ''} />
+		)}
 
-		<!-- Scroll Highlight Content -->
-		<div class="mx-auto">
-			<div class="scroll-highlight-container relative">
-				<div class="relative">
-					<p class="scroll-highlight-text text-2xl md:text-3xl lg:text-5xl leading-relaxed md:leading-relaxed lg:leading-relaxed font-medium tracking-tight font-title">
-						{words.map((word, index) => (
-							<span
-								class="scroll-word"
-								data-word-index={index}
-							>{word}</span>
-						))}
-					</p>
-				</div>
-			</div>
+		<div class="mt-10 max-w-4xl">
+			<p class="scroll-highlight-text font-display text-[28px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground sm:text-[36px] lg:text-[48px]">
+				{
+					words.map((word, index) => (
+						<span class="scroll-word" data-word-index={index}>
+							{word}
+						</span>
+					))
+				}
+			</p>
 		</div>
 	</div>
-</section>
+</Section>
 
 <style is:global>
-	/* Default state - words are dimmed using opacity */
 	.scroll-word {
-		opacity: 0.2;
-		transition: opacity 0.3s ease-out, color 0.3s ease-out, text-shadow 0.3s ease-out;
+		color: var(--muted-foreground);
+		transition: color 0.3s ease-out;
 	}
-	
-	/* Space between words */
+
 	.scroll-word::after {
 		content: ' ';
 	}
-	
+
 	.scroll-word:last-child::after {
 		content: '';
 	}
 
-	/* Highlighted state */
 	.scroll-word.highlighted {
-		opacity: 1;
+		color: var(--brand);
 	}
 
-	/* Primary highlight color variant */
-	.scroll-highlight-section[data-highlight-color="primary"] .scroll-word.highlighted {
-		color: hsl(var(--primary));
-		text-shadow: 0 0 30px hsl(var(--primary) / 0.3);
+	.scroll-highlight-section[data-highlight-color='accent'] .scroll-word.highlighted {
+		color: var(--foreground);
 	}
 
-	/* Gradient highlight color variant */
-	.scroll-highlight-section[data-highlight-color="gradient"] .scroll-word.highlighted {
-		background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--chart-1)), hsl(var(--chart-2)));
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-
-	/* Accent highlight color variant */
-	.scroll-highlight-section[data-highlight-color="accent"] .scroll-word.highlighted {
-		color: hsl(var(--chart-1));
-		text-shadow: 0 0 30px hsl(var(--chart-1) / 0.3);
-	}
-
-	/* Progress bar glow effect */
-	.scroll-progress {
-		box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+	.scroll-highlight-section[data-highlight-color='gradient'] .scroll-word.highlighted {
+		color: var(--brand);
 	}
 </style>
 
 <script>
 	function initScrollHighlight() {
-		const sections = document.querySelectorAll('.scroll-highlight-section')!;
-		
+		const sections = document.querySelectorAll('.scroll-highlight-section')!
+
 		sections.forEach((sectionEl) => {
-			const section = sectionEl as HTMLElement;
-			const wordsNodeList = section.querySelectorAll('.scroll-word');
-			const words = Array.from(wordsNodeList);
-			const progressBar = section.querySelector('.scroll-progress') as HTMLElement | null;
-			const percentageDisplay = section.querySelector('.scroll-percentage');
-			
-			if (words.length === 0) return;
-			
-			// Check if already initialized
-			if (section.dataset.initialized === 'true') return;
-			section.dataset.initialized = 'true';
-			
-			const totalWords = words.length;
-			
+			const section = sectionEl as HTMLElement
+			const wordsNodeList = section.querySelectorAll('.scroll-word')
+			const words = Array.from(wordsNodeList)
+
+			if (words.length === 0) return
+			if (section.dataset.initialized === 'true') return
+			section.dataset.initialized = 'true'
+
+			const totalWords = words.length
+			const rootSection = section.closest('section') as HTMLElement | null
+
 			function updateHighlighting() {
-				const rect = section.getBoundingClientRect();
-				const viewportHeight = window.innerHeight;
-				const sectionHeight = rect.height;
-				
-				// Calculate progress: 0 when top of section at bottom of viewport,
-				// 1 when bottom of section at top of viewport
-				const sectionTop = rect.top;
-				
-				// Start highlighting when section enters viewport from bottom
-				// End highlighting when section leaves viewport from top
-				const startOffset = viewportHeight * 0.8; // Start when 80% of viewport from top
-				const endOffset = viewportHeight * 0.2;   // End when 20% of viewport from top
-				
-				// Calculate progress based on where the middle of the section is
-				const sectionMiddle = sectionTop + sectionHeight / 2;
-				const progress = 1 - ((sectionMiddle - endOffset) / (startOffset - endOffset));
-				const clampedProgress = Math.max(0, Math.min(1, progress));
-				
-				// Determine how many words should be highlighted
-				const wordsToHighlight = Math.floor(clampedProgress * totalWords);
-				
-				// Update word highlighting
+				if (!rootSection) return
+				const rect = rootSection.getBoundingClientRect()
+				const viewportHeight = window.innerHeight
+				const sectionHeight = rect.height
+				const sectionTop = rect.top
+				const startOffset = viewportHeight * 0.8
+				const endOffset = viewportHeight * 0.2
+				const sectionMiddle = sectionTop + sectionHeight / 2
+				const progress = 1 - (sectionMiddle - endOffset) / (startOffset - endOffset)
+				const clampedProgress = Math.max(0, Math.min(1, progress))
+				const wordsToHighlight = Math.floor(clampedProgress * totalWords)
+
 				for (let i = 0; i < words.length; i++) {
-					if (i < wordsToHighlight) {
-						words[i].classList.add('highlighted');
-					} else {
-						words[i].classList.remove('highlighted');
-					}
-				}
-				
-				// Update progress bar
-				if (progressBar) {
-					progressBar.style.width = `${clampedProgress * 100}%`;
-				}
-				
-				// Update percentage display
-				if (percentageDisplay) {
-					percentageDisplay.textContent = `${Math.round(clampedProgress * 100)}%`;
+					words[i].classList.toggle('highlighted', i < wordsToHighlight)
 				}
 			}
-			
-			// Listen to scroll events
-			window.addEventListener('scroll', updateHighlighting, { passive: true });
-			
-			// Initial update
-			updateHighlighting();
-		});
+
+			window.addEventListener('scroll', updateHighlighting, { passive: true })
+			updateHighlighting()
+		})
 	}
-	
-	// Initialize on various page load events
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', initScrollHighlight);
+		document.addEventListener('DOMContentLoaded', initScrollHighlight)
 	} else {
-		initScrollHighlight();
+		initScrollHighlight()
 	}
-	
-	// Reinitialize on Astro page transitions
-	document.addEventListener('astro:page-load', initScrollHighlight);
-	document.addEventListener('astro:after-swap', initScrollHighlight);
+
+	document.addEventListener('astro:page-load', initScrollHighlight)
+	document.addEventListener('astro:after-swap', initScrollHighlight)
 </script>

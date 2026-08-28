@@ -1,0 +1,27 @@
+---
+import Beliefs from './Beliefs.astro'
+
+interface Props {
+	node: {
+		eyebrow?: string
+		title?: string
+		description?: string
+		ctaLabel?: string
+		ctaUrl?: string
+		beliefs?: any[]
+	}
+}
+
+const { node = {} as any } = Astro.props
+const { eyebrow, title, description, ctaLabel, ctaUrl, beliefs } = node
+---
+
+<Beliefs
+	eyebrow={eyebrow}
+	title={title}
+	description={description}
+	ctaLabel={ctaLabel}
+	ctaUrl={ctaUrl}
+	beliefs={beliefs}
+	blockType="beliefs"
+/>

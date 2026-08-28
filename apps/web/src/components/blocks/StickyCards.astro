@@ -1,5 +1,6 @@
 ---
-import GridDesign from '../GridDesign.astro'
+import Section from '../site/Section.astro'
+import SectionHead from '../site/SectionHead.astro'
 import Button from '../ui/Button.astro'
 import Badge from '../ui/Badge.astro'
 
@@ -101,89 +102,42 @@ const {
 } = Astro.props
 ---
 
-<!-- STICKY CARDS VERSION -->
-<section class="relative w-full pt-16 md:pt-24" aria-labelledby="sticky-cards-title">
-	<GridDesign />
-	<div class="container relative mx-auto px-4 md:px-6">
-		<!-- Header -->
-		<header class="text-center mb-16 md:mb-20">
-			<div class="max-w-3xl mx-auto">
-				<div class="mb-4">
-					<Badge variant="outline">
-						{subtitle}
-					</Badge>
-				</div>
-				<div class="mb-6">
-					<h2 id="sticky-cards-title" class="text-4xl md:text-6xl tracking-tight font-title">
-						{title}
-					</h2>
-				</div>
-				<p class="text-lg text-muted-foreground leading-relaxed">
-					{description}
-				</p>
-			</div>
-		</header>
+<Section class="pt-16 sm:pt-20" aria-labelledby="sticky-cards-title">
+	<SectionHead eyebrow={subtitle} title={title} description={description} />
 
-		<!-- Sticky Cards Layout - Inspired by Webflow approach -->
-		<div class="relative pt-[10vh]">
-			<div
-				class="absolute inset-0 z-0 w-full dot-pattern"
-				style={{
-					backgroundSize: "20px 20px",
-				}}
-				aria-hidden="true"
-			/>
-			<div class="max-w-6xl mx-auto relative z-10">
-				<div class="grid grid-cols-1 gap-0 ">
-					{cards.map((card, index) => {
-						const isEven = index % 2 === 0
-						const posConfig = imagePositionConfig[card.imagePosition || 'center']
-						return (
-							<article class="sticky-card sticky top-[10%] h-[70vh] mb-[10vh] bg-background border border-border overflow-hidden grid grid-cols-1 lg:grid-cols-2 items-stretch">
+	<div class="relative mt-12 pt-[6vh]">
+		<div
+			class="absolute inset-0 z-0 w-full dot-pattern opacity-50"
+			style="background-size: 22px 22px;"
+			aria-hidden="true"
+		/>
+		<div class="relative z-10 max-w-6xl mx-auto">
+			<div class="grid grid-cols-1 gap-8">
+				{cards.map((card, index) => {
+					const isEven = index % 2 === 0
+					const posConfig = imagePositionConfig[card.imagePosition || 'center']
+					return (
+						<article class="sticky-card sticky top-[10%] mb-[8vh] grid min-h-[60vh] grid-cols-1 items-stretch overflow-hidden rounded-3xl border border-hairline bg-card lg:grid-cols-2">
 								<!-- Content Section -->
 								<div class={`flex flex-col justify-center p-6 md:p-12 lg:p-16 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
 									<div class="max-w-lg">
-										<div class="mb-2">
-											<Badge variant="outline" size="sm">
-												{card.tagline}
-											</Badge>
-										</div>
-										<div class="mb-6">
-											<h3 class="text-4xl tracking-tight font-title">
-												{card.title}
-											</h3>
-										</div>
-										<p class="text-muted-foreground leading-relaxed mb-8">
+										{card.tagline && (
+											<div class="mb-3">
+												<Badge variant="brand" size="sm">{card.tagline}</Badge>
+											</div>
+										)}
+										<h3 class="font-display text-[28px] font-medium tracking-[-0.02em] text-foreground sm:text-[32px]">
+											{card.title}
+										</h3>
+										<p class="mt-4 text-[15px] leading-relaxed text-muted-foreground">
 											{card.description}
 										</p>
-										
-										<!-- Action Buttons -->
-										<nav class="flex flex-wrap items-center gap-4" aria-label="Card actions">
-											<Button 
-												href={card.primaryButtonUrl}
-												variant="outline"
-											>
+										<nav class="mt-8 flex flex-wrap items-center gap-3" aria-label="Card actions">
+											<Button href={card.primaryButtonUrl} variant="brand">
 												{card.primaryButtonText}
 											</Button>
-											<Button 
-												href={card.secondaryButtonUrl}
-												variant="ghost"
-												class="group"
-											>
-												<span>{card.secondaryButtonText}</span>
-												<svg 
-													xmlns="http://www.w3.org/2000/svg" 
-													width="16" 
-													height="16" 
-													viewBox="0 0 16 16" 
-													fill="none" 
-													stroke="currentColor" 
-													stroke-width="1.5"
-													class="ml-2 group-hover:translate-x-1 transition-transform duration-200"
-													aria-hidden="true"
-												>
-													<path d="M6 3L11 8L6 13" />
-												</svg>
+											<Button href={card.secondaryButtonUrl} variant="outline">
+												{card.secondaryButtonText}
 											</Button>
 										</nav>
 									</div>
@@ -217,7 +171,7 @@ const {
 											)}
 										</div>
 									) : (
-										<div class="w-full h-full bg-muted/20 border border-dashed border-border overflow-hidden">
+										<div class="h-full w-full overflow-hidden bg-muted">
 											<img
 												src={getImageUrl(card.image)}
 												alt={`Illustration for ${card.title}`}
@@ -233,8 +187,7 @@ const {
 				</div>
 			</div>
 		</div>
-	</div>
-</section>
+</Section>
 
 <script>
 	import {
@@ -305,13 +258,7 @@ const {
 
 <style>
 	.dot-pattern {
-		left: 4px;
-		--dot-color: rgba(0, 0, 0, 0.35);
-		background-image: radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
-	}
-	
-	:global(.dark) .dot-pattern {
-		--dot-color: rgba(255, 255, 255, 0.35);
+		background-image: radial-gradient(circle at 1px 1px, var(--color-hairline) 1px, transparent 0);
 	}
 
 	.dithered-bg :global(canvas) {

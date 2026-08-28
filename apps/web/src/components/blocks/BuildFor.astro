@@ -1,5 +1,5 @@
 ---
-import GridDesign from '../GridDesign.astro'
+import Section from '../site/Section.astro'
 
 interface RippleSettings {
 	mainCircleSize?: number
@@ -51,8 +51,7 @@ const numCircles = rippleSettings?.numCircles || 8
 	}
 </style>
 
-<section class="relative bg-muted">
-	<GridDesign />
+<Section class="relative bg-background">
 	<!-- Ripple Effect positioned at section level -->
 	<div
 		class="pointer-events-none select-none absolute top-0 left-0 inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_bottom,white,transparent)]"
@@ -110,4 +109,4 @@ const numCircles = rippleSettings?.numCircles || 8
 			</span>
 		</h2>
 	</div>
-</section>
+</Section>

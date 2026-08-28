@@ -1,5 +1,5 @@
-import { type ShopCheckoutCspOptions } from '@repo/payments/shop/client'
 import {
+	type ShopCheckoutCspOptions,
 	getShopCheckoutConnectSrc,
 	getShopCheckoutFrameSrc,
 	getShopCheckoutScriptSrc,

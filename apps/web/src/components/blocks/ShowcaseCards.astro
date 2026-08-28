@@ -1,0 +1,109 @@
+---
+import MarkdownText from '../site/MarkdownText.astro'
+import Eyebrow from '../site/Eyebrow.astro';
+import Reveal from '../site/Reveal.astro';
+import { cn } from '../../lib/utils';
+
+export interface Card {
+	image: string;
+	quote: string;
+	name: string;
+	role: string;
+	stat: string;
+	statLabel: string;
+}
+
+export interface Props {
+	eyebrow?: string;
+	title?: string;
+	description?: string;
+	cards?: Card[];
+	blockType: 'showcaseCards';
+}
+
+const {
+	eyebrow = 'Built for every market',
+	title = 'One platform, everywhere',
+	description = 'Experience seamless integration and unmatched performance across all your devices and markets with our comprehensive suite of tools.',
+	cards = [
+		{
+			image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000&auto=format&fit=crop',
+			quote: 'This platform fundamentally changed how we operate globally.',
+			name: 'Sarah Jenkins',
+			role: 'VP of Engineering, TechCorp',
+			stat: '+140%',
+			statLabel: 'growth in quarterly active users',
+		},
+		{
+			image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1000&auto=format&fit=crop',
+			quote: 'Our deployment times went from hours to literally minutes.',
+			name: 'Michael Chen',
+			role: 'DevOps Lead, InnovateInc',
+			stat: '90%',
+			statLabel: 'reduction in deployment time',
+		},
+		{
+			image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=1000&auto=format&fit=crop',
+			quote: 'The analytics engine gives us insights we never thought possible.',
+			name: 'Elena Rodriguez',
+			role: 'Data Director, MetricFlow',
+			stat: '3x',
+			statLabel: 'faster reporting cycles',
+		},
+		{
+			image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1000&auto=format&fit=crop',
+			quote: 'Customer satisfaction scores doubled within our first month.',
+			name: 'David Kim',
+			role: 'Customer Success, ServicePro',
+			stat: '200%',
+			statLabel: 'increase in CSAT scores',
+		}
+	],
+	blockType
+} = Astro.props;
+---
+
+<section class="border-t border-hairline py-24 sm:py-32 lg:py-36 overflow-hidden">
+	<div class="px-5 sm:px-8 lg:px-14">
+		<div class="max-w-4xl">
+			{eyebrow && <Eyebrow class="mb-5">{eyebrow}</Eyebrow>}
+			{title && (
+				<h2 class="font-display text-balance text-[40px] font-medium leading-[1.08] tracking-[-0.035em] sm:text-[54px] sm:leading-[1.06] lg:text-[68px]">
+					{title}
+				</h2>
+			)}
+			{description && (
+				<MarkdownText content={description} class="mt-7 max-w-2xl text-pretty text-[16px] leading-relaxed text-muted-foreground sm:text-[18px]" />
+			)}
+		</div>
+	</div>
+
+	<div class="relative left-1/2 mt-16 flex w-screen -translate-x-1/2 snap-x snap-mandatory scroll-pl-9 gap-5 overflow-x-auto pb-4 pl-9 pr-5 sm:mt-20 sm:scroll-pl-[max(57px,calc((100vw-1312px)/2+56px))] sm:gap-6 sm:pl-[max(57px,calc((100vw-1312px)/2+56px))] sm:pr-8 lg:scroll-pl-[max(81px,calc((100vw-1312px)/2+80px))] lg:pl-[max(81px,calc((100vw-1312px)/2+80px))] lg:pr-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+		{cards.map((card, i) => (
+			<div class="w-[84vw] max-w-[540px] shrink-0 snap-start sm:w-[54vw] lg:w-[38vw] xl:w-[32vw]">
+				<Reveal delay={i * 80}>
+					<figure class="group relative min-h-[620px] overflow-hidden rounded-3xl border border-hairline bg-card sm:min-h-[700px]">
+						<img src={card.image} alt="" class="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+						<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+						<figcaption class="absolute inset-x-0 bottom-0 flex flex-col gap-5 p-7 text-white sm:p-9">
+							<blockquote class="text-pretty font-display text-[25px] font-medium leading-[1.25] tracking-[-0.02em] sm:text-[30px]">
+								&ldquo;{card.quote}&rdquo;
+							</blockquote>
+							<div class="h-px bg-white/30"></div>
+							<div class="flex items-end justify-between gap-5">
+								<div class="flex flex-col">
+									<span class="text-[15px] font-semibold">{card.name}</span>
+									<span class="text-[13px] leading-snug text-white/70">{card.role}</span>
+								</div>
+								<div class="flex flex-col items-end text-right">
+									<span class="font-display text-[28px] font-medium leading-none">{card.stat}</span>
+									<span class="max-w-36 text-[12px] leading-snug text-white/70">{card.statLabel}</span>
+								</div>
+							</div>
+						</figcaption>
+					</figure>
+				</Reveal>
+			</div>
+		))}
+	</div>
+</section>

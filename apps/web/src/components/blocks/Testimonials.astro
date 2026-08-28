@@ -1,7 +1,7 @@
 ---
+import Section from '../site/Section.astro'
+import SectionHead from '../site/SectionHead.astro'
 import { brand } from '@repo/config/brand'
-import GridDesign from '../GridDesign.astro'
-import Badge from '../ui/Badge.astro'
 
 interface Testimonial {
 	name: string
@@ -32,7 +32,7 @@ const {
 	testimonials: rawTestimonials = [
 		{
 			quote:
-				'I was going to build my own authentication system using blockchain, AI, and quantum computing... then I discovered this and saved 3 years of my life.',
+				'I was going to build my own authentication system... then I discovered this and saved months of work.',
 			name: 'Captain Deploy',
 			role: 'Chief Meme Officer',
 			company: 'Deploy or Die Inc.',
@@ -47,63 +47,22 @@ const {
 			image: 'https://i.pravatar.cc/150?img=11',
 		},
 		{
-			quote: `${brand.name} saved me 127.3 hours of boilerplate setup...`,
+			quote: `${brand.name} saved me countless hours of boilerplate setup.`,
 			name: 'Ctrl Alt Delete',
 			role: 'Reformed Code Artist',
 			company: 'Infinite Loop Labs',
 			image: 'https://i.pravatar.cc/150?img=23',
 		},
-		{
-			quote:
-				"The TypeScript setup is so good, it caught errors I hadn't even made yet...",
-			name: 'Null Pointer',
-			role: 'Duck Whisperer',
-			company: 'Try-Catch Paradise',
-			image: 'https://i.pravatar.cc/150?img=15',
-		},
-		{
-			quote:
-				'Implementing auth used to take longer than explaining why I still use PHP. Not anymore! Well, at least the auth part.',
-			name: 'Legacy Larry',
-			role: 'Time Optimization Specialist',
-			company: '404 Found',
-			image: 'https://i.pravatar.cc/150?img=33',
-		},
-		{
-			quote:
-				'Our sprint planning used to be "Fix auth bugs" every week. Now we actually build features! What a concept!',
-			name: 'Agile Gandalf',
-			role: 'Sprint Survivor',
-			company: 'You Shall Not Crash',
-			image: 'https://i.pravatar.cc/150?img=3',
-		},
-		{
-			quote:
-				'I was about to switch careers and become a goat farmer. Then I found this solution. The goats are disappointed.',
-			name: 'Git Shepherd',
-			role: 'Almost Goat Farmer',
-			company: 'Stack Overflow Farms',
-			image: 'https://i.pravatar.cc/150?img=42',
-		},
-		{
-			quote:
-				'Finally, something that makes auth less painful than explaining blockchain to my grandma.',
-			name: 'Hash',
-			role: 'Professional Problem Avoider',
-			company: 'Stripe',
-			image: 'https://i.pravatar.cc/150?img=8',
-		},
 	],
 } = Astro.props
 
-// Transform CMS testimonials to consistent flat structure
 const testimonials: Testimonial[] = rawTestimonials.map((testimonial) => {
 	if ('authorName' in testimonial) {
 		const cms = testimonial as CMSTestimonial
 		const imageUrl =
 			typeof cms.authorImage === 'string'
 				? cms.authorImage
-				: (cms.authorImage?.url || 'https://i.pravatar.cc/150?img=1')
+				: cms.authorImage?.url || 'https://i.pravatar.cc/150?img=1'
 		return {
 			quote: cms.quote,
 			name: cms.authorName,
@@ -116,62 +75,37 @@ const testimonials: Testimonial[] = rawTestimonials.map((testimonial) => {
 })
 ---
 
-<section class="relative w-full bg-gradient-to-br pt-12" aria-labelledby="testimonials-heading">
-	<GridDesign />
-	<div class="container mx-auto relative px-4 md:px-6">
-		<div class="mb-8 flex flex-col items-center space-y-4">
-			<Badge variant="outline" size="sm"> // WHAT PEOPLE ARE SAYING </Badge>
-			<h2
-				id="testimonials-heading"
-				class="max-w-4xl text-center text-3xl tracking-tight sm:text-5xl md:text-6xl font-title"
-			>
-				{title}
-				<br />
-				{subtitle}
-			</h2>
-		</div>
-	</div>
-	<div class="mt-12 w-full border-y border-dashed">
-		<div class="container mx-auto relative px-4 md:px-6">
-			<div class="relative border-muted bg-background">
-				<ul
-					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-foreground/10 border-dashed border-l list-none"
-					role="list"
-					aria-label="Customer testimonials"
-				>
-					{
-						testimonials.map((testimonial) => (
-							<li class="border-foreground/10 transition-colors border-b border-r border-dashed bg-background hover:bg-muted/50">
-								<article class="p-6 flex h-full flex-col justify-between">
-									<blockquote class="mb-4 text-lg font-title">
-										"{testimonial.quote}"
-									</blockquote>
-									<footer class="flex items-center gap-3">
-										<div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
-											<img
-												src={testimonial.image}
-												alt={testimonial.name}
-												class="object-cover w-full h-full"
-												width="48"
-												height="48"
-											/>
-										</div>
-										<div>
-											<cite class="font-semibold not-italic">
-												{testimonial.name}
-											</cite>
-											<div class="text-sm text-muted-foreground">
-												{testimonial.role}
-												{testimonial.company && `, ${testimonial.company}`}
-											</div>
-										</div>
-									</footer>
-								</article>
-							</li>
-						))
-					}
-				</ul>
-			</div>
-		</div>
-	</div>
-</section>
+<Section class="py-16 sm:py-20 lg:py-24" aria-labelledby="testimonials-heading">
+	<SectionHead eyebrow="Testimonials" title={`${title} ${subtitle}`} />
+
+	<ul class="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 list-none p-0 m-0" role="list">
+		{
+			testimonials.map((testimonial) => (
+				<li class="flex h-full flex-col rounded-3xl border border-hairline bg-card p-6 sm:p-7">
+					<blockquote class="flex-1 text-[16px] leading-relaxed text-foreground">
+						"{testimonial.quote}"
+					</blockquote>
+					<footer class="mt-6 flex items-center gap-3 border-t border-hairline pt-5">
+						<img
+							src={testimonial.image}
+							alt={testimonial.name}
+							class="size-11 rounded-full object-cover"
+							width="44"
+							height="44"
+							loading="lazy"
+						/>
+						<div>
+							<cite class="text-[14px] font-semibold not-italic text-foreground">
+								{testimonial.name}
+							</cite>
+							<p class="text-[13px] text-muted-foreground">
+								{testimonial.role}
+								{testimonial.company && `, ${testimonial.company}`}
+							</p>
+						</div>
+					</footer>
+				</li>
+			))
+		}
+	</ul>
+</Section>

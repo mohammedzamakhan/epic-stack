@@ -1,7 +1,7 @@
 import { parseWithZod } from '@conform-to/zod'
 import { requireUserId } from '@repo/auth'
-import { db, eq, User as UserTable } from '@repo/database'
 import { redirectWithToast } from '@repo/common/toast'
+import { db, eq, User as UserTable } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
