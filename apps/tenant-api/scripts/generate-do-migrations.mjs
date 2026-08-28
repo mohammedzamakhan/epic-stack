@@ -15,7 +15,7 @@ const journal = JSON.parse(
 
 const migrations = Object.fromEntries(
 	journal.entries.map((entry) => [
-		entry.tag,
+		`m${String(entry.idx).padStart(4, '0')}`,
 		readFileSync(join(drizzleDir, `${entry.tag}.sql`), 'utf8'),
 	]),
 )

@@ -1,6 +1,5 @@
 import { resolveSiteLocaleRequest } from '@repo/common/site-locales'
 import { defineMiddleware } from 'astro:middleware'
-import { ENV } from 'varlock/env'
 import { createSiteI18n } from '~/lib/i18n'
 import {
 	fetchPublishedOrganizationForHost,
@@ -25,6 +24,12 @@ import {
 	sitesShopCheckoutFrameSrc,
 	sitesShopCheckoutScriptSrc,
 } from '~/lib/site-headers'
+import {
+	getPublicAppUrl,
+	getSiteHostEnv,
+	getTenantApiUrl,
+	getTenantApiUrlKsa,
+} from '~/lib/worker-env'
 
 export {
 	resolveHost,
@@ -32,46 +37,35 @@ export {
 	type HostResolution,
 } from '~/lib/resolve-host'
 
-function siteHostEnv(): SiteHostEnv {
-	const env = ENV as SiteHostEnv
-	return {
-		ROOT_APP: process.env.ROOT_APP || env.ROOT_APP,
-		PUBLIC_SITE_HOST_SUFFIXES:
-			process.env.PUBLIC_SITE_HOST_SUFFIXES || env.PUBLIC_SITE_HOST_SUFFIXES,
-	}
+function siteHostEnv() {
+	return getSiteHostEnv()
 }
 
-const appUrl = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
-	/\/$/,
-	'',
-)
-const tenantApiUrl = (
-	process.env.TENANT_API_URL ||
-	ENV.TENANT_API_URL ||
-	'http://localhost:3007'
-).replace(/\/$/, '')
-const tenantApiUrlKsa = (
-	process.env.TENANT_API_URL_KSA ||
-	ENV.TENANT_API_URL_KSA ||
-	''
-).replace(/\/$/, '')
-const imgSrc = `img-src 'self' data: ${appUrl}`
-const fontSrc = `font-src 'self' data: ${appUrl}`
+function runtimeUrls() {
+	const appUrl = getPublicAppUrl()
+	const tenantApiUrl = getTenantApiUrl()
+	const tenantApiUrlKsa = getTenantApiUrlKsa()
+	return { appUrl, tenantApiUrl, tenantApiUrlKsa }
+}
+
 const inlineShopCheckoutEnabled = isInlineShopCheckoutEnabled()
 const shopCheckoutCsp = {
 	inlineCard: inlineShopCheckoutEnabled,
 	hostedEmbed: true,
 }
-const connectSrc = [
-	sitesConnectSrc([appUrl, tenantApiUrl, tenantApiUrlKsa]),
-	sitesShopCheckoutConnectSrc(shopCheckoutCsp),
-]
-	.filter(Boolean)
-	.join(' ')
 
 const isProduction = isSitesProduction()
 
 function securityHeadersFor(env: SiteHostEnv) {
+	const { appUrl, tenantApiUrl, tenantApiUrlKsa } = runtimeUrls()
+	const connectSrc = [
+		sitesConnectSrc([appUrl, tenantApiUrl, tenantApiUrlKsa]),
+		sitesShopCheckoutConnectSrc(shopCheckoutCsp),
+	]
+		.filter(Boolean)
+		.join(' ')
+	const imgSrc = `img-src 'self' data: ${appUrl}`
+	const fontSrc = `font-src 'self' data: ${appUrl}`
 	const frameAncestors = getSiteHostSuffixes(env)
 		.flatMap((domain) => [`*.${domain}:*`, `*.${domain}`])
 		.join(' ')
