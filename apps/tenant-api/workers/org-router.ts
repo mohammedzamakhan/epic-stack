@@ -7,7 +7,7 @@ import {
 	findActiveOrganizationById,
 } from '../src/lib/origin.ts'
 import { getBearerToken } from '../src/lib/secrets.ts'
-import type { TenantApiWorkerEnv } from './env.d.ts'
+import type { TenantApiWorkerEnv } from './bindings.ts'
 
 const orgIdBodySchema = z.object({
 	orgId: z.string().regex(TENANT_ORG_ID_PATTERN).optional(),

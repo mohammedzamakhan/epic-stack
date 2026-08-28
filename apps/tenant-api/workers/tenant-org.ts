@@ -12,7 +12,7 @@ import {
 } from '@repo/tenant-db'
 import { durableSqliteMigrations } from './migrations.generated.ts'
 import { createTenantApiApp } from '../src/app.ts'
-import type { TenantApiWorkerEnv } from './env.d.ts'
+import type { TenantApiWorkerEnv } from './bindings.ts'
 
 export const TENANT_ORG_HEADER = 'X-Epic-Tenant-Org-Id'
 

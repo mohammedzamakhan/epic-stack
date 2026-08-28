@@ -9,7 +9,7 @@ import { getBearerToken, timingSafeEqualString } from '../src/lib/secrets.ts'
 import { assertOrgOnUsNode, resolveOrgId } from './org-router.ts'
 import { TENANT_ORG_HEADER, TenantOrg } from './tenant-org.ts'
 import { TenantRegistry } from './tenant-registry.ts'
-import type { TenantApiWorkerEnv } from './env.d.ts'
+import type { TenantApiWorkerEnv } from './bindings.ts'
 
 export { TenantOrg, TenantRegistry }
 
