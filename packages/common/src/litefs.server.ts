@@ -19,13 +19,13 @@ function isCloudflareProduction(): boolean {
 }
 
 export async function getInstanceInfo(
-	litefsDir?: string,
+	ignoredLitefsDir?: string,
 ): Promise<InstanceInfo> {
 	// Cloudflare Workers - D1 handles database
 	return LOCAL_INSTANCE_INFO
 }
 
-export function getInstanceInfoSync(litefsDir?: string): InstanceInfo {
+export function getInstanceInfoSync(ignoredLitefsDir?: string): InstanceInfo {
 	return LOCAL_INSTANCE_INFO
 }
 
@@ -38,7 +38,7 @@ export async function getAllInstances(): Promise<
 
 export function getInternalInstanceDomain(
 	instance: string,
-	port?: string | void,
+	ignoredPort?: string | void,
 ): string {
 	// Cloudflare Workers - use Workers internal routing
 	if (isCloudflareProduction()) return `https://${instance}.workers.dev`
@@ -50,7 +50,7 @@ export async function ensurePrimary(): Promise<boolean> {
 	return true
 }
 
-export async function ensureInstance(instance: string): Promise<true> {
+export async function ensureInstance(ignoredInstance: string): Promise<true> {
 	// Cloudflare Workers - single instance, no need to ensure
 	return true
 }

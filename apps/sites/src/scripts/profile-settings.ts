@@ -1,6 +1,6 @@
+import { loadPaymentMethods } from './profile-shop-data'
 import { setSessionTokens, tenantFetch } from '~/lib/client-auth'
 import { browserLocaleHref } from '~/lib/locale'
-import { loadPaymentMethods } from './profile-shop-data'
 
 async function loadProfile(options: {
 	nameInput: HTMLElement | null

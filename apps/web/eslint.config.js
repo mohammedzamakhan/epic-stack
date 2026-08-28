@@ -5,6 +5,13 @@ export default [
 	...defaultConfig,
 	// Custom ignores for Astro app
 	{
-		ignores: ['dist/', '.astro/', 'node_modules/', 'public/', 'env.d.ts'],
+		ignores: [
+			'dist/',
+			'.astro/',
+			'node_modules/',
+			'public/',
+			'env.d.ts',
+			'emdash-env.d.ts',
+		],
 	},
 ]
