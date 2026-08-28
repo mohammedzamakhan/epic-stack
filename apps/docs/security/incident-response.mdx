@@ -127,24 +127,27 @@ for (const userId of affectedUserIds) {
 **Rotate Secrets**:
 
 ```bash
-# Generate new secrets
-fly secrets set SESSION_SECRET="$(openssl rand -base64 32)"
-fly secrets set SSO_ENCRYPTION_KEY="$(openssl rand -hex 32)"
+# Generate new secrets and update via Cloudflare Dashboard or wrangler
+# SESSION_SECRET and SSO_ENCRYPTION_KEY need to be regenerated
+openssl rand -base64 32
+openssl rand -hex 32
 ```
 
 ### 5. Recovery
 
 **Restore from Backup** (if needed):
 
-```bash
-# Download latest backup
-fly ssh sftp get /backups/backup-YYYYMMDD.db
+For D1 backups, use the Cloudflare API or Dashboard to restore:
 
+```bash
+# Download latest backup from Cloudflare R2 or GitHub Artifacts
+# Restore to D1 using wrangler CLI
+wrangler d1 execute database-name --file=./backup.sql
+```
+
+```bash
 # Verify backup integrity
 sqlite3 backup-YYYYMMDD.db "SELECT COUNT(*) FROM sqlite_master;"
-
-# Restore (WARNING: destructive)
-fly ssh console -C "litefs import -name sqlite.db /path/to/backup.db"
 ```
 
 **Verify System Integrity**:

@@ -20,7 +20,7 @@ export interface GetClientIpOptions {
 	 */
 	returnUndefined?: boolean
 	/**
-	 * Whether to trust proxy headers (Fly-Client-IP, X-Forwarded-For, etc.)
+	 * Whether to trust proxy headers (X-Forwarded-For, etc.)
 	 * Defaults to true unless TRUST_PROXY='false' environment variable is explicitly set
 	 */
 	trustProxy?: boolean
@@ -96,10 +96,8 @@ export function getClientIp(
 		return undefined
 	}
 
-	// Check provider-controlled edge headers first (Fly.io, Cloudflare)
-	const flyClientIp = getHeader('Fly-Client-IP')
+	// Check provider-controlled edge headers first (Cloudflare preferred)
 	const cfConnectingIp = getHeader('CF-Connecting-IP')
-	if (flyClientIp) return flyClientIp
 	if (cfConnectingIp) return cfConnectingIp
 
 	const realIp = getHeader('X-Real-IP')

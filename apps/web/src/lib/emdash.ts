@@ -11,6 +11,12 @@ import {
 	type TranslationsResult,
 } from 'emdash'
 
+import {
+	type Page,
+	type Post,
+	type PaginatedResponse,
+} from './content-types.ts'
+
 // Re-export for convenience
 export {
 	getEmDashEntry,
@@ -19,72 +25,7 @@ export {
 	getSection,
 	getSections,
 }
-export type { TranslationsResult }
-
-export interface Page {
-	id: string
-	slug: string
-	title: string
-	content?: any
-	hero?: {
-		type?: string
-		title?: string
-		description?: string
-		media?: {
-			url: string
-			alt?: string
-		}
-		links?: Array<{
-			label: string
-			url: string
-			type?: string
-		}>
-	}
-	layout?: any[]
-	seo?: {
-		title?: string
-		description?: string
-		image?: {
-			url: string
-			alt?: string
-		}
-	}
-	updatedAt?: string
-	createdAt?: string
-}
-
-export interface Post {
-	id: string
-	slug: string
-	title: string
-	content?: any
-	categories?: Array<{ name: string; slug: string }>
-	heroImage?: {
-		url: string
-		alt?: string
-	}
-	seo?: {
-		title?: string
-		description?: string
-		image?: {
-			url: string
-			alt?: string
-		}
-	}
-	publishedAt?: string
-	updatedAt?: string
-	createdAt?: string
-}
-
-export interface PaginatedResponse<T> {
-	entries: T[]
-	total: number
-	page: number
-	limit: number
-	hasNextPage: boolean
-	hasPrevPage: boolean
-	totalPages: number
-}
+export type { TranslationsResult, Page, Post, PaginatedResponse }
 
 /** Fetch a page by slug and optional locale */
 export async function getPage(

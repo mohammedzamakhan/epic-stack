@@ -17,21 +17,22 @@ This is to prevent new users of the Epic Stack from being blocked or surprised
 by the CSP by default. However, it is recommended to enable the CSP in
 `server/index.ts` by removing the `reportOnly: true` option.
 
-## Fly's Internal Network
+## Cloudflare Workers Network
 
-The Epic Stack uses [Fly](https://fly.io) for hosting. Fly has an internal
-network that allows you to connect services to each other without exposing them
-to the public internet. Only services within your organization have access to
-this network, and only accounts in your organization have access as well.
+The Epic Stack uses [Cloudflare Workers](https://workers.cloudflare.com) for
+hosting. Cloudflare has a global network that allows you to deploy your app to
+multiple regions without exposing them to the public internet. Only services
+within your organization have access to this network, and only accounts in your
+organization have access as well.
 
 When running multiple instances of the Epic Stack, your instances communicate
 with each other over this internal network. Most of this happens behind the
-scenes with the consul service that Fly manages for us.
+scenes via Cloudflare Workers internal routing.
 
 We also have an endpoint that allows instances to connect to each other to
 update the cache in the primary region. This uses internal URLs for that
-communication (via [`litefs-js`](https://github.com/fly-apps/litefs-js)), but as
-an added layer of security it uses a shared secret to validate the requests.
+communication, but as an added layer of security it uses a shared secret to
+validate the requests.
 
 > This could be changed if there's a way to determine if a request is coming
 > from the internal network. But I haven't found a way to do that yet. PRs
@@ -48,7 +49,8 @@ The currently recommended policy for managing secrets is to place them in a
 need to actually connect to real services, this can be used as
 `cp .env.example .env`).
 
-These secrets need to also be set on Fly using the `fly secrets` command.
+These secrets need to also be set on Cloudflare Workers using the
+`npx wrangler secret put` command.
 
 There are significant limitations to this approach and will probably be improved
 in the future.

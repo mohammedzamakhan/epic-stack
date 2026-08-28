@@ -3,8 +3,8 @@
 Epic Stack runs control-plane maintenance on a schedule without a separate job
 runner like Trigger.dev. A lightweight **Cloudflare Worker** (`apps/jobs-cron`)
 fires cron triggers that POST to authenticated routes on the **App primary
-instance** (Fly.io + LiteFS). The App holds the control-plane SQLite database,
-so the actual work always runs where the database lives.
+instance**. The App holds the control-plane SQLite database, so the actual work
+always runs where the database lives.
 
 ## Architecture
 
@@ -12,8 +12,7 @@ so the actual work always runs where the database lives.
 Cloudflare Cron (apps/jobs-cron)
         │  POST + Bearer INTERNAL_COMMAND_TOKEN
         ▼
-App primary instance (Fly.io / LiteFS)
-        │  requirePrimaryInstance + safeCompare token
+App instance (Cloudflare Workers)
         ▼
 /resources/jobs/* route handlers
         │
@@ -92,7 +91,8 @@ can be copied in the background:
    - On unrecoverable workflow errors, `POST .../complete` marks the migration
      `failed`
 
-Secrets stay on the App (Fly); the Worker never stores org credentials.
+Secrets stay on the App (Cloudflare D1/Workers); the Worker never stores org
+credentials.
 
 **App env:** `JOBS_CRON_WORKER_URL` (Worker public URL, e.g.
 `http://localhost:8787` in dev).
@@ -105,7 +105,7 @@ via
 (`/cdn-cgi/media/`), not ffmpeg or async workers.
 
 1. The App exposes `/resources/videos/source?objectKey=…`, which proxies the
-   org's object from Tigris or custom S3 (HEAD + Range support).
+   org's object from Cloudflare R2 or custom S3 (HEAD + Range support).
 2. URL helpers in `@repo/common` build transform URLs when
    `MEDIA_TRANSFORM_BASE_URL` is set on the App.
 3. The `VideoPoster` component shows a frame poster and plays a short silent
@@ -115,8 +115,8 @@ via
 
 - App hostname must be **Cloudflare-proxied** (orange cloud).
 - Enable **Media Transformations** on that zone.
-- Set `MEDIA_TRANSFORM_BASE_URL=https://app.yourdomain.com` on the App (Fly
-  secret).
+- Set `MEDIA_TRANSFORM_BASE_URL=https://app.yourdomain.com` on the App
+  (Cloudflare secret).
 
 Leave `MEDIA_TRANSFORM_BASE_URL` empty in local dev; the UI falls back to direct
 source URLs.

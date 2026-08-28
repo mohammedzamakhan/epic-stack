@@ -1,16 +1,18 @@
-# This file is moved to the root directory before building the image
+# This file is used for building the Cloudflare Workers deployment
+# Build from the monorepo root:
+#   docker build -f apps/app/other/Dockerfile -t app .
 
 # base node image
-FROM node:22-bookworm-slim as base
+FROM node:22-bookworm-slim AS base
 
 # set for base and all layer that inherit from it
 ENV NODE_ENV production
 
-# Install openssl and sqlite
-RUN apt-get update && apt-get install -y fuse3 openssl sqlite3 ca-certificates
+# Install openssl and sqlite (for build-time operations)
+RUN apt-get update && apt-get install -y openssl sqlite3 ca-certificates
 
 # Install all node_modules, including dev dependencies
-FROM base as deps
+FROM base AS deps
 
 WORKDIR /myapp
 
@@ -18,7 +20,7 @@ ADD package.json package-lock.json .npmrc ./
 RUN npm ci --include=dev
 
 # Setup production node_modules
-FROM base as production-deps
+FROM base AS production-deps
 
 WORKDIR /myapp
 
@@ -27,7 +29,7 @@ ADD package.json package-lock.json .npmrc ./
 RUN npm prune --omit=dev
 
 # Build the app
-FROM base as build
+FROM base AS build
 
 ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
@@ -48,25 +50,11 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
   export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
   cd apps/app && npm run build
 
-# Finally, build the production image with minimal footprint
+# Final production image
 FROM base
 
-ENV FLY="true"
-ENV LITEFS_DIR="/litefs/data"
-ENV DATABASE_FILENAME="sqlite.db"
-ENV DATABASE_PATH="$LITEFS_DIR/$DATABASE_FILENAME"
-ENV DATABASE_URL="file:$DATABASE_PATH"
-ENV CACHE_DATABASE_FILENAME="cache.db"
-ENV CACHE_DATABASE_PATH="$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
-ENV CACHE_DATABASE_URL="file:$CACHE_DATABASE_PATH"
-ENV INTERNAL_PORT="8080"
-ENV PORT="8081"
 ENV NODE_ENV="production"
-
-# add shortcut for connecting to database CLI
-RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
-# and one for the cache database
-RUN echo "#!/bin/sh\nset -x\nsqlite3 \$CACHE_DATABASE_URL" > /usr/local/bin/cache-database-cli && chmod +x /usr/local/bin/cache-database-cli
+ENV PORT="8787"
 
 WORKDIR /myapp
 
@@ -85,15 +73,11 @@ COPY --from=build /myapp/apps/app/app/components/ui/icons /myapp/apps/app/app/co
 # Copy shared packages
 COPY --from=build /myapp/packages /myapp/packages
 
-# prepare for litefs
-COPY --from=flyio/litefs:0.5.11 /usr/local/bin/litefs /usr/local/bin/litefs
-ADD apps/app/other/litefs.yml /etc/litefs.yml
-RUN mkdir -p /data ${LITEFS_DIR}
-
 # Copy the app-specific files
 COPY --from=build /myapp/apps/app /myapp/apps/app
 
 # Set working directory to the app
 WORKDIR /myapp/apps/app
 
-CMD ["litefs", "mount"]
+# Cloudflare Workers uses the built server index
+CMD ["npm", "run", "start"]

@@ -306,7 +306,7 @@ export class SSOPeriodicValidator {
 // Export singleton instance
 export const ssoPeriodicValidator = new SSOPeriodicValidator()
 
-// Auto-start in production Node/Fly — Workers forbid timers in global scope
+// Auto-start in production — Workers forbid timers in global scope
 if (process.env.NODE_ENV === 'production' && !isCloudflareWorkerRuntime()) {
 	// Start with a delay to allow application to fully initialize
 	setTimeout(() => {

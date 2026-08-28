@@ -60,10 +60,10 @@ app.use((req, res, next) => {
 const getHost = (req: { get: (key: string) => string | undefined }) =>
 	req.get('X-Forwarded-Host') ?? req.get('host') ?? ''
 
-// fly is our proxy
+// Cloudflare is our proxy
 app.set('trust proxy', true)
 
-// ensure HTTPS only (X-Forwarded-Proto comes from Fly)
+// ensure HTTPS only (X-Forwarded-Proto comes from Cloudflare)
 app.use((req, res, next) => {
 	if (req.method !== 'GET') return next()
 	const proto = req.get('X-Forwarded-Proto')
@@ -154,7 +154,7 @@ app.use(async (req, res, next) => {
 	try {
 		// Check if IP is blacklisted first
 		const ipTracking = await import('@repo/common/ip-tracking')
-		const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
+		const ip = req.get('cf-connecting-ip') || req.ip || '127.0.0.1'
 
 		const isBlacklisted = await ipTracking.isIpBlacklisted(ip)
 		if (isBlacklisted) {
@@ -175,7 +175,7 @@ app.use(async (req, res, next) => {
 		setImmediate(async () => {
 			try {
 				const ipTracking = await import('@repo/common/ip-tracking')
-				const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
+				const ip = req.get('cf-connecting-ip') || req.ip || '127.0.0.1'
 				await ipTracking.trackIpRequest({
 					ip,
 					method: req.method,
@@ -219,11 +219,9 @@ const rateLimitDefault = {
 	legacyHeaders: false,
 	validate: { trustProxy: false },
 	// Malicious users can spoof their IP address which means we should not default
-	// to trusting req.ip when hosted on Fly.io. However, users cannot spoof Fly-Client-Ip.
-	// When sitting behind a CDN such as cloudflare, replace fly-client-ip with the CDN
-	// specific header such as cf-connecting-ip
+	// to trusting req.ip when hosted behind a CDN. For Cloudflare, use cf-connecting-ip.
 	keyGenerator: (req: express.Request) => {
-		return req.get('fly-client-ip') ?? `${req.ip}`
+		return req.get('cf-connecting-ip') ?? `${req.ip}`
 	},
 }
 

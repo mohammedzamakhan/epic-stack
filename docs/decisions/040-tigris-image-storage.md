@@ -40,12 +40,12 @@ Tigris and instead we'll manage authenticated fetch requests ourselves.
 4. More scalable solution for applications with heavy image usage
 5. Easier to implement CDN capabilities in the future
 6. Simplified database maintenance and backup procedures
-7. Tigris storage is much cheaper than Fly volume storage
+7. Tigris storage is much cheaper than Cloudflare D1 storage
 
 ### Negative
 
-1. Additional external service dependency (though Fly as built-in support and no
-   additional account needs to be created)
+1. Additional external service dependency (though Cloudflare has built-in R2
+   support and no additional account needs to be created)
 2. Need to manage Tigris configuration
 3. Slightly more complex deployment setup
 4. Additional complexity in image upload and retrieval logic

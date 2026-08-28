@@ -44,7 +44,6 @@
     "expo-secure-store": "~15.0.6",
     "expo-status-bar": "~3.0.7",
     "expo-web-browser": "^15.0.10",
-    "litefs-js": "2.0.2",
     "react": "19.1.0",
     "react-hook-form": "^7.54.2",
     "react-native": "0.81.5",

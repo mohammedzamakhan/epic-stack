@@ -14,7 +14,8 @@ Browsers on tenant Sites call this API **directly**. Do not proxy auth through
 
 ## Production (OCI)
 
-App/Admin stay on Fly. Tenant-api runs on **Oracle Cloud Ampere A1** VMs:
+App/Admin stay on Cloudflare Workers. Tenant-api runs on **Oracle Cloud Ampere
+A1** VMs:
 
 - **US:** Ashburn `us-ashburn-1`, paid A1, `DATA_REGION=us`
 - **KSA:** Riyadh `me-riyadh-1` (tenancy **home region**), Always Free A1,

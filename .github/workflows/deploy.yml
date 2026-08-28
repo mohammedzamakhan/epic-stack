@@ -212,9 +212,7 @@ jobs:
         run: npm rebuild sharp libsql rolldown @astrojs/compiler-binding
 
       - name: 🏗 Build Web App
-        run: |
-          cd apps/web
-          npm run build
+        run: npx turbo run build --filter=web
 
       - name: 🚀 Deploy Web App to Cloudflare Workers
         working-directory: apps/web
@@ -246,9 +244,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build Sites
-        run: |
-          cd apps/sites
-          npm run build
+        run: npx turbo run build --filter=sites
         env:
           PUBLIC_APP_URL:
             ${{ vars.PUBLIC_APP_URL || 'https://epic-startup.me' }}
@@ -338,9 +334,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build App
-        run: |
-          cd apps/app
-          npm run build
+        run: npx turbo run build --filter=app
 
       - name: 🚀 Deploy App
         working-directory: apps/app
@@ -372,9 +366,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build Admin
-        run: |
-          cd apps/admin
-          npm run build
+        run: npx turbo run build --filter=admin
 
       - name: 🚀 Deploy Admin
         working-directory: apps/admin

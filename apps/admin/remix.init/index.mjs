@@ -2,7 +2,6 @@ import { execSync } from 'node:child_process'
 import crypto from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import toml from '@iarna/toml'
 import { $ } from 'execa'
 import inquirer from 'inquirer'
 import open from 'open'
@@ -13,7 +12,6 @@ const escapeRegExp = (string) =>
 	string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const getRandomString = (length) => crypto.randomBytes(length).toString('hex')
-const getRandomString32 = () => getRandomString(32)
 
 async function getEpicStartupVersion() {
 	const response = await fetch(
@@ -32,12 +30,12 @@ async function getEpicStartupVersion() {
 }
 
 export default async function main({ rootDirectory }) {
-	const FLY_TOML_PATH = path.join(rootDirectory, 'fly.toml')
 	const EXAMPLE_ENV_PATH = path.join(rootDirectory, '.env.example')
 	const ENV_PATH = path.join(rootDirectory, '.env')
 	const PKG_PATH = path.join(rootDirectory, 'package.json')
+	const WRANGLER_PATH = path.join(rootDirectory, 'wrangler.jsonc')
 
-	const appNameRegex = escapeRegExp('epic-startup-template')
+	const wranglerNameRegex = escapeRegExp('epic-startup-admin')
 
 	const DIR_NAME = path.basename(rootDirectory)
 	const SUFFIX = getRandomString(2)
@@ -47,8 +45,8 @@ export default async function main({ rootDirectory }) {
 		.replace(/[^a-zA-Z0-9-_]/g, '-')
 		.toLowerCase()
 
-	const [flyTomlContent, env, packageJsonString] = await Promise.all([
-		fs.readFile(FLY_TOML_PATH, 'utf-8'),
+	const [wranglerContent, env, packageJsonString] = await Promise.all([
+		fs.readFile(WRANGLER_PATH, 'utf-8'),
 		fs.readFile(EXAMPLE_ENV_PATH, 'utf-8'),
 		fs.readFile(PKG_PATH, 'utf-8'),
 	])
@@ -58,8 +56,8 @@ export default async function main({ rootDirectory }) {
 		`SESSION_SECRET="${getRandomString(16)}"`,
 	)
 
-	const newFlyTomlContent = flyTomlContent.replace(
-		new RegExp(appNameRegex, 'g'),
+	const newWranglerContent = wranglerContent.replace(
+		new RegExp(wranglerNameRegex, 'g'),
 		APP_NAME,
 	)
 
@@ -69,7 +67,7 @@ export default async function main({ rootDirectory }) {
 	delete packageJson.author
 	delete packageJson.license
 
-	// Add Epic Startup version information
+	// Add Epic Stack version information
 	try {
 		const epicStartupVersion = await getEpicStartupVersion()
 		packageJson['epic-startup'] = epicStartupVersion
@@ -81,7 +79,7 @@ export default async function main({ rootDirectory }) {
 	}
 
 	const fileOperationPromises = [
-		fs.writeFile(FLY_TOML_PATH, newFlyTomlContent),
+		fs.writeFile(WRANGLER_PATH, newWranglerContent),
 		fs.writeFile(ENV_PATH, newEnv),
 		fs.writeFile(PKG_PATH, JSON.stringify(packageJson, null, 2) + '\n'),
 		fs.copyFile(
@@ -138,7 +136,7 @@ async function setupDeployment({ rootDirectory }) {
 			name: 'shouldSetupDeployment',
 			type: 'confirm',
 			default: true,
-			message: 'Would you like to set up deployment right now?',
+			message: 'Would you like to set up Cloudflare deployment right now?',
 		},
 	])
 
@@ -149,109 +147,16 @@ async function setupDeployment({ rootDirectory }) {
 		return
 	}
 
-	const hasFly = await $`fly version`.then(
-		() => true,
-		() => false,
-	)
-	if (!hasFly) {
-		console.log(
-			`You need to install Fly first. Follow the instructions here: https://fly.io/docs/hands-on/install-flyctl/`,
-		)
-		return
-	}
-	const loggedInUser = await ensureLoggedIn()
-	if (!loggedInUser) {
-		console.log(
-			`Ok, check the docs when you're ready to get this deployed: https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/deployment.md`,
-		)
-	}
-
-	console.log('🔎 Determining the best region for you...')
-	const primaryRegion = await getPreferredRegion()
-
-	const flyConfig = toml.parse(
-		await fs.readFile(path.join(rootDirectory, 'fly.toml')),
-	)
-	flyConfig.primary_region = primaryRegion
-	await fs.writeFile(
-		path.join(rootDirectory, 'fly.toml'),
-		toml.stringify(flyConfig),
-	)
-
-	const { app: APP_NAME } = flyConfig
-
-	const { shouldSetupStaging } = await inquirer.prompt([
-		{
-			name: 'shouldSetupStaging',
-			type: 'confirm',
-			default: true,
-			message: 'Would you like to set up a staging environment?',
-		},
-	])
-
-	console.log(
-		`🥪 Creating app ${APP_NAME}${shouldSetupStaging ? ' and staging...' : '...'}`,
-	)
-	if (shouldSetupStaging) {
-		await $I`fly apps create ${APP_NAME}-staging`
-	}
-	await $I`fly apps create ${APP_NAME}`
-
-	console.log(`🤫 Setting secrets in apps`)
-	if (shouldSetupStaging) {
-		await $I`fly secrets set SESSION_SECRET=${getRandomString32()} INTERNAL_COMMAND_TOKEN=${getRandomString32()} HONEYPOT_SECRET=${getRandomString32()} ALLOW_INDEXING=false --app ${APP_NAME}-staging`
-	}
-	await $I`fly secrets set SESSION_SECRET=${getRandomString32()} INTERNAL_COMMAND_TOKEN=${getRandomString32()} HONEYPOT_SECRET=${getRandomString32()} --app ${APP_NAME}`
-
-	console.log(`🔊 Creating volumes.`)
-	if (shouldSetupStaging) {
-		await $I`fly volumes create data --region ${primaryRegion} --size 1 --yes --app ${APP_NAME}-staging`
-	}
-	await $I`fly volumes create data --region ${primaryRegion} --size 1 --yes --app ${APP_NAME}`
-
-	console.log(`🔗 Attaching consul`)
-	if (shouldSetupStaging) {
-		await $I`fly consul attach --app ${APP_NAME}-staging`
-	}
-	await $I`fly consul attach --app ${APP_NAME}`
-
-	console.log(`🗄️ Setting up Tigris object storage`)
-	const $S = $({ stdio: ['inherit', 'ignore', 'inherit'], cwd: rootDirectory })
-	if (shouldSetupStaging) {
-		await $S`fly storage create --yes --app ${APP_NAME}-staging --name ${APP_NAME}-staging`
-	}
-	await $S`fly storage create --yes --app ${APP_NAME} --name ${APP_NAME}`
-
-	const { shouldDeploy } = await inquirer.prompt([
-		{
-			name: 'shouldDeploy',
-			type: 'confirm',
-			default: true,
-			message:
-				'Would you like to deploy right now? (This will take a while. You can wait until you push to GitHub instead).',
-		},
-	])
-	if (shouldDeploy) {
-		console.log(`🚀 Deploying`)
-		if (shouldSetupStaging) {
-			console.log(`  Starting with staging`)
-			await $I`fly deploy --app ${APP_NAME}-staging`
-			await open(`https://${APP_NAME}-staging.fly.dev/`)
-			console.log(`  Staging deployed... Deploying production...`)
-		}
-		await $I`fly deploy --app ${APP_NAME}`
-		await open(`https://${APP_NAME}.fly.dev/`)
-		console.log(`  Production deployed...`)
-	}
-
 	const { shouldSetupGitHub } = await inquirer.prompt([
 		{
 			name: 'shouldSetupGitHub',
 			type: 'confirm',
 			default: true,
-			message: 'Would you like to setup GitHub Action deployment right now?',
+			message:
+				'Would you like to set up GitHub Actions for CI/CD to Cloudflare Workers?',
 		},
 	])
+
 	if (shouldSetupGitHub) {
 		console.log(`⛓ Initializing git repo...`)
 		// it's possible there's already a git repo initialized so we'll just ignore
@@ -278,88 +183,15 @@ async function setupDeployment({ rootDirectory }) {
 		}
 
 		console.log(
-			`Opening Fly Tokens Dashboard and GitHub Action Secrets pages. Please create a new token on Fly and set it as the value for a new secret called FLY_API_TOKEN on GitHub.`,
+			`📋 Opening Cloudflare API tokens and GitHub Action Secrets pages. Create a token with Workers edit permission and set it as CLOUDFLARE_API_TOKEN.`,
 		)
-		await open(`https://fly.io/tokens/create`)
+		await open(`https://dash.cloudflare.com/profile/api-tokens`)
 		await open(`${repoURL}/settings/secrets/actions/new`)
 
 		console.log(
 			`Once you're finished with setting the token, you should be good to add the remote, commit, and push!`,
 		)
 	}
-	console.log('All done 🎉 Happy building')
-}
 
-async function ensureLoggedIn() {
-	const loggedInUser = await $`fly auth whoami`.then(
-		({ stdout }) => stdout,
-		() => null,
-	)
-	if (loggedInUser) {
-		const answers = await inquirer.prompt([
-			{
-				name: 'proceed',
-				type: 'list',
-				default: 'Yes',
-				message: `You're logged in as ${loggedInUser}. Proceed?`,
-				choices: ['Yes', 'Login as another user', 'Exit'],
-			},
-		])
-		switch (answers.proceed) {
-			case 'Yes': {
-				return loggedInUser
-			}
-			case 'Login as another user': {
-				await $`fly auth logout`
-				return ensureLoggedIn()
-			}
-			default: {
-				return null
-			}
-		}
-	} else {
-		console.log(`You need to login to Fly first. Running \`fly auth login\`...`)
-		await $({ stdio: 'inherit' })`fly auth login`
-		return ensureLoggedIn()
-	}
-}
-
-async function getPreferredRegion() {
-	const {
-		platform: { requestRegion: defaultRegion },
-	} = await makeFlyRequest({ query: 'query {platform {requestRegion}}' })
-
-	const availableRegions = await makeFlyRequest({
-		query: `{platform {regions {name code}}}`,
-	})
-	const { preferredRegion } = await inquirer.prompt([
-		{
-			name: 'preferredRegion',
-			type: 'list',
-			default: defaultRegion,
-			message: `Which region would you like to deploy to? The closest to you is ${defaultRegion}.`,
-			choices: availableRegions.platform.regions.map((region) => ({
-				name: `${region.name} (${region.code})`,
-				value: region.code,
-			})),
-		},
-	])
-	return preferredRegion
-}
-
-let flyToken = null
-async function makeFlyRequest({ query, variables }) {
-	if (!flyToken) {
-		flyToken = (await $`fly auth token`).stdout.trim()
-	}
-
-	const json = await fetch('https://api.fly.io/graphql', {
-		method: 'POST',
-		body: JSON.stringify({ query, variables }),
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${flyToken}`,
-		},
-	}).then((response) => response.json())
-	return json.data
+	console.log('All done 🎉 Happy building!')
 }

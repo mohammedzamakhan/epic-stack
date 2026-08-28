@@ -53,10 +53,10 @@ This would need to be documented in the future
 [#29](https://github.com/mohammedzamakhan/epic-startup/issues/29).
 
 As a file on disk, you cannot "distribute" SQLite directly. However, with tools
-like [Turso](https://turso.tech/) or [LiteFS](https://fly.io/docs/litefs), you
-can make that work. And both of these tools even have built-in solutions to the
-"Read Replica Consistency" challenge. So if you need your app to run in multiple
-instances, you need to use one of these tools.
+like [Turso](https://turso.tech/) or Cloudflare D1, you can make that work. And
+both of these tools even have built-in solutions to the "Read Replica
+Consistency" challenge. So if you need your app to run in multiple instances,
+you need to use one of these tools.
 
 Using SQLite is an _enormous_ simplification both during development and
 production. With one less service to worry about (especially something as

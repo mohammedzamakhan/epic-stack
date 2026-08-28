@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import {
 	CAMPAIGN_CHANNELS,
-	CAMPAIGN_STATUSES,
 	type CampaignChannel,
 	type CampaignStatus,
 } from './campaign.ts'

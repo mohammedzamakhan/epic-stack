@@ -2,7 +2,7 @@ import { count, eq, sql } from 'drizzle-orm'
 import { db } from './client.ts'
 import { SSOConfiguration, SSOSession, User } from './schema.ts'
 
-/** Lightweight connectivity probe used by Fly HTTP healthchecks. */
+/** Lightweight connectivity probe used by Cloudflare HTTP healthchecks. */
 export async function pingControlPlane() {
 	await db.run(sql`SELECT 1`)
 }

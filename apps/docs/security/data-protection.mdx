@@ -33,7 +33,7 @@ const decryptedSecret = decrypt(encryptedSecret, masterKey)
 
 All communications use TLS 1.3:
 
-- **External traffic**: HTTPS enforced via Fly.io
+- **External traffic**: HTTPS enforced via Cloudflare
 - **Internal services**: TLS between application instances
 - **Database**: SQLite on encrypted filesystem
 
@@ -183,7 +183,7 @@ Backup security measures:
 
 Only authorized personnel should access backups:
 
-- Fly.io SSH access required
+- Cloudflare Dashboard access required
 - S3 bucket with IAM policies
 - Audit logging of backup access
 

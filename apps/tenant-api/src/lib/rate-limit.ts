@@ -39,12 +39,12 @@ export function rateLimit(name: string, config: RateLimitConfig) {
 		}
 
 		// IP resolution priority for rate limiting:
-		// 1. fly-client-ip: Set by Fly.io's proxy — most reliable, cannot be spoofed by clients
+		// 1. cf-connecting-ip: Set by Cloudflare's proxy — most reliable when behind Cloudflare
 		// 2. Last x-forwarded-for value: Appended by our trusted upstream proxy (sites app)
 		// 3. x-real-ip: Fallback only — can be set by clients if not stripped by upstream
 		const forwardedFor = c.req.header('x-forwarded-for')
 		const ip =
-			c.req.header('fly-client-ip') ||
+			c.req.header('cf-connecting-ip') ||
 			(forwardedFor ? forwardedFor.split(',').pop()?.trim() : null) ||
 			c.req.header('x-real-ip') ||
 			'unknown'
