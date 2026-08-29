@@ -275,21 +275,26 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		if (invites && invites.length > 0) {
 			try {
-				const [organization] = await db
-					.select({ name: Organization.name, slug: Organization.slug })
-					.from(Organization)
-					.where(eq(Organization.id, orgId))
-					.limit(1)
+				// ⚡ Bolt Optimization:
+				// Parallelized fetching of Organization and User details using Promise.all.
+				// These queries are independent. By executing them concurrently rather than sequentially,
+				// we reduce the total latency of this setup step by approximately 50% (the duration of one query).
+				const [[organization], [currentUser]] = await Promise.all([
+					db
+						.select({ name: Organization.name, slug: Organization.slug })
+						.from(Organization)
+						.where(eq(Organization.id, orgId))
+						.limit(1),
+					db
+						.select({ name: User.name, email: User.email })
+						.from(User)
+						.where(eq(User.id, userId))
+						.limit(1),
+				])
 
 				if (!organization) {
 					throw new Error('Organization not found')
 				}
-
-				const [currentUser] = await db
-					.select({ name: User.name, email: User.email })
-					.from(User)
-					.where(eq(User.id, userId))
-					.limit(1)
 
 				await Promise.all(
 					invites.map(async (invite) => {
