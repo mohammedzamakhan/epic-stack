@@ -340,7 +340,6 @@ export const NoteCard = ({
 													<button
 														className="bg-background text-background-foreground flex items-center gap-1.5 rounded-bl-md border-b border-l border-black/10 px-2 py-1.5"
 														onClick={handleStartEdit}
-														aria-label={_(t`Quick edit`)}
 													>
 														<Icon name="pencil" className="h-3.5 w-3.5" />
 													</button>

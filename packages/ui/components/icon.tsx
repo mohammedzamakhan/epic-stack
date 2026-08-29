@@ -46,6 +46,10 @@ export function Icon({
 	className,
 	title,
 	children,
+	'aria-label': ariaLabel,
+	'aria-labelledby': ariaLabelledBy,
+	'aria-hidden': ariaHidden,
+	focusable,
 	...props
 }: IconProps) {
 	if (children) {
@@ -58,6 +62,10 @@ export function Icon({
 					size={size}
 					className={className}
 					title={title}
+					aria-label={ariaLabel}
+					aria-labelledby={ariaLabelledBy}
+					aria-hidden={ariaHidden}
+					focusable={focusable}
 					{...props}
 				/>
 				{children}
@@ -65,8 +73,16 @@ export function Icon({
 		)
 	}
 
+	const isDecorative = !title && !ariaLabel && !ariaLabelledBy
+	const defaultAriaHidden = isDecorative ? 'true' : undefined
+	const defaultFocusable = isDecorative ? 'false' : undefined
+
 	return (
 		<svg
+			aria-hidden={ariaHidden ?? defaultAriaHidden}
+			focusable={focusable ?? defaultFocusable}
+			aria-label={ariaLabel}
+			aria-labelledby={ariaLabelledBy}
 			{...props}
 			className={cn(sizeClassName[size], 'inline self-center', className)}
 		>

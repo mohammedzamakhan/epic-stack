@@ -1,3 +1,4 @@
+/* eslint-disable import/no-duplicates */
 import 'react-router'
 import { createRequestHandler } from '@react-router/express'
 import express from 'express'

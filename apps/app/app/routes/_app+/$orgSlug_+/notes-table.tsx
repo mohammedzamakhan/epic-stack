@@ -73,18 +73,31 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 					const note = row.original
 					return (
 						<div className="flex justify-end gap-2">
-							<Button variant="ghost" size="icon" aria-label={t`View`}>
-								<Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
-									<Icon name="search" className="size-4" />
-								</Link>
+							<Button
+								variant="ghost"
+								size="icon"
+								aria-label={t`View`}
+								render={
+									<Link
+										to={`${note.id}`}
+										onClick={(e) => e.stopPropagation()}
+									/>
+								}
+							>
+								<Icon name="search" className="size-4" />
 							</Button>
-							<Button variant="ghost" size="icon" aria-label={t`Edit`}>
-								<Link
-									to={`${note.id}/edit`}
-									onClick={(e) => e.stopPropagation()}
-								>
-									<Icon name="pencil" className="size-4" />
-								</Link>
+							<Button
+								variant="ghost"
+								size="icon"
+								aria-label={t`Edit`}
+								render={
+									<Link
+										to={`${note.id}/edit`}
+										onClick={(e) => e.stopPropagation()}
+									/>
+								}
+							>
+								<Icon name="pencil" className="size-4" />
 							</Button>
 						</div>
 					)

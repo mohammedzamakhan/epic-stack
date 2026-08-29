@@ -67,7 +67,9 @@ function UpgradeAccountCard({
 				<CardDescription className="text-sidebar-foreground">
 					<Trans>
 						There are{' '}
-						<span className="font-bold text-red-400">{daysRemaining} days</span>{' '}
+						<span className="text-destructive font-bold dark:text-red-400">
+							{daysRemaining} days
+						</span>{' '}
 						left in your trial. Get in touch with questions or feedback.
 					</Trans>
 				</CardDescription>
@@ -533,6 +535,7 @@ export function AppSidebar({
 					}}
 					className="absolute inset-0 flex h-full flex-col"
 					style={{ pointerEvents: isAccountRoute ? 'auto' : 'none' }}
+					inert={!isAccountRoute ? true : undefined}
 				>
 					<AccountSidebar
 						user={userData}
@@ -559,6 +562,7 @@ export function AppSidebar({
 					}}
 					className="absolute inset-0 flex h-full flex-col"
 					style={{ pointerEvents: !isAccountRoute ? 'auto' : 'none' }}
+					inert={isAccountRoute ? true : undefined}
 				>
 					<OrganizationSidebar
 						user={userData}

@@ -122,6 +122,10 @@ test.describe('Accessibility', () => {
 		for (let i = 0; i < Math.min(buttonCount, 5); i++) {
 			const button = buttons.nth(i)
 			if (await button.isVisible()) {
+				const isInert = await button.evaluate(
+					(el) => el.closest('[inert]') !== null,
+				)
+				if (isInert) continue
 				await button.focus()
 				await expect(button).toBeFocused()
 			}
@@ -134,6 +138,10 @@ test.describe('Accessibility', () => {
 		for (let i = 0; i < Math.min(linkCount, 5); i++) {
 			const link = links.nth(i)
 			if (await link.isVisible()) {
+				const isInert = await link.evaluate(
+					(el) => el.closest('[inert]') !== null,
+				)
+				if (isInert) continue
 				await link.focus()
 				await expect(link).toBeFocused()
 			}
@@ -454,6 +462,7 @@ test.describe('Accessibility', () => {
 					// Check if field has aria-describedby pointing to error message
 					const describedBy = await field.getAttribute('aria-describedby')
 					if (describedBy) {
+						// eslint-disable-next-line playwright/no-raw-locators -- dynamic ID selector required for aria-describedby lookup
 						const errorElement = page.locator(`#${describedBy}`)
 						await expect(errorElement).toBeVisible()
 					}

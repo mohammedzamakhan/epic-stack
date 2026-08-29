@@ -88,7 +88,7 @@ const normalizePathForRedirect = (path: string): string => {
 		normalized = '/' + normalized
 	}
 	// Remove any NUL characters to avoid header splitting issues.
-
+	// eslint-disable-next-line no-control-regex
 	normalized = normalized.replace(/\0/g, '')
 	return normalized
 }

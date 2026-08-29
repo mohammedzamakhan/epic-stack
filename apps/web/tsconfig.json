@@ -13,7 +13,8 @@
 		"public/**/*",
 		"env.d.ts",
 		"emdash-env.d.ts",
-		"check-type.ts"
+		"check-type.ts",
+		"tests/**/*"
 	],
 	"exclude": ["dist", "node_modules"]
 }

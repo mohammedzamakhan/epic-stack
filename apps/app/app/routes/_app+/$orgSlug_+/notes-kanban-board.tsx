@@ -134,6 +134,8 @@ function calculateNoteDestination(
 	return { columnId: destColId, position: destIndex }
 }
 
+const EMPTY_NOTES: Note[] = []
+
 export function NotesKanbanBoard({
 	notes,
 	statuses,
@@ -467,10 +469,11 @@ export function NotesKanbanBoard({
 						<SortableKanbanColumn
 							key={col.id}
 							column={col}
-							notes={grouped[col.id] ?? []}
+							notes={grouped[col.id] ?? EMPTY_NOTES}
 							orgSlug={orgSlug}
 							activeNote={activeNote}
-							dragDestination={dragDestination}
+							isDragDestination={dragDestination?.columnId === col.id}
+							dragPosition={dragDestination?.columnId === col.id ? dragDestination.position : undefined}
 							organizationId={organizationId}
 							isActive={activeColumn?.id === col.id}
 						/>
@@ -489,10 +492,11 @@ export function NotesKanbanBoard({
 							<div className="scale-105 rotate-3 shadow-2xl">
 								<KanbanColumn
 									column={activeColumn}
-									notes={grouped[activeColumn.id] ?? []}
+									notes={grouped[activeColumn.id] ?? EMPTY_NOTES}
 									orgSlug={orgSlug}
 									activeNote={null}
-									dragDestination={null}
+									isDragDestination={false}
+									dragPosition={undefined}
 									organizationId={organizationId}
 								/>
 							</div>
@@ -508,12 +512,15 @@ export function NotesKanbanBoard({
 /*  Sortable Column Wrapper                                                   */
 /* -------------------------------------------------------------------------- */
 
-function SortableKanbanColumn({
+// ⚡ Bolt: Wrapped SortableKanbanColumn in React.memo and extracted primitive drag props
+// to prevent O(N) re-renders of all columns during drag-over events.
+const SortableKanbanColumn = React.memo(function SortableKanbanColumn({
 	column,
 	notes,
 	orgSlug,
 	activeNote,
-	dragDestination,
+	isDragDestination,
+	dragPosition,
 	organizationId,
 	isActive,
 }: {
@@ -521,7 +528,8 @@ function SortableKanbanColumn({
 	notes: Note[]
 	orgSlug: string
 	activeNote: Note | null
-	dragDestination: { columnId: string; position?: number } | null
+	isDragDestination: boolean
+	dragPosition?: number
 	organizationId: string
 	isActive: boolean
 }) {
@@ -554,25 +562,29 @@ function SortableKanbanColumn({
 				notes={notes}
 				orgSlug={orgSlug}
 				activeNote={activeNote}
-				dragDestination={dragDestination}
+				isDragDestination={isDragDestination}
+				dragPosition={dragPosition}
 				organizationId={organizationId}
 				dragHandleProps={{ ...attributes, ...listeners }}
 				isActive={isActive}
 			/>
 		</div>
 	)
-}
+})
 
 /* -------------------------------------------------------------------------- */
 /*  Column                                                                    */
 /* -------------------------------------------------------------------------- */
 
-function KanbanColumn({
+// ⚡ Bolt: Wrapped KanbanColumn in React.memo and extracted primitive drag props
+// to prevent O(N) re-renders of all columns during drag-over events.
+const KanbanColumn = React.memo(function KanbanColumn({
 	column,
 	notes,
 	orgSlug,
 	activeNote,
-	dragDestination,
+	isDragDestination,
+	dragPosition,
 	organizationId,
 	dragHandleProps,
 	isActive,
@@ -581,7 +593,8 @@ function KanbanColumn({
 	notes: Note[]
 	orgSlug: string
 	activeNote: Note | null
-	dragDestination: { columnId: string; position?: number } | null
+	isDragDestination: boolean
+	dragPosition?: number
 	organizationId: string
 	dragHandleProps?: React.HTMLAttributes<HTMLDivElement>
 	isActive?: boolean
@@ -597,20 +610,16 @@ function KanbanColumn({
 		? notes.map((n) => makeDragId(column.id, n.id))
 		: [placeholderId]
 
-	// Check if this column is the drag destination
-	const isDestination = dragDestination?.columnId === column.id
-	const dragPosition = dragDestination?.position ?? 0
-
 	// Create display notes with preview
 	const displayNotes = [...notes]
 	if (
-		isDestination &&
+		isDragDestination &&
 		activeNote &&
 		!notes.find((n) => n.id === activeNote.id)
 	) {
 		// Insert preview note at the correct position
 		const previewNote = { ...activeNote, id: `${activeNote.id}-preview` }
-		displayNotes.splice(dragPosition, 0, previewNote)
+		displayNotes.splice(dragPosition ?? 0, 0, previewNote)
 	}
 
 	return (
@@ -730,20 +739,22 @@ function KanbanColumn({
 							/>
 						)
 					})}
-					{notes.length === 0 && !isDestination && (
+					{notes.length === 0 && !isDragDestination && (
 						<div className="text-muted-foreground border-muted-foreground/30 flex h-20 min-h-screen items-center justify-center rounded border-2 border-dashed text-sm"></div>
 					)}
 				</div>
 			</SortableContext>
 		</div>
 	)
-}
+})
 
 /* -------------------------------------------------------------------------- */
 /*  Note Card wrapper                                                         */
 /* -------------------------------------------------------------------------- */
 
-function SortableNote({
+// ⚡ Bolt: Wrapped SortableNote in React.memo to prevent O(N*M) re-renders
+// of all notes when its parent column re-renders during drag operations.
+const SortableNote = React.memo(function SortableNote({
 	note,
 	dragId,
 	organizationId,
@@ -793,7 +804,7 @@ function SortableNote({
 			/>
 		</div>
 	)
-}
+})
 
 /* -------------------------------------------------------------------------- */
 /*  “+ column” button – stateless (details element manages open/close)    */

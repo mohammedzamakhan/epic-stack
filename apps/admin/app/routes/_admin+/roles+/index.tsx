@@ -64,25 +64,26 @@ const CreateRoleSchema = z.object({
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireUserWithRole(request, 'admin')
 
-	// Get all organization roles with their permission counts
-	const organizationRoles = await db.query.OrganizationRole.findMany({
-		with: {
-			organizationPermissionToRoles: {
-				with: { permission: true },
+	// ⚡ Bolt Performance Optimization: Parallelized independent database queries to reduce overall request latency.
+	// Get all organization roles and system roles with their permission counts concurrently.
+	const [organizationRoles, systemRoles] = await Promise.all([
+		db.query.OrganizationRole.findMany({
+			with: {
+				organizationPermissionToRoles: {
+					with: { permission: true },
+				},
+				organizations: true,
 			},
-			organizations: true,
-		},
-		orderBy: (role, { desc }) => desc(role.level),
-	})
-
-	// Get system roles with their permission counts
-	const systemRoles = await db.query.Role.findMany({
-		with: {
-			permissionToRoles: { with: { permission: true } },
-			roleToUsers: true,
-		},
-		orderBy: (role, { asc }) => asc(role.name),
-	})
+			orderBy: (role, { desc }) => desc(role.level),
+		}),
+		db.query.Role.findMany({
+			with: {
+				permissionToRoles: { with: { permission: true } },
+				roleToUsers: true,
+			},
+			orderBy: (role, { asc }) => asc(role.name),
+		}),
+	])
 
 	return {
 		organizationRoles: organizationRoles.map((role) => ({
