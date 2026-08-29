@@ -33,8 +33,8 @@ import {
 	createOrganizationInviteLink,
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
-	MAX_ORGANIZATION_INVITES_PER_REQUEST,
 } from '#app/utils/organization/invitation.server.ts'
+import { MAX_ORGANIZATION_INVITES_PER_REQUEST } from '#app/utils/organization/invitation.ts'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import { type OrganizationRoleName } from '#app/utils/organization/organizations.server.ts'
 import {

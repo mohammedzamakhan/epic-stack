@@ -62,19 +62,8 @@ details.
   soft brand-colored background.
 - `^^word^^` wraps text in brand color (`<span class="text-brand">`).
 
-These are the recommended ways to emphasize words in headings. Avoid pasting raw
-HTML unless you know what you are doing.
-
-### Allowed HTML (advanced)
-
-For trusted editors, a small set of inline HTML is also allowed:
-
-```html
-<span class="text-brand">brand text</span>
-<mark class="md-highlight">highlighted</mark>
-```
-
-Other tags and classes are stripped for safety.
+These are the recommended ways to emphasize words in headings. Raw HTML is
+stripped — use the markdown syntax above instead of pasting tags.
 
 ## SEO and metadata
 

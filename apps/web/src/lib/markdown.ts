@@ -1,4 +1,23 @@
-import { marked, type TokenizerAndRendererExtension } from 'marked'
+import {
+	Lexer,
+	marked,
+	type Token,
+	type TokenizerAndRendererExtension,
+	type Tokens,
+} from 'marked'
+
+function escapeHtml(value: string): string {
+	return value
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#39;')
+}
+
+export function isSafeHref(href: string): boolean {
+	return /^(https?:\/\/|\/|#|mailto:|tel:)/i.test(href)
+}
 
 const highlightExtension: TokenizerAndRendererExtension = {
 	name: 'highlight',
@@ -16,7 +35,7 @@ const highlightExtension: TokenizerAndRendererExtension = {
 		}
 	},
 	renderer(token) {
-		return `<mark class="md-highlight">${token.text}</mark>`
+		return `<mark class="md-highlight">${escapeHtml(String(token.text))}</mark>`
 	},
 }
 
@@ -36,13 +55,26 @@ const brandExtension: TokenizerAndRendererExtension = {
 		}
 	},
 	renderer(token) {
-		return `<span class="text-brand">${token.text}</span>`
+		return `<span class="text-brand">${escapeHtml(String(token.text))}</span>`
 	},
 }
 
 marked.use({
 	gfm: true,
 	breaks: true,
+	renderer: {
+		html() {
+			return ''
+		},
+		image() {
+			return ''
+		},
+		link({ href, title, text }: Tokens.Link) {
+			if (!href || !isSafeHref(href)) return text
+			const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''
+			return `<a href="${escapeHtml(href)}" class="underline underline-offset-2"${titleAttr}>${text}</a>`
+		},
+	},
 	extensions: [highlightExtension, brandExtension],
 })
 
@@ -50,64 +82,41 @@ marked.use({
 export const MARKDOWN_SYNTAX_HELP =
 	'**bold** · *italic* · ==highlight== · ^^brand color^^ · [link](url)'
 
-const INLINE_CLASS_ALLOWLIST = new Set([
-	'md-highlight',
-	'text-brand',
-	'font-semibold',
-	'italic',
-])
-
-/** Allow only safe span/mark tags with whitelisted classes from editor markdown. */
-function sanitizeInlineHtml(html: string): string {
-	return html.replace(
-		/<(\/?)(span|mark|strong|em|b|i|a)(\s[^>]*)?>/gi,
-		(match, slash, tag, attrs = '') => {
-			if (slash) return `</${tag}>`
-
-			if (tag === 'a') {
-				const hrefMatch = /href\s*=\s*["']([^"']+)["']/i.exec(attrs)
-				if (!hrefMatch) return ''
-				const href = hrefMatch[1]
-				if (/^(https?:\/\/|\/|#|mailto:|tel:)/i.test(href)) {
-					return `<a href="${href}" class="underline underline-offset-2">`
-				}
-				return ''
-			}
-
-			const classMatch = /class\s*=\s*["']([^"']+)["']/i.exec(attrs)
-			if (!classMatch) {
-				return tag === 'mark' ? '<mark class="md-highlight">' : `<${tag}>`
-			}
-
-			const safeClasses = classMatch[1]
-				.split(/\s+/)
-				.filter((cls) => INLINE_CLASS_ALLOWLIST.has(cls))
-			if (safeClasses.length === 0) return `<${tag}>`
-			return `<${tag} class="${safeClasses.join(' ')}">`
-		},
-	)
+export function lexMarkdown(content: string, block = false): Token[] {
+	return block ? marked.lexer(content) : Lexer.lexInline(content)
 }
 
 export function parseMarkdownInline(content: string): string {
-	const html = marked.parseInline(content, { async: false }) as string
-	return sanitizeInlineHtml(html)
+	return marked.parseInline(content, { async: false }) as string
 }
 
 export function parseMarkdownBlock(content: string): string {
-	const html = marked.parse(content, { async: false }) as string
-	return sanitizeInlineHtml(html)
+	return marked.parse(content, { async: false }) as string
+}
+
+function tokenPlainText(tokens: Token[] | undefined): string {
+	if (!tokens?.length) return ''
+
+	return tokens
+		.map((token) => {
+			if (token.type === 'html' || token.type === 'image') return ''
+			if (token.type === 'br' || token.type === 'space') return ' '
+			if (token.type === 'list') {
+				const list = token as Tokens.List
+				return list.items.map((item) => tokenPlainText(item.tokens)).join(' ')
+			}
+			if ('tokens' in token && token.tokens?.length) {
+				return tokenPlainText(token.tokens)
+			}
+			if ('text' in token && typeof token.text === 'string') {
+				return token.text
+			}
+			return ''
+		})
+		.join('')
 }
 
 /** Plain text for SEO meta tags, aria labels, and share dialogs. */
 export function stripMarkdown(content: string): string {
-	return content
-		.replace(/==([^=]+)==/g, '$1')
-		.replace(/\^\^([^^]+)\^\^/g, '$1')
-		.replace(/\*\*([^*]+)\*\*/g, '$1')
-		.replace(/\*([^*]+)\*/g, '$1')
-		.replace(/_([^_]+)_/g, '$1')
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-		.replace(/<[^>]+>/g, '')
-		.replace(/\s+/g, ' ')
-		.trim()
+	return tokenPlainText(marked.lexer(content)).replace(/\s+/g, ' ').trim()
 }

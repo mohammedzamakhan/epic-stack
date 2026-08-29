@@ -30,4 +30,25 @@ describe('markdown', () => {
 			'Build your next startup with Epic',
 		)
 	})
+
+	it('does not emit raw HTML or javascript URLs', () => {
+		expect(parseMarkdownInline('<script>alert(1)</script>')).not.toContain(
+			'<script>',
+		)
+		expect(parseMarkdownInline('[x](javascript:alert(1))')).not.toContain(
+			'javascript:',
+		)
+		expect(parseMarkdownInline('==<script>alert(1)</script>==')).toContain(
+			'&lt;script',
+		)
+		expect(parseMarkdownInline('==<script>alert(1)</script>==')).not.toContain(
+			'<script>',
+		)
+	})
+
+	it('strips markdown including leftover HTML to plain text', () => {
+		expect(stripMarkdown('Hello <script>alert(1)</script> **world**')).toBe(
+			'Hello alert(1) world',
+		)
+	})
 })

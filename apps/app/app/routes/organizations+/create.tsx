@@ -59,8 +59,8 @@ import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
-	MAX_ORGANIZATION_INVITES_PER_REQUEST,
 } from '#app/utils/organization/invitation.server.ts'
+import { MAX_ORGANIZATION_INVITES_PER_REQUEST } from '#app/utils/organization/invitation.ts'
 import {
 	createOrganization,
 	setUserDefaultOrganization,
