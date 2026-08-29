@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
@@ -15,7 +16,6 @@ import {
 	type ChartConfig,
 } from '@repo/ui/chart'
 import { Icon } from '@repo/ui/icon'
-import { memo } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 const chartConfig = {

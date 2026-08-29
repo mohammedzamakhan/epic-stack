@@ -1,7 +1,7 @@
 import { generateSitemap } from '@nasa-gcn/remix-seo'
 import { getDomainUrl } from '@repo/common'
-import { serverBuildContext } from '#app/server-context.ts'
 import { type Route } from './+types/sitemap[.]xml.ts'
+import { serverBuildContext } from '#app/server-context.ts'
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const serverBuild = context.get(serverBuildContext)

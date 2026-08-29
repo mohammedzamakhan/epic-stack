@@ -15,8 +15,8 @@ import {
 	inArray,
 } from '@repo/database'
 import { RouterContextProvider } from 'react-router'
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { createUser } from '#tests/db-utils.ts'

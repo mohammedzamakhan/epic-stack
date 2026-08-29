@@ -19,7 +19,6 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { cn, useIsMobile } from '@repo/ui'
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -38,6 +37,7 @@ import {
 	type ChartConfig,
 } from '@repo/ui/chart'
 import { Checkbox } from '@repo/ui/checkbox'
+import { cn, useIsMobile } from '@repo/ui'
 import {
 	Drawer,
 	DrawerClose,
@@ -732,7 +732,11 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 	const [isOpen, setIsOpen] = React.useState(false)
 
 	return (
-		<Drawer direction={isMobile ? 'bottom' : 'right'} open={isOpen} onOpenChange={setIsOpen}>
+		<Drawer
+			direction={isMobile ? 'bottom' : 'right'}
+			open={isOpen}
+			onOpenChange={setIsOpen}
+		>
 			<DrawerTrigger asChild>
 				<Button variant="link" className="text-foreground w-fit px-0 text-left">
 					{item.header}

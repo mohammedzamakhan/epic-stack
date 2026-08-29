@@ -1,5 +1,4 @@
 import { parseWithZod } from '@conform-to/zod'
-import { invariantResponse } from '@epic-web/invariant'
 import { logNoteActivity } from '@repo/audit'
 import {
 	requireUserWithOrganizationPermission,
@@ -24,6 +23,7 @@ import {
 } from '@repo/database'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { data, type ActionFunctionArgs } from 'react-router'
+import { invariantResponse } from '@epic-web/invariant'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import {
 	notifyCommentMentions,

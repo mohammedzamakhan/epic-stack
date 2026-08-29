@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/react/macro'
 
-import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
+import { cn } from '@repo/ui'
 import { Icon } from '@repo/ui/icon'
 import { format, isToday, isYesterday } from 'date-fns'
 import { UserAvatar } from '../user-avatar'

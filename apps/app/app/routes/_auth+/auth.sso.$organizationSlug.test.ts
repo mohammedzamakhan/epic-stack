@@ -1,7 +1,7 @@
 import { Organization, db, eq } from '@repo/database'
 import { RouterContextProvider } from 'react-router'
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { BASE_URL } from '#tests/utils.ts'
 import { action } from './auth.sso.$organizationSlug.ts'
