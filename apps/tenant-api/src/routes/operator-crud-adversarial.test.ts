@@ -200,7 +200,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 't-2',
@@ -244,7 +244,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'd-1',
@@ -281,7 +281,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'a-1',
@@ -317,7 +317,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'd-1',
@@ -365,7 +365,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 'node-same',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'node-same',
@@ -400,7 +400,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 					],
 					edges: [{ id: 'e1', source: 't-1', target: 'ghost-node-404' }],
@@ -430,7 +430,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{ id: 'd-1', type: 'delay', data: { duration: 0, unit: 'hours' } },
 					],
@@ -458,7 +458,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'a-1',
@@ -488,7 +488,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 's-1',
@@ -524,7 +524,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{ id: 'a-1', type: 'action_sms', data: { messageText: 'Hello' } },
 					],
@@ -619,12 +619,12 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 				},
 				body: JSON.stringify({
 					name: 'Lifecycle Transition Journey',
-					triggerType: 'customer_signup',
+					triggerType: 'phone_verified',
 					nodes: [
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 's-1',
@@ -852,7 +852,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 						{
 							id: 't-1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 's-1',
@@ -948,11 +948,11 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 			// Set worker URL to non-existent endpoint to simulate worker outage
 			process.env.JOBS_CRON_WORKER_URL = 'http://127.0.0.1:59999'
 
-			// Create active marketing journey for customer_signup
+			// Create active marketing journey for phone_verified
 			await db.insert(marketingJourneys).values({
 				name: 'Active Welcome Journey',
 				status: 'active',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 			})
 			await db.insert(marketingJourneys).values({
 				name: 'Active Phone Verified Journey',
@@ -1079,12 +1079,12 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 		it('spawns multiple active journey runs when fan-out trigger matches multiple active journeys', async () => {
 			const db = await getTenantDb(orgId1)
 
-			// Create 5 distinct active journeys for customer_signup
+			// Create 5 distinct active journeys for phone_verified
 			for (let i = 1; i <= 5; i++) {
 				await db.insert(marketingJourneys).values({
 					name: `Welcome Journey Tier ${i}`,
 					status: 'active',
-					triggerType: 'customer_signup',
+					triggerType: 'phone_verified',
 				})
 			}
 
@@ -1092,7 +1092,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 			await db.insert(marketingJourneys).values({
 				name: 'Paused Welcome Journey',
 				status: 'paused',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 			})
 
 			// Seed customer with valid OTP
@@ -1134,7 +1134,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 			// Should have spawned exactly 5 runs (one for each active journey)
 			expect(runs).toHaveLength(5)
 			for (const r of runs) {
-				expect(r.triggerEvent).toBe('customer_signup')
+				expect(r.triggerEvent).toBe('phone_verified')
 				expect(r.status).toBe('running')
 			}
 		})

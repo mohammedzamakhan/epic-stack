@@ -747,12 +747,12 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 			await db.insert(marketingJourneys).values({
 				name: 'Triggered Journey',
 				status: 'active',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 			})
 
 			const EVAL_COUNT = 10
 			const promises = Array.from({ length: EVAL_COUNT }).map(() =>
-				evaluateAndSpawnTriggers(orgId, 'customer_signup', customer.id),
+				evaluateAndSpawnTriggers(orgId, 'phone_verified', customer.id),
 			)
 
 			const results = await Promise.all(promises)
@@ -776,7 +776,7 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 				{
 					id: 't-1',
 					type: 'trigger' as const,
-					data: { triggerType: 'customer_signup' as const },
+					data: { triggerType: 'phone_verified' as const },
 				},
 				{
 					id: 'd-1',
@@ -816,7 +816,7 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 				{
 					id: 't-1',
 					type: 'trigger' as const,
-					data: { triggerType: 'customer_signup' as const },
+					data: { triggerType: 'phone_verified' as const },
 				},
 				{
 					id: 't-2',
@@ -851,7 +851,7 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 				{
 					id: 't-1',
 					type: 'trigger' as const,
-					data: { triggerType: 'customer_signup' as const },
+					data: { triggerType: 'phone_verified' as const },
 				},
 				{
 					id: 'a-1',
@@ -884,7 +884,7 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 				{
 					id: 't-1',
 					type: 'trigger' as const,
-					data: { triggerType: 'customer_signup' as const },
+					data: { triggerType: 'phone_verified' as const },
 				},
 				{
 					id: 'd-1',

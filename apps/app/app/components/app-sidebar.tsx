@@ -172,6 +172,7 @@ function OrganizationSidebar({
 	onboardingProgress,
 	orgSlug,
 	organizationId,
+	homePageId,
 	favoriteNotes,
 	setHasVisibleFeatureUpdates,
 	trialStatus,
@@ -184,6 +185,7 @@ function OrganizationSidebar({
 	onboardingProgress: OnboardingProgressData | null | undefined
 	orgSlug: string | undefined
 	organizationId: string | undefined
+	homePageId: string | null
 	favoriteNotes: any
 	setHasVisibleFeatureUpdates: (value: boolean) => void
 	trialStatus?: { isActive: boolean; daysRemaining: number }
@@ -294,6 +296,17 @@ function OrganizationSidebar({
 					url: `/${orgSlug}/website/pages`,
 					isActive: location.pathname.includes(`/${orgSlug}/website/pages`),
 				},
+				...(homePageId
+					? [
+							{
+								title: _(msg`Branding`),
+								url: `/${orgSlug}/website/pages/${homePageId}?panel=branding`,
+								isActive:
+									location.pathname.includes(`/${orgSlug}/website/pages/`) &&
+									location.search.includes('panel=branding'),
+							},
+						]
+					: []),
 				{
 					title: _(msg`Announcements`),
 					url: `/${orgSlug}/website/announcements`,
@@ -466,6 +479,7 @@ export function AppSidebar({
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
 	const organizationId =
 		rootData?.userOrganizations?.currentOrganization?.organization.id
+	const homePageId = rootData?.homePageId ?? null
 
 	// Check if we're on profile or organizations routes
 	const isProfileRoute = location.pathname === '/profile'
@@ -552,6 +566,7 @@ export function AppSidebar({
 						onboardingProgress={onboardingProgress}
 						orgSlug={orgSlug}
 						organizationId={organizationId}
+						homePageId={homePageId}
 						favoriteNotes={rootData?.favoriteNotes}
 						setHasVisibleFeatureUpdates={setHasVisibleFeatureUpdates}
 						trialStatus={trialStatus}

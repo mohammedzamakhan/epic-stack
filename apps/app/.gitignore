@@ -13,8 +13,8 @@ node_modules
 /playwright/.cache/
 /tests/fixtures/email/
 /tests/fixtures/uploaded/
-/tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/org/
-/tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/users/
+/tests/fixtures/openimg/example-r2-cloudflarestorage-com/mock-bucket/org/
+/tests/fixtures/openimg/example-r2-cloudflarestorage-com/mock-bucket/users/
 /tests/fixtures/openimg/metadata.json
 /coverage
 

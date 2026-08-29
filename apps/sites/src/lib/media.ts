@@ -1,21 +1,9 @@
 import { ENV } from 'varlock/env'
 
-export function resolveMediaUrl(src: string | null | undefined): string | null {
-	if (!src) return null
-	if (
-		src.startsWith('http://') ||
-		src.startsWith('https://') ||
-		src.startsWith('data:')
-	) {
-		return src
-	}
-	const origin = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
-		/\/$/,
-		'',
-	)
-	if (src.startsWith('/')) return `${origin}${src}`
-	return `${origin}/${src}`
-}
+const APP_VIDEO_PATHS = new Set([
+	'/resources/images',
+	'/resources/videos/source',
+])
 
 export function isVideoMediaUrl(src: string | null | undefined): boolean {
 	if (!src) return false
@@ -26,6 +14,41 @@ export function isVideoMediaUrl(src: string | null | undefined): boolean {
 		value = src
 	}
 	return /\.(mp4|webm|mov|m4v)(?:$|[?#])/i.test(value)
+}
+
+function sameOriginVideoUrl(src: string): string | null {
+	try {
+		const url =
+			src.startsWith('http://') || src.startsWith('https://')
+				? new URL(src)
+				: new URL(src.startsWith('/') ? src : `/${src}`, 'http://sites.local')
+		if (APP_VIDEO_PATHS.has(url.pathname)) {
+			return `/api/videos${url.search}${url.hash}`
+		}
+	} catch {
+		return null
+	}
+	return null
+}
+
+export function resolveMediaUrl(src: string | null | undefined): string | null {
+	if (!src) return null
+	if (src.startsWith('data:') || src.startsWith('blob:')) return src
+
+	if (isVideoMediaUrl(src)) {
+		const videoUrl = sameOriginVideoUrl(src)
+		if (videoUrl) return videoUrl
+	}
+
+	if (src.startsWith('http://') || src.startsWith('https://')) {
+		return src
+	}
+	const origin = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
+		/\/$/,
+		'',
+	)
+	if (src.startsWith('/')) return `${origin}${src}`
+	return `${origin}/${src}`
 }
 
 export type SiteLocaleLink = {

@@ -59,6 +59,19 @@ export default defineConfig({
 					}
 				},
 			},
+			process.env.npm_lifecycle_event !== 'build' && {
+				name: 'mock-cloudflare-workers',
+				resolveId(id) {
+					if (id === 'cloudflare:workers') {
+						return '\0cloudflare:workers'
+					}
+				},
+				load(id) {
+					if (id === '\0cloudflare:workers') {
+						return `export const env = {};`
+					}
+				},
+			},
 			tailwindcss(),
 			lingui(),
 			fontless({

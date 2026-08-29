@@ -12,10 +12,6 @@ const TENANT_TRIGGER_MSGS: Record<
 	string,
 	{ label: ReturnType<typeof msg>; desc: ReturnType<typeof msg> }
 > = {
-	customer_signup: {
-		label: msg`Customer Signup`,
-		desc: msg`Runs when a new customer registers`,
-	},
 	phone_verified: {
 		label: msg`Phone Verified`,
 		desc: msg`Runs when customer verifies phone OTP`,
@@ -23,14 +19,6 @@ const TENANT_TRIGGER_MSGS: Record<
 	profile_completed: {
 		label: msg`Profile Completed`,
 		desc: msg`Runs when customer updates name/email`,
-	},
-	tag_added: {
-		label: msg`Tag Added`,
-		desc: msg`Runs when a tag is applied to customer`,
-	},
-	form_submitted: {
-		label: msg`Form Submitted`,
-		desc: msg`Runs on website form submission`,
 	},
 	custom_event: {
 		label: msg`Custom Event`,
@@ -43,11 +31,8 @@ const TENANT_TRIGGER_MSGS: Record<
 }
 
 const TENANT_TRIGGER_OPTION_MSGS: Record<string, ReturnType<typeof msg>> = {
-	customer_signup: msg`Customer Signup (Registration)`,
 	phone_verified: msg`Phone Verified (OTP Success)`,
 	profile_completed: msg`Profile Completed (Name/Email)`,
-	tag_added: msg`Tag Added`,
-	form_submitted: msg`Form Submitted`,
 	custom_event: msg`Custom Event`,
 	manual: msg`Manual Trigger`,
 }
@@ -167,7 +152,7 @@ function buildPaletteItems(
 			{
 				...baseItems[0]!,
 				defaultData: {
-					triggerType: 'customer_signup',
+					triggerType: 'phone_verified',
 					config: {},
 				},
 			},

@@ -131,7 +131,17 @@ export function NodeInspector({
 									onValueChange={(val) => handleChange('triggerType', val)}
 								>
 									<SelectTrigger id="triggerType" className="h-9">
-										<SelectValue placeholder={_(msg`Select trigger type`)} />
+										<SelectValue placeholder={_(msg`Select trigger type`)}>
+											{
+												triggerOptions.find(
+													(option) =>
+														option.value ===
+														(data.triggerType ||
+															triggerOptions[0]?.value ||
+															'manual'),
+												)?.label
+											}
+										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										{triggerOptions.map((option) => (
@@ -147,38 +157,6 @@ export function NodeInspector({
 									</Trans>
 								</p>
 							</div>
-
-							{data.triggerType === 'tag_added' && (
-								<div className="space-y-1.5">
-									<Label htmlFor="tag" className="text-xs font-medium">
-										<Trans>Target Tag Name</Trans>
-									</Label>
-									<Input
-										id="tag"
-										placeholder={_(msg`e.g. VIP, lead-hot, subscriber`)}
-										value={data.config?.tag || ''}
-										onChange={(e) => handleConfigChange('tag', e.target.value)}
-										className="h-9"
-									/>
-								</div>
-							)}
-
-							{data.triggerType === 'form_submitted' && (
-								<div className="space-y-1.5">
-									<Label htmlFor="formId" className="text-xs font-medium">
-										<Trans>Form Identifier / Slug</Trans>
-									</Label>
-									<Input
-										id="formId"
-										placeholder={_(msg`e.g. contact-us, demo-request`)}
-										value={data.config?.formId || ''}
-										onChange={(e) =>
-											handleConfigChange('formId', e.target.value)
-										}
-										className="h-9"
-									/>
-								</div>
-							)}
 
 							{data.triggerType === 'custom_event' && (
 								<div className="space-y-1.5">

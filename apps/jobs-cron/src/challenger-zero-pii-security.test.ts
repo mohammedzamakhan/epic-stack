@@ -119,7 +119,7 @@ describe('Challenger 2 — Adversarial Zero-PII & API Security Verification', ()
 						{
 							id: 't1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'a1',
@@ -216,13 +216,13 @@ describe('Challenger 2 — Adversarial Zero-PII & API Security Verification', ()
 				customerId: 'cust_uuid_ksa_888',
 				tenantApiUrl: 'http://localhost:3009',
 				dataRegion: 'ksa',
-				triggerEvent: 'customer_signup',
+				triggerEvent: 'phone_verified',
 				graph: {
 					nodes: [
 						{
 							id: 'node_trig',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 						{
 							id: 'node_email',

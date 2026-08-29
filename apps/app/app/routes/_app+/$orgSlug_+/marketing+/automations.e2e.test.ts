@@ -46,7 +46,7 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 								name: 'Welcome Series',
 								description: 'Onboarding flow',
 								status: 'active',
-								triggerType: 'customer_signup',
+								triggerType: 'phone_verified',
 								nodes: [{ id: '1' }, { id: '2' }],
 								stats: { total: 15, running: 5, completed: 10, failed: 0 },
 							},
@@ -127,7 +127,7 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 						{
 							id: 't1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 					],
 					edges: [],
@@ -166,12 +166,12 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 							name: 'Active Welcome Journey',
 							description: 'Onboarding',
 							status: 'active',
-							triggerType: 'customer_signup',
+							triggerType: 'phone_verified',
 							nodes: [
 								{
 									id: 'n1',
 									type: 'trigger',
-									data: { triggerType: 'customer_signup' },
+									data: { triggerType: 'phone_verified' },
 								},
 							],
 							edges: [],
@@ -218,7 +218,7 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 					{
 						id: 't',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{
 						id: 'e',
@@ -281,7 +281,7 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 					{
 						id: 't',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{ id: 'd', type: 'delay', data: { duration: 1, unit: 'hours' } },
 				],
@@ -368,7 +368,7 @@ describe('Marketing Journeys UI & Route End-to-End Integration Suite', () => {
 								id: testJourneyId,
 								name: 'Onboarding Campaign',
 								status: 'active',
-								triggerType: 'customer_signup',
+								triggerType: 'phone_verified',
 							},
 						}),
 						{ status: 200 },

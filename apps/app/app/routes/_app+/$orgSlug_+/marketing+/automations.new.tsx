@@ -44,7 +44,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	const triggerNode = parsedGraph.nodes.find((n: any) => n.type === 'trigger')
 	const triggerType =
-		(triggerNode?.data as any)?.triggerType || 'customer_signup'
+		(triggerNode?.data as any)?.triggerType || 'phone_verified'
 	const triggerConfig =
 		((triggerNode?.data as any)?.config as Record<string, unknown>) || {}
 

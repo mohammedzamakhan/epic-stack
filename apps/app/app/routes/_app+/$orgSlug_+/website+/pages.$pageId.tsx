@@ -105,6 +105,7 @@ import {
 	useFetcher,
 	useLoaderData,
 	useParams,
+	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
 import {
@@ -1359,7 +1360,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ status: 'error', result: submission.reply() })
 		}
 
-		const { baseColor, theme, radius, mode, headingFont, bodyFont } =
+		const { baseColor, theme, radius, mode, headingFont, bodyFont, cssVars } =
 			submission.value
 
 		try {
@@ -1387,6 +1388,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 								: bodyFont,
 						headingCustomFont: current.headingCustomFont,
 						bodyCustomFont: current.bodyCustomFont,
+						cssVars:
+							cssVars && Object.keys(cssVars).length > 0 ? cssVars : null,
 					}),
 				})
 				.where(eq(Organization.id, organization.id))
@@ -5106,7 +5109,10 @@ export default function PageBuilderRoute() {
 	const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
 		null,
 	)
-	const [inspector, setInspector] = useState<InspectorId>('sections')
+	const [searchParams] = useSearchParams()
+	const initialInspector: InspectorId =
+		searchParams.get('panel') === 'branding' ? 'branding' : 'sections'
+	const [inspector, setInspector] = useState<InspectorId>(initialInspector)
 	const handlePreviewRefresh = useCallback(() => {
 		setIframeKey(Date.now())
 	}, [])

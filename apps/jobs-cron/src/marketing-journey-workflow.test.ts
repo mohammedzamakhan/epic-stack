@@ -92,13 +92,13 @@ describe('MarketingJourneyWorkflow', () => {
 			runId: 'run_9f8e7d6c-5b4a-3210-fedc-ba9876543210',
 			customerId: 'cust_6ba7b810-9dad-11d1-80b4-00c04fd430c8',
 			tenantApiUrl: 'http://localhost:3007',
-			triggerEvent: 'customer_signup',
+			triggerEvent: 'phone_verified',
 			graph: {
 				nodes: [
 					{
 						id: 'node_trig_1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{
 						id: 'node_email_1',
@@ -221,7 +221,7 @@ describe('MarketingJourneyWorkflow', () => {
 					{
 						id: 'node_trigger',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{
 						id: 'node_delay_1',
@@ -607,7 +607,7 @@ describe('MarketingJourneyWorkflow', () => {
 					{
 						id: 'node_trig',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{
 						id: 'node_del_1',

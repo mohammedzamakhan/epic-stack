@@ -559,7 +559,7 @@ describe('Adversarial SQLite Schema Testing (Milestone 1)', () => {
 				.returning()
 
 			expect(journey!.status).toBe('draft')
-			expect(journey!.triggerType).toBe('customer_signup')
+			expect(journey!.triggerType).toBe('phone_verified')
 			expect(journey!.version).toBe(1)
 			expect(journey!.triggerConfig).toBe('{}')
 			expect(journey!.graphJson).toBe('{"nodes":[],"edges":[]}')
@@ -590,7 +590,7 @@ describe('Adversarial SQLite Schema Testing (Milestone 1)', () => {
 				.returning()
 
 			expect(run!.status).toBe('running')
-			expect(run!.triggerEvent).toBe('customer_signup')
+			expect(run!.triggerEvent).toBe('phone_verified')
 			expect(run!.contextData).toBe('{}')
 			expect(run!.currentNodeId).toBeNull()
 			expect(run!.currentStepNodeId).toBeNull()
@@ -873,7 +873,7 @@ describe('Adversarial SQLite Schema Testing (Milestone 1)', () => {
 				.values({
 					name: 'Direct Object Journey',
 					graphJson: rawGraphObj,
-					triggerConfig: { triggerType: 'customer_signup', tags: ['vip'] },
+					triggerConfig: { triggerType: 'phone_verified', tags: ['vip'] },
 					nodes: rawGraphObj.nodes,
 					edges: rawGraphObj.edges,
 				})
@@ -887,7 +887,7 @@ describe('Adversarial SQLite Schema Testing (Milestone 1)', () => {
 			// When queried, Drizzle's { mode: 'json' } deserializes to JS object
 			expect(queried!.graphJson).toEqual(rawGraphObj)
 			expect(queried!.triggerConfig).toEqual({
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 				tags: ['vip'],
 			})
 			expect(queried!.nodes).toEqual(rawGraphObj.nodes)

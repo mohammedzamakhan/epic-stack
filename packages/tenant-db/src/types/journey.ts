@@ -14,11 +14,8 @@ export type JourneyStatus = (typeof JOURNEY_STATUSES)[number]
 export const journeyStatusSchema = z.enum(JOURNEY_STATUSES)
 
 export const JOURNEY_TRIGGER_TYPES = [
-	'customer_signup',
 	'phone_verified',
 	'profile_completed',
-	'tag_added',
-	'form_submitted',
 	'custom_event',
 	'manual',
 ] as const
@@ -74,7 +71,7 @@ export const conditionOperatorSchema = z.enum(CONDITION_OPERATORS)
 // ==========================================
 
 export const triggerNodeDataSchema = z.object({
-	triggerType: journeyTriggerTypeSchema.default('customer_signup'),
+	triggerType: journeyTriggerTypeSchema.default('phone_verified'),
 	config: z.record(z.unknown()).optional().default({}),
 })
 export type TriggerNodeData = z.infer<typeof triggerNodeDataSchema>
@@ -220,7 +217,7 @@ export type RelaxedWorkflowGraph = z.infer<typeof relaxedWorkflowGraphSchema>
 export const createJourneySchema = z.object({
 	name: z.string().min(1, 'Journey name is required').max(200),
 	description: z.string().max(1000).optional(),
-	triggerType: journeyTriggerTypeSchema.optional().default('customer_signup'),
+	triggerType: journeyTriggerTypeSchema.optional().default('phone_verified'),
 	triggerConfig: z.record(z.unknown()).optional().default({}),
 	nodes: z.array(z.record(z.unknown())).optional().default([]),
 	edges: z.array(z.record(z.unknown())).optional().default([]),

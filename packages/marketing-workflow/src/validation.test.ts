@@ -17,7 +17,7 @@ describe('validateFlowCanvas', () => {
 				id: 't1',
 				type: 'trigger',
 				position: { x: 0, y: 0 },
-				data: { triggerType: 'customer_signup' },
+				data: { triggerType: 'phone_verified' },
 			},
 			{
 				id: 'd1',
@@ -85,13 +85,13 @@ describe('validateFlowCanvas', () => {
 				id: 't1',
 				type: 'trigger',
 				position: { x: 0, y: 0 },
-				data: { triggerType: 'customer_signup' },
+				data: { triggerType: 'phone_verified' },
 			},
 			{
 				id: 't2',
 				type: 'trigger',
 				position: { x: 200, y: 0 },
-				data: { triggerType: 'tag_added' },
+				data: { triggerType: 'profile_completed' },
 			},
 			{
 				id: 'e1',
@@ -163,7 +163,7 @@ describe('validateFlowCanvas', () => {
 				id: 't1',
 				type: 'trigger',
 				position: { x: 0, y: 0 },
-				data: { triggerType: 'customer_signup' },
+				data: { triggerType: 'phone_verified' },
 			},
 			{
 				id: 'd1',

@@ -367,12 +367,12 @@ describe('Journey API Routes (System & Operator)', () => {
 					.insert(marketingJourneys)
 					.values({
 						name: 'CF Worker Retrieval Flow',
-						triggerType: 'customer_signup',
+						triggerType: 'phone_verified',
 						nodes: JSON.stringify([
 							{
 								id: 't-1',
 								type: 'trigger',
-								data: { triggerType: 'customer_signup' },
+								data: { triggerType: 'phone_verified' },
 							},
 						]),
 						edges: JSON.stringify([]),
@@ -428,7 +428,7 @@ describe('Journey API Routes (System & Operator)', () => {
 					{
 						id: 't-1',
 						type: 'trigger' as const,
-						data: { triggerType: 'customer_signup' as const },
+						data: { triggerType: 'phone_verified' as const },
 					},
 					{
 						id: 'a-1',
@@ -450,7 +450,7 @@ describe('Journey API Routes (System & Operator)', () => {
 					body: JSON.stringify({
 						name: 'Operator Created Journey',
 						description: 'A test flow',
-						triggerType: 'customer_signup',
+						triggerType: 'phone_verified',
 						nodes: validGraph.nodes,
 						edges: validGraph.edges,
 					}),
@@ -478,7 +478,7 @@ describe('Journey API Routes (System & Operator)', () => {
 							{
 								id: 't-1',
 								type: 'trigger',
-								data: { triggerType: 'customer_signup' },
+								data: { triggerType: 'phone_verified' },
 							},
 							{
 								id: 'd-1',

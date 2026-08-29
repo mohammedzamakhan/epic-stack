@@ -26,7 +26,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'node-0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			const edges: WorkflowEdge[] = []
@@ -61,7 +61,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'node-0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			const edges: WorkflowEdge[] = []
@@ -98,7 +98,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'node-0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			const edges: WorkflowEdge[] = []
@@ -127,7 +127,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'trigger-root',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			const edges: WorkflowEdge[] = []
@@ -161,7 +161,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 				{
 					id: 'cond-1',
@@ -221,7 +221,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'node-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			const edges: WorkflowEdge[] = []
@@ -259,7 +259,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 't-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 				{ id: 'a', type: 'delay', data: { duration: 1, unit: 'hours' } },
 				{ id: 'b', type: 'delay', data: { duration: 1, unit: 'hours' } },
@@ -293,7 +293,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 't-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 				{
 					id: 'email-1',
@@ -336,7 +336,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 				{
 					id: 'cond-1',
@@ -368,7 +368,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'node-0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			const edges: WorkflowEdge[] = []
@@ -408,7 +408,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 't-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 				{
 					id: 'email-1',
@@ -463,7 +463,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 't-2',
@@ -494,7 +494,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'orphan-delay',
@@ -545,7 +545,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 				],
 				edges: [
@@ -569,7 +569,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 				],
 				edges: [],
@@ -596,7 +596,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'd-1',
@@ -614,7 +614,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'd-1',
@@ -632,7 +632,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'd-1',
@@ -651,7 +651,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'sms-1',
@@ -675,7 +675,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'sms-1',
@@ -694,7 +694,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'c-1',
@@ -719,7 +719,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'c-1',
@@ -767,7 +767,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 'عقدة-البداية-🎯',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'رسالة-الترحيب-💌',
@@ -799,7 +799,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1.*+?^${}()|[]\\',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'node\'--"<script>alert(1)</script>',
@@ -873,7 +873,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 						id: 't-1',
 						type: 'trigger',
 						position: { x: 100.5, y: -200.25 },
-						data: { triggerType: 'customer_signup', config: { tag: 'vip' } },
+						data: { triggerType: 'phone_verified', config: { tag: 'vip' } },
 					},
 					{
 						id: 'e-1',
@@ -929,7 +929,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'n_0_0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			for (let r = 0; r < 5; r++) {
@@ -978,7 +978,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'n_0_0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			for (let r = 0; r < 5; r++) {
@@ -1031,7 +1031,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 				{
 					id: 'node-0',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 			]
 			for (let i = 1; i < n; i++) {
@@ -1068,7 +1068,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup', config: {} },
+						data: { triggerType: 'phone_verified', config: {} },
 					},
 					{
 						id: 'step-A',
@@ -1131,7 +1131,7 @@ describe('Milestone 1 Adversarial Challenges: validateWorkflowDAG & Schemas', ()
 
 			// Default fallbacks applied
 			const parsed = createJourneySchema.parse({ name: 'Default Flow' })
-			expect(parsed.triggerType).toBe('customer_signup')
+			expect(parsed.triggerType).toBe('phone_verified')
 			expect(parsed.triggerConfig).toEqual({})
 			expect(parsed.nodes).toEqual([])
 			expect(parsed.edges).toEqual([])

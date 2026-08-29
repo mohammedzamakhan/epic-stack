@@ -904,7 +904,7 @@ export async function createJourney(orgId: string, input: CreateJourneyInput) {
 		name: input.name,
 		description: input.description || null,
 		status: 'draft' as const,
-		triggerType: input.triggerType || ('customer_signup' as const),
+		triggerType: input.triggerType || ('phone_verified' as const),
 		triggerConfig: JSON.stringify(input.triggerConfig || {}),
 		graphJson,
 		nodes: JSON.stringify(nodes),

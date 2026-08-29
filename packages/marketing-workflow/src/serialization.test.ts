@@ -12,7 +12,7 @@ describe('workflow serialization', () => {
 				id: 'trigger_1',
 				type: 'trigger',
 				position: { x: 100.4, y: 200.7 },
-				data: { triggerType: 'customer_signup', config: { plan: 'pro' } },
+				data: { triggerType: 'phone_verified', config: { plan: 'pro' } },
 			},
 			{
 				id: 'email_1',
@@ -87,7 +87,7 @@ describe('workflow serialization', () => {
 				id: 'node_trig_1',
 				type: 'trigger',
 				position: { x: 200, y: 50 },
-				data: { triggerType: 'customer_signup' },
+				data: { triggerType: 'phone_verified' },
 			},
 			{
 				id: 'node_delay_1',
