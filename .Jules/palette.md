@@ -1,4 +1,6 @@
-## 2026-08-11 - Interactive Component Touch Targets
+## 2024-03-24 - [ImpersonationBanner Custom Alert Contrast & Touch Targets]
+**Learning:** Custom alert banners often suffer from poor hardcoded contrast values (like `text-yellow-600` on `bg-yellow-50`) which fail WCAG AA contrast ratio requirements. Interactive actions inside these custom banners sometimes use reduced touch targets (like 28px tall `size="sm"` buttons) that fail mobile accessibility guidelines.
+**Action:** When auditing or implementing custom alert banners, strictly check color contrast for text/borders (e.g. use deeper text colors like `text-yellow-800` on light yellow backgrounds), and ensure interactive buttons have a minimum touch target size of 44px (e.g., `min-h-[44px]`).## 2026-08-11 - Interactive Component Touch Targets
 **Learning:** The Switch, Checkbox, and Radio Group components were using `after:-inset-y-2` which resulted in a touch target height of around 34.4px (for a 18.4px switch) and 32px (for a 16px checkbox/radio button). This failed the minimum 44px WCAG requirement for touch targets.
 **Action:** Always ensure that small interactive components (14-18px) use sufficient pseudo-element padding, such as `after:-inset-y-4` or `after:-inset-4`, to expand their touch target area to at least 44px.
 ## 2024-05-15 - Adding inert to visually hidden sidebars
