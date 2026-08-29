@@ -533,6 +533,7 @@ export function AppSidebar({
 					}}
 					className="absolute inset-0 flex h-full flex-col"
 					style={{ pointerEvents: isAccountRoute ? 'auto' : 'none' }}
+					inert={!isAccountRoute ? true : undefined}
 				>
 					<AccountSidebar
 						user={userData}
@@ -559,6 +560,7 @@ export function AppSidebar({
 					}}
 					className="absolute inset-0 flex h-full flex-col"
 					style={{ pointerEvents: !isAccountRoute ? 'auto' : 'none' }}
+					inert={isAccountRoute ? true : undefined}
 				>
 					<OrganizationSidebar
 						user={userData}
