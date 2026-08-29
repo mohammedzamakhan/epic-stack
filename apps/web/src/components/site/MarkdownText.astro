@@ -1,5 +1,5 @@
 ---
-import { marked } from 'marked'
+import { parseMarkdownBlock } from '../../lib/markdown'
 
 interface Props {
 	content?: string
@@ -10,13 +10,16 @@ const { content, class: className = '' } = Astro.props
 
 if (!content) return null
 
-const html = marked.parse(content)
+const html = parseMarkdownBlock(content)
 ---
 <div 
 	class:list={[
+		'md-content',
 		'[&>p]:mb-4 last:[&>p]:mb-0',
 		'[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-2 [&_a]:font-medium hover:[&_a]:text-muted-foreground transition-colors',
 		'[&_strong]:font-semibold [&_strong]:text-foreground',
+		'[&_em]:italic',
+		'[&_.md-highlight]:rounded-sm [&_.md-highlight]:bg-brand/20 [&_.md-highlight]:px-1 [&_.md-highlight]:py-0.5',
 		'[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 last:[&_ul]:mb-0',
 		'[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-4 last:[&_ol]:mb-0',
 		className

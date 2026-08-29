@@ -17,6 +17,7 @@ import {
 	WebsitePage,
 	Role,
 	_RoleToUser,
+	OrganizationInviteLink,
 } from '@repo/database'
 import { type User as UserModel } from '@repo/database/types'
 import * as setCookieParser from 'set-cookie-parser'
@@ -112,6 +113,9 @@ async function deleteTestUser(userId: string | undefined) {
 	if (!userId) return
 
 	await db.delete(WebsitePage).where(eq(WebsitePage.createdById, userId))
+	await db
+		.delete(OrganizationInviteLink)
+		.where(eq(OrganizationInviteLink.createdById, userId))
 	await db.delete(User).where(eq(User.id, userId))
 }
 

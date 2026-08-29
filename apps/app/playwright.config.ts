@@ -3,6 +3,18 @@ import 'varlock/auto-load'
 
 const PORT = process.env.PORT || '3001'
 
+/**
+ * Match the GitHub Actions Playwright job (`.github/workflows/deploy.yml`):
+ * - `CI=true` uses the production build with mocks (`npm run start:mocks`)
+ * - `LAUNCH_STATUS` defaults to `LAUNCHED` so waitlist does not swallow sign-in
+ * - `MOCKS=true` so invitation emails are captured instead of sent
+ *
+ * `waitlist-referral` tests override `LAUNCH_STATUS=CLOSED_BETA`.
+ *
+ * `npm run test:e2e:run` sets `CI=true` (same as CI). Do not leave a stray
+ * `npm run dev` on :3001 with a different `LAUNCH_STATUS` when using that
+ * script — a fresh mocked server is started instead of reusing it.
+ */
 export default defineConfig({
 	testDir: './tests/e2e',
 	timeout: 60 * 1000,
@@ -31,15 +43,21 @@ export default defineConfig({
 	webServer: {
 		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
 		port: Number(PORT),
-		reuseExistingServer: true,
+		reuseExistingServer: !process.env.CI,
 		stdout: 'pipe',
 		stderr: 'pipe',
 		env: {
+			...process.env,
 			PORT,
 			NODE_ENV: 'test',
-			// Set LAUNCH_STATUS for waitlist referral tests
-			// Individual tests can override this if needed
-			LAUNCH_STATUS: process.env.LAUNCH_STATUS || 'LAUNCHED',
+			MOCKS: 'true',
+			// Local `.env` is often CLOSED_BETA for product work. CI has no such
+			// file and defaults to LAUNCHED. Do not inherit `.env` here — it would
+			// send `/organizations` to the waitlist. Waitlist tests match `waitlist`
+			// in the Playwright argv (`npm run test:e2e:waitlist`).
+			LAUNCH_STATUS: process.argv.some((arg) => arg.includes('waitlist'))
+				? 'CLOSED_BETA'
+				: 'LAUNCHED',
 		},
 	},
 })

@@ -1,5 +1,7 @@
 ---
 import { PortableText } from 'emdash/ui'
+import MarkdownInline from './site/MarkdownInline.astro'
+import MarkdownText from './site/MarkdownText.astro'
 
 interface Props {
   title: string
@@ -57,12 +59,12 @@ const tableOfContents = generateTableOfContents(content)
       </p>
     )}
     <h1 class="font-display text-balance text-[36px] font-medium tracking-[-0.03em] text-foreground sm:text-[48px]">
-      {title}
+      <MarkdownInline content={title} />
     </h1>
     {meta?.description && (
-      <p class="mt-5 max-w-2xl text-pretty text-[17px] leading-relaxed text-muted-foreground">
-        {meta.description}
-      </p>
+      <div class="mt-5 max-w-2xl text-pretty text-[17px] leading-relaxed text-muted-foreground">
+        <MarkdownText content={meta.description} />
+      </div>
     )}
   </div>
 </section>

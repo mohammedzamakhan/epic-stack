@@ -1,6 +1,8 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
 import Section from '../site/Section.astro'
 import SectionHead from '../site/SectionHead.astro'
+import { parseMarkdownInline } from '../../lib/markdown'
 import { getPosts, type Post } from '../../lib/emdash'
 
 interface Props {
@@ -34,7 +36,7 @@ const {
 				id="blog-section-title"
 				class="font-display max-w-xl text-balance text-[32px] font-medium tracking-[-0.02em] sm:text-[40px]"
 			>
-				{title}
+				<MarkdownInline content={title} />
 			</h2>
 		</div>
 		{
@@ -103,7 +105,7 @@ const {
 								)}
 							</div>
 							<h3 class="mt-3 flex items-start gap-1 text-pretty text-[18px] font-medium leading-snug tracking-[-0.01em]">
-								<span set:html={post.title} />
+								<span set:html={parseMarkdownInline(post.title)} />
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="16"

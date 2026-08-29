@@ -5,9 +5,13 @@
 import {
 	getEmDashEntry,
 	getEmDashCollection,
+	getMenu,
+	getSiteSettings,
 	getTranslations,
 	getSection,
 	getSections,
+	type Menu,
+	type SiteSettings,
 	type TranslationsResult,
 } from 'emdash'
 
@@ -21,11 +25,44 @@ import {
 export {
 	getEmDashEntry,
 	getEmDashCollection,
+	getMenu,
+	getSiteSettings,
 	getTranslations,
 	getSection,
 	getSections,
 }
-export type { TranslationsResult, Page, Post, PaginatedResponse }
+export type {
+	TranslationsResult,
+	Page,
+	Post,
+	PaginatedResponse,
+	Menu,
+	SiteSettings,
+}
+
+export type FooterMenuColumn = {
+	heading: string
+	menu: Menu
+}
+
+export type ResolvedSiteLogo = {
+	mediaId: string
+	alt?: string
+	url: string
+}
+
+/** Resolve a site logo from Emdash site settings */
+export function resolveSiteLogo(
+	settings: Partial<SiteSettings> | null | undefined,
+): ResolvedSiteLogo | null {
+	const logo = settings?.logo
+	if (!logo?.url) return null
+	return {
+		mediaId: logo.mediaId,
+		alt: logo.alt,
+		url: logo.url,
+	}
+}
 
 /** Fetch a page by slug and optional locale */
 export async function getPage(
@@ -112,25 +149,42 @@ export async function getPost(
 	}
 }
 
-/** Fetch header navigation from Emdash menus for a specific locale */
-export async function getHeader(locale?: string) {
+/** Fetch the primary header menu for a specific locale */
+export async function getPrimaryMenu(locale?: string): Promise<Menu | null> {
 	try {
-		const { entry } = await getEmDashEntry('menus', 'header', { locale })
-		return entry?.data ?? null
+		return await getMenu('primary', locale ? { locale } : {})
 	} catch (error) {
-		console.error('Error fetching header:', error)
+		console.error('Error fetching primary menu:', error)
 		return null
 	}
 }
 
-/** Fetch footer data from Emdash menus for a specific locale */
-export async function getFooter(locale?: string) {
+/** Fetch footer menu columns for a specific locale */
+export async function getFooterMenuColumns(
+	locale?: string,
+): Promise<FooterMenuColumn[]> {
+	const menuOptions = locale ? { locale } : {}
+	const columns: Array<{ heading: string; name: string }> = [
+		{ heading: 'Product', name: 'footer_product' },
+		{ heading: 'Resources', name: 'footer_resources' },
+		{ heading: 'Company', name: 'footer_company' },
+		{ heading: 'Legal', name: 'footer_legal' },
+	]
+
 	try {
-		const { entry } = await getEmDashEntry('menus', 'footer', { locale })
-		return entry?.data ?? null
+		const menus = await Promise.all(
+			columns.map(async ({ heading, name }) => ({
+				heading,
+				menu: await getMenu(name, menuOptions),
+			})),
+		)
+
+		return menus.filter((column): column is FooterMenuColumn =>
+			Boolean(column.menu && column.menu.items.length > 0),
+		)
 	} catch (error) {
-		console.error('Error fetching footer:', error)
-		return null
+		console.error('Error fetching footer menus:', error)
+		return []
 	}
 }
 

@@ -178,4 +178,11 @@
 			transform: none;
 		}
 	}
+
+	.md-highlight,
+	mark.md-highlight {
+		border-radius: 0.25rem;
+		background-color: color-mix(in oklch, var(--brand) 20%, transparent);
+		padding: 0.125rem 0.25rem;
+	}
 }

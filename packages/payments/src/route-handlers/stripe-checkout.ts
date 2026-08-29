@@ -1,6 +1,7 @@
 import { db, eq, Organization, UserOrganization } from '@repo/database'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
 import type Stripe from 'stripe'
+import { cleanupDuplicateSubscriptions } from '../utils/duplicate-subscriptions'
 
 export interface StripeCheckoutDependencies {
 	stripe: Stripe
@@ -11,7 +12,10 @@ export interface StripeCheckoutDependencies {
  * This handler processes successful Stripe checkout sessions and updates the organization.
  * Used by both the admin and app applications.
  *
- * @param request - The incoming request with session_id and organizationId params
+ * Organization ID is read from Stripe session metadata (set at checkout creation)
+ * rather than URL query params, which prevents organizationId tampering.
+ *
+ * @param request - The incoming request with session_id param
  * @param deps - Dependencies (stripe client)
  * @returns Redirect response to appropriate page
  */
@@ -21,7 +25,6 @@ export async function handleStripeCheckout(
 ) {
 	const url = new URL(request.url)
 	const sessionId = url.searchParams.get('session_id')
-	const organizationId = url.searchParams.get('organizationId')
 	if (!sessionId) {
 		return redirect('/pricing')
 	}
@@ -30,6 +33,11 @@ export async function handleStripeCheckout(
 		const session = await deps.stripe.checkout.sessions.retrieve(sessionId, {
 			expand: ['customer', 'subscription'],
 		})
+
+		const organizationId = session.metadata?.organizationId
+		if (!organizationId) {
+			throw new Error('No organization ID found in session metadata.')
+		}
 
 		if (!session.customer || typeof session.customer === 'string') {
 			throw new Error('Invalid customer data from Stripe.')
@@ -78,10 +86,6 @@ export async function handleStripeCheckout(
 			throw new Error('User not found in database.')
 		}
 
-		if (!organizationId) {
-			throw new Error('Tenant not found in database.')
-		}
-
 		const isMember = organizations.some(
 			(org) => org.organizationId === organizationId,
 		)
@@ -103,15 +107,48 @@ export async function handleStripeCheckout(
 			.returning({ slug: Organization.slug })
 		if (!tenant) throw new Error('Tenant not found in database.')
 
-		// Check if this is part of organization creation flow
-		const isCreationFlow = url.searchParams.get('creation') === 'true'
+		// Cancel and refund any duplicate subscriptions from concurrent checkouts
+		try {
+			const cleanup = await cleanupDuplicateSubscriptions(
+				deps.stripe,
+				customerId,
+			)
+			if (
+				cleanup.keptSubscriptionId &&
+				cleanup.keptSubscriptionId !== subscriptionId
+			) {
+				// A newer subscription won the dedup — sync org to the kept one
+				const keptSubscription = await deps.stripe.subscriptions.retrieve(
+					cleanup.keptSubscriptionId,
+					{ expand: ['items.data.price.product'] },
+				)
+				const keptPlan = keptSubscription.items.data[0]?.price
+				const keptProductId = keptPlan
+					? (keptPlan.product as Stripe.Product).id
+					: productId
+				await db
+					.update(Organization)
+					.set({
+						stripeSubscriptionId: cleanup.keptSubscriptionId,
+						stripeProductId: keptProductId,
+						planName: keptPlan
+							? (keptPlan.product as Stripe.Product).name
+							: (plan.product as Stripe.Product).name,
+						subscriptionStatus: keptSubscription.status,
+						updatedAt: new Date(),
+					})
+					.where(eq(Organization.id, organizationId))
+			}
+		} catch (error) {
+			console.error('Error cleaning up duplicate subscriptions:', error)
+		}
+
+		const isCreationFlow = session.metadata?.isCreationFlow === 'true'
 
 		if (isCreationFlow) {
-			// Continue with organization creation flow
 			return redirect(`/organizations/create?step=3&orgId=${organizationId}`)
 		}
 
-		// Regular checkout flow - go to dashboard
 		return redirect(`/${tenant.slug}/dashboard`)
 	} catch (error) {
 		console.error('Error handling successful checkout:', error)

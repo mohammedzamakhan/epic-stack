@@ -1,4 +1,5 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
 import MarkdownText from '../site/MarkdownText.astro'
 import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
@@ -71,7 +72,7 @@ const visibleTrustItems = trustItems.filter(
 		{
 			displayHeadline && (
 				<h1 class="max-w-4xl text-balance text-[clamp(2.75rem,8vw,7rem)] font-semibold leading-[0.96] tracking-[-0.055em] text-foreground sm:tracking-[-0.075em]">
-					{displayHeadline}
+					<MarkdownInline content={displayHeadline} />
 					{headlineAccent && (
 						<span class="text-brand">
 							{headlineAccent.startsWith(' ')

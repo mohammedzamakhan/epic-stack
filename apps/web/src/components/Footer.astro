@@ -1,54 +1,22 @@
 ---
 import { brand, getCopyright } from '@repo/config/brand'
+import type { SiteSettings } from 'emdash'
 import LanguageSwitcher from './LanguageSwitcher.astro'
 import SectionSeam from './site/SectionSeam.astro'
-import { getFooter } from '../lib/emdash'
+import { type FooterMenuColumn, resolveSiteLogo } from '../lib/emdash'
 
-const currentLocale = Astro.currentLocale ?? 'en'
-const footerData = (await getFooter(currentLocale)) as any
-const columns: any[] = Array.isArray(footerData?.columns) ? footerData.columns : []
-const copyrightText = footerData?.copyrightText || getCopyright()
-const tagline = footerData?.tagline || brand.description
+interface Props {
+	settings?: Partial<SiteSettings> | null
+	footerColumns?: FooterMenuColumn[]
+}
 
-const hasDynamicColumns = columns.length > 0
+const { settings = null, footerColumns = [] } = Astro.props
 
-const fallbackColumns = [
-	{
-		title: 'Product',
-		links: [
-			{ link: { label: 'Features', url: '/pages/features' } },
-			{ link: { label: 'Pricing', url: '/pages/pricing' } },
-			{ link: { label: 'Integrations', url: '/integrations' } },
-			{ link: { label: 'API', url: '/api' } },
-		],
-	},
-	{
-		title: 'Resources',
-		links: [
-			{ link: { label: 'Blog', url: '/posts' } },
-			{ link: { label: 'Documentation', url: '/docs' } },
-			{ link: { label: 'Support', url: '/support' } },
-			{ link: { label: 'Status', url: '/api/status' } },
-		],
-	},
-	{
-		title: 'Company',
-		links: [
-			{ link: { label: 'About', url: '/about' } },
-			{ link: { label: 'Careers', url: '/careers' } },
-			{ link: { label: 'Contact', url: '/contact' } },
-		],
-	},
-	{
-		title: 'Legal',
-		links: [
-			{ link: { label: 'Privacy', url: '/privacy' } },
-			{ link: { label: 'Terms', url: '/tos' } },
-		],
-	},
-]
-
-const displayColumns = hasDynamicColumns ? columns : fallbackColumns
+const siteTitle = settings?.title || brand.name
+const tagline = settings?.tagline || brand.description
+const copyrightText = getCopyright()
+const siteLogo = resolveSiteLogo(settings)
+const displayColumns = footerColumns
 ---
 
 <footer class="relative px-5 pb-12 pt-16 sm:px-8">
@@ -56,19 +24,38 @@ const displayColumns = hasDynamicColumns ? columns : fallbackColumns
 	<div class="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-6">
 		<div class="col-span-2">
 			<span class="flex items-center gap-2.5 text-foreground">
-				<svg
-					aria-hidden="true"
-					class="size-5 text-brand"
-					viewBox="0 0 65 65"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						fill="currentColor"
-						d="M39.445 25.555 37 17.163 65 0 47.821 28l-8.376-2.445Zm-13.89 0L28 17.163 0 0l17.179 28 8.376-2.445Zm13.89 13.89L37 47.837 65 65 47.821 37l-8.376 2.445Zm-13.89 0L28 47.837 0 65l17.179-28 8.376 2.445Z"
-					/>
-				</svg>
-				<span class="text-[19px] font-semibold leading-none tracking-[-0.025em]">{brand.name}</span>
+				{
+					siteLogo ? (
+						<>
+							<img
+								src={siteLogo.url}
+								alt={siteLogo.alt || siteTitle}
+								class="h-5 w-auto"
+							/>
+							<span class="text-[19px] font-semibold leading-none tracking-[-0.025em]">
+									{siteTitle}
+							</span>
+						</>
+					) : (
+						<>
+							<svg
+								aria-hidden="true"
+								class="size-5 text-brand"
+								viewBox="0 0 65 65"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill="currentColor"
+									d="M39.445 25.555 37 17.163 65 0 47.821 28l-8.376-2.445Zm-13.89 0L28 17.163 0 0l17.179 28 8.376-2.445Zm13.89 13.89L37 47.837 65 65 47.821 37l-8.376 2.445Zm-13.89 0L28 47.837 0 65l17.179-28 8.376 2.445Z"
+								/>
+							</svg>
+							<span class="text-[19px] font-semibold leading-none tracking-[-0.025em]">
+								{siteTitle}
+							</span>
+						</>
+					)
+				}
 			</span>
 			<p class="mt-5 max-w-xs text-pretty text-[14px] leading-relaxed text-muted-foreground">
 				{tagline}
@@ -76,25 +63,22 @@ const displayColumns = hasDynamicColumns ? columns : fallbackColumns
 		</div>
 
 		{
-			displayColumns.map((column: any) => (
-				<nav aria-label={column.title} class="flex flex-col">
-					<p class="text-[13px] font-medium text-foreground">{column.title}</p>
+			displayColumns.map((column) => (
+				<nav aria-label={column.heading} class="flex flex-col">
+					<p class="text-[13px] font-medium text-foreground">{column.heading}</p>
 					<ul class="mt-4 flex flex-col gap-3">
-						{column.links?.map((linkRef: any) => {
-							const link = linkRef.link
-							const href = link?.url || '#'
-							return (
-								<li>
-									<a
-										href={href}
-										target={link?.newTab ? '_blank' : undefined}
-										class="text-[14px] text-muted-foreground transition-colors hover:text-foreground"
-									>
-										{link?.label}
-									</a>
-								</li>
-							)
-						})}
+						{column.menu.items.map((item) => (
+							<li>
+								<a
+									href={item.url}
+									target={item.target}
+									rel={item.target ? 'noopener noreferrer' : undefined}
+									class="text-[14px] text-muted-foreground transition-colors hover:text-foreground"
+								>
+									{item.label}
+								</a>
+							</li>
+						))}
 					</ul>
 				</nav>
 			))

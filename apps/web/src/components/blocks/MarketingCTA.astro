@@ -1,4 +1,5 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
 import MarkdownText from '../site/MarkdownText.astro'
 import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
@@ -33,7 +34,7 @@ const {
 		></div>
 		<div class="relative mx-auto max-w-2xl text-center">
 			<h2 id="cta-heading" class="font-display text-balance text-[40px] font-medium tracking-[-0.03em] text-foreground sm:text-[56px]">
-				{title}
+				<MarkdownInline content={title} />
 			</h2>
 			{
 				description && (

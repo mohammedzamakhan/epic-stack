@@ -6,13 +6,19 @@ import RenderBlocks from '../components/RenderBlocks.astro'
 import MarketingBlocks from '../components/MarketingBlocks.astro'
 import SEO from '../components/SEO.astro'
 import { brand } from '@repo/config/brand'
+import { stripMarkdown } from '../lib/markdown'
 
 // Fetch home page content
 const currentLocale = Astro.currentLocale ?? 'en'
 const homePage = await getHomePage(currentLocale)
 
 // SEO data - always available regardless of CMS content
-const seoTitle = homePage?.seo?.title || (homePage as any)?.meta?.title || homePage?.title || `${brand.name} - ${brand.tagline}`
+const seoTitle = stripMarkdown(
+	homePage?.seo?.title ||
+		(homePage as any)?.meta?.title ||
+		homePage?.title ||
+		`${brand.name} - ${brand.tagline}`,
+)
 const seoDescription = homePage?.seo?.description || (homePage as any)?.meta?.description || brand.description
 const seoImage = homePage?.seo?.image || (homePage as any)?.meta?.image
 ---
@@ -108,13 +114,13 @@ const seoImage = homePage?.seo?.image || (homePage as any)?.meta?.image
 										<a
 											href={`/posts/${post.slug}`}
 											class="hover:text-primary/80 transition-colors"
-											set:html={post.title}
+											set:html={parseMarkdownInline(post.title)}
 										/>
 									</h3>
 									{post.meta?.description && (
 										<p
 											class="text-muted-foreground text-sm leading-relaxed pl-4"
-											set:html={post.meta.description}
+											set:html={parseMarkdownBlock(post.meta.description)}
 										/>
 									)}
 									<a

@@ -270,6 +270,7 @@ describe('StripeProvider', () => {
 					cancel_url: 'https://example.com/cancel',
 					customer: 'cus_123',
 				}),
+				undefined,
 			)
 		})
 
@@ -293,6 +294,33 @@ describe('StripeProvider', () => {
 						trial_period_days: 14,
 					},
 				}),
+				undefined,
+			)
+		})
+
+		it('should pass metadata and idempotency key when specified', async () => {
+			mockStripeInstance.checkout.sessions.create.mockResolvedValue({
+				id: 'cs_123',
+				url: 'https://checkout.stripe.com/pay/cs_123',
+			})
+
+			await stripeProvider.createCheckoutSession({
+				priceId: 'price_123',
+				quantity: 1,
+				successUrl: 'https://example.com/success',
+				cancelUrl: 'https://example.com/cancel',
+				metadata: { organizationId: 'org_123', isCreationFlow: 'false' },
+				idempotencyKey: 'checkout-org_123-price_123',
+			})
+
+			expect(mockStripeInstance.checkout.sessions.create).toHaveBeenCalledWith(
+				expect.objectContaining({
+					metadata: {
+						organizationId: 'org_123',
+						isCreationFlow: 'false',
+					},
+				}),
+				{ idempotencyKey: 'checkout-org_123-price_123' },
 			)
 		})
 

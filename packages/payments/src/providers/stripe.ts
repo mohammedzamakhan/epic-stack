@@ -173,6 +173,7 @@ export class StripeProvider implements PaymentProvider {
 			client_reference_id: options.clientReferenceId,
 			allow_promotion_codes: options.allowPromotionCodes,
 			payment_method_collection: options.paymentMethodCollection,
+			metadata: options.metadata,
 		}
 
 		if (options.trialPeriodDays !== undefined) {
@@ -181,7 +182,14 @@ export class StripeProvider implements PaymentProvider {
 			}
 		}
 
-		const session = await this.stripe.checkout.sessions.create(sessionData)
+		const requestOptions = options.idempotencyKey
+			? { idempotencyKey: options.idempotencyKey }
+			: undefined
+
+		const session = await this.stripe.checkout.sessions.create(
+			sessionData,
+			requestOptions,
+		)
 
 		return {
 			id: session.id,

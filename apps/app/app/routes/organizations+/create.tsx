@@ -60,6 +60,7 @@ import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
 } from '#app/utils/organization/invitation.server.ts'
+import { MAX_ORGANIZATION_INVITES_PER_REQUEST } from '#app/utils/organization/invitation.ts'
 import {
 	createOrganization,
 	setUserDefaultOrganization,
@@ -70,6 +71,11 @@ import {
 	getPlansAndPrices,
 	createCheckoutSession,
 } from '#app/utils/payments.server.ts'
+import {
+	checkRateLimit,
+	createRateLimitResponse,
+	ORGANIZATION_INVITE_RATE_LIMIT,
+} from '#app/utils/rate-limit.server.ts'
 import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
 
@@ -144,6 +150,7 @@ const InviteSchema = z.object({
 				role: z.enum(DEFAULT_AVAILABLE_ROLES),
 			}),
 		)
+		.max(MAX_ORGANIZATION_INVITES_PER_REQUEST)
 		.optional(),
 })
 
@@ -255,6 +262,14 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		await userHasOrgAccess(request, orgId)
+
+		const rateLimitCheck = await checkRateLimit(
+			{ type: 'user', value: `${userId}:${orgId}` },
+			ORGANIZATION_INVITE_RATE_LIMIT,
+		)
+		if (!rateLimitCheck.allowed) {
+			return createRateLimitResponse(rateLimitCheck.resetAt)
+		}
 
 		const { invites } = submission.value
 

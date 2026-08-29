@@ -1,4 +1,5 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
 import MarkdownText from '../site/MarkdownText.astro'
 import Eyebrow from '../site/Eyebrow.astro';
 import Reveal from '../site/Reveal.astro';
@@ -69,7 +70,7 @@ const {
 			{eyebrow && <Eyebrow class="mb-5">{eyebrow}</Eyebrow>}
 			{title && (
 				<h2 class="font-display text-balance text-[40px] font-medium leading-[1.08] tracking-[-0.035em] sm:text-[54px] sm:leading-[1.06] lg:text-[68px]">
-					{title}
+					<MarkdownInline content={title} />
 				</h2>
 			)}
 			{description && (

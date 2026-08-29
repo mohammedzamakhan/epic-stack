@@ -81,6 +81,12 @@ export const SHOP_CONNECT_ONBOARDING_RATE_LIMIT: RateLimitConfig = {
 	windowMs: 30 * 1000,
 }
 
+export const ORGANIZATION_INVITE_RATE_LIMIT: RateLimitConfig = {
+	scope: 'org-send-invitations',
+	maxRequests: isDev ? 1000 : 20,
+	windowMs: 60 * 60 * 1000, // 1 hour
+}
+
 /**
  * Serialize all rate-limit checks within this process.
  *

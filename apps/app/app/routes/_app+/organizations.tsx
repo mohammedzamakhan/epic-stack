@@ -2,14 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
-import {
-	and,
-	db,
-	eq,
-	OrganizationInvitation,
-	User,
-	UserOrganization,
-} from '@repo/database'
+import { db, eq, OrganizationInvitation, User } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
@@ -37,11 +30,11 @@ import {
 } from 'react-router'
 
 import { EmptyState } from '#app/components/empty-state.tsx'
+import { acceptInvitationById } from '#app/utils/organization/invitation.server.ts'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
 } from '#app/utils/organization/organizations.server.ts'
-import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -146,50 +139,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'accept-invitation') {
 		try {
-			await validateInvitationOwnership(userId, invitationId)
-
-			const invitation = await db.query.OrganizationInvitation.findFirst({
-				where: (record, { eq }) => eq(record.id, invitationId),
-				with: { organization: true, organizationRole: true },
-			})
-
-			// This should not happen since validateInvitationOwnership already checked
-			invariantResponse(invitation, 'Invitation not found', { status: 404 })
-
-			// Check if user is already a member
-			const [existingMember] = await db
-				.select({ userId: UserOrganization.userId })
-				.from(UserOrganization)
-				.where(
-					and(
-						eq(UserOrganization.userId, userId),
-						eq(UserOrganization.organizationId, invitation.organizationId),
-					),
-				)
-				.limit(1)
-
-			if (!existingMember) {
-				// Add user to organization with the correct role
-				await db.insert(UserOrganization).values({
-					userId,
-					organizationId: invitation.organizationId,
-					organizationRoleId: invitation.organizationRoleId,
-					active: true,
-				})
-
-				// Update seat quantity for billing
-				try {
-					await updateSeatQuantity(invitation.organizationId)
-				} catch {
-					// Failed to update seat quantity
-				}
-			}
-
-			// Delete the invitation
-			await db
-				.delete(OrganizationInvitation)
-				.where(eq(OrganizationInvitation.id, invitationId))
-
+			await acceptInvitationById(invitationId, userId)
 			return Response.json({ success: true })
 		} catch {
 			return Response.json(

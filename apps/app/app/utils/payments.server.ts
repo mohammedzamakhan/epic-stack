@@ -17,6 +17,7 @@ import {
 import { type Organization } from '@repo/database/types'
 import { sendEmail, TrialEndingEmail } from '@repo/email'
 import {
+	cleanupDuplicateSubscriptions as cleanupDuplicateStripeSubscriptions,
 	createStripeProvider,
 	getTrialConfig,
 	calculateManualTrialDaysRemaining,
@@ -171,25 +172,34 @@ export async function createCheckoutSession(
 	}
 
 	// Check if organization has existing active subscription
-	if (
-		organization.stripeCustomerId &&
-		organization.stripeSubscriptionId &&
-		from === 'checkout'
-	) {
+	if (organization.stripeCustomerId && from === 'checkout') {
 		try {
-			const subscription = await paymentProvider.retrieveSubscription(
-				organization.stripeSubscriptionId,
+			const subscriptions = await paymentProvider.listSubscriptions(
+				organization.stripeCustomerId,
 			)
 
-			if (
-				subscription.status === 'active' ||
-				subscription.status === 'trialing'
-			) {
-				// This is an upgrade - modify existing subscription instead of creating new one
-				await upgradeSubscription(organization, priceId)
-				return data({
-					success: true,
-				})
+			const activeOrTrialing = subscriptions.filter(
+				(sub) => sub.status === 'active' || sub.status === 'trialing',
+			)
+
+			if (activeOrTrialing.length > 0) {
+				const subscriptionToUpgrade =
+					activeOrTrialing.find(
+						(sub) => sub.id === organization.stripeSubscriptionId,
+					) ?? activeOrTrialing[0]
+
+				if (subscriptionToUpgrade) {
+					const orgForUpgrade =
+						organization.stripeSubscriptionId === subscriptionToUpgrade.id
+							? organization
+							: {
+									...organization,
+									stripeSubscriptionId: subscriptionToUpgrade.id,
+								}
+
+					await upgradeSubscription(orgForUpgrade, priceId)
+					return data({ success: true })
+				}
 			}
 		} catch (error) {
 			console.error('Error checking existing subscription:', error)
@@ -218,10 +228,21 @@ export async function createCheckoutSession(
 		}
 	}
 
+	const trialPeriodDays =
+		trialConfig.creditCardRequired === 'manual'
+			? (() => {
+					if (!organization.createdAt) return undefined
+					const daysRemaining = calculateManualTrialDaysRemaining(
+						organization.createdAt,
+					)
+					return daysRemaining > 0 ? daysRemaining : undefined
+				})()
+			: trialConfig.trialDays
+
 	const session = await paymentProvider.createCheckoutSession({
 		priceId,
 		quantity,
-		successUrl: `${getDomainUrl(request)}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}${isCreationFlow ? '&creation=true' : ''}`,
+		successUrl: `${getDomainUrl(request)}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
 		cancelUrl:
 			from === 'checkout'
 				? `${getDomainUrl(request)}/${organization.slug}/settings/billing`
@@ -229,12 +250,14 @@ export async function createCheckoutSession(
 		customerId: organization.stripeCustomerId || testCustomerId || undefined,
 		clientReferenceId: userId.toString(),
 		allowPromotionCodes: true,
-		trialPeriodDays:
-			trialConfig.creditCardRequired === 'manual'
-				? undefined
-				: trialConfig.trialDays,
+		trialPeriodDays,
 		paymentMethodCollection:
 			trialConfig.creditCardRequired === 'stripe' ? 'if_required' : 'always',
+		metadata: {
+			organizationId: organization.id,
+			isCreationFlow: isCreationFlow ? 'true' : 'false',
+		},
+		idempotencyKey: `checkout-${organization.id}-${priceId}`,
 	})
 
 	return redirect(session.url!)
@@ -390,8 +413,38 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 
 		const trialConfig = getTrialConfig()
 
+		if (!organization) {
+			return { isActive: false, daysRemaining: 0 }
+		}
+
+		// Paid subscription takes precedence over manual app-enforced trial
+		if (
+			organization.stripeCustomerId &&
+			organization.stripeSubscriptionId &&
+			(organization.subscriptionStatus === 'active' ||
+				organization.subscriptionStatus === 'trialing')
+		) {
+			if (organization.subscriptionStatus === 'active') {
+				return { isActive: true, daysRemaining: 0 }
+			}
+
+			const subscription = await paymentProvider.retrieveSubscription(
+				organization.stripeSubscriptionId,
+			)
+
+			if (subscription.status === 'trialing' && subscription.trialEnd) {
+				const daysRemaining = Math.ceil(
+					(subscription.trialEnd.getTime() - Date.now()) /
+						(1000 * 60 * 60 * 24),
+				)
+				return { isActive: true, daysRemaining: Math.max(0, daysRemaining) }
+			}
+
+			return { isActive: true, daysRemaining: 0 }
+		}
+
 		if (trialConfig.creditCardRequired === 'manual') {
-			if (!organization?.createdAt) {
+			if (!organization.createdAt) {
 				return { isActive: false, daysRemaining: 0 }
 			}
 
@@ -404,7 +457,7 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 			}
 		}
 
-		if (!user || !organization || !organization?.stripeCustomerId) {
+		if (!user || !organization.stripeCustomerId) {
 			return { isActive: false, daysRemaining: 0 }
 		}
 
@@ -452,6 +505,8 @@ const getOrganizationSeatQuantity = async (organizationId: string) => {
 	return row?.value ?? 0
 }
 
+const seatUpdateQueues = new Map<string, Promise<unknown>>()
+
 export const updateSeatQuantity = async (organizationId: string) => {
 	const [organization] = await db
 		.select()
@@ -463,30 +518,61 @@ export const updateSeatQuantity = async (organizationId: string) => {
 		return null
 	}
 
-	// Get the number of users in the organization
-	const numUsersInOrganization =
-		await getOrganizationSeatQuantity(organizationId)
-
-	// Get the subscription
-	const subscription = await paymentProvider.retrieveSubscription(
-		organization.stripeSubscriptionId,
+	const stripeSubscriptionId = organization.stripeSubscriptionId
+	const previous = seatUpdateQueues.get(organizationId) ?? Promise.resolve()
+	const run = previous.then(
+		() => syncSeatQuantity(organizationId, stripeSubscriptionId),
+		() => syncSeatQuantity(organizationId, stripeSubscriptionId),
 	)
+	seatUpdateQueues.set(
+		organizationId,
+		run.then(
+			() => undefined,
+			() => undefined,
+		),
+	)
+	return run
+}
 
-	if (subscription.items.length !== 1) {
-		throw new Error('Subscription does not have exactly 1 item')
+async function syncSeatQuantity(
+	organizationId: string,
+	stripeSubscriptionId: string,
+) {
+	let lastResult: Awaited<
+		ReturnType<typeof paymentProvider.updateSubscription>
+	> | null = null
+
+	// Re-count after each Stripe write so concurrent accepts cannot leave
+	// quantity stuck on a stale snapshot (last-write-wins).
+	for (let attempt = 0; attempt < 3; attempt++) {
+		const numUsersInOrganization =
+			await getOrganizationSeatQuantity(organizationId)
+
+		const subscription =
+			await paymentProvider.retrieveSubscription(stripeSubscriptionId)
+
+		if (subscription.items.length !== 1) {
+			throw new Error('Subscription does not have exactly 1 item')
+		}
+
+		const firstItem = subscription.items[0]
+		if (!firstItem) {
+			throw new Error('Subscription item not found')
+		}
+
+		lastResult = await paymentProvider.updateSubscription({
+			subscriptionId: stripeSubscriptionId,
+			priceId: firstItem.priceId,
+			quantity: numUsersInOrganization,
+		})
+
+		const recount = await getOrganizationSeatQuantity(organizationId)
+		if (recount === numUsersInOrganization) {
+			return lastResult
+		}
 	}
 
-	const firstItem = subscription.items[0]
-	if (!firstItem) {
-		throw new Error('Subscription item not found')
-	}
-
-	// Update the subscription
-	return paymentProvider.updateSubscription({
-		subscriptionId: organization.stripeSubscriptionId,
-		priceId: firstItem.priceId,
-		quantity: numUsersInOrganization,
-	})
+	return lastResult
 }
 
 export const checkoutAction = async (
@@ -534,41 +620,29 @@ export async function cleanupDuplicateSubscriptions(
 	}
 
 	try {
-		// Get all subscriptions for this customer
-		const subscriptions = await paymentProvider.listSubscriptions(
+		const cleanup = await cleanupDuplicateStripeSubscriptions(
+			stripe,
 			organization.stripeCustomerId,
 		)
 
-		const activeSubscriptions = subscriptions.filter(
-			(sub) => sub.status === 'active',
-		)
-
-		if (activeSubscriptions.length <= 1) {
-			return // No duplicates
-		}
-
-		// Sort by ID (newer subscriptions have higher IDs in most cases)
-		const sortedSubscriptions = activeSubscriptions.sort((a, b) =>
-			b.id.localeCompare(a.id),
-		)
-
-		// Keep the newest subscription, cancel the rest
-		const [keepSubscription, ...cancelSubscriptions] = sortedSubscriptions
-
-		if (!keepSubscription) {
-			console.error('No subscription to keep after sorting')
+		if (!cleanup.keptSubscriptionId) {
 			return
 		}
 
-		for (const sub of cancelSubscriptions) {
-			await paymentProvider.cancelSubscription(sub.id)
+		const subscriptions = await paymentProvider.listSubscriptions(
+			organization.stripeCustomerId,
+		)
+		const keepSubscription = subscriptions.find(
+			(sub) => sub.id === cleanup.keptSubscriptionId,
+		)
+
+		if (!keepSubscription) {
+			return
 		}
 
-		// Get product details
 		const products = await paymentProvider.getProducts()
 		const product = products.find((p) => p.id === keepSubscription.productId)
 
-		// Update organization with the kept subscription
 		await updateOrganizationSubscription(organization.id, {
 			stripeSubscriptionId: keepSubscription.id,
 			stripeProductId: keepSubscription.productId,
