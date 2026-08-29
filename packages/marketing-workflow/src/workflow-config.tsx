@@ -25,10 +25,6 @@ export interface WorkflowConfig {
 }
 
 const TENANT_TRIGGER_LABELS: Record<string, { label: string; desc: string }> = {
-	customer_signup: {
-		label: 'Customer Signup',
-		desc: 'Runs when a new customer registers',
-	},
 	phone_verified: {
 		label: 'Phone Verified',
 		desc: 'Runs when customer verifies phone OTP',
@@ -36,14 +32,6 @@ const TENANT_TRIGGER_LABELS: Record<string, { label: string; desc: string }> = {
 	profile_completed: {
 		label: 'Profile Completed',
 		desc: 'Runs when customer updates name/email',
-	},
-	tag_added: {
-		label: 'Tag Added',
-		desc: 'Runs when a tag is applied to customer',
-	},
-	form_submitted: {
-		label: 'Form Submitted',
-		desc: 'Runs on website form submission',
 	},
 	custom_event: {
 		label: 'Custom Event',
@@ -56,11 +44,8 @@ const TENANT_TRIGGER_LABELS: Record<string, { label: string; desc: string }> = {
 }
 
 const TENANT_TRIGGER_OPTIONS: TriggerOption[] = [
-	{ value: 'customer_signup', label: 'Customer Signup (Registration)' },
 	{ value: 'phone_verified', label: 'Phone Verified (OTP Success)' },
 	{ value: 'profile_completed', label: 'Profile Completed (Name/Email)' },
-	{ value: 'tag_added', label: 'Tag Added' },
-	{ value: 'form_submitted', label: 'Form Submitted' },
 	{ value: 'custom_event', label: 'Custom Event' },
 	{ value: 'manual', label: 'Manual Trigger' },
 ]
@@ -141,7 +126,7 @@ function createTenantPaletteItems(): PaletteItem[] {
 		{
 			...BASE_PALETTE_ITEMS[0]!,
 			defaultData: {
-				triggerType: 'customer_signup' as JourneyTriggerType,
+				triggerType: 'phone_verified' as JourneyTriggerType,
 				config: {},
 			},
 		},

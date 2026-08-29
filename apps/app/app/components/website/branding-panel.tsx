@@ -142,6 +142,9 @@ export function BrandingPanel({
 				mode: theme.mode,
 				...(theme.headingFont ? { headingFont: theme.headingFont } : {}),
 				...(theme.bodyFont ? { bodyFont: theme.bodyFont } : {}),
+				...(theme.cssVars && Object.keys(theme.cssVars).length > 0
+					? { cssVars: JSON.stringify(theme.cssVars) }
+					: {}),
 			},
 			{ method: 'POST' },
 		)

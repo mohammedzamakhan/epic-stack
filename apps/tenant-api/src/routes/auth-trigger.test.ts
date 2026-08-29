@@ -72,15 +72,10 @@ describe('Auth Trigger Lifecycle Hooks', () => {
 		vi.restoreAllMocks()
 	})
 
-	it('spawns active customer_signup and phone_verified journeys upon OTP verify', async () => {
+	it('spawns active phone_verified journeys upon OTP verify', async () => {
 		const db = await getTenantDb(orgId)
 
-		// Create active journeys
-		await db.insert(marketingJourneys).values({
-			name: 'Welcome on Signup',
-			status: 'active',
-			triggerType: 'customer_signup',
-		})
+		// Create active journey
 		await db.insert(marketingJourneys).values({
 			name: 'SMS on Phone Verified',
 			status: 'active',
@@ -130,7 +125,7 @@ describe('Auth Trigger Lifecycle Hooks', () => {
 
 		expect(runs.length).toBeGreaterThanOrEqual(1)
 		const triggerEvents = runs.map((r) => r.triggerEvent)
-		expect(triggerEvents).toContain('customer_signup')
+		expect(triggerEvents).toContain('phone_verified')
 	})
 
 	it('spawns active profile_completed journeys upon customer profile update', async () => {

@@ -1,7 +1,10 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { getDomainUrl, isCloudflareWorkerRuntime } from '@repo/common'
 import { validateInstanceUrl } from '@repo/security'
-import { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'
+import {
+	getSignedGetRequestInfoAsync,
+	getSignedHeadRequestInfoAsync,
+} from '#app/utils/storage.server.ts'
 import { type Route } from './+types/images'
 
 type ImageFit = 'cover' | 'contain'
@@ -33,6 +36,66 @@ function parseImageParams(searchParams: URLSearchParams): ImageParams {
 				? format
 				: undefined,
 	}
+}
+
+const VIDEO_OBJECT_KEY = /\.(mp4|webm|mov|m4v)$/i
+const VIDEO_PASSTHROUGH_HEADERS = [
+	'content-type',
+	'content-length',
+	'content-range',
+	'accept-ranges',
+	'etag',
+	'last-modified',
+] as const
+
+function isVideoObjectKey(objectKey: string) {
+	return VIDEO_OBJECT_KEY.test(objectKey)
+}
+
+async function streamStoredVideo(
+	request: Request,
+	objectKey: string,
+	organizationId: string | null,
+) {
+	const method = request.method === 'HEAD' ? 'HEAD' : 'GET'
+	const { url: storageUrl, headers: signedHeaders } =
+		method === 'HEAD'
+			? await getSignedHeadRequestInfoAsync(
+					objectKey,
+					organizationId ?? undefined,
+				)
+			: await getSignedGetRequestInfoAsync(
+					objectKey,
+					organizationId ?? undefined,
+				)
+
+	const upstreamHeaders = new Headers(signedHeaders)
+	const range = request.headers.get('Range')
+	if (range) upstreamHeaders.set('Range', range)
+
+	const upstream = await fetch(storageUrl, {
+		method,
+		headers: upstreamHeaders,
+	})
+
+	const responseHeaders = getImageResponseHeaders()
+	for (const headerName of VIDEO_PASSTHROUGH_HEADERS) {
+		const value = upstream.headers.get(headerName)
+		if (value) responseHeaders.set(headerName, value)
+	}
+	responseHeaders.set('Accept-Ranges', 'bytes')
+
+	if (method === 'HEAD') {
+		return new Response(null, {
+			status: upstream.status,
+			headers: responseHeaders,
+		})
+	}
+
+	return new Response(upstream.body, {
+		status: upstream.status,
+		headers: responseHeaders,
+	})
 }
 
 function getImageResponseHeaders() {
@@ -169,6 +232,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 			invariantResponse(false, 'Invalid or low-entropy objectKey parameter', {
 				status: 400,
 			})
+		}
+		if (isVideoObjectKey(objectKey)) {
+			return streamStoredVideo(request, objectKey, organizationId)
 		}
 	}
 

@@ -80,13 +80,13 @@ describe('Jobs-Cron Worker Endpoints', () => {
 			runId: 'run_xyz_789',
 			customerId: 'cust_999',
 			tenantApiUrl: 'http://localhost:3007',
-			triggerEvent: 'customer_signup',
+			triggerEvent: 'phone_verified',
 			graph: {
 				nodes: [
 					{
 						id: 'node_trigger',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{
 						id: 'node_email',
@@ -207,7 +207,7 @@ describe('Jobs-Cron Worker Endpoints', () => {
 						{
 							id: 'n1',
 							type: 'trigger',
-							data: { triggerType: 'customer_signup' },
+							data: { triggerType: 'phone_verified' },
 						},
 					],
 					edges: [],

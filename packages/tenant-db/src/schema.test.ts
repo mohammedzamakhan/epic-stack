@@ -66,7 +66,7 @@ describe('Tenant Database Schema & Drizzle Migrations', () => {
 				{
 					id: 't-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'a-1',
@@ -86,7 +86,7 @@ describe('Tenant Database Schema & Drizzle Migrations', () => {
 				name: 'Onboarding Welcome Flow',
 				description: 'Automated welcome email after signup',
 				status: 'active',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 				triggerConfig: JSON.stringify({ tag: 'new-user' }),
 				graphJson: JSON.stringify(graphData),
 				nodes: JSON.stringify(graphData.nodes),
@@ -101,7 +101,7 @@ describe('Tenant Database Schema & Drizzle Migrations', () => {
 		expect(journey.id).toBeTruthy()
 		expect(journey.name).toBe('Onboarding Welcome Flow')
 		expect(journey.status).toBe('active')
-		expect(journey.triggerType).toBe('customer_signup')
+		expect(journey.triggerType).toBe('phone_verified')
 		expect(journey.publishedAt).toBeInstanceOf(Date)
 
 		const queried = await db.query.marketingJourneys.findFirst({

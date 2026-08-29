@@ -13,6 +13,7 @@ not_found_handling = "none"
 PUBLIC_APP_URL = "https://epic-startup-app.zama-887.workers.dev"
 ROOT_APP = "workers.dev"
 PUBLIC_SITE_HOST_SUFFIXES = "workers.dev"
+TENANT_API_URL = "https://epic-startup-tenant-api-us.zama-887.workers.dev"
 
 [env.production]
 name = "epic-startup-sites"

@@ -10,7 +10,7 @@ import { useWorkflowConfig } from '../workflow-config.tsx'
 function TriggerNodeComponent({ data, selected }: NodeProps<TriggerFlowNode>) {
 	const { _ } = useLingui()
 	const { triggerLabels } = useWorkflowConfig()
-	const triggerType = data.triggerType || 'customer_signup'
+	const triggerType = data.triggerType || 'phone_verified'
 	const info = triggerLabels[triggerType] || {
 		label: triggerType,
 		desc: _(msg`Custom trigger event`),

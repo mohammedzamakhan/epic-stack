@@ -1,4 +1,7 @@
-import { ENV } from 'varlock/env'
+import {
+	getTenantApiUrl as getUsTenantApiUrl,
+	getTenantApiUrlKsa,
+} from '~/lib/worker-env'
 
 /**
  * Regional tenant-api URL for this org.
@@ -9,14 +12,8 @@ import { ENV } from 'varlock/env'
 export function getTenantApiUrl(dataRegion?: string | null): string {
 	const region = (dataRegion || 'us').toLowerCase()
 	if (region === 'ksa') {
-		const ksaUrl = process.env.TENANT_API_URL_KSA || ENV.TENANT_API_URL_KSA
-		if (ksaUrl) {
-			return ksaUrl.replace(/\/$/, '')
-		}
+		const ksaUrl = getTenantApiUrlKsa()
+		if (ksaUrl) return ksaUrl
 	}
-	return (
-		process.env.TENANT_API_URL ||
-		ENV.TENANT_API_URL ||
-		'http://localhost:3007'
-	).replace(/\/$/, '')
+	return getUsTenantApiUrl()
 }

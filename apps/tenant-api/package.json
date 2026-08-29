@@ -8,9 +8,11 @@
     "dev": "tsx watch src/index.ts",
     "dev:ksa": "DATA_REGION=ksa PORT=3009 tsx watch src/index.ts",
     "start": "node --import=tsx src/index.ts",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "generate:do-migrations": "node scripts/generate-do-migrations.mjs",
+    "build": "npm run generate:do-migrations && tsc",
+    "typecheck": "npm run generate:do-migrations && tsc --noEmit",
+    "test": "vitest run",
+    "deploy:cf": "npm run generate:do-migrations && wrangler deploy"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
@@ -29,8 +31,10 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250811.0",
     "@types/node": "^22.19.6",
     "typescript": "^5.8.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.118.0"
   }
 }

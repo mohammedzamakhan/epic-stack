@@ -1,5 +1,11 @@
 import { storeUtmParams } from '@repo/analytics'
-import { getImpersonationInfo, getUserId, logout } from '@repo/auth'
+import {
+	getImpersonationInfo,
+	getUserId,
+	logout,
+	ORG_PERMISSIONS,
+	requireUserWithOrganizationPermission,
+} from '@repo/auth'
 import { cache, cachified } from '@repo/cache'
 import {
 	combineHeaders,
@@ -15,6 +21,7 @@ import { getSidebarState } from '@repo/common/sidebar-cookie'
 import { getToast } from '@repo/common/toast'
 import { brand, getErrorTitle } from '@repo/config/brand'
 import {
+	and,
 	db,
 	eq,
 	Organization,
@@ -24,6 +31,7 @@ import {
 	Role,
 	User,
 	UserImage,
+	WebsitePage,
 	_RoleToUser,
 	_PermissionToRole,
 } from '@repo/database'
@@ -278,6 +286,50 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		getCookieConsentState(request),
 	])
 
+	// Resolve the home page id for the current org, so the sidebar can
+	// deep-link the Branding sub-item directly to the home-page editor.
+	// Best-effort: returns null if the user lacks website read access or
+	// the org has no home page yet (freshly created orgs).
+	const currentOrgId = userOrganizations?.currentOrganization?.organization.id
+	let homePageId: string | null = null
+	if (currentOrgId && userId) {
+		const hasWebsiteAccess = await time(
+			async () => {
+				try {
+					await requireUserWithOrganizationPermission(
+						userId,
+						currentOrgId,
+						ORG_PERMISSIONS.READ_WEBSITE_ANY,
+					)
+					return true
+				} catch {
+					return false
+				}
+			},
+			{ timings, type: 'check website permission', desc: 'check website perm' },
+		)
+		if (hasWebsiteAccess) {
+			homePageId = await cachified({
+				key: `home-page-id:${currentOrgId}`,
+				cache,
+				ttl: 1000 * 60 * 2,
+				getFreshValue: async () => {
+					const [row] = await db
+						.select({ id: WebsitePage.id })
+						.from(WebsitePage)
+						.where(
+							and(
+								eq(WebsitePage.organizationId, currentOrgId),
+								eq(WebsitePage.isHomePage, true),
+							),
+						)
+						.limit(1)
+					return row?.id ?? null
+				},
+			})
+		}
+	}
+
 	const utmHeaders = utmResponse?.headers || {}
 
 	return data(
@@ -292,6 +344,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			impersonationInfo,
 			cookieConsent,
 			launchStatus: getLaunchStatus(),
+			homePageId,
 			env: {
 				NODE_ENV: ENV.NODE_ENV,
 				ALLOW_INDEXING: ENV.ALLOW_INDEXING,

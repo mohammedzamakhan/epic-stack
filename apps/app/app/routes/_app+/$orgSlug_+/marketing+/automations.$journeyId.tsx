@@ -40,7 +40,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			name: String(journey.name),
 			description: journey.description ? String(journey.description) : null,
 			status: (journey.status || 'draft') as JourneyStatus,
-			triggerType: String(journey.triggerType || 'customer_signup'),
+			triggerType: String(journey.triggerType || 'phone_verified'),
 			graphJson: journey.graphJson ? String(journey.graphJson) : undefined,
 			nodes,
 			edges,
@@ -72,7 +72,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		const triggerNode = parsedGraph.nodes.find((n: any) => n.type === 'trigger')
 		const triggerType =
-			(triggerNode?.data as any)?.triggerType || 'customer_signup'
+			(triggerNode?.data as any)?.triggerType || 'phone_verified'
 		const triggerConfig =
 			((triggerNode?.data as any)?.config as Record<string, unknown>) || {}
 

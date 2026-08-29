@@ -211,7 +211,7 @@ describe('Adversarial Security & Robustness Suite: Marketing Journey Builder', (
 					'/operator/journeys',
 					expect.objectContaining({
 						method: 'POST',
-						body: expect.stringContaining('"triggerType":"customer_signup"'),
+						body: expect.stringContaining('"triggerType":"phone_verified"'),
 					}),
 				)
 				expect((response as Response).headers.get('Location')).toBe(
@@ -615,7 +615,7 @@ describe('Adversarial Security & Robustness Suite: Marketing Journey Builder', (
 							JSON.stringify({
 								journey: {
 									name: 'Original Journey',
-									triggerType: 'customer_signup',
+									triggerType: 'phone_verified',
 									nodes: [],
 									edges: [],
 								},
@@ -750,7 +750,7 @@ describe('Adversarial Security & Robustness Suite: Marketing Journey Builder', (
 									id: 'j1',
 									name: 'Active Journey',
 									status: 'active',
-									triggerType: 'customer_signup',
+									triggerType: 'phone_verified',
 								},
 							}),
 							{ status: 200 },

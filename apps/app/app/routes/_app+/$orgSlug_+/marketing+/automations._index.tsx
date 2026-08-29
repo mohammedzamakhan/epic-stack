@@ -101,7 +101,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			name: String(j.name),
 			description: j.description as string | null | undefined,
 			status: j.status as JourneyListItem['status'],
-			triggerType: String(j.triggerType || 'customer_signup'),
+			triggerType: String(j.triggerType || 'phone_verified'),
 			stepCount: Array.isArray(j.nodes) ? j.nodes.length : 0,
 			runsCount: Number(j.runsCount) || 0,
 			updatedAt: String(j.updatedAt || j.createdAt || new Date().toISOString()),

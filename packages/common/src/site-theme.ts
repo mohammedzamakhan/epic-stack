@@ -96,7 +96,7 @@ export const SITE_THEME_RADIUS_VALUES: Record<SiteThemeRadius, string> = {
 	full: '1.2rem',
 }
 
-export const SITE_THEME_MODES = ['light', 'dark', 'system'] as const
+export const SITE_THEME_MODES = ['light', 'dark'] as const
 
 export type SiteBaseColor = (typeof SITE_BASE_COLORS)[number]
 export type SiteThemeColor = (typeof SITE_THEME_COLORS)[number]
@@ -112,17 +112,19 @@ export type SiteThemeConfig = {
 	bodyFont: SiteFontSelection
 	headingCustomFont: SiteCustomFont | null
 	bodyCustomFont: SiteCustomFont | null
+	cssVars?: Record<string, string> | null
 }
 
 export const DEFAULT_SITE_THEME: SiteThemeConfig = {
 	baseColor: 'neutral',
 	theme: 'neutral',
 	radius: 'default',
-	mode: 'system',
+	mode: 'light',
 	headingFont: 'inter',
 	bodyFont: 'inter',
 	headingCustomFont: null,
 	bodyCustomFont: null,
+	cssVars: null,
 }
 
 type ThemeTokens = Record<string, string>
@@ -304,6 +306,7 @@ export function parseSiteThemeConfig(
 					: bodyFont,
 			headingCustomFont,
 			bodyCustomFont,
+			cssVars: parsed.cssVars as SiteThemeConfig['cssVars'],
 		}
 	} catch {
 		return { ...DEFAULT_SITE_THEME }
@@ -325,18 +328,47 @@ export function resolveSiteThemeTokens(config: SiteThemeConfig): {
 	const theme = THEME_BY_NAME[config.theme] ?? THEME_BY_NAME.neutral!
 	const radius = SITE_THEME_RADIUS_VALUES[config.radius]
 
-	const light = toCssVarMap({
+	const lightRaw: ThemeTokens = {
 		...base.cssVars.light,
 		...theme.cssVars.light,
 		radius,
-	})
-	const dark = toCssVarMap({
+		...config.cssVars,
+	}
+	const darkRaw: ThemeTokens = {
 		...base.cssVars.dark,
 		...theme.cssVars.dark,
 		radius,
-	})
+		...config.cssVars,
+	}
 
-	return { light, dark }
+	return {
+		light: toCssVarMap(lightRaw),
+		dark: toCssVarMap(darkRaw),
+	}
+}
+
+/**
+ * Resolve only the base+theme+radius preset tokens for the current config,
+ * without applying any user `cssVars` overrides. Useful for pre-filling an
+ * editor with the active preset value or for showing a "preset" hint next
+ * to an overridden token. Returns the variant for the current `config.mode`
+ * (light or dark) so the editor reflects what the user is actually previewing.
+ * Keys are unprefixed (e.g. `primary`) to match the `SiteThemeConfig.cssVars`
+ * shape; the radius token is included as `radius`.
+ */
+export function resolveSiteThemePresetTokens(
+	config: SiteThemeConfig,
+): ThemeTokens {
+	const base = THEME_BY_NAME[config.baseColor] ?? THEME_BY_NAME.neutral!
+	const theme = THEME_BY_NAME[config.theme] ?? THEME_BY_NAME.neutral!
+	const radius = SITE_THEME_RADIUS_VALUES[config.radius]
+	const variant = config.mode === 'dark' ? 'dark' : 'light'
+
+	return {
+		...base.cssVars[variant],
+		...theme.cssVars[variant],
+		radius,
+	}
 }
 
 function tokensToCss(selector: string, tokens: ThemeTokens): string {

@@ -182,7 +182,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				.values({
 					name: 'Welcome Journey',
 					status: 'active',
-					triggerType: 'customer_signup',
+					triggerType: 'phone_verified',
 				})
 				.returning()
 			const journey = journeyInsert[0]!
@@ -572,16 +572,16 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				.returning()
 			const customer = customerInsert[0]!
 
-			// 1. Active journey for customer_signup
+			// 1. Active journey for phone_verified
 			await db.insert(marketingJourneys).values({
 				name: 'Active Welcome',
 				status: 'active',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 				nodes: JSON.stringify([
 					{
 						id: 't-1',
 						type: 'trigger',
-						data: { triggerType: 'customer_signup' },
+						data: { triggerType: 'phone_verified' },
 					},
 					{
 						id: 'a-1',
@@ -592,23 +592,23 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				edges: JSON.stringify([{ id: 'e1', source: 't-1', target: 'a-1' }]),
 			})
 
-			// 2. Draft journey for customer_signup (should NOT spawn)
+			// 2. Draft journey for phone_verified (should NOT spawn)
 			await db.insert(marketingJourneys).values({
 				name: 'Draft Welcome',
 				status: 'draft',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 			})
 
-			// 3. Active journey for phone_verified (different trigger -> should NOT spawn)
+			// 3. Active journey for manual (different trigger -> should NOT spawn)
 			await db.insert(marketingJourneys).values({
-				name: 'Phone Verified Flow',
+				name: 'Manual Flow',
 				status: 'active',
-				triggerType: 'phone_verified',
+				triggerType: 'manual',
 			})
 
 			const result = await evaluateAndSpawnTriggers(
 				orgId,
-				'customer_signup',
+				'phone_verified',
 				customer.id,
 			)
 
@@ -623,7 +623,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				.where(eq(journeyRuns.customerId, customer.id))
 				.all()
 			expect(runsInDb).toHaveLength(1)
-			expect(runsInDb[0]?.triggerEvent).toBe('customer_signup')
+			expect(runsInDb[0]?.triggerEvent).toBe('phone_verified')
 			expect(runsInDb[0]?.status).toBe('running')
 		})
 	})
@@ -637,7 +637,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger' as const,
-					data: { triggerType: 'customer_signup' as const },
+					data: { triggerType: 'phone_verified' as const },
 				},
 				{
 					id: 'delay-1',
@@ -664,7 +664,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 			const createRes = await createJourney(orgId, {
 				name: 'Onboarding Sequence',
 				description: 'Automated 3-step onboarding flow',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 				nodes: validGraph.nodes,
 				edges: validGraph.edges,
 			})
@@ -705,7 +705,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 					{
 						id: 't-1',
 						type: 'trigger' as const,
-						data: { triggerType: 'customer_signup' as const },
+						data: { triggerType: 'phone_verified' as const },
 					},
 					{
 						id: 'd-1',
@@ -742,7 +742,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 		it('publishes valid journey to active status and pauses active journey', async () => {
 			const createRes = await createJourney(orgId, {
 				name: 'Publishable Journey',
-				triggerType: 'customer_signup',
+				triggerType: 'phone_verified',
 				nodes: validGraph.nodes,
 				edges: validGraph.edges,
 			})

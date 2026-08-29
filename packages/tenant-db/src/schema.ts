@@ -53,18 +53,10 @@ export const marketingJourneys = sqliteTable(
 			.notNull()
 			.default('draft'),
 		triggerType: text('trigger_type', {
-			enum: [
-				'customer_signup',
-				'phone_verified',
-				'profile_completed',
-				'tag_added',
-				'form_submitted',
-				'custom_event',
-				'manual',
-			],
+			enum: ['phone_verified', 'profile_completed', 'custom_event', 'manual'],
 		})
 			.notNull()
-			.default('customer_signup'),
+			.default('phone_verified'),
 		triggerConfig: text('trigger_config', { mode: 'json' })
 			.notNull()
 			.default('{}'),
@@ -111,7 +103,7 @@ export const journeyRuns = sqliteTable(
 			.default('running'),
 		currentNodeId: text('current_node_id'),
 		currentStepNodeId: text('current_step_node_id'),
-		triggerEvent: text('trigger_event').notNull().default('customer_signup'),
+		triggerEvent: text('trigger_event').notNull().default('phone_verified'),
 		contextData: text('context_data', { mode: 'json' }).default('{}'),
 		errorMessage: text('error_message'),
 		startedAt: integer('started_at', { mode: 'timestamp' }).default(

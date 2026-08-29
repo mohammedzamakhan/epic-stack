@@ -1,6 +1,6 @@
 import { type SiteFontSelection } from '@repo/common/site-fonts'
-import { ENV } from 'varlock/env'
 import { edgeCache } from '~/lib/site-headers'
+import { getPublicAppUrl } from '~/lib/worker-env'
 
 export type PublicSiteCustomFont = {
 	url: string
@@ -48,11 +48,7 @@ export type PublicOrganization = {
 }
 
 function getAppUrl(): string {
-	return (
-		process.env.PUBLIC_APP_URL ||
-		ENV.PUBLIC_APP_URL ||
-		'http://localhost:3001'
-	).replace(/\/$/, '')
+	return getPublicAppUrl()
 }
 
 async function fetchAppJson<T>(

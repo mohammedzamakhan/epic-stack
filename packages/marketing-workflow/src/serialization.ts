@@ -32,7 +32,7 @@ export function reactFlowToWorkflowGraph(
 					...baseNode,
 					type: 'trigger' as const,
 					data: {
-						triggerType: (node.data?.triggerType as any) || 'customer_signup',
+						triggerType: (node.data?.triggerType as any) || 'phone_verified',
 						config: (node.data?.config as Record<string, unknown>) || {},
 					},
 				}
@@ -192,7 +192,7 @@ export function createDefaultTenantJourneyGraph(): WorkflowGraph {
 				type: 'trigger',
 				position: { x: 250, y: 50 },
 				data: {
-					triggerType: 'customer_signup',
+					triggerType: 'phone_verified',
 					config: {},
 				},
 			},

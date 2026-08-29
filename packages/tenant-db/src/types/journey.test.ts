@@ -22,15 +22,15 @@ import {
 describe('Journey Zod Schemas', () => {
 	it('validates trigger node data schema', () => {
 		const valid = triggerNodeDataSchema.parse({
-			triggerType: 'customer_signup',
+			triggerType: 'phone_verified',
 			config: { tag: 'vip' },
 		})
-		expect(valid.triggerType).toBe('customer_signup')
+		expect(valid.triggerType).toBe('phone_verified')
 		expect(valid.config).toEqual({ tag: 'vip' })
 
 		// Default fallback
 		const def = triggerNodeDataSchema.parse({})
-		expect(def.triggerType).toBe('customer_signup')
+		expect(def.triggerType).toBe('phone_verified')
 	})
 
 	it('validates delay node data schema', () => {
@@ -107,7 +107,7 @@ describe('Journey Zod Schemas', () => {
 					type: 'trigger',
 					position: { x: 100, y: 100 },
 					data: {
-						triggerType: 'customer_signup',
+						triggerType: 'phone_verified',
 						config: {},
 					},
 				},
@@ -154,10 +154,10 @@ describe('Journey Zod Schemas', () => {
 		const createInput = createJourneySchema.parse({
 			name: 'New Customer Welcome Sequence',
 			description: 'Onboards new signups',
-			triggerType: 'customer_signup',
+			triggerType: 'phone_verified',
 		})
 		expect(createInput.name).toBe('New Customer Welcome Sequence')
-		expect(createInput.triggerType).toBe('customer_signup')
+		expect(createInput.triggerType).toBe('phone_verified')
 
 		const updateInput = updateJourneySchema.parse({
 			status: 'active',
@@ -195,7 +195,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup', config: {} },
+					data: { triggerType: 'phone_verified', config: {} },
 				},
 				{
 					id: 'delay-1',
@@ -279,7 +279,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'delay-1',
@@ -304,7 +304,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'delay-1',
@@ -336,7 +336,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'node-b',
@@ -390,7 +390,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'trigger-2',
@@ -414,7 +414,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'delay-1',
@@ -443,7 +443,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'dup-id',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'dup-id',
@@ -467,7 +467,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 			],
 			edges: [{ id: 'e1', source: 'ghost-source', target: 'ghost-target' }],
@@ -489,7 +489,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'email-1',
@@ -522,7 +522,7 @@ describe('DAG Validation Algorithm (validateWorkflowDAG)', () => {
 				{
 					id: 'trigger-1',
 					type: 'trigger',
-					data: { triggerType: 'customer_signup' },
+					data: { triggerType: 'phone_verified' },
 				},
 				{
 					id: 'bad-delay',

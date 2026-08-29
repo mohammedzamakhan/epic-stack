@@ -413,13 +413,6 @@ authRoutes.post(
 		// Fire-and-forget: evaluate active marketing journey triggers
 		void evaluateAndSpawnTriggers(
 			organization.id,
-			'customer_signup',
-			customer.id,
-		).catch((err) => {
-			console.error('Failed to evaluate customer_signup journey triggers:', err)
-		})
-		void evaluateAndSpawnTriggers(
-			organization.id,
 			'phone_verified',
 			customer.id,
 		).catch((err) => {

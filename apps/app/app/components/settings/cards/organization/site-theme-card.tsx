@@ -12,6 +12,7 @@ import {
 	getBaseColorMeta,
 	getSiteFont,
 	getThemeColorMeta,
+	resolveSiteThemePresetTokens,
 	siteFontDisplayName,
 	siteFontFormatFromExtension,
 	type SiteFontSelection,
@@ -22,6 +23,7 @@ import {
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
 import {
 	Select,
 	SelectContent,
@@ -32,7 +34,7 @@ import {
 	SelectValue,
 } from '@repo/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
-import { type ChangeEvent, useRef } from 'react'
+import { type ChangeEvent, useRef, useState } from 'react'
 import { z } from 'zod'
 
 export const SiteThemeSchema = z.object({
@@ -42,6 +44,18 @@ export const SiteThemeSchema = z.object({
 	mode: z.enum(SITE_THEME_MODES),
 	headingFont: z.union([z.enum(SITE_FONT_IDS), z.literal(CUSTOM_SITE_FONT_ID)]),
 	bodyFont: z.union([z.enum(SITE_FONT_IDS), z.literal(CUSTOM_SITE_FONT_ID)]),
+	cssVars: z
+		.preprocess((value) => {
+			if (value == null || value === '') return undefined
+			if (typeof value !== 'string') return value
+			try {
+				const parsed = JSON.parse(value) as unknown
+				return parsed && typeof parsed === 'object' ? parsed : undefined
+			} catch {
+				return value
+			}
+		}, z.record(z.string()).nullable().optional())
+		.optional(),
 	organizationId: z.string(),
 })
 
@@ -58,6 +72,28 @@ const ACCENT_NEUTRALS = SITE_THEME_COLORS.filter((c) =>
 const ACCENT_COLORS = SITE_THEME_COLORS.filter(
 	(c) => !(SITE_BASE_COLORS as readonly string[]).includes(c),
 )
+
+const ignoredShadcnTokens = [
+	'background',
+	'foreground',
+	'card',
+	'card-foreground',
+	'popover',
+	'popover-foreground',
+	'primary',
+	'primary-foreground',
+	'secondary',
+	'secondary-foreground',
+	'muted',
+	'muted-foreground',
+	'accent',
+	'accent-foreground',
+	'destructive',
+	'destructive-foreground',
+	'border',
+	'input',
+	'ring',
+] as const satisfies ReadonlyArray<string>
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
 	return <p className="text-muted-foreground text-xs font-medium">{children}</p>
@@ -320,6 +356,403 @@ function FontFileField({
 	)
 }
 
+type CssTokenKey = (typeof ignoredShadcnTokens)[number]
+
+/** Purpose-grouped token order shown in the editor. */
+const TOKEN_GROUPS: ReadonlyArray<{
+	id: string
+	label: string
+	hint: string
+	tokens: ReadonlyArray<CssTokenKey>
+}> = [
+	{
+		id: 'surface',
+		label: 'Surface',
+		hint: 'Backgrounds, cards, and popovers',
+		tokens: [
+			'background',
+			'foreground',
+			'card',
+			'card-foreground',
+			'popover',
+			'popover-foreground',
+		],
+	},
+	{
+		id: 'action',
+		label: 'Action',
+		hint: 'Primary buttons, links, and their text',
+		tokens: [
+			'primary',
+			'primary-foreground',
+			'secondary',
+			'secondary-foreground',
+		],
+	},
+	{
+		id: 'muted',
+		label: 'Muted',
+		hint: 'Subdued surfaces and placeholder text',
+		tokens: ['muted', 'muted-foreground', 'accent', 'accent-foreground'],
+	},
+	{
+		id: 'border',
+		label: 'Border & Input',
+		hint: 'Form fields, dividers, and focus rings',
+		tokens: ['border', 'input', 'ring'],
+	},
+	{
+		id: 'status',
+		label: 'Status',
+		hint: 'Errors and destructive actions',
+		tokens: ['destructive', 'destructive-foreground'],
+	},
+]
+
+const TOKEN_LABELS: Record<CssTokenKey, string> = {
+	background: 'Background',
+	foreground: 'Foreground',
+	card: 'Card',
+	'card-foreground': 'Card text',
+	popover: 'Popover',
+	'popover-foreground': 'Popover text',
+	primary: 'Primary',
+	'primary-foreground': 'Primary text',
+	secondary: 'Secondary',
+	'secondary-foreground': 'Secondary text',
+	muted: 'Muted',
+	'muted-foreground': 'Muted text',
+	accent: 'Accent',
+	'accent-foreground': 'Accent text',
+	destructive: 'Destructive',
+	'destructive-foreground': 'Destructive text',
+	border: 'Border',
+	input: 'Input',
+	ring: 'Focus ring',
+}
+
+/**
+ * Best-effort normalization to a 7-char `#rrggbb` hex so the native
+ * `<input type="color">` can read the value. The text input still accepts
+ * any CSS color (oklch, hsl, named) — this only powers the picker swatch.
+ */
+function toHexForPicker(value: string | undefined): string {
+	if (!value) return '#000000'
+	const v = value.trim()
+	if (/^#[0-9a-fA-F]{6}$/.test(v)) return v
+	if (/^#[0-9a-fA-F]{3}$/.test(v)) {
+		return (
+			'#' +
+			v
+				.slice(1)
+				.split('')
+				.map((c) => c + c)
+				.join('')
+		)
+	}
+	return '#000000'
+}
+
+function isColorishValue(value: string | undefined): boolean {
+	if (!value) return false
+	const v = value.trim().toLowerCase()
+	if (v.startsWith('#')) return true
+	if (v.startsWith('rgb') || v.startsWith('hsl') || v.startsWith('oklch'))
+		return true
+	if (v.startsWith('oklab') || v.startsWith('lab') || v.startsWith('lch'))
+		return true
+	return false
+}
+
+function TokenSwatch({
+	value,
+	disabled,
+	onPick,
+	overridden,
+}: {
+	value: string | undefined
+	disabled?: boolean
+	onPick: (hex: string) => void
+	overridden: boolean
+}) {
+	const hasColor = isColorishValue(value)
+
+	return (
+		<label
+			className={cn(
+				'border-border relative size-7 shrink-0 cursor-pointer rounded-md border',
+				'focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-1',
+				overridden && 'ring-foreground/20 ring-2 ring-offset-1',
+				disabled && 'pointer-events-none opacity-50',
+			)}
+			style={
+				hasColor
+					? { backgroundColor: value!.trim() }
+					: {
+							backgroundImage:
+								'conic-gradient(#e5e7eb 0 25%, #ffffff 0 50%, #e5e7eb 0 75%, #ffffff 0)',
+							backgroundSize: '8px 8px',
+						}
+			}
+		>
+			<input
+				type="color"
+				className="absolute inset-0 size-full cursor-pointer opacity-0"
+				disabled={disabled}
+				value={toHexForPicker(value)}
+				onChange={(e) => onPick(e.target.value)}
+			/>
+		</label>
+	)
+}
+
+function TokenRow({
+	token,
+	tokenValue,
+	presetValue,
+	overridden,
+	disabled,
+	isFirst,
+	onChange,
+}: {
+	token: CssTokenKey
+	tokenValue: string
+	presetValue: string
+	overridden: boolean
+	disabled?: boolean
+	isFirst: boolean
+	onChange: (token: CssTokenKey, next: string | undefined) => void
+}) {
+	const inputId = `css-var-${token}`
+	const cssVar = `--${token}`
+
+	return (
+		<div
+			className={cn(
+				'flex flex-col gap-1.5 px-3 py-2 transition-colors',
+				'hover:bg-muted/30 focus-within:bg-muted/30',
+				!isFirst && 'border-border border-t',
+				overridden && 'bg-foreground/2',
+			)}
+		>
+			<div className="flex min-w-0 items-center gap-2">
+				<TokenSwatch
+					value={tokenValue}
+					disabled={disabled}
+					overridden={overridden}
+					onPick={(hex) => onChange(token, hex)}
+				/>
+				<label
+					htmlFor={inputId}
+					className="text-foreground min-w-0 flex-1 truncate text-[12.5px] leading-tight"
+					title={cssVar}
+				>
+					{TOKEN_LABELS[token]}
+					<span className="sr-only"> ({cssVar})</span>
+				</label>
+				{overridden ? (
+					<Tooltip>
+						<TooltipTrigger
+							render={
+								<button
+									type="button"
+									disabled={disabled}
+									onClick={() => onChange(token, undefined)}
+									aria-label="Reset to preset"
+									className={cn(
+										'text-muted-foreground hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md transition-colors',
+										'hover:bg-background/60',
+										'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+										'disabled:pointer-events-none disabled:opacity-50',
+									)}
+								>
+									<Icon name="x" size="xs" />
+								</button>
+							}
+						/>
+						<TooltipContent className="max-w-56">
+							<p>
+								<Trans>Reset to preset</Trans>
+							</p>
+							{presetValue ? (
+								<p className="mt-0.5 font-mono text-[10px] break-all opacity-70">
+									{presetValue}
+								</p>
+							) : null}
+						</TooltipContent>
+					</Tooltip>
+				) : null}
+			</div>
+			<Input
+				id={inputId}
+				type="text"
+				spellCheck={false}
+				autoComplete="off"
+				className="h-7 w-full min-w-0 font-mono text-[11px]"
+				placeholder={presetValue || 'Preset'}
+				disabled={disabled}
+				value={tokenValue}
+				onChange={(e) => onChange(token, e.target.value)}
+				title={tokenValue || presetValue}
+			/>
+		</div>
+	)
+}
+
+function CssVarsEditor({
+	value,
+	disabled,
+	onChange,
+}: {
+	value: SiteThemeConfig
+	disabled?: boolean
+	onChange: (next: SiteThemeConfig) => void
+}) {
+	const { _ } = useLingui()
+	const [open, setOpen] = useState(false)
+	const overrides = value.cssVars || {}
+	const overrideCount = Object.keys(overrides).length
+	const preset = resolveSiteThemePresetTokens(value)
+
+	const setToken = (token: CssTokenKey, next: string | undefined) => {
+		const trimmed = next?.trim() ?? ''
+		const presetValue = preset[token] ?? ''
+		// If the typed value matches the active preset, drop the override
+		// so the user can experiment freely without leaving a redundant
+		// "override that equals the preset" in storage.
+		const newVars: Record<string, string> = { ...overrides }
+		if (trimmed && trimmed !== presetValue) {
+			newVars[token] = trimmed
+		} else {
+			delete newVars[token]
+		}
+		onChange({
+			...value,
+			cssVars: Object.keys(newVars).length > 0 ? newVars : undefined,
+		})
+	}
+
+	const resetAll = () => {
+		onChange({ ...value, cssVars: undefined })
+	}
+
+	return (
+		<section className="space-y-3 pt-4">
+			<button
+				type="button"
+				onClick={() => setOpen((o) => !o)}
+				aria-expanded={open}
+				className={cn(
+					'group/advanced border-border flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors',
+					'hover:border-foreground/20 hover:bg-muted/40',
+					'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+					open && 'border-foreground/20 bg-muted/30',
+				)}
+			>
+				<span
+					className={cn(
+						'flex size-6 shrink-0 items-center justify-center rounded-md transition-colors',
+						open
+							? 'bg-foreground/10 text-foreground'
+							: 'bg-muted text-muted-foreground group-hover/advanced:text-foreground',
+					)}
+				>
+					<Icon name="pocket-knife" size="xs" />
+				</span>
+				<span className="text-foreground min-w-0 flex-1 text-[13px] leading-snug font-semibold">
+					{_(msg`Custom colors`)}
+				</span>
+				{overrideCount > 0 ? (
+					<span
+						className={cn(
+							'inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5',
+							'bg-foreground text-background text-[10px] font-semibold tabular-nums',
+						)}
+					>
+						{overrideCount}
+					</span>
+				) : null}
+				<span
+					className={cn(
+						'text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-md transition-transform duration-200 ease-out',
+						'group-hover/advanced:text-foreground',
+						open && 'text-foreground rotate-180',
+					)}
+				>
+					<Icon name="chevron-down" size="sm" />
+				</span>
+			</button>
+
+			<div
+				className={cn(
+					'grid transition-[grid-template-rows] duration-300 ease-out',
+					open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+				)}
+			>
+				<div className="overflow-hidden">
+					<div className="space-y-5 pt-1">
+						<div className="flex items-start justify-between gap-2">
+							<p className="text-muted-foreground min-w-0 text-[11px] leading-relaxed">
+								{_(
+									msg`Change specific colors here. They start from Accent, Gray, and Appearance above, and work in both light and dark.`,
+								)}
+							</p>
+							{overrideCount > 0 ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="xs"
+									disabled={disabled}
+									onClick={resetAll}
+									className="text-muted-foreground hover:text-foreground self-start"
+								>
+									<Trans>Reset all</Trans>
+								</Button>
+							) : null}
+						</div>
+
+						<div className="space-y-5">
+							{TOKEN_GROUPS.map((group) => (
+								<div key={group.id} className="space-y-2">
+									<div className="space-y-0.5">
+										<h4 className="text-foreground text-[11px] font-semibold tracking-tight uppercase">
+											{group.label}
+										</h4>
+										<p className="text-muted-foreground text-[10.5px] leading-snug">
+											{group.hint}
+										</p>
+									</div>
+									<div className="border-border overflow-hidden rounded-md border">
+										{group.tokens.map((token, i) => {
+											const presetValue = preset[token] ?? ''
+											const overridden = token in overrides
+											const tokenValue = overridden
+												? (overrides[token] ?? '')
+												: presetValue
+											return (
+												<TokenRow
+													key={token}
+													token={token}
+													tokenValue={tokenValue}
+													presetValue={presetValue}
+													overridden={overridden}
+													disabled={disabled}
+													isFirst={i === 0}
+													onChange={setToken}
+												/>
+											)
+										})}
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	)
+}
+
 export function SiteThemeFields({
 	value,
 	disabled,
@@ -342,13 +775,11 @@ export function SiteThemeFields({
 	const modeLabels: Record<SiteThemeMode, string> = {
 		light: _(msg`Light`),
 		dark: _(msg`Dark`),
-		system: _(msg`System`),
 	}
 
 	const modeIcons = {
 		light: 'sun',
 		dark: 'moon',
-		system: 'laptop',
 	} as const
 
 	const radiusLabels: Record<SiteThemeRadius, string> = {
@@ -461,7 +892,7 @@ export function SiteThemeFields({
 
 			<section className="space-y-2">
 				<FieldLabel>{_(msg`Appearance`)}</FieldLabel>
-				<div className="grid grid-cols-3 gap-1.5">
+				<div className="grid grid-cols-2 gap-1.5">
 					{SITE_THEME_MODES.map((mode) => {
 						const isSelected = value.mode === mode
 						return (
@@ -525,6 +956,7 @@ export function SiteThemeFields({
 					})}
 				</div>
 			</section>
+			<CssVarsEditor value={value} disabled={disabled} onChange={onChange} />
 		</div>
 	)
 }
