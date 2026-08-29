@@ -8,8 +8,11 @@ interface Props {
 	node: {
 		variant?: 'highImpact' | 'mediumImpact' | 'lowImpact' | 'default'
 		headline?: string
+		headlineAccent?: string
 		subheadline?: string
 		badge?: string
+		footnote?: string
+		trustItems?: Array<{ text?: string } | string>
 		mediaUrl?: string
 		videoUrl?: string
 		imagePerspective?: 'none' | 'left' | 'right' | 'bottom' | 'bottom-lg' | 'paper'
@@ -27,8 +30,11 @@ const { node = {} as any } = Astro.props
 const {
 	variant = 'highImpact',
 	headline,
+	headlineAccent,
 	subheadline,
 	badge,
+	footnote,
+	trustItems,
 	mediaUrl,
 	videoUrl,
 	imagePerspective,
@@ -49,13 +55,22 @@ if (secondaryCtaLabel) {
 	links.push({ label: secondaryCtaLabel, url: secondaryCtaUrl || '#', type: 'custom' })
 }
 
+const parsedTrustItems = (trustItems ?? [])
+	.map((item: { text?: string } | string) =>
+		typeof item === 'string' ? item : item?.text,
+	)
+	.filter((item: string | undefined): item is string => Boolean(item?.trim()))
+
 const media = image || (mediaUrl ? { url: mediaUrl, alt: headline || 'Hero visual' } : undefined)
 const heroProps: any = {
 	title: headline,
 	description: subheadline,
 	headline,
+	headlineAccent,
 	subheadline,
 	badge,
+	footnote,
+	trustItems: parsedTrustItems,
 	links,
 	media,
 	videoUrl,

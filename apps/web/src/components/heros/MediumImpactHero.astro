@@ -2,62 +2,161 @@
 import MarkdownText from '../site/MarkdownText.astro'
 import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
+import { resolveMarketingIcon } from '../../lib/marketing-icons'
 
 interface Props {
 	title?: string
 	description?: string
 	headline?: string
 	subheadline?: string
-	richText?: any
-	media?: any
-	links?: any[]
+	headlineAccent?: string
+	badge?: string
+	footnote?: string
+	trustItems?: string[]
+	media?: { url: string; alt?: string; width?: number; height?: number }
+	links?: Array<{ label?: string; url?: string; link?: { label?: string; url?: string } }>
 }
 
-const { title, description, headline, subheadline, media, links } = Astro.props
+const {
+	headline,
+	subheadline,
+	headlineAccent,
+	badge,
+	footnote,
+	trustItems = [],
+	media,
+	links = [],
+	title,
+	description,
+} = Astro.props
 
-const displayTitle = headline || title || ''
-const displayDescription = subheadline || description || ''
+const displayHeadline = headline || title || ''
+const displaySubheadline = subheadline || description || ''
+const primaryLink = links[0]
+const primaryHref = primaryLink?.url || primaryLink?.link?.url || '/signup'
+const primaryLabel =
+	primaryLink?.label || primaryLink?.link?.label || 'Join the waitlist'
+
+const sparklesIcon = resolveMarketingIcon('sparkles', 14)
+const visibleTrustItems = trustItems.filter(
+	(item): item is string => typeof item === 'string' && item.trim().length > 0,
+)
 ---
 
-<Section seam={false} class="pt-28 pb-8 sm:pt-32">
-	<div class="max-w-3xl space-y-6">
+<Section
+	seam={false}
+	class="overflow-hidden pb-12 pt-24 sm:pb-16 sm:pt-40 lg:pb-20 lg:pt-44"
+>
+	<div
+		aria-hidden="true"
+		class="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_50%_0%,var(--brand-soft),transparent_64%)] opacity-35"
+	>
+	</div>
+
+	<div class="relative mx-auto flex max-w-5xl flex-col items-center text-center">
 		{
-			displayTitle && (
-				<h1 class="font-display text-balance text-[36px] font-medium tracking-[-0.03em] text-foreground sm:text-[48px]">
-					{displayTitle}
+			badge && (
+				<div class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand-soft/30 px-3 py-1.5 text-[11.5px] font-medium text-brand sm:px-3.5 sm:py-2 sm:text-[12px]">
+					{sparklesIcon && (
+						<span
+							class="inline-flex size-3.5 shrink-0 [&>svg]:size-3.5"
+							set:html={sparklesIcon}
+						/>
+					)}
+					{badge}
+				</div>
+			)
+		}
+
+		{
+			displayHeadline && (
+				<h1 class="max-w-4xl text-balance text-[clamp(2.75rem,8vw,7rem)] font-semibold leading-[0.96] tracking-[-0.055em] text-foreground sm:tracking-[-0.075em]">
+					{displayHeadline}
+					{headlineAccent && (
+						<span class="text-brand">
+							{headlineAccent.startsWith(' ')
+								? headlineAccent
+								: ` ${headlineAccent}`}
+						</span>
+					)}
 				</h1>
 			)
 		}
+
 		{
-			displayDescription && (
-				<MarkdownText content={displayDescription} class="max-w-xl text-pretty text-[17px] leading-relaxed text-muted-foreground" />
+			displaySubheadline && (
+				<MarkdownText
+					content={displaySubheadline}
+					class="mt-5 max-w-2xl text-pretty text-[16px] leading-[1.6] text-muted-foreground sm:mt-7 sm:text-[19px] sm:leading-8"
+				/>
 			)
 		}
 
 		{
-			links && links.length > 0 && (
-				<div class="flex flex-wrap gap-3">
-					{links.map((linkItem: any, i: number) => (
-						<Button
-							href={linkItem?.url || linkItem?.link?.url || '#'}
-							variant={i === 0 ? 'brand' : 'outline'}
-							size="md"
+			primaryLabel && (
+				<div class="mt-10 w-full max-w-xl">
+					<Button
+						href={primaryHref}
+						variant="brand"
+						class="h-14 w-full gap-2 px-6 text-[15px] font-semibold transition-transform hover:-translate-y-0.5"
+					>
+						{primaryLabel}
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
 						>
-							{linkItem?.label || linkItem?.link?.label || 'Learn more'}
-						</Button>
-					))}
+							<path d="M5 12h14"></path>
+							<path d="m12 5 7 7-7 7"></path>
+						</svg>
+					</Button>
+
+					{
+						footnote && (
+							<p class="mt-3 text-balance text-center text-[12px] leading-5 text-muted-foreground">
+								{footnote}
+							</p>
+						)
+					}
+				</div>
+			)
+		}
+
+		{
+			visibleTrustItems.length > 0 && (
+				<div class="mt-10 flex flex-col items-center gap-2.5 text-[13px] text-muted-foreground sm:mt-12 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6 sm:gap-y-2">
+					{visibleTrustItems.map((item, index) =>
+						index === 0 ? (
+							<span>{item}</span>
+						) : (
+							<>
+								<span
+									aria-hidden="true"
+									class="hidden size-1 shrink-0 rounded-full bg-brand sm:block"
+								/>
+								<span>{item}</span>
+							</>
+						),
+					)}
 				</div>
 			)
 		}
 	</div>
 
 	{
-		media && typeof media === 'object' && (
-			<div class="mt-12 overflow-hidden rounded-2xl border border-hairline">
+		media?.url && (
+			<div class="relative mx-auto mt-14 max-w-4xl overflow-hidden rounded-2xl border border-hairline">
 				<img
 					class="w-full object-cover"
 					src={media.url}
-					alt={media.alt || displayTitle || 'Hero image'}
+					alt={media.alt || displayHeadline || 'Hero image'}
 					width={media.width || 1200}
 					height={media.height || 600}
 					loading="eager"
