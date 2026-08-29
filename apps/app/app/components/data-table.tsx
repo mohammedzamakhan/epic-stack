@@ -726,10 +726,14 @@ const chartConfig = {
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 	const isMobile = useIsMobile()
+	// Performance optimization: We track the open state of the drawer to lazily render the heavy
+	// ChartContainer and AreaChart components only when necessary. This prevents significant
+	// memory and rendering overhead since TableCellViewer is rendered for every row in the table.
+	const [isOpen, setIsOpen] = React.useState(false)
 
 	return (
-		<Drawer direction={isMobile ? 'bottom' : 'right'}>
-			<DrawerTrigger>
+		<Drawer direction={isMobile ? 'bottom' : 'right'} open={isOpen} onOpenChange={setIsOpen}>
+			<DrawerTrigger asChild>
 				<Button variant="link" className="text-foreground w-fit px-0 text-left">
 					{item.header}
 				</Button>
@@ -742,7 +746,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 					</DrawerDescription>
 				</DrawerHeader>
 				<div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-					{!isMobile && (
+					{!isMobile && isOpen && (
 						<>
 							<ChartContainer config={chartConfig}>
 								<AreaChart

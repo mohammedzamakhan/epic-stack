@@ -1,0 +1,3 @@
+## 2024-10-27 - [Lazy Loading Drawer Content]
+**Learning:** The `@repo/ui/drawer` (based on Vaul) mounts its child contents immediately even when closed. Placing heavy or computationally expensive components (like Recharts) inside drawers without conditional rendering causes significant memory and rendering overhead, especially when rendered multiple times (e.g. in a data table).
+**Action:** Always track the open state of drawers (`isOpen`) and use conditional rendering (`{isOpen && <HeavyComponent />}`) for heavy or computationally expensive components inside them to optimize rendering performance.
