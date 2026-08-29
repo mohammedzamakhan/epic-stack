@@ -1,3 +1,6 @@
+## 2026-08-11 - Interactive Component Touch Targets
+**Learning:** The Switch, Checkbox, and Radio Group components were using `after:-inset-y-2` which resulted in a touch target height of around 34.4px (for a 18.4px switch) and 32px (for a 16px checkbox/radio button). This failed the minimum 44px WCAG requirement for touch targets.
+**Action:** Always ensure that small interactive components (14-18px) use sufficient pseudo-element padding, such as `after:-inset-y-4` or `after:-inset-4`, to expand their touch target area to at least 44px.
 ## 2024-05-15 - Adding inert to visually hidden sidebars
 **Learning:** Sidebars hidden only by opacity and pointer-events still receive keyboard focus and are read by screen readers. This breaks keyboard navigation (tab order) and causes confusion for screen reader users.
 **Action:** Always apply the `inert` attribute to components that are visually hidden but still in the DOM to ensure they are completely removed from the accessibility tree and keyboard navigation.
