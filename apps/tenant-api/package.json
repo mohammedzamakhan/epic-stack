@@ -8,10 +8,11 @@
     "dev": "tsx watch src/index.ts",
     "dev:ksa": "DATA_REGION=ksa PORT=3009 tsx watch src/index.ts",
     "start": "node --import=tsx src/index.ts",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "generate:do-migrations": "node scripts/generate-do-migrations.mjs",
+    "build": "npm run generate:do-migrations && tsc",
+    "typecheck": "npm run generate:do-migrations && tsc --noEmit",
     "test": "vitest run",
-    "deploy:cf": "node scripts/generate-do-migrations.mjs && wrangler deploy"
+    "deploy:cf": "npm run generate:do-migrations && wrangler deploy"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
