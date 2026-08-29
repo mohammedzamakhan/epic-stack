@@ -3,6 +3,9 @@
 This document outlines the steps for deploying the Epic Stack using its
 Cloudflare-based architecture.
 
+For product launch phases (closed beta waitlist, public beta, full launch), see
+the [Launch Checklist](./launch-checklist.md).
+
 ## Overview
 
 - **Main App & Admin App**: Cloudflare Workers with Cloudflare D1

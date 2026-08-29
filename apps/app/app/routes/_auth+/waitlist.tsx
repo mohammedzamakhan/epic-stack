@@ -2,6 +2,8 @@ import { Trans, Plural, t } from '@lingui/macro'
 import { requireUserId } from '@repo/auth'
 import { getPageTitle } from '@repo/config/brand'
 import { db, eq, User } from '@repo/database'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
 import {
 	Card,
 	CardContent,
@@ -18,7 +20,9 @@ import {
 	InputGroupAddon,
 	InputGroupButton,
 } from '@repo/ui/input-group'
-import { useState, useEffect, useCallback } from 'react'
+import { Separator } from '@repo/ui/separator'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { redirect } from 'react-router'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
@@ -26,6 +30,8 @@ import {
 	calculateUserRank,
 } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/waitlist.ts'
+
+const EASE_OUT = [0.16, 1, 0.3, 1] as const
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
@@ -83,6 +89,83 @@ export function meta() {
 	return [{ title: getPageTitle('You are on the Waitlist') }]
 }
 
+function WaitlistStat({
+	label,
+	value,
+	suffix,
+	delay,
+	shouldReduceMotion,
+}: {
+	label: ReactNode
+	value: ReactNode
+	suffix?: ReactNode
+	delay: number
+	shouldReduceMotion: boolean | null
+}) {
+	return (
+		<motion.div
+			className="flex flex-col items-center px-4 py-4 text-center"
+			initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{
+				delay,
+				duration: shouldReduceMotion ? 0.15 : 0.35,
+				ease: EASE_OUT,
+			}}
+		>
+			<p className="text-muted-foreground mb-2 text-xs font-medium">{label}</p>
+			<p className="text-foreground flex min-h-9 items-end justify-center text-3xl leading-none font-bold tabular-nums">
+				{value}
+			</p>
+			<p className="text-muted-foreground mt-2 min-h-4 text-xs tabular-nums">
+				{suffix ?? '\u00A0'}
+			</p>
+		</motion.div>
+	)
+}
+
+function WaitlistActionRow({
+	icon,
+	title,
+	badge,
+	children,
+	delay,
+	shouldReduceMotion,
+}: {
+	icon: React.ComponentProps<typeof Icon>['name']
+	title: ReactNode
+	badge: ReactNode
+	children: ReactNode
+	delay: number
+	shouldReduceMotion: boolean | null
+}) {
+	return (
+		<motion.div
+			className="flex items-start gap-3"
+			initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{
+				delay,
+				duration: shouldReduceMotion ? 0.15 : 0.35,
+				ease: EASE_OUT,
+			}}
+		>
+			<div className="bg-primary/10 ring-primary/15 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1">
+				<Icon name={icon} className="text-primary h-4 w-4" />
+			</div>
+			<div className="min-w-0 flex-1 space-y-2">
+				<div className="flex flex-wrap items-baseline justify-between gap-2">
+					<p className="text-sm font-medium">{title}</p>
+					<Badge variant="secondary" className="shrink-0">
+						{badge}
+					</Badge>
+				</div>
+				{children}
+			</div>
+		</motion.div>
+	)
+}
+
 export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 	const {
 		user,
@@ -94,6 +177,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 		hasDiscordOAuth,
 	} = loaderData
 	const [copied, setCopied] = useState(false)
+	const shouldReduceMotion = useReducedMotion()
 	const userEmail = user.email
 	const referralCount = waitlistEntry.referralCount
 	const points = waitlistEntry.points
@@ -126,63 +210,81 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 	}, [referralUrl])
 
 	return (
-		<Card className="mx-auto w-full max-w-md bg-white/95 backdrop-blur">
-			<CardHeader className="text-center">
-				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-					<Icon name="check" className="h-8 w-8 text-green-600" />
-				</div>
-				<CardTitle className="justify-center text-2xl font-bold">
-					<Trans>You're on the Waitlist!</Trans>
-				</CardTitle>
-				<CardDescription className="text-base">
-					<Trans>
-						We'll notify you by email as soon as the waitlist opens.
-					</Trans>
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-6">
-				{/* Points and Rank Display */}
-				<div>
-					<p className="mb-1 text-center font-medium">
-						<Trans>Want to go to the top of the waitlist?</Trans>
-					</p>
-					<p className="text-muted-foreground mb-4 text-center text-sm">
-						<Trans>Here's how to do it:</Trans>
-					</p>
-					<div className="grid grid-cols-2 gap-4">
-						<div className="text-center">
-							<p className="text-muted-foreground mb-1 text-xs">
-								<Trans>Your points</Trans>
-							</p>
-							<p className="text-3xl font-bold">{points}</p>
-						</div>
-						<div className="text-center">
-							<p className="text-muted-foreground mb-1 text-xs">
-								<Trans>Your rank</Trans>
-							</p>
-							<p className="text-3xl font-bold">#{rank}</p>
-							<p className="text-muted-foreground text-xs">
-								<Trans>of {totalUsers} people</Trans>
-							</p>
+		<motion.div
+			initial={
+				shouldReduceMotion
+					? { opacity: 0 }
+					: { opacity: 0, y: 20, filter: 'blur(6px)' }
+			}
+			animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+			transition={{
+				duration: shouldReduceMotion ? 0.2 : 0.5,
+				ease: EASE_OUT,
+			}}
+		>
+			<Card className="bg-card/95 shadow-lg shadow-black/10 backdrop-blur-sm">
+				<CardHeader className="space-y-4 text-center">
+					<motion.div
+						className="bg-primary/15 ring-primary/25 mx-auto flex h-14 w-14 items-center justify-center rounded-full ring-1"
+						initial={
+							shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.85 }
+						}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{
+							delay: shouldReduceMotion ? 0 : 0.12,
+							duration: shouldReduceMotion ? 0.15 : 0.4,
+							ease: EASE_OUT,
+						}}
+					>
+						<Icon name="check" className="text-primary h-7 w-7" />
+					</motion.div>
+					<div className="space-y-1.5">
+						<CardTitle className="text-2xl font-bold text-balance">
+							<Trans>You're on the Waitlist!</Trans>
+						</CardTitle>
+						<CardDescription className="text-base">
+							<Trans>
+								We'll notify you by email as soon as the waitlist opens.
+							</Trans>
+						</CardDescription>
+					</div>
+				</CardHeader>
+
+				<CardContent className="space-y-6">
+					<div>
+						<p className="mb-1 text-center font-medium">
+							<Trans>Want to go to the top of the waitlist?</Trans>
+						</p>
+						<p className="text-muted-foreground mb-4 text-center text-sm">
+							<Trans>Here's how to do it:</Trans>
+						</p>
+						<div className="bg-muted/40 divide-border/70 grid grid-cols-2 divide-x rounded-xl border">
+							<WaitlistStat
+								label={<Trans>Your points</Trans>}
+								value={points}
+								delay={shouldReduceMotion ? 0 : 0.18}
+								shouldReduceMotion={shouldReduceMotion}
+							/>
+							<WaitlistStat
+								label={<Trans>Your rank</Trans>}
+								value={`#${rank}`}
+								suffix={<Trans>of {totalUsers} people</Trans>}
+								delay={shouldReduceMotion ? 0 : 0.24}
+								shouldReduceMotion={shouldReduceMotion}
+							/>
 						</div>
 					</div>
-				</div>
 
-				{/* Referral Section */}
-				<div className="space-y-3">
-					<div className="flex items-start gap-3">
-						<div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-							<Icon name="users" className="text-primary h-4 w-4" />
-						</div>
-						<div className="min-w-0 flex-1">
-							<div className="my-2 flex items-baseline justify-between gap-2">
-								<p className="text-sm font-medium">
-									<Trans>Share with others</Trans>
-								</p>
-								<span className="text-xs font-semibold text-green-600">
-									<Trans>+5 points/referral</Trans>
-								</span>
-							</div>
+					<Separator />
+
+					<div className="space-y-5">
+						<WaitlistActionRow
+							icon="users"
+							title={<Trans>Share with others</Trans>}
+							badge={<Trans>+5 points/referral</Trans>}
+							delay={shouldReduceMotion ? 0 : 0.3}
+							shouldReduceMotion={shouldReduceMotion}
+						>
 							<Field>
 								<FieldContent>
 									<InputGroup>
@@ -197,16 +299,35 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 												onClick={copyToClipboard}
 												variant="ghost"
 												size="xs"
+												aria-live="polite"
 											>
-												<Icon name={copied ? 'check' : 'copy'} />
-												{copied ? <Trans>Copied!</Trans> : <Trans>Copy</Trans>}
+												<AnimatePresence mode="wait" initial={false}>
+													<motion.span
+														key={copied ? 'copied' : 'copy'}
+														className="inline-flex items-center gap-1"
+														initial={{ opacity: 0, y: 4 }}
+														animate={{ opacity: 1, y: 0 }}
+														exit={{ opacity: 0, y: -4 }}
+														transition={{
+															duration: shouldReduceMotion ? 0.1 : 0.15,
+															ease: EASE_OUT,
+														}}
+													>
+														<Icon name={copied ? 'check' : 'copy'} />
+														{copied ? (
+															<Trans>Copied!</Trans>
+														) : (
+															<Trans>Copy</Trans>
+														)}
+													</motion.span>
+												</AnimatePresence>
 											</InputGroupButton>
 										</InputGroupAddon>
 									</InputGroup>
 								</FieldContent>
 							</Field>
 							{referralCount > 0 && (
-								<p className="mt-2 text-xs text-green-600">
+								<p className="text-primary text-xs font-medium">
 									<Plural
 										value={referralCount}
 										one="# person joined using your link!"
@@ -215,47 +336,44 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 									<Trans>Thanks for referring.</Trans>
 								</p>
 							)}
-						</div>
-					</div>
+						</WaitlistActionRow>
 
-					{/* Discord Section */}
-					<div className="flex items-start gap-3">
-						<div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-							<Icon name="message-circle" className="text-primary h-4 w-4" />
-						</div>
-						<div className="flex-1">
-							<div className="my-2 flex items-baseline justify-between gap-2">
-								<p className="text-sm font-medium">
-									<Trans>Join our Discord</Trans>
-								</p>
-								<span className="text-xs font-semibold text-green-600">
-									<Trans>+2 points</Trans>
-								</span>
-							</div>
+						<WaitlistActionRow
+							icon="message-circle"
+							title={<Trans>Join our Discord</Trans>}
+							badge={<Trans>+2 points</Trans>}
+							delay={shouldReduceMotion ? 0 : 0.36}
+							shouldReduceMotion={shouldReduceMotion}
+						>
 							{waitlistEntry.hasJoinedDiscord ? (
-								<p className="text-xs font-medium text-green-600">
+								<p className="text-primary text-xs font-medium">
 									<Trans>✓ Discord points claimed</Trans>
 								</p>
 							) : (
 								<div className="flex flex-col gap-2">
 									{discordInviteUrl && (
-										<a
-											href={discordInviteUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="rounded-md bg-[#5865F2] px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
+										<Button
+											className="w-full bg-[#5865F2] text-white hover:bg-[#4752C4]"
+											render={
+												<a
+													href={discordInviteUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+												/>
+											}
 										>
 											<Trans>Join Discord server</Trans>
-										</a>
+										</Button>
 									)}
 									{hasDiscordOAuth ? (
 										<>
-											<a
-												href="/auth/discord/verify"
-												className="rounded-md border border-[#5865F2] px-4 py-2 text-center text-sm font-medium text-[#5865F2] transition-colors hover:bg-[#5865F2]/10"
+											<Button
+												variant="outline"
+												className="w-full border-[#5865F2] text-[#5865F2] hover:bg-[#5865F2]/10"
+												render={<a href="/auth/discord/verify" />}
 											>
 												<Trans>Verify Discord membership</Trans>
-											</a>
+											</Button>
 											<p className="text-muted-foreground text-xs">
 												<Trans>
 													Click "Verify Discord membership" after joining to
@@ -273,20 +391,20 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 									)}
 								</div>
 							)}
-						</div>
+						</WaitlistActionRow>
 					</div>
-				</div>
-			</CardContent>
-			{/* Email Notification Info */}
-			<CardFooter>
-				<p className="text-muted-foreground text-sm">
-					<Trans>
-						We'll send you an email at{' '}
-						<span className="font-semibold">{userEmail}</span> when we're ready
-						to welcome you.
-					</Trans>
-				</p>
-			</CardFooter>
-		</Card>
+				</CardContent>
+
+				<CardFooter>
+					<p className="text-muted-foreground text-sm">
+						<Trans>
+							We'll send you an email at{' '}
+							<span className="font-semibold">{userEmail}</span> when we're
+							ready to welcome you.
+						</Trans>
+					</p>
+				</CardFooter>
+			</Card>
+		</motion.div>
 	)
 }

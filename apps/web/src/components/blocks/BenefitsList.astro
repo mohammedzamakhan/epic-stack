@@ -1,0 +1,61 @@
+---
+import Section from '../site/Section.astro'
+
+interface Props {
+	eyebrow?: string
+	title?: string
+	items?: string[]
+	blockType?: 'benefitsList'
+}
+
+const {
+	eyebrow = 'Why join early',
+	title = 'The first table gets the best seat.',
+	items = [],
+	blockType = 'benefitsList',
+} = Astro.props
+
+const visibleItems = items.filter(
+	(item): item is string => typeof item === 'string' && item.trim().length > 0,
+)
+---
+
+<Section class="border-t border-hairline py-12 sm:py-16 lg:py-20">
+	<div
+		class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-20"
+	>
+		<div>
+			{
+				eyebrow && (
+					<p class="text-brand font-mono text-[11px] tracking-[0.16em] uppercase">
+						{eyebrow}
+					</p>
+				)
+			}
+			{
+				title && (
+					<h2 class="mt-4 max-w-md text-balance text-[clamp(2rem,4vw,3.5rem)] leading-none font-semibold tracking-[-0.055em]">
+						{title}
+					</h2>
+				)
+			}
+		</div>
+
+		{
+			visibleItems.length > 0 && (
+				<div class="border-t border-hairline">
+					{visibleItems.map((item, index) => (
+						<div class="border-b border-hairline flex items-start gap-4 py-5 sm:py-6">
+							<span class="text-brand w-6 shrink-0 font-mono text-[12px] leading-6 tabular-nums">
+								{String(index + 1).padStart(2, '0')}
+							</span>
+							<p class="text-foreground/85 max-w-lg text-[16px] leading-6">
+								{item}
+							</p>
+						</div>
+					))}
+				</div>
+			)
+		}
+	</div>
+</Section>

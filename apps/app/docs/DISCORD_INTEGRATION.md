@@ -1,7 +1,8 @@
 # Discord Integration for Waitlist
 
 This document explains how to set up Discord OAuth verification for the waitlist
-feature.
+feature. For the full closed-beta rollout (including `LAUNCH_STATUS` and smoke
+tests), see [Launch Checklist](../../docs/launch-checklist.md).
 
 ## Overview
 

@@ -15,6 +15,10 @@ in the coming weeks. Stay tuned!
 - [Deployment](./deployment.md) - If you skip the deployment step when starting
   your app, these are the manual steps you can follow to get things up and
   running.
+- [Deployment Checklist](./deployment-checklist.md) - Infrastructure deploy
+  steps (D1, Workers, tenant-api, Pages).
+- [Launch Checklist](./launch-checklist.md) - Product launch phases
+  (`LAUNCH_STATUS`), waitlist, Discord verification, and go-live smoke tests.
 - [Authentication](./authentication.md) - Operator login (App) vs customer phone
   OTP on tenant Sites.
 - [Tenant data residency](./tenant-data-residency.md) - Regional tenant-api,

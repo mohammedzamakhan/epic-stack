@@ -32,12 +32,12 @@ const ICON_OPTIONS = [
 ]
 
 const HERO_VARIANT_OPTIONS = [
-	{ label: 'High Impact (Dark, Grid, Glow, Full-width)', value: 'highImpact' },
+	{ label: 'High Impact (Split layout, media showcase)', value: 'highImpact' },
 	{
-		label: 'Medium Impact (Clean, Centered, Container)',
+		label: 'Medium Impact (Centered waitlist / signup CTA)',
 		value: 'mediumImpact',
 	},
-	{ label: 'Low Impact (Compact, Text-focused)', value: 'lowImpact' },
+	{ label: 'Low Impact (Compact, text-focused)', value: 'lowImpact' },
 	{ label: 'Default (Minimal)', value: 'default' },
 ]
 
@@ -58,7 +58,7 @@ const FORM_TYPE_OPTIONS = [
 
 const definition = {
 	id: 'marketing-blocks',
-	version: '0.2.4',
+	version: '0.2.6',
 	capabilities: ['content:read', 'content:write'] as const,
 	hooks: {
 		'content:beforeSave': async (event: {
@@ -123,9 +123,35 @@ const definition = {
 					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
 					{
 						type: 'text_input',
+						action_id: 'headlineAccent',
+						label: 'Headline accent (Medium Impact — brand color suffix)',
+					},
+					{
+						type: 'text_input',
 						action_id: 'subheadline',
 						label: 'Subheadline / Description',
 						multiline: true,
+					},
+					{
+						type: 'text_input',
+						action_id: 'footnote',
+						label: 'Footnote below CTA (Medium Impact)',
+						multiline: true,
+					},
+					{
+						type: 'repeater',
+						action_id: 'trustItems',
+						label: 'Trust bullets (Medium Impact)',
+						item_label: 'Bullet',
+						min_items: 0,
+						max_items: 4,
+						fields: [
+							{
+								type: 'text_input',
+								action_id: 'text',
+								label: 'Text',
+							},
+						],
 					},
 					{
 						type: 'media_picker',
@@ -1104,6 +1130,39 @@ const definition = {
 								type: 'text_input',
 								action_id: 'body',
 								label: 'Body Text',
+								multiline: true,
+							},
+						],
+					},
+				],
+			},
+
+			// 27b. Benefits List (numbered waitlist reasons)
+			{
+				type: 'marketing.benefitsList',
+				label: 'Benefits List',
+				category: 'Sections',
+				description:
+					'Split section with eyebrow + headline on the left and a numbered benefit list on the right — ideal for waitlist “why join early” sections',
+				fields: [
+					{
+						type: 'text_input',
+						action_id: 'eyebrow',
+						label: 'Eyebrow (e.g. Why join early)',
+					},
+					{ type: 'text_input', action_id: 'title', label: 'Headline' },
+					{
+						type: 'repeater',
+						action_id: 'items',
+						label: 'Benefits',
+						item_label: 'Benefit',
+						min_items: 1,
+						max_items: 6,
+						fields: [
+							{
+								type: 'text_input',
+								action_id: 'text',
+								label: 'Benefit text',
 								multiline: true,
 							},
 						],
