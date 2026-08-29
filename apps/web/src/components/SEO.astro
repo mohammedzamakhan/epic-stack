@@ -199,8 +199,8 @@ const faqSchema = faq.length > 0 ? {
 <meta name="twitter:domain" content={siteUrl.replace(/^https?:\/\//, '')} />
 
 <!-- Structured Data (JSON-LD) -->
-<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
-<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
-{articleSchema && <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />}
-{breadcrumbSchema && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />}
-{faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+<script type="application/ld+json" set:html={JSON.stringify(organizationSchema).replace(/</g, '\\u003c')} />
+<script type="application/ld+json" set:html={JSON.stringify(websiteSchema).replace(/</g, '\\u003c')} />
+{articleSchema && <script type="application/ld+json" set:html={JSON.stringify(articleSchema).replace(/</g, '\\u003c')} />}
+{breadcrumbSchema && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema).replace(/</g, '\\u003c')} />}
+{faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema).replace(/</g, '\\u003c')} />}
