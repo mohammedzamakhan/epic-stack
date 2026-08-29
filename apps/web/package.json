@@ -7,13 +7,15 @@
   "scripts": {
     "dev": "NODE_OPTIONS=\"--use-system-ca\" astro dev --port 3002",
     "start": "astro dev --port 3002",
-    "build": "astro build",
+    "build": "CLOUDFLARE_BUILD=true astro build",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "astro check",
-    "types": "emdash types"
+    "types": "emdash types",
+    "db:seed": "emdash seed --database=./.emdash/data.db --on-conflict=update",
+    "db:migrate:manifest": "CLOUDFLARE_BUILD=true astro sync"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.7",

@@ -62,6 +62,12 @@ export {
 	type StripeCheckoutDependencies,
 } from './src/route-handlers'
 
+// Subscription utilities
+export {
+	cleanupDuplicateSubscriptions,
+	type DuplicateSubscriptionCleanupResult,
+} from './src/utils/duplicate-subscriptions'
+
 // Stripe Connect (tenant site commerce)
 export {
 	SHOP_PLATFORM_FEE_PERCENT,

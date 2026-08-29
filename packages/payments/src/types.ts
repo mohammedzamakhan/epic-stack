@@ -105,6 +105,10 @@ export interface CheckoutSessionOptions {
 	trialPeriodDays?: number
 	paymentMethodCollection?: 'always' | 'if_required'
 	testClockId?: string
+	/** Stored on the Stripe Checkout Session; used to bind checkout to an org. */
+	metadata?: Record<string, string>
+	/** Prevents duplicate sessions when checkout is triggered repeatedly. */
+	idempotencyKey?: string
 }
 
 export interface CustomerPortalOptions {

@@ -5,7 +5,12 @@ import Banner from '~/components/Banner.astro'
 import Frame from '~/components/site/Frame.astro'
 import '../styles/tailwind.css'
 import { getThemeFromCookie } from '~/utils/theme'
-import { getBanner } from '~/lib/emdash'
+import {
+	getBanner,
+	getFooterMenuColumns,
+	getPrimaryMenu,
+	getSiteSettings,
+} from '~/lib/emdash'
 
 import { getDirection } from '@repo/i18n'
 
@@ -15,8 +20,14 @@ const dir = getDirection(currentLocale)
 const cookieHeader = Astro.request.headers.get('cookie')
 const theme = getThemeFromCookie(cookieHeader)
 
-const banner = (await getBanner(currentLocale)) as any
-const isBannerEnabled: boolean = Boolean(banner?.isEnabled)
+const [settings, primaryMenu, footerColumns, banner] = await Promise.all([
+	getSiteSettings(),
+	getPrimaryMenu(currentLocale),
+	getFooterMenuColumns(currentLocale),
+	getBanner(currentLocale),
+])
+
+const isBannerEnabled: boolean = Boolean((banner as any)?.isEnabled)
 ---
 
 <html class={theme} lang={currentLocale} dir={dir}>
@@ -39,11 +50,15 @@ const isBannerEnabled: boolean = Boolean(banner?.isEnabled)
 	<body class="min-h-screen bg-background">
 		<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-background focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
 		<Banner />
-		<Header bannerEnabled={isBannerEnabled} />
+		<Header
+			bannerEnabled={isBannerEnabled}
+			settings={settings}
+			primaryMenu={primaryMenu}
+		/>
 		<main id="main-content" class="min-h-screen">
 			<Frame>
 				<slot />
-				<Footer />
+				<Footer settings={settings} footerColumns={footerColumns} />
 			</Frame>
 		</main>
 	</body>

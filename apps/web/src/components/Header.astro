@@ -1,15 +1,26 @@
 ---
 import { brand } from '@repo/config/brand'
+import type { Menu, SiteSettings } from 'emdash'
 import ThemeSwitcher from './ThemeSwitcher.astro'
 import LanguageSwitcher from './LanguageSwitcher.astro'
 import Button from './ui/Button.astro'
 import Navigation from './Navigation.astro'
+import { resolveSiteLogo } from '../lib/emdash'
 
 interface Props {
 	bannerEnabled?: boolean
+	settings?: Partial<SiteSettings> | null
+	primaryMenu?: Menu | null
 }
 
-const { bannerEnabled = false } = Astro.props
+const {
+	bannerEnabled = false,
+	settings = null,
+	primaryMenu = null,
+} = Astro.props
+
+const siteTitle = settings?.title || brand.name
+const siteLogo = resolveSiteLogo(settings)
 
 const currentUrl = Astro.url
 const protocol = currentUrl.protocol
@@ -31,22 +42,39 @@ const loginUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/login`
 			aria-label="Main navigation"
 		>
 			<div class="flex items-center gap-2">
-				<a href="/" aria-label={`${brand.name} home`} class="flex items-center gap-2.5 text-foreground">
-					<svg
-						aria-hidden="true"
-						class="size-5 text-brand"
-						viewBox="0 0 65 65"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill="currentColor"
-							d="M39.445 25.555 37 17.163 65 0 47.821 28l-8.376-2.445Zm-13.89 0L28 17.163 0 0l17.179 28 8.376-2.445Zm13.89 13.89L37 47.837 65 65 47.821 37l-8.376 2.445Zm-13.89 0L28 47.837 0 65l17.179-28 8.376 2.445Z"
-						/>
-					</svg>
-					<span id="header-wordmark" class="text-[19px] font-semibold leading-none tracking-[-0.025em]">
-						{brand.name}
-					</span>
+				<a href="/" aria-label={`${siteTitle} home`} class="flex items-center gap-2.5 text-foreground">
+					{
+						siteLogo ? (
+							<>
+								<img
+									src={siteLogo.url}
+									alt={siteLogo.alt || siteTitle}
+									class="h-5 w-auto"
+								/>
+								<span id="header-wordmark" class="text-[19px] font-semibold leading-none tracking-[-0.025em]">
+										{siteTitle}
+								</span>
+							</>
+						) : (
+							<>
+								<svg
+									aria-hidden="true"
+									class="size-5 text-brand"
+									viewBox="0 0 65 65"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										fill="currentColor"
+										d="M39.445 25.555 37 17.163 65 0 47.821 28l-8.376-2.445Zm-13.89 0L28 17.163 0 0l17.179 28 8.376-2.445Zm13.89 13.89L37 47.837 65 65 47.821 37l-8.376 2.445Zm-13.89 0L28 47.837 0 65l17.179-28 8.376 2.445Z"
+									/>
+								</svg>
+								<span id="header-wordmark" class="text-[19px] font-semibold leading-none tracking-[-0.025em]">
+									{siteTitle}
+								</span>
+							</>
+						)
+					}
 				</a>
 			</div>
 
@@ -54,7 +82,7 @@ const loginUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/login`
 				id="header-center-nav"
 				class="absolute left-1/2 hidden -translate-x-1/2 lg:block"
 			>
-				<Navigation />
+				<Navigation menu={primaryMenu} />
 			</div>
 
 			<div class="flex items-center gap-2">
@@ -96,7 +124,7 @@ const loginUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/login`
 			class="max-h-0 overflow-hidden border-t border-hairline bg-background/95 backdrop-blur-xl transition-[max-height] duration-300 lg:hidden"
 		>
 			<div class="flex flex-col gap-1 px-5 py-4 sm:px-8">
-				<Navigation isMobile={true} />
+				<Navigation menu={primaryMenu} isMobile={true} />
 				<div class="mt-2 flex gap-2 px-3">
 					<Button href={loginUrl} target="_blank" variant="outline" size="sm" class="flex-1">
 						Log in

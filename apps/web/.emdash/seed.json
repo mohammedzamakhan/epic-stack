@@ -55,6 +55,47 @@
 			]
 		}
 	],
+	"menus": [
+		{
+			"name": "primary",
+			"label": "Primary Navigation",
+			"items": [
+				{ "type": "custom", "label": "Blog", "url": "/posts" },
+				{ "type": "custom", "label": "About", "url": "/about" },
+				{ "type": "custom", "label": "Support", "url": "/support" }
+			]
+		},
+		{
+			"name": "footer_product",
+			"label": "Footer: Product",
+			"items": [
+				{ "type": "custom", "label": "Features", "url": "/pages/features" },
+				{ "type": "custom", "label": "Pricing", "url": "/pages/pricing" }
+			]
+		},
+		{
+			"name": "footer_resources",
+			"label": "Footer: Resources",
+			"items": [
+				{ "type": "custom", "label": "Blog", "url": "/posts" },
+				{ "type": "custom", "label": "Support", "url": "/support" },
+				{ "type": "custom", "label": "Status", "url": "/api/status" }
+			]
+		},
+		{
+			"name": "footer_company",
+			"label": "Footer: Company",
+			"items": [{ "type": "custom", "label": "About", "url": "/about" }]
+		},
+		{
+			"name": "footer_legal",
+			"label": "Footer: Legal",
+			"items": [
+				{ "type": "custom", "label": "Privacy", "url": "/privacy" },
+				{ "type": "custom", "label": "Terms", "url": "/tos" }
+			]
+		}
+	],
 	"content": {
 		"pages": [
 			{
