@@ -39,8 +39,6 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 
 		// eslint-disable-next-line playwright/no-raw-locators -- React Flow viewport has no semantic role
 		await expect(page.locator('.react-flow')).toBeVisible()
-		// eslint-disable-next-line playwright/no-raw-locators -- React Flow node wrapper
-		await expect(page.locator('.react-flow__node').first()).toBeVisible()
 		await expect(
 			page.getByRole('heading', { name: /^trigger$/i }),
 		).toBeVisible()
@@ -59,8 +57,9 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		// eslint-disable-next-line playwright/no-raw-locators -- React Flow viewport has no semantic role
 		const reactFlow = page.locator('.react-flow')
 		await expect(reactFlow).toBeVisible()
-		// eslint-disable-next-line playwright/no-raw-locators -- React Flow node wrapper
-		await expect(page.locator('.react-flow__node').first()).toBeVisible()
+		await expect(
+			page.getByRole('heading', { name: /^trigger$/i }),
+		).toBeVisible()
 
 		const triggerNode = page.getByRole('heading', { name: /^trigger$/i })
 		await triggerNode.click()

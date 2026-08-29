@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { generateTOTP } from '@repo/auth'
-import { expect, test } from '#tests/playwright-utils.ts'
+import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 
 test('Users can add 2FA to their account and use it when logging in', async ({
 	page,
@@ -14,6 +14,10 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 		page.getByRole('heading', { name: /security settings/i, level: 1 }),
 	).toBeVisible()
 	await page.waitForLoadState('networkidle')
+
+	await expect(
+		page.getByRole('heading', { name: /multi-factor authentication/i }),
+	).toBeVisible()
 
 	const enable2FAButton = page.getByRole('button', {
 		name: /Set up authenticator app/i,
@@ -81,16 +85,26 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 
 	await expect(page).toHaveURL(/\/verify/)
 
-	// Generate OTP immediately before submit to avoid period-boundary flakiness
-	const loginCode = (await generateTOTP(totpOptions)).otp
 	const codeInput = page.getByRole('textbox', { name: /code/i })
-	await codeInput.fill(loginCode)
-	await page.getByRole('button', { name: /verify/i }).click()
+	await waitFor(
+		async () => {
+			const loginCode = (await generateTOTP(totpOptions)).otp
+			await codeInput.fill(loginCode)
+			await page.getByRole('button', { name: /verify/i }).click()
+			await page.waitForURL((url) => !url.pathname.includes('/verify'), {
+				timeout: 5000,
+			})
+			return page.url()
+		},
+		{
+			timeout: 15000,
+			errorMessage:
+				'Expected to leave the 2FA verify page after submitting a code',
+		},
+	)
 
 	// After 2FA, users without an org land on org creation (or home then redirect)
-	await expect(page).toHaveURL(/\/(organizations\/create)?$/, {
-		timeout: 30000,
-	})
+	await expect(page).toHaveURL(/\/(organizations\/create)?$/)
 
 	await navigate('/')
 	await page.waitForURL('/organizations/create')

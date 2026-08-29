@@ -1,7 +1,13 @@
-import path from 'path'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
-// Removed db import - using test utilities instead
+
+const e2eDir = path.dirname(fileURLToPath(import.meta.url))
+const PROFILE_PHOTO_FIXTURE = path.join(
+	e2eDir,
+	'../fixtures/openimg/example-r2-cloudflarestorage-com/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
+)
 
 test.describe('File Operations', () => {
 	test('Users can upload profile photos', async ({ page, login, navigate }) => {
@@ -20,9 +26,7 @@ test.describe('File Operations', () => {
 				el.style.position = 'relative'
 			})
 
-			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
-			)
+			await fileInput.setInputFiles(PROFILE_PHOTO_FIXTURE)
 
 			const dialogHeading = page.getByRole('heading', {
 				name: /Update Profile Photo/i,
@@ -82,9 +86,7 @@ test.describe('File Operations', () => {
 				el.style.position = 'relative'
 			})
 
-			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
-			)
+			await fileInput.setInputFiles(PROFILE_PHOTO_FIXTURE)
 
 			await page.waitForTimeout(2000)
 
@@ -298,9 +300,7 @@ test.describe('File Operations', () => {
 				el.style.position = 'relative'
 			})
 
-			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
-			)
+			await fileInput.setInputFiles(PROFILE_PHOTO_FIXTURE)
 
 			await page.waitForTimeout(2000)
 
@@ -395,9 +395,7 @@ test.describe('File Operations', () => {
 				el.style.position = 'relative'
 			})
 
-			await fileInput.setInputFiles(
-				'./tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/user/kody-png-w-base-h-base-fit-base.png',
-			)
+			await fileInput.setInputFiles(PROFILE_PHOTO_FIXTURE)
 
 			await page.waitForTimeout(2000)
 
