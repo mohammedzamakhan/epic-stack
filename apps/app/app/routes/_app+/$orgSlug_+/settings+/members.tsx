@@ -1,14 +1,17 @@
 import { parseWithZod } from '@conform-to/zod'
 import { requireUserId } from '@repo/auth'
 import {
+	alias,
 	and,
-	count,
 	db,
-	eq,
 	desc,
+	eq,
+	exists,
+	ne,
+	or,
+	OrganizationRole,
 	User,
 	UserOrganization,
-	OrganizationRole,
 } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
@@ -30,6 +33,7 @@ import {
 	createOrganizationInviteLink,
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
+	MAX_ORGANIZATION_INVITES_PER_REQUEST,
 } from '#app/utils/organization/invitation.server.ts'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import { type OrganizationRoleName } from '#app/utils/organization/organizations.server.ts'
@@ -39,6 +43,11 @@ import {
 	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization/permissions.server.ts'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
+import {
+	checkRateLimit,
+	createRateLimitResponse,
+	ORGANIZATION_INVITE_RATE_LIMIT,
+} from '#app/utils/rate-limit.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -119,8 +128,33 @@ const InviteSchema = z.object({
 				role: z.enum(['admin', 'member', 'viewer', 'guest'] as const),
 			}),
 		)
-		.min(1, 'At least one invite is required'),
+		.min(1, 'At least one invite is required')
+		.max(
+			MAX_ORGANIZATION_INVITES_PER_REQUEST,
+			`You can invite at most ${MAX_ORGANIZATION_INVITES_PER_REQUEST} people at a time`,
+		),
 })
+
+function otherActiveAdminsExist(organizationId: string, excludeUserId: string) {
+	const OtherMembership = alias(UserOrganization, 'otherMembership')
+	return exists(
+		db
+			.select({ userId: OtherMembership.userId })
+			.from(OtherMembership)
+			.innerJoin(
+				OrganizationRole,
+				eq(OtherMembership.organizationRoleId, OrganizationRole.id),
+			)
+			.where(
+				and(
+					eq(OtherMembership.organizationId, organizationId),
+					eq(OtherMembership.active, true),
+					eq(OrganizationRole.name, 'admin'),
+					ne(OtherMembership.userId, excludeUserId),
+				),
+			),
+	)
+}
 
 export async function action({ request, params }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -140,6 +174,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			organization.id,
 			ORG_PERMISSIONS.CREATE_MEMBER_ANY,
 		)
+
+		const rateLimitCheck = await checkRateLimit(
+			{ type: 'user', value: `${userId}:${organization.id}` },
+			ORGANIZATION_INVITE_RATE_LIMIT,
+		)
+		if (!rateLimitCheck.allowed) {
+			return createRateLimitResponse(rateLimitCheck.resetAt)
+		}
 
 		const submission = parseWithZod(formData, { schema: InviteSchema })
 
@@ -227,7 +269,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		try {
-			await db
+			const [removed] = await db
 				.update(UserOrganization)
 				.set({
 					active: false,
@@ -236,10 +278,42 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					and(
 						eq(UserOrganization.userId, memberUserId),
 						eq(UserOrganization.organizationId, organization.id),
+						or(
+							ne(UserOrganization.organizationRoleId, 'org_role_admin'),
+							otherActiveAdminsExist(organization.id, memberUserId),
+						),
 					),
 				)
+				.returning({ userId: UserOrganization.userId })
 
-			// Update seat quantity for billing
+			if (!removed) {
+				const [target] = await db
+					.select({
+						userId: UserOrganization.userId,
+						roleName: OrganizationRole.name,
+						active: UserOrganization.active,
+					})
+					.from(UserOrganization)
+					.innerJoin(
+						OrganizationRole,
+						eq(UserOrganization.organizationRoleId, OrganizationRole.id),
+					)
+					.where(
+						and(
+							eq(UserOrganization.userId, memberUserId),
+							eq(UserOrganization.organizationId, organization.id),
+						),
+					)
+					.limit(1)
+				if (target?.active && target.roleName.toLowerCase() === 'admin') {
+					return Response.json(
+						{ error: 'Cannot remove the last admin of the organization' },
+						{ status: 400 },
+					)
+				}
+				return Response.json({ error: 'Member not found' }, { status: 404 })
+			}
+
 			try {
 				await updateSeatQuantity(organization.id)
 			} catch (error) {
@@ -281,45 +355,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ error: 'Invalid role' }, { status: 400 })
 		}
 
-		// Prevent demoting the last admin
-		const memberToUpdate = await db.query.UserOrganization.findFirst({
-			columns: { active: true },
-			with: { organizationRole: { columns: { name: true } } },
-			where: (membership, { and, eq }) =>
-				and(
-					eq(membership.userId, memberUserId),
-					eq(membership.organizationId, organization.id),
-				),
-		})
-		if (
-			memberToUpdate &&
-			memberToUpdate.organizationRole.name.toLowerCase() === 'admin' &&
-			memberToUpdate.active &&
-			newRole === 'member'
-		) {
-			const [activeAdminCount] = await db
-				.select({ value: count() })
-				.from(UserOrganization)
-				.innerJoin(
-					OrganizationRole,
-					eq(UserOrganization.organizationRoleId, OrganizationRole.id),
-				)
-				.where(
-					and(
-						eq(UserOrganization.organizationId, organization.id),
-						eq(UserOrganization.active, true),
-						eq(OrganizationRole.name, 'admin'),
-					),
-				)
-			if ((activeAdminCount?.value ?? 0) === 1) {
-				return Response.json(
-					{ error: 'Cannot demote the last admin of the organization' },
-					{ status: 400 },
-				)
-			}
-		}
-
-		// Get the organization role ID for the new role name
 		const [organizationRole] = await db
 			.select({ id: OrganizationRole.id })
 			.from(OrganizationRole)
@@ -331,7 +366,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		try {
-			await db
+			const lastAdminGuard =
+				newRole === 'member'
+					? or(
+							ne(UserOrganization.organizationRoleId, 'org_role_admin'),
+							otherActiveAdminsExist(organization.id, memberUserId),
+						)
+					: undefined
+
+			const [updated] = await db
 				.update(UserOrganization)
 				.set({
 					organizationRoleId: organizationRole.id,
@@ -340,8 +383,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					and(
 						eq(UserOrganization.userId, memberUserId),
 						eq(UserOrganization.organizationId, organization.id),
+						lastAdminGuard,
 					),
 				)
+				.returning({ userId: UserOrganization.userId })
+
+			if (!updated) {
+				const [existing] = await db
+					.select({ userId: UserOrganization.userId })
+					.from(UserOrganization)
+					.where(
+						and(
+							eq(UserOrganization.userId, memberUserId),
+							eq(UserOrganization.organizationId, organization.id),
+						),
+					)
+					.limit(1)
+				if (!existing) {
+					return Response.json({ error: 'Member not found' }, { status: 404 })
+				}
+				return Response.json(
+					{ error: 'Cannot demote the last admin of the organization' },
+					{ status: 400 },
+				)
+			}
 			return Response.json({ success: true })
 		} catch (error) {
 			console.error('Error updating member role:', error)

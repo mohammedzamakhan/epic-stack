@@ -7,6 +7,9 @@ import {
 	desc,
 	eq,
 	gte,
+	isNull,
+	lt,
+	or,
 	Organization,
 	OrganizationInvitation,
 	OrganizationInviteLink,
@@ -15,8 +18,16 @@ import {
 	UserOrganization,
 } from '@repo/database'
 import { OrganizationInviteEmail, sendEmail } from '@repo/email'
+import { type SQL } from 'drizzle-orm'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
+import { MAX_ORGANIZATION_INVITES_PER_REQUEST } from './invitation.ts'
 import { type OrganizationRoleName } from './organizations.server'
+
+export { MAX_ORGANIZATION_INVITES_PER_REQUEST }
+
+type PendingInvitation = NonNullable<
+	Awaited<ReturnType<typeof getInvitationByToken>>
+>
 
 async function getOrganizationRoleId(roleName: OrganizationRoleName) {
 	const [role] = await db
@@ -174,10 +185,32 @@ export async function getPendingInvitationsByEmail(email: string) {
 	}))
 }
 
-async function acceptInvitation(
-	invitation: Awaited<ReturnType<typeof getPendingInvitationsByEmail>>[number],
+async function assertInvitationOwnedByUser(
+	invitation: { email: string },
 	userId: string,
 ) {
+	const [user] = await db
+		.select({ email: User.email })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
+	invariantResponse(user, 'User not found', { status: 404 })
+	invariantResponse(
+		invitation.email.toLowerCase() === user.email.toLowerCase(),
+		'This invitation was not sent to your email address',
+		{ status: 403 },
+	)
+	return user
+}
+
+async function acceptInvitation(
+	invitation: Pick<
+		PendingInvitation,
+		'id' | 'email' | 'organizationId' | 'organizationRoleId' | 'organization'
+	>,
+	userId: string,
+) {
+	await assertInvitationOwnedByUser(invitation, userId)
 	const [member] = await db
 		.select({ userId: UserOrganization.userId })
 		.from(UserOrganization)
@@ -214,12 +247,23 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 	return results
 }
 
+export async function acceptInvitationById(
+	invitationId: string,
+	userId: string,
+) {
+	const invitation = await getInvitationById(invitationId)
+	invariantResponse(invitation, 'Invitation not found', { status: 404 })
+	if (invitation.expiresAt && invitation.expiresAt < new Date())
+		throw new Error('Invitation has expired')
+	return acceptInvitation(invitation, userId)
+}
+
 export async function validateAndAcceptInvitation(
 	token: string,
 	userId: string,
 ) {
 	const invitation = await getInvitationByToken(token)
-	invariantResponse(invitation, 'Invitation not found')
+	invariantResponse(invitation, 'Invitation not found', { status: 404 })
 	if (invitation.expiresAt && invitation.expiresAt < new Date())
 		throw new Error('Invitation has expired')
 	return acceptInvitation(invitation, userId)
@@ -358,15 +402,20 @@ export async function createInvitationFromLink(
 	userEmail: string,
 ) {
 	const link = await validateInviteLink(token)
+	const email = userEmail.toLowerCase()
 	const invitationToken = crypto.randomUUID()
+	const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+	// Shareable links must not overwrite a still-valid email invitation.
+	// A leaked member link would otherwise escalate a pending guest invite.
+	// Expired rows occupying the unique (email, org) key may be replaced.
 	await db
 		.insert(OrganizationInvitation)
 		.values({
-			email: userEmail.toLowerCase(),
+			email,
 			organizationId: link.organizationId,
 			organizationRoleId: link.organizationRoleId,
 			token: invitationToken,
-			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+			expiresAt,
 			inviterId: link.createdById,
 		})
 		.onConflictDoUpdate({
@@ -377,11 +426,15 @@ export async function createInvitationFromLink(
 			set: {
 				organizationRoleId: link.organizationRoleId,
 				token: invitationToken,
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+				expiresAt,
 				inviterId: link.createdById,
 			},
+			where: or(
+				isNull(OrganizationInvitation.expiresAt),
+				lt(OrganizationInvitation.expiresAt, new Date()),
+			),
 		})
-	return getInvitationByToken(invitationToken)
+	return getInvitationByEmailAndOrganization(email, link.organizationId)
 }
 
 export async function validateAndAcceptInviteLink(
@@ -414,7 +467,21 @@ export async function validateAndAcceptInviteLink(
 	return { organization: link.organization, alreadyMember: !!member }
 }
 
-async function getInvitationByToken(token: string) {
+function mapInvitationRow(row: {
+	invitation: typeof OrganizationInvitation.$inferSelect
+	organizationRole: typeof OrganizationRole.$inferSelect
+	organization: typeof Organization.$inferSelect
+	inviter: typeof User.$inferSelect | null
+}) {
+	return {
+		...row.invitation,
+		organizationRole: row.organizationRole,
+		organization: row.organization,
+		inviter: row.inviter,
+	}
+}
+
+async function findInvitation(where: SQL | undefined) {
 	const [row] = await db
 		.select({
 			invitation: OrganizationInvitation,
@@ -432,14 +499,27 @@ async function getInvitationByToken(token: string) {
 			eq(OrganizationInvitation.organizationId, Organization.id),
 		)
 		.leftJoin(User, eq(OrganizationInvitation.inviterId, User.id))
-		.where(eq(OrganizationInvitation.token, token))
+		.where(where)
 		.limit(1)
-	return row
-		? {
-				...row.invitation,
-				organizationRole: row.organizationRole,
-				organization: row.organization,
-				inviter: row.inviter,
-			}
-		: null
+	return row ? mapInvitationRow(row) : null
+}
+
+export async function getInvitationByToken(token: string) {
+	return findInvitation(eq(OrganizationInvitation.token, token))
+}
+
+async function getInvitationById(invitationId: string) {
+	return findInvitation(eq(OrganizationInvitation.id, invitationId))
+}
+
+async function getInvitationByEmailAndOrganization(
+	email: string,
+	organizationId: string,
+) {
+	return findInvitation(
+		and(
+			eq(OrganizationInvitation.email, email),
+			eq(OrganizationInvitation.organizationId, organizationId),
+		),
+	)
 }

@@ -12,6 +12,7 @@ import {
 	linkSettingsField,
 	normalizeLinkPickFields,
 } from './content-links'
+import { markdownField } from './markdown-fields'
 
 const ICON_OPTIONS = [
 	{ label: 'Lightning / Zap', value: 'zap' },
@@ -58,7 +59,7 @@ const FORM_TYPE_OPTIONS = [
 
 const definition = {
 	id: 'marketing-blocks',
-	version: '0.2.6',
+	version: '0.2.7',
 	capabilities: ['content:read', 'content:write'] as const,
 	hooks: {
 		'content:beforeSave': async (event: {
@@ -99,6 +100,11 @@ const definition = {
 				label: 'Link Settings',
 				fieldTypes: ['json'],
 			},
+			{
+				name: 'markdown_input',
+				label: 'Markdown',
+				fieldTypes: ['string'],
+			},
 		],
 		portableTextBlocks: [
 			// 1. Hero (Advanced Multi-Variant)
@@ -120,18 +126,13 @@ const definition = {
 						action_id: 'badge',
 						label: 'Badge / Pill text',
 					},
-					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
+					markdownField('headline', 'Headline'),
 					{
 						type: 'text_input',
 						action_id: 'headlineAccent',
 						label: 'Headline accent (Medium Impact — brand color suffix)',
 					},
-					{
-						type: 'text_input',
-						action_id: 'subheadline',
-						label: 'Subheadline / Description',
-						multiline: true,
-					},
+					markdownField('subheadline', 'Subheadline / Description', true),
 					{
 						type: 'text_input',
 						action_id: 'footnote',
@@ -242,13 +243,8 @@ const definition = {
 						action_id: 'badge',
 						label: 'Badge (e.g. // FEATURES)',
 					},
-					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
-					{
-						type: 'text_input',
-						action_id: 'subheadline',
-						label: 'Subheadline',
-						multiline: true,
-					},
+					markdownField('headline', 'Headline'),
+					markdownField('subheadline', 'Subheadline', true),
 					{
 						type: 'repeater',
 						action_id: 'features',
@@ -263,13 +259,8 @@ const definition = {
 								label: 'Icon',
 								options: ICON_OPTIONS,
 							},
-							{ type: 'text_input', action_id: 'title', label: 'Title' },
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-								multiline: true,
-							},
+							markdownField('title', 'Title'),
+							markdownField('description', 'Description', true),
 						],
 					},
 				],
@@ -283,13 +274,8 @@ const definition = {
 				description:
 					'Alternating feature sections with preview images and mini testimonials',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Section Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Section Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'repeater',
 						action_id: 'features',
@@ -297,17 +283,8 @@ const definition = {
 						item_label: 'Feature Item',
 						min_items: 1,
 						fields: [
-							{
-								type: 'text_input',
-								action_id: 'title',
-								label: 'Feature Title',
-							},
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-								multiline: true,
-							},
+							markdownField('title', 'Feature Title'),
+							markdownField('description', 'Description', true),
 							{
 								type: 'media_picker',
 								action_id: 'imageUrl',
@@ -341,13 +318,8 @@ const definition = {
 				description: 'Key product highlights with icons and accent tags',
 				fields: [
 					{ type: 'text_input', action_id: 'badge', label: 'Badge' },
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{ type: 'text_input', action_id: 'buttonText', label: 'Button Text' },
 					linkSettingsField('buttonUrl', 'Button URL'),
 					{
@@ -363,13 +335,8 @@ const definition = {
 								label: 'Icon',
 								options: ICON_OPTIONS,
 							},
-							{ type: 'text_input', action_id: 'title', label: 'Title' },
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-								multiline: true,
-							},
+							markdownField('title', 'Title'),
+							markdownField('description', 'Description', true),
 						],
 					},
 				],
@@ -388,7 +355,7 @@ const definition = {
 						action_id: 'badge',
 						label: 'Badge (e.g. PRICING PLANS)',
 					},
-					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
+					markdownField('headline', 'Headline'),
 					{
 						type: 'repeater',
 						action_id: 'plans',
@@ -412,11 +379,7 @@ const definition = {
 								action_id: 'yearlyPrice',
 								label: 'Yearly Price (e.g. $199)',
 							},
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Plan Description',
-							},
+							markdownField('description', 'Plan Description'),
 							{
 								type: 'text_input',
 								action_id: 'features',
@@ -443,7 +406,7 @@ const definition = {
 				description: 'Customer quote cards with author information and avatar',
 				fields: [
 					{ type: 'text_input', action_id: 'badge', label: 'Badge' },
-					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
+					markdownField('headline', 'Headline'),
 					{
 						type: 'repeater',
 						action_id: 'testimonials',
@@ -451,12 +414,7 @@ const definition = {
 						item_label: 'Testimonial',
 						min_items: 1,
 						fields: [
-							{
-								type: 'text_input',
-								action_id: 'quote',
-								label: 'Quote',
-								multiline: true,
-							},
+							markdownField('quote', 'Quote', true),
 							{ type: 'text_input', action_id: 'author', label: 'Author Name' },
 							{ type: 'text_input', action_id: 'role', label: 'Role / Title' },
 							{ type: 'text_input', action_id: 'company', label: 'Company' },
@@ -473,12 +431,7 @@ const definition = {
 				category: 'Sections',
 				description: 'Large featured single testimonial with author spotlight',
 				fields: [
-					{
-						type: 'text_input',
-						action_id: 'quote',
-						label: 'Quote',
-						multiline: true,
-					},
+					markdownField('quote', 'Quote', true),
 					{ type: 'text_input', action_id: 'author', label: 'Author Name' },
 					{ type: 'text_input', action_id: 'role', label: 'Role / Title' },
 					{ type: 'text_input', action_id: 'company', label: 'Company' },
@@ -494,7 +447,7 @@ const definition = {
 				description: 'Expandable accordion FAQ section',
 				fields: [
 					{ type: 'text_input', action_id: 'badge', label: 'Badge' },
-					{ type: 'text_input', action_id: 'headline', label: 'Headline' },
+					markdownField('headline', 'Headline'),
 					{
 						type: 'text_input',
 						action_id: 'supportText',
@@ -519,13 +472,8 @@ const definition = {
 						item_label: 'Question',
 						min_items: 1,
 						fields: [
-							{ type: 'text_input', action_id: 'question', label: 'Question' },
-							{
-								type: 'text_input',
-								action_id: 'answer',
-								label: 'Answer',
-								multiline: true,
-							},
+							markdownField('question', 'Question'),
+							markdownField('answer', 'Answer', true),
 						],
 					},
 				],
@@ -539,13 +487,8 @@ const definition = {
 				description:
 					'High-conversion banner with heading, description, and action buttons',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'description',
-						label: 'Description',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('description', 'Description', true),
 					{
 						type: 'text_input',
 						action_id: 'primaryButtonText',
@@ -568,13 +511,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Grid of key metrics and statistical highlights',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Section Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Section Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'repeater',
 						action_id: 'stats',
@@ -592,12 +530,7 @@ const definition = {
 								action_id: 'label',
 								label: 'Metric Label (e.g. Uptime SLA)',
 							},
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-								multiline: true,
-							},
+							markdownField('description', 'Description', true),
 						],
 					},
 				],
@@ -635,13 +568,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Ecosystem integration tools and tech stack cards',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'repeater',
 						action_id: 'integrations',
@@ -654,11 +582,7 @@ const definition = {
 								action_id: 'name',
 								label: 'Integration Name',
 							},
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-							},
+							markdownField('description', 'Description'),
 							{
 								type: 'select',
 								action_id: 'icon',
@@ -678,13 +602,8 @@ const definition = {
 				description:
 					'Tabbed feature walkthrough with screenshots and rich descriptions',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'text_input',
 						action_id: 'buttonText',
@@ -705,13 +624,8 @@ const definition = {
 						min_items: 1,
 						fields: [
 							{ type: 'text_input', action_id: 'label', label: 'Tab Label' },
-							{ type: 'text_input', action_id: 'title', label: 'Tab Title' },
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Tab Description',
-								multiline: true,
-							},
+							markdownField('title', 'Tab Title'),
+							markdownField('description', 'Tab Description', true),
 							{
 								type: 'text_input',
 								action_id: 'icon',
@@ -734,13 +648,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Stack of sticky cards that pin and scroll gracefully',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'repeater',
 						action_id: 'cards',
@@ -748,13 +657,8 @@ const definition = {
 						item_label: 'Card',
 						min_items: 1,
 						fields: [
-							{ type: 'text_input', action_id: 'title', label: 'Card Title' },
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-								multiline: true,
-							},
+							markdownField('title', 'Card Title'),
+							markdownField('description', 'Description', true),
 							{ type: 'text_input', action_id: 'tag', label: 'Tag / Category' },
 							{ type: 'media_picker', action_id: 'imageUrl', label: 'Image' },
 							{
@@ -781,13 +685,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Personal note or letter from the founders',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Heading' },
-					{
-						type: 'text_input',
-						action_id: 'content',
-						label: 'Letter Content',
-						multiline: true,
-					},
+					markdownField('title', 'Heading'),
+					markdownField('content', 'Letter Content', true),
 					{
 						type: 'text_input',
 						action_id: 'founderName',
@@ -813,17 +712,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Typography statement that highlights words on scroll',
 				fields: [
-					{
-						type: 'text_input',
-						action_id: 'heading',
-						label: 'Section Heading',
-					},
-					{
-						type: 'text_input',
-						action_id: 'text',
-						label: 'Highlightable Text',
-						multiline: true,
-					},
+					markdownField('heading', 'Section Heading'),
+					markdownField('text', 'Highlightable Text', true),
 				],
 			},
 
@@ -834,13 +724,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Target persona cards (Startups, Scaleups, Enterprises)',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'repeater',
 						action_id: 'items',
@@ -848,17 +733,8 @@ const definition = {
 						item_label: 'Persona',
 						min_items: 0,
 						fields: [
-							{
-								type: 'text_input',
-								action_id: 'title',
-								label: 'Persona Title (e.g. For Indie Hackers)',
-							},
-							{
-								type: 'text_input',
-								action_id: 'description',
-								label: 'Description',
-								multiline: true,
-							},
+							markdownField('title', 'Persona Title (e.g. For Indie Hackers)'),
+							markdownField('description', 'Description', true),
 							{ type: 'text_input', action_id: 'tag', label: 'Tag' },
 						],
 					},
@@ -872,13 +748,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Grid of leadership and team members with social links',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'repeater',
 						action_id: 'members',
@@ -916,13 +787,8 @@ const definition = {
 				description:
 					'Interactive form for contact, newsletter, or demo requests',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Form Title' },
-					{
-						type: 'text_input',
-						action_id: 'subtitle',
-						label: 'Subtitle',
-						multiline: true,
-					},
+					markdownField('title', 'Form Title'),
+					markdownField('subtitle', 'Subtitle', true),
 					{
 						type: 'select',
 						action_id: 'formType',
@@ -959,8 +825,8 @@ const definition = {
 				category: 'Sections',
 				description: 'Automated teaser showing the latest articles',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Heading' },
-					{ type: 'text_input', action_id: 'subtitle', label: 'Subtitle' },
+					markdownField('title', 'Heading'),
+					markdownField('subtitle', 'Subtitle'),
 					{
 						type: 'toggle',
 						action_id: 'showViewAll',
@@ -981,14 +847,7 @@ const definition = {
 				label: 'Rich Content Section',
 				category: 'Sections',
 				description: 'Text content section with headings and body copy',
-				fields: [
-					{
-						type: 'text_input',
-						action_id: 'body',
-						label: 'Content Text',
-						multiline: true,
-					},
-				],
+				fields: [markdownField('body', 'Content Text', true)],
 			},
 
 			// 24. Archive Block
@@ -997,9 +856,7 @@ const definition = {
 				label: 'Post Archive',
 				category: 'Sections',
 				description: 'Paginated or filtered archive of content entries',
-				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Archive Title' },
-				],
+				fields: [markdownField('title', 'Archive Title')],
 			},
 
 			// 25. Showcase Cards (Horizontal Scroll)
@@ -1011,13 +868,8 @@ const definition = {
 					'Full-bleed horizontal-scrolling portrait cards with image overlays, quotes, and stats',
 				fields: [
 					{ type: 'text_input', action_id: 'eyebrow', label: 'Eyebrow' },
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'description',
-						label: 'Description',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('description', 'Description', true),
 					{
 						type: 'repeater',
 						action_id: 'cards',
@@ -1031,12 +883,7 @@ const definition = {
 								action_id: 'image',
 								label: 'Card Image',
 							},
-							{
-								type: 'text_input',
-								action_id: 'quote',
-								label: 'Quote',
-								multiline: true,
-							},
+							markdownField('quote', 'Quote', true),
 							{ type: 'text_input', action_id: 'name', label: 'Name' },
 							{
 								type: 'text_input',
@@ -1067,7 +914,7 @@ const definition = {
 					'2-column grid with 1px borders — tag pills, titles, and arrow icons per cell',
 				fields: [
 					{ type: 'text_input', action_id: 'eyebrow', label: 'Eyebrow' },
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
+					markdownField('title', 'Title'),
 					{
 						type: 'text_input',
 						action_id: 'actionLabel',
@@ -1083,7 +930,7 @@ const definition = {
 						max_items: 12,
 						fields: [
 							{ type: 'text_input', action_id: 'tag', label: 'Tag / Category' },
-							{ type: 'text_input', action_id: 'title', label: 'Title' },
+							markdownField('title', 'Title'),
 							{
 								type: 'text_input',
 								action_id: 'meta',
@@ -1104,13 +951,8 @@ const definition = {
 					'Sticky heading with stacked value/belief cards — great for philosophy sections',
 				fields: [
 					{ type: 'text_input', action_id: 'eyebrow', label: 'Eyebrow' },
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'description',
-						label: 'Description',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('description', 'Description', true),
 					{
 						type: 'text_input',
 						action_id: 'ctaLabel',
@@ -1125,13 +967,8 @@ const definition = {
 						min_items: 1,
 						max_items: 10,
 						fields: [
-							{ type: 'text_input', action_id: 'title', label: 'Belief Title' },
-							{
-								type: 'text_input',
-								action_id: 'body',
-								label: 'Body Text',
-								multiline: true,
-							},
+							markdownField('title', 'Belief Title'),
+							markdownField('body', 'Body Text', true),
 						],
 					},
 				],
@@ -1150,7 +987,7 @@ const definition = {
 						action_id: 'eyebrow',
 						label: 'Eyebrow (e.g. Why join early)',
 					},
-					{ type: 'text_input', action_id: 'title', label: 'Headline' },
+					markdownField('title', 'Headline'),
 					{
 						type: 'repeater',
 						action_id: 'items',
@@ -1158,14 +995,7 @@ const definition = {
 						item_label: 'Benefit',
 						min_items: 1,
 						max_items: 6,
-						fields: [
-							{
-								type: 'text_input',
-								action_id: 'text',
-								label: 'Benefit text',
-								multiline: true,
-							},
-						],
+						fields: [markdownField('text', 'Benefit text', true)],
 					},
 				],
 			},
@@ -1178,13 +1008,8 @@ const definition = {
 				description:
 					'Sticky heading on the left with visual showcase rows scrolling on the right',
 				fields: [
-					{ type: 'text_input', action_id: 'title', label: 'Title' },
-					{
-						type: 'text_input',
-						action_id: 'description',
-						label: 'Description',
-						multiline: true,
-					},
+					markdownField('title', 'Title'),
+					markdownField('description', 'Description', true),
 					{
 						type: 'repeater',
 						action_id: 'rows',
@@ -1203,17 +1028,8 @@ const definition = {
 								action_id: 'imageAlt',
 								label: 'Image Alt Text',
 							},
-							{
-								type: 'text_input',
-								action_id: 'lead',
-								label: 'Lead Text (bold opener)',
-							},
-							{
-								type: 'text_input',
-								action_id: 'copy',
-								label: 'Supporting Copy',
-								multiline: true,
-							},
+							markdownField('lead', 'Lead Text (bold opener)'),
+							markdownField('copy', 'Supporting Copy', true),
 						],
 					},
 				],

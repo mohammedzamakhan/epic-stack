@@ -1,4 +1,6 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
+import MarkdownText from '../site/MarkdownText.astro'
 import Section from '../site/Section.astro'
 import SectionHead from '../site/SectionHead.astro'
 
@@ -67,10 +69,12 @@ const {
 			features.map((feature) => (
 				<li class="border-t-2 border-brand pt-5">
 					{feature.icon && <div class="mb-3 text-brand" aria-hidden="true" set:html={feature.icon} />}
-					<h3 class="text-[15px] font-semibold text-foreground">{feature.title}</h3>
-					<p class="mt-2 text-pretty text-[13px] leading-relaxed text-muted-foreground">
-						{feature.description}
-					</p>
+					<h3 class="text-[15px] font-semibold text-foreground">
+						<MarkdownInline content={feature.title} />
+					</h3>
+					<div class="mt-2 text-pretty text-[13px] leading-relaxed text-muted-foreground">
+						<MarkdownText content={feature.description} />
+					</div>
 				</li>
 			))
 		}

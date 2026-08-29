@@ -1,4 +1,6 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
+import MarkdownText from '../site/MarkdownText.astro'
 import Section from '../site/Section.astro'
 
 interface Props {
@@ -35,7 +37,7 @@ const visibleItems = items.filter(
 			{
 				title && (
 					<h2 class="mt-4 max-w-md text-balance text-[clamp(2rem,4vw,3.5rem)] leading-none font-semibold tracking-[-0.055em]">
-						{title}
+						<MarkdownInline content={title} />
 					</h2>
 				)
 			}
@@ -49,9 +51,9 @@ const visibleItems = items.filter(
 							<span class="text-brand w-6 shrink-0 font-mono text-[12px] leading-6 tabular-nums">
 								{String(index + 1).padStart(2, '0')}
 							</span>
-							<p class="text-foreground/85 max-w-lg text-[16px] leading-6">
-								{item}
-							</p>
+							<div class="text-foreground/85 max-w-lg text-[16px] leading-6">
+								<MarkdownText content={item} />
+							</div>
 						</div>
 					))}
 				</div>

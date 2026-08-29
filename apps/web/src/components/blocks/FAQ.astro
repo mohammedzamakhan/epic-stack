@@ -1,4 +1,6 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
+import MarkdownText from '../site/MarkdownText.astro'
 import Section from '../site/Section.astro'
 import Button from '../ui/Button.astro'
 
@@ -62,11 +64,11 @@ const {
 			></div>
 			<div class="relative flex max-w-lg flex-col items-start justify-center">
 				<h2 id="faq-heading" class="font-display text-balance text-[40px] font-medium tracking-[-0.04em] text-foreground sm:text-[52px]">
-					{title}
+					<MarkdownInline content={title} />
 				</h2>
-				<p class="mt-6 max-w-md text-pretty text-[17px] leading-relaxed text-foreground/65">
-					{subtitle}
-				</p>
+				<div class="mt-6 max-w-md text-pretty text-[17px] leading-relaxed text-foreground/65">
+					<MarkdownText content={subtitle} />
+				</div>
 				<p class="mt-4 text-[15px] text-foreground/65">
 					{supportText}{' '}
 					<a href={supportLinkUrl} class="font-medium text-foreground underline-offset-4 hover:underline">
@@ -87,7 +89,7 @@ const {
 						open={index === 0}
 					>
 						<summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-8 text-left text-[19px] font-medium leading-snug marker:content-none sm:text-[22px] [&::-webkit-details-marker]:hidden">
-							<span>{faq.question}</span>
+							<span><MarkdownInline content={faq.question} /></span>
 							<svg
 								aria-hidden="true"
 								class="size-5 shrink-0 text-muted-foreground transition-transform duration-300 group-open:rotate-180"
@@ -98,9 +100,9 @@ const {
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6" />
 							</svg>
 						</summary>
-						<p class="max-w-xl pb-8 text-pretty text-[16px] leading-relaxed text-muted-foreground sm:text-[18px]">
-							{faq.answer}
-						</p>
+						<div class="max-w-xl pb-8 text-pretty text-[16px] leading-relaxed text-muted-foreground sm:text-[18px]">
+							<MarkdownText content={faq.answer} />
+						</div>
 					</details>
 				))
 			}

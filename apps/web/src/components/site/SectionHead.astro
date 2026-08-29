@@ -1,5 +1,6 @@
 ---
 import Eyebrow from './Eyebrow.astro'
+import MarkdownInline from './MarkdownInline.astro'
 import MarkdownText from './MarkdownText.astro'
 
 interface Props {
@@ -16,7 +17,7 @@ const { eyebrow, title, description } = Astro.props
 		{eyebrow && <Eyebrow class="mb-4">{eyebrow}</Eyebrow>}
 		{title && (
 			<h2 class="font-display max-w-xl text-balance text-[32px] font-medium tracking-[-0.02em] sm:text-[40px]">
-				{title}
+				<MarkdownInline content={title} />
 			</h2>
 		)}
 		<slot name="action" />

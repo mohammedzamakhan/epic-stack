@@ -505,6 +505,8 @@ const getOrganizationSeatQuantity = async (organizationId: string) => {
 	return row?.value ?? 0
 }
 
+const seatUpdateQueues = new Map<string, Promise<unknown>>()
+
 export const updateSeatQuantity = async (organizationId: string) => {
 	const [organization] = await db
 		.select()
@@ -516,30 +518,61 @@ export const updateSeatQuantity = async (organizationId: string) => {
 		return null
 	}
 
-	// Get the number of users in the organization
-	const numUsersInOrganization =
-		await getOrganizationSeatQuantity(organizationId)
-
-	// Get the subscription
-	const subscription = await paymentProvider.retrieveSubscription(
-		organization.stripeSubscriptionId,
+	const stripeSubscriptionId = organization.stripeSubscriptionId
+	const previous = seatUpdateQueues.get(organizationId) ?? Promise.resolve()
+	const run = previous.then(
+		() => syncSeatQuantity(organizationId, stripeSubscriptionId),
+		() => syncSeatQuantity(organizationId, stripeSubscriptionId),
 	)
+	seatUpdateQueues.set(
+		organizationId,
+		run.then(
+			() => undefined,
+			() => undefined,
+		),
+	)
+	return run
+}
 
-	if (subscription.items.length !== 1) {
-		throw new Error('Subscription does not have exactly 1 item')
+async function syncSeatQuantity(
+	organizationId: string,
+	stripeSubscriptionId: string,
+) {
+	let lastResult: Awaited<
+		ReturnType<typeof paymentProvider.updateSubscription>
+	> | null = null
+
+	// Re-count after each Stripe write so concurrent accepts cannot leave
+	// quantity stuck on a stale snapshot (last-write-wins).
+	for (let attempt = 0; attempt < 3; attempt++) {
+		const numUsersInOrganization =
+			await getOrganizationSeatQuantity(organizationId)
+
+		const subscription =
+			await paymentProvider.retrieveSubscription(stripeSubscriptionId)
+
+		if (subscription.items.length !== 1) {
+			throw new Error('Subscription does not have exactly 1 item')
+		}
+
+		const firstItem = subscription.items[0]
+		if (!firstItem) {
+			throw new Error('Subscription item not found')
+		}
+
+		lastResult = await paymentProvider.updateSubscription({
+			subscriptionId: stripeSubscriptionId,
+			priceId: firstItem.priceId,
+			quantity: numUsersInOrganization,
+		})
+
+		const recount = await getOrganizationSeatQuantity(organizationId)
+		if (recount === numUsersInOrganization) {
+			return lastResult
+		}
 	}
 
-	const firstItem = subscription.items[0]
-	if (!firstItem) {
-		throw new Error('Subscription item not found')
-	}
-
-	// Update the subscription
-	return paymentProvider.updateSubscription({
-		subscriptionId: organization.stripeSubscriptionId,
-		priceId: firstItem.priceId,
-		quantity: numUsersInOrganization,
-	})
+	return lastResult
 }
 
 export const checkoutAction = async (

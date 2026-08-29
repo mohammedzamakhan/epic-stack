@@ -1,0 +1,24 @@
+---
+import { parseMarkdownInline } from '../../lib/markdown'
+
+interface Props {
+	content?: string
+	class?: string
+}
+
+const { content, class: className = '' } = Astro.props
+
+if (!content) return null
+
+const html = parseMarkdownInline(content)
+---
+<span
+	class:list={[
+		'md-inline',
+		'[&_strong]:font-semibold [&_em]:italic',
+		'[&_.md-highlight]:rounded-sm [&_.md-highlight]:bg-brand/20 [&_.md-highlight]:px-1 [&_.md-highlight]:py-0.5',
+		'[&_a]:underline [&_a]:underline-offset-2',
+		className,
+	]}
+	set:html={html}
+/>

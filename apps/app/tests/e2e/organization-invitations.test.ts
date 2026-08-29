@@ -1,37 +1,84 @@
+/**
+ * Organization invitations & membership — critical path.
+ *
+ * These tests assume the same environment CI uses (see playwright.config.ts):
+ *   LAUNCH_STATUS=LAUNCHED
+ *   MOCKS=true
+ *
+ * Run like CI (recommended; starts `npm run start:mocks` on a free :3001):
+ *   npm run test:e2e:run -- tests/e2e/organization-invitations.test.ts
+ *
+ * UI mode against `npm run dev`:
+ *   npx playwright test tests/e2e/organization-invitations.test.ts --ui
+ */
 import { faker } from '@faker-js/faker'
+import { type Page } from '@playwright/test'
 import {
 	and,
 	db,
 	eq,
 	Organization,
 	OrganizationInvitation,
+	OrganizationInviteLink,
 	Role,
 	User,
 	UserOrganization,
+	WaitlistEntry,
 	_RoleToUser,
 } from '@repo/database'
-// Removed db import - using test utilities instead
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
-async function createOwnerUser() {
-	const [owner] = await db
+const WEEK_MS = 1000 * 60 * 60 * 24 * 7
+
+/**
+ * Local `.env` is often `LAUNCH_STATUS=CLOSED_BETA`, which sends `/organizations`
+ * to the waitlist. CI has no such file and runs `LAUNCHED`. Granting early
+ * access makes these tests pass in both environments.
+ */
+async function openApp(
+	login: () => Promise<{
+		id: string
+		email: string
+		username: string
+		name: string | null
+	}>,
+) {
+	const user = await login()
+	await db
+		.insert(WaitlistEntry)
+		.values({
+			userId: user.id,
+			referralCode: `e2e-${user.id}`,
+			hasEarlyAccess: true,
+			grantedAccessAt: new Date(),
+			grantedAccessBy: user.id,
+		})
+		.onConflictDoUpdate({
+			target: WaitlistEntry.userId,
+			set: { hasEarlyAccess: true, grantedAccessAt: new Date() },
+		})
+	return user
+}
+
+async function createUserRecord() {
+	const [user] = await db
 		.insert(User)
 		.values({
-			email: faker.internet.email(),
+			email: faker.internet.email().toLowerCase(),
 			username: faker.internet.username(),
 			name: faker.person.fullName(),
 		})
 		.returning()
-	if (!owner) throw new Error('Failed to create owner')
+	if (!user) throw new Error('Failed to create user')
 	const [role] = await db
 		.select({ id: Role.id })
 		.from(Role)
 		.where(eq(Role.name, 'user'))
 		.limit(1)
-	if (role) await db.insert(_RoleToUser).values({ A: role.id, B: owner.id })
-	return owner
+	if (role) await db.insert(_RoleToUser).values({ A: role.id, B: user.id })
+	return user
 }
 
 async function createOrgWithAdmin(ownerId: string) {
@@ -39,7 +86,7 @@ async function createOrgWithAdmin(ownerId: string) {
 		.insert(Organization)
 		.values({
 			name: faker.company.name(),
-			slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+			slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${Date.now()}-${faker.string.alphanumeric(4)}`,
 			description: faker.company.catchPhrase(),
 		})
 		.returning()
@@ -52,49 +99,136 @@ async function createOrgWithAdmin(ownerId: string) {
 	return org
 }
 
-test.describe('Organization Invitations', () => {
-	test('Organization owners can send invitations', async ({
+async function addMember(
+	orgId: string,
+	userId: string,
+	role: 'admin' | 'member' | 'viewer' | 'guest',
+) {
+	await db.insert(UserOrganization).values({
+		userId,
+		organizationId: orgId,
+		organizationRoleId: `org_role_${role}`,
+		active: true,
+	})
+}
+
+async function insertEmailInvitation({
+	organizationId,
+	email,
+	inviterId,
+	role = 'member',
+	expiresAt = new Date(Date.now() + WEEK_MS),
+}: {
+	organizationId: string
+	email: string
+	inviterId: string
+	role?: 'admin' | 'member' | 'viewer' | 'guest'
+	expiresAt?: Date
+}) {
+	const [invitation] = await db
+		.insert(OrganizationInvitation)
+		.values({
+			organizationId,
+			email: email.toLowerCase(),
+			organizationRoleId: `org_role_${role}`,
+			inviterId,
+			token: `inv-${role}-${faker.string.uuid()}`,
+			expiresAt,
+		})
+		.returning()
+	if (!invitation) throw new Error('Failed to create invitation')
+	return invitation
+}
+
+async function insertInviteLink({
+	organizationId,
+	createdById,
+	role = 'member',
+	isActive = true,
+}: {
+	organizationId: string
+	createdById: string
+	role?: 'admin' | 'member' | 'viewer' | 'guest'
+	isActive?: boolean
+}) {
+	const [link] = await db
+		.insert(OrganizationInviteLink)
+		.values({
+			organizationId,
+			createdById,
+			organizationRoleId: `org_role_${role}`,
+			token: `link-${role}-${faker.string.uuid()}`,
+			isActive,
+		})
+		.returning()
+	if (!link) throw new Error('Failed to create invite link')
+	return link
+}
+
+async function getMembership(organizationId: string, userId: string) {
+	const [membership] = await db
+		.select({
+			userId: UserOrganization.userId,
+			organizationRoleId: UserOrganization.organizationRoleId,
+			active: UserOrganization.active,
+		})
+		.from(UserOrganization)
+		.where(
+			and(
+				eq(UserOrganization.organizationId, organizationId),
+				eq(UserOrganization.userId, userId),
+			),
+		)
+		.limit(1)
+	return membership ?? null
+}
+
+async function getInvitationById(id: string) {
+	const [invitation] = await db
+		.select()
+		.from(OrganizationInvitation)
+		.where(eq(OrganizationInvitation.id, id))
+		.limit(1)
+	return invitation ?? null
+}
+
+function membersAction(
+	page: Page,
+	orgSlug: string,
+	fields: Record<string, string>,
+) {
+	return page.request.post(`/${orgSlug}/settings/members`, { form: fields })
+}
+
+test.describe('Email invitations', () => {
+	test('Admin can invite someone by email', async ({
 		page,
 		login,
 		navigate,
 	}) => {
-		const user = await login()
+		const admin = await openApp(login)
+		const org = await createTestOrganization(admin.id, 'admin')
+		const inviteEmail = faker.internet.email().toLowerCase()
 
-		// Create an organization for the user
-		const org = await createTestOrganization(user.id, 'admin')
-
-		// Navigate to organization members page
 		await navigate('/:slug/settings/members', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
+		await expect(
+			page.getByRole('button', { name: /send invitations/i }),
+		).toBeVisible()
 
-		// Wait for page to fully load
-		await page.waitForLoadState('networkidle')
+		const send = await membersAction(page, org.slug, {
+			intent: 'send-invitations',
+			'invites[0].email': inviteEmail,
+			'invites[0].role': 'member',
+		})
+		expect(send.ok()).toBe(true)
 
-		// Fill in invitation form (form is already visible on the page)
-		const inviteEmail = faker.internet.email()
-		await page.getByPlaceholder('Enter email address').fill(inviteEmail)
+		await page.reload()
+		await expect(
+			page
+				.getByRole('region', { name: /pending invitations/i })
+				.getByText(inviteEmail),
+		).toBeVisible()
 
-		// Select role via the visual dropdown - scope to invite form to avoid the org switcher button
-		// (the org switcher has "1 member" which would match generic role patterns)
-		// eslint-disable-next-line playwright/no-raw-locators -- form has no semantic role without an accessible name
-		await page
-			.locator('#invite-form')
-			.getByRole('button', { name: 'Admin', exact: true })
-			.click()
-		// Wait for the dropdown menu and click Member (filter by text starting with "Member")
-		await page
-			.getByRole('menuitem')
-			.filter({ hasText: /^Member/ })
-			.click()
-
-		// Send invitation
-		await page.getByRole('button', { name: /send invitations/i }).click()
-
-		// Wait for form to reset (indicates success)
-		await page.waitForTimeout(1000)
-		await expect(page.getByPlaceholder('Enter email address')).toHaveValue('')
-
-		// Verify invitation exists in database
 		const [invitation] = await db
 			.select()
 			.from(OrganizationInvitation)
@@ -105,332 +239,524 @@ test.describe('Organization Invitations', () => {
 				),
 			)
 			.limit(1)
-		expect(invitation).toBeTruthy()
 		expect(invitation?.organizationRoleId).toBe('org_role_member')
 
-		// Verify invitation email was sent
-		await waitFor(
+		const email = await waitFor(
 			async () => {
-				const email = await readEmail(inviteEmail)
-				expect(email).toBeTruthy()
-				expect(email?.subject).toContain('invited')
-				return email
+				const sent = await readEmail(inviteEmail)
+				expect(sent).toBeTruthy()
+				expect(sent?.subject).toContain('invited')
+				return sent
 			},
-			{ timeout: 10000 },
+			{ timeout: 10_000 },
 		)
+		expect(email?.text).toContain(`/join/${invitation?.token}`)
 	})
 
-	test('Users can accept organization invitations', async ({
+	test('Invitee can accept from the organizations dashboard', async ({
 		page,
 		login,
 		navigate,
 	}) => {
-		const invitedUser = await login()
-
-		const owner = await createOwnerUser()
+		const invitee = await openApp(login)
+		const owner = await createUserRecord()
 		const org = await createOrgWithAdmin(owner.id)
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: invitee.email,
+			inviterId: owner.id,
+		})
 
-		// Create an invitation for the logged-in user
-		const [invitation] = await db
-			.insert(OrganizationInvitation)
-			.values({
-				organizationId: org.id,
-				email: invitedUser.email,
-				organizationRoleId: 'org_role_member',
-				inviterId: owner.id,
-				token: `accept-test-1-${faker.string.uuid()}-${Date.now()}`,
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			})
-			.returning()
-		if (!invitation) throw new Error('Failed to create invitation')
-
-		// Navigate directly to organizations page where pending invitations are shown
 		await navigate('/organizations')
-		await page.waitForLoadState('networkidle')
-
-		// Verify invitation details are displayed in pending invitations section
 		await expect(
 			page.getByRole('heading', { name: /pending invitations/i }),
 		).toBeVisible()
 		await expect(page.getByText(org.name)).toBeVisible()
 
-		// Accept the invitation
 		await page.getByRole('button', { name: /accept/i }).click()
-
-		// Wait for the action to complete
-		await page.waitForLoadState('networkidle')
-
-		// The pending invitations section should disappear or the specific invitation should be gone
-		// We can check that the organization now appears in the user's organizations list
 		await expect(
 			page.getByRole('link', { name: new RegExp(org.name) }),
 		).toBeVisible()
 
-		// Navigate to the organization to verify membership
-		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
-
-		// Verify user is now a member in database
-		const [membership] = await db
-			.select({ organizationRoleId: UserOrganization.organizationRoleId })
-			.from(UserOrganization)
-			.where(
-				and(
-					eq(UserOrganization.organizationId, org.id),
-					eq(UserOrganization.userId, invitedUser.id),
-				),
-			)
-			.limit(1)
-		expect(membership).toBeTruthy()
+		const membership = await getMembership(org.id, invitee.id)
 		expect(membership?.organizationRoleId).toBe('org_role_member')
-
-		// Verify invitation is deleted after acceptance (correct behavior)
-		const [updatedInvitation] = await db
-			.select()
-			.from(OrganizationInvitation)
-			.where(eq(OrganizationInvitation.id, invitation.id))
-			.limit(1)
-		expect(updatedInvitation ?? null).toBeNull()
+		expect(membership?.active).toBe(true)
+		expect(await getInvitationById(invitation.id)).toBeNull()
 	})
 
-	test('Users can decline organization invitations', async ({
+	test('Invitee can decline a pending invitation', async ({
 		page,
 		login,
 		navigate,
 	}) => {
-		const invitedUser = await login()
-
-		const owner = await createOwnerUser()
+		const invitee = await openApp(login)
+		const owner = await createUserRecord()
 		const org = await createOrgWithAdmin(owner.id)
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: invitee.email,
+			inviterId: owner.id,
+		})
 
-		// Create an invitation for the logged-in user
-		const [invitation] = await db
-			.insert(OrganizationInvitation)
-			.values({
-				organizationId: org.id,
-				email: invitedUser.email,
-				organizationRoleId: 'org_role_member',
-				inviterId: owner.id,
-				token: `decline-test-${faker.string.uuid()}-${Date.now()}`,
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			})
-			.returning()
-		if (!invitation) throw new Error('Failed to create invitation')
-
-		// Navigate to organizations page where pending invitations are shown
 		await navigate('/organizations')
-		await page.waitForLoadState('networkidle')
+		await expect(page.getByText(org.name)).toBeVisible()
+		await page.getByRole('button', { name: /decline/i }).click()
+		await expect(page.getByText(org.name)).not.toBeVisible()
 
-		// Verify invitation is displayed
+		expect(await getMembership(org.id, invitee.id)).toBeNull()
+		expect(await getInvitationById(invitation.id)).toBeNull()
+	})
+
+	test('Admin can revoke a pending invitation', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const admin = await openApp(login)
+		const org = await createTestOrganization(admin.id, 'admin')
+		const inviteEmail = faker.internet.email().toLowerCase()
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: inviteEmail,
+			inviterId: admin.id,
+		})
+
+		await navigate('/:slug/settings/members', { slug: org.slug })
+		const pendingSection = page.getByRole('region', {
+			name: /pending invitations/i,
+		})
+		await expect(pendingSection.getByText(inviteEmail)).toBeVisible()
+		await pendingSection
+			.getByRole('button', { name: /delete invitation/i })
+			.click()
+		await expect(pendingSection.getByText(inviteEmail)).not.toBeVisible()
+		expect(await getInvitationById(invitation.id)).toBeNull()
+	})
+
+	test('Invitee sees every pending invitation for their email', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const invitee = await openApp(login)
+		const owner = await createUserRecord()
+		const org1 = await createOrgWithAdmin(owner.id)
+		const org2 = await createOrgWithAdmin(owner.id)
+		await insertEmailInvitation({
+			organizationId: org1.id,
+			email: invitee.email,
+			inviterId: owner.id,
+			role: 'member',
+		})
+		await insertEmailInvitation({
+			organizationId: org2.id,
+			email: invitee.email,
+			inviterId: owner.id,
+			role: 'admin',
+		})
+
+		await navigate('/organizations')
+		await expect(
+			page.getByRole('heading', { name: /pending invitations/i }),
+		).toBeVisible()
+		await expect(page.getByText(org1.name)).toBeVisible()
+		await expect(page.getByText(org2.name)).toBeVisible()
+	})
+
+	test('Expired invitations are not shown and cannot be accepted', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const invitee = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const expired = new Date(Date.now() - WEEK_MS)
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: invitee.email,
+			inviterId: owner.id,
+			expiresAt: expired,
+		})
+
+		await navigate('/organizations')
+		const pendingHeading = page.getByRole('heading', {
+			name: /pending invitations/i,
+		})
+		if (await pendingHeading.isVisible()) {
+			await expect(page.getByText(org.name)).not.toBeVisible()
+		} else {
+			await expect(pendingHeading).not.toBeVisible()
+		}
+
+		const accept = await page.request.post('/organizations', {
+			form: {
+				intent: 'accept-invitation',
+				invitationId: invitation.id,
+			},
+		})
+		expect(accept.status()).toBe(500)
+		expect(await getMembership(org.id, invitee.id)).toBeNull()
+	})
+
+	test('Authenticated invitee clicking the email join link lands on pending invitations', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const invitee = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: invitee.email,
+			inviterId: owner.id,
+		})
+
+		await navigate('/join/:token', { token: invitation.token })
+		await expect(page).toHaveURL(/\/organizations/)
+		await expect(
+			page.getByRole('heading', { name: /pending invitations/i }),
+		).toBeVisible()
+		await expect(page.getByText(org.name)).toBeVisible()
+		expect(await getMembership(org.id, invitee.id)).toBeNull()
+	})
+
+	test('A user cannot accept an invitation sent to a different email', async ({
+		page,
+		login,
+	}) => {
+		const user = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: faker.internet.email().toLowerCase(),
+			inviterId: owner.id,
+		})
+
+		const response = await page.request.post('/organizations', {
+			form: {
+				intent: 'accept-invitation',
+				invitationId: invitation.id,
+			},
+		})
+		expect(response.ok()).toBe(false)
+		expect(await getMembership(org.id, user.id)).toBeNull()
+		expect(await getInvitationById(invitation.id)).toBeTruthy()
+	})
+
+	test('Join link for someone else’s email is rejected', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const user = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const invitation = await insertEmailInvitation({
+			organizationId: org.id,
+			email: faker.internet.email().toLowerCase(),
+			inviterId: owner.id,
+		})
+
+		await navigate('/join/:token', { token: invitation.token })
+		await expect(
+			page.getByText(/this invitation was not sent to your email address/i),
+		).toBeVisible()
+		expect(await getMembership(org.id, user.id)).toBeNull()
+	})
+})
+
+test.describe('Shareable invite links', () => {
+	test('Admin can create a reusable invite link', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const admin = await openApp(login)
+		const org = await createTestOrganization(admin.id, 'admin')
+
+		await navigate('/:slug/settings/members', { slug: org.slug })
+		await page.getByRole('button', { name: /create link/i }).click()
+		await expect(page.getByRole('button', { name: /copy/i })).toBeVisible()
+
+		const [link] = await db
+			.select()
+			.from(OrganizationInviteLink)
+			.where(
+				and(
+					eq(OrganizationInviteLink.organizationId, org.id),
+					eq(OrganizationInviteLink.createdById, admin.id),
+					eq(OrganizationInviteLink.isActive, true),
+				),
+			)
+			.limit(1)
+		expect(link).toBeTruthy()
+		expect(link?.organizationRoleId).toBe('org_role_member')
+	})
+
+	test('Authenticated user clicking a shareable link gets a pending invitation', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const joiner = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const link = await insertInviteLink({
+			organizationId: org.id,
+			createdById: owner.id,
+			role: 'member',
+		})
+
+		await navigate('/join/:token', { token: link.token })
+		await expect(page).toHaveURL(/\/organizations/)
 		await expect(
 			page.getByRole('heading', { name: /pending invitations/i }),
 		).toBeVisible()
 		await expect(page.getByText(org.name)).toBeVisible()
 
-		// Decline the invitation
-		await page.getByRole('button', { name: /decline/i }).click()
-
-		// Wait for the action to complete
-		await page.waitForLoadState('networkidle')
-
-		// The invitation should disappear from the page
-		await expect(page.getByText(org.name)).not.toBeVisible()
-
-		// Verify user is not a member in database
-		const [membership] = await db
-			.select({ organizationId: UserOrganization.organizationId })
-			.from(UserOrganization)
+		const [pending] = await db
+			.select()
+			.from(OrganizationInvitation)
 			.where(
 				and(
-					eq(UserOrganization.organizationId, org.id),
-					eq(UserOrganization.userId, invitedUser.id),
+					eq(OrganizationInvitation.organizationId, org.id),
+					eq(OrganizationInvitation.email, joiner.email.toLowerCase()),
 				),
 			)
 			.limit(1)
-		expect(membership ?? null).toBeNull()
-
-		// Verify invitation is deleted after declining (correct behavior)
-		const [updatedInvitation] = await db
-			.select()
-			.from(OrganizationInvitation)
-			.where(eq(OrganizationInvitation.id, invitation.id))
-			.limit(1)
-		expect(updatedInvitation ?? null).toBeNull()
+		expect(pending?.organizationRoleId).toBe('org_role_member')
+		expect(await getMembership(org.id, joiner.id)).toBeNull()
 	})
 
-	test('Organization owners can revoke pending invitations', async ({
+	test('Existing members are sent into the organization instead of being re-invited', async ({
 		page,
 		login,
 		navigate,
 	}) => {
-		const user = await login()
-
-		// Create an organization for the user
-		const org = await createTestOrganization(user.id, 'admin')
-
-		// Create a pending invitation
-		const [invitation] = await db
-			.insert(OrganizationInvitation)
-			.values({
-				organizationId: org.id,
-				email: faker.internet.email(),
-				organizationRoleId: 'org_role_member',
-				inviterId: user.id,
-				token: `revoke-test-${faker.string.uuid()}-${Date.now()}`,
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			})
-			.returning()
-		if (!invitation) throw new Error('Failed to create invitation')
-
-		// Navigate to organization members page
-		await navigate('/:slug/settings/members', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
-
-		// Find and revoke the invitation (look for the trash button in pending invitations)
-		const invitationEmail = faker.internet.email()
-		// Update the invitation to use a known email
-		await db
-			.update(OrganizationInvitation)
-			.set({ email: invitationEmail })
-			.where(eq(OrganizationInvitation.id, invitation.id))
-
-		// Refresh the page to see the updated invitation
-		await page.reload()
-		await page.waitForLoadState('networkidle')
-
-		// Find the invitation in the pending invitations section and click the trash button
-		const pendingSection = page.getByRole('region', {
-			name: /pending invitations/i,
-		})
-		await pendingSection.getByText(invitationEmail).isVisible()
-		// Use aria-label to find the delete button associated with this invitation row
-		// The button is in ItemActions (sibling to ItemContent), so parent traversal from the text span
-		// would not reach it. Instead, find the delete button within the region scope.
-		await pendingSection
-			.getByRole('button', { name: /delete invitation/i })
-			.click()
-
-		// Verify invitation is no longer displayed (check that the email is not in pending invitations)
-		await expect(pendingSection.getByText(invitationEmail)).not.toBeVisible()
-
-		// Verify invitation is deleted from database
-		const [deletedInvitation] = await db
-			.select()
-			.from(OrganizationInvitation)
-			.where(eq(OrganizationInvitation.id, invitation.id))
-			.limit(1)
-		expect(deletedInvitation ?? null).toBeNull()
-	})
-
-	test('Users can view their pending invitations', async ({
-		page,
-		login,
-		navigate,
-	}) => {
-		const invitedUser = await login()
-
-		const owner = await createOwnerUser()
-		const org1 = await createOrgWithAdmin(owner.id)
-		const org2 = await createOrgWithAdmin(owner.id)
-
-		// Create invitations for both organizations
-		await db.insert(OrganizationInvitation).values([
-			{
-				organizationId: org1.id,
-				email: invitedUser.email,
-				organizationRoleId: 'org_role_member',
-				inviterId: owner.id,
-				token: `view-test-1-${faker.string.uuid()}-${Date.now()}`,
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			},
-			{
-				organizationId: org2.id,
-				email: invitedUser.email,
-				organizationRoleId: 'org_role_admin',
-				inviterId: owner.id,
-				token: `view-test-2-${faker.string.uuid()}-${Date.now()}`,
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			},
-		])
-
-		// Navigate to organizations page
-		await navigate('/organizations')
-		await page.waitForLoadState('networkidle')
-
-		// Verify pending invitations section is displayed
-		await expect(
-			page.getByRole('heading', { name: /pending invitations/i }),
-		).toBeVisible()
-
-		// Verify both invitations are displayed
-		await expect(page.getByText(org1.name)).toBeVisible()
-		await expect(page.getByText(org2.name)).toBeVisible()
-
-		// The main point is that both invitations are visible - roles are secondary
-		// Just verify the invitations are displayed correctly
-	})
-
-	test('Expired invitations cannot be accepted', async ({
-		page,
-		login,
-		navigate,
-	}) => {
-		const invitedUser = await login()
-
-		const owner = await createOwnerUser()
+		const member = await openApp(login)
+		const owner = await createUserRecord()
 		const org = await createOrgWithAdmin(owner.id)
-
-		// Create an expired invitation (created 8 days ago)
-		const expiredDate = new Date()
-		expiredDate.setDate(expiredDate.getDate() - 8)
-
-		const [ignored_invitation] = await db
-			.insert(OrganizationInvitation)
-			.values({
-				organizationId: org.id,
-				email: invitedUser.email,
-				organizationRoleId: 'org_role_member',
-				inviterId: owner.id,
-				createdAt: expiredDate,
-				token: `expired-test-${faker.string.uuid()}-${Date.now()}`,
-				expiresAt: expiredDate, // Set expiration to the past
-			})
-			.returning()
-		if (!ignored_invitation) throw new Error('Failed to create invitation')
-
-		// Navigate to organizations page where pending invitations are shown
-		await navigate('/organizations')
-		await page.waitForLoadState('networkidle')
-
-		// Verify expired invitation does NOT appear in pending invitations
-		// (The organizations page should filter out expired invitations)
-		const pendingSection = page.getByRole('heading', {
-			name: /pending invitations/i,
+		await addMember(org.id, member.id, 'member')
+		const link = await insertInviteLink({
+			organizationId: org.id,
+			createdById: owner.id,
 		})
 
-		// The pending invitations section should either not exist or not contain the expired invitation
-		if (await pendingSection.isVisible()) {
-			await expect(page.getByText(org.name)).not.toBeVisible()
-		} else {
-			// If no pending invitations section, that's also correct (no valid invitations to show)
-			await expect(pendingSection).not.toBeVisible()
-		}
+		await navigate('/join/:token', { token: link.token })
+		await expect(page).toHaveURL(new RegExp(`/${org.slug}`))
+		expect((await getMembership(org.id, member.id))?.active).toBe(true)
 	})
 
-	test('Invalid invitation tokens show error message', async ({
+	test('Invalid invite tokens show an error', async ({
 		page,
 		login,
 		navigate,
 	}) => {
-		await login()
-
-		// Navigate to invalid invitation page
+		await openApp(login)
 		await navigate('/join/invalid-token-123')
-		await page.waitForLoadState('networkidle')
-
-		// Verify error message is displayed (check for the actual error message from the join route)
 		await expect(
 			page.getByText(/invalid or expired invite link/i),
 		).toBeVisible()
+	})
+
+	test('Deactivated invite links are rejected', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const joiner = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const link = await insertInviteLink({
+			organizationId: org.id,
+			createdById: owner.id,
+			isActive: false,
+		})
+
+		await navigate('/join/:token', { token: link.token })
+		await expect(
+			page.getByText(/invalid or expired invite link/i),
+		).toBeVisible()
+		expect(await getMembership(org.id, joiner.id)).toBeNull()
+	})
+
+	test('Shareable member link does not upgrade a pending guest email invite', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const invitee = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		const guestInvite = await insertEmailInvitation({
+			organizationId: org.id,
+			email: invitee.email,
+			inviterId: owner.id,
+			role: 'guest',
+		})
+		const memberLink = await insertInviteLink({
+			organizationId: org.id,
+			createdById: owner.id,
+			role: 'member',
+		})
+
+		await navigate('/join/:token', { token: memberLink.token })
+		await expect(page).toHaveURL(/\/organizations/)
+
+		const pending = await getInvitationById(guestInvite.id)
+		expect(pending).toBeTruthy()
+		expect(pending?.organizationRoleId).toBe('org_role_guest')
+		expect(pending?.token).toBe(guestInvite.token)
+	})
+})
+
+test.describe('Roles and last-admin protection', () => {
+	test('Member can view the member list but cannot invite', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const member = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		await addMember(org.id, member.id, 'member')
+
+		await navigate('/:slug/settings/members', { slug: org.slug })
+		await expect(
+			page.getByText(member.name || member.username).first(),
+		).toBeVisible()
+
+		const response = await membersAction(page, org.slug, {
+			intent: 'send-invitations',
+			'invites[0].email': faker.internet.email(),
+			'invites[0].role': 'member',
+		})
+		expect(response.status()).toBe(403)
+	})
+
+	test('Viewer can open the members page', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const viewer = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		await addMember(org.id, viewer.id, 'viewer')
+
+		await navigate('/:slug/settings/members', { slug: org.slug })
+		await expect(
+			page.getByText(viewer.name || viewer.username).first(),
+		).toBeVisible()
+	})
+
+	test('Guest cannot open the members page', async ({
+		page,
+		login,
+		navigate,
+	}) => {
+		const guest = await openApp(login)
+		const owner = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		await addMember(org.id, guest.id, 'guest')
+
+		await navigate('/:slug/settings/members', { slug: org.slug })
+		await expect(page.getByText(/403/)).toBeVisible()
+		await expect(page.getByText(/read:member:any/i)).toBeVisible()
+	})
+
+	test('Admin can promote a member and demote another admin when one remains', async ({
+		page,
+		login,
+	}) => {
+		const admin = await openApp(login)
+		const otherAdmin = await createUserRecord()
+		const member = await createUserRecord()
+		const org = await createOrgWithAdmin(admin.id)
+		await addMember(org.id, otherAdmin.id, 'admin')
+		await addMember(org.id, member.id, 'member')
+
+		const promote = await membersAction(page, org.slug, {
+			intent: 'update-member-role',
+			userId: member.id,
+			role: 'admin',
+		})
+		expect(promote.ok()).toBe(true)
+		expect((await getMembership(org.id, member.id))?.organizationRoleId).toBe(
+			'org_role_admin',
+		)
+
+		const demote = await membersAction(page, org.slug, {
+			intent: 'update-member-role',
+			userId: otherAdmin.id,
+			role: 'member',
+		})
+		expect(demote.ok()).toBe(true)
+		expect(
+			(await getMembership(org.id, otherAdmin.id))?.organizationRoleId,
+		).toBe('org_role_member')
+	})
+
+	test('The last remaining admin cannot be demoted', async ({
+		page,
+		login,
+	}) => {
+		const admin = await openApp(login)
+		const org = await createTestOrganization(admin.id, 'admin')
+
+		const response = await membersAction(page, org.slug, {
+			intent: 'update-member-role',
+			userId: admin.id,
+			role: 'member',
+		})
+		expect(response.status()).toBe(400)
+		expect(await response.text()).toContain('last admin')
+		expect((await getMembership(org.id, admin.id))?.organizationRoleId).toBe(
+			'org_role_admin',
+		)
+	})
+
+	test('An admin cannot remove themselves', async ({ page, login }) => {
+		const admin = await openApp(login)
+		const otherAdmin = await createUserRecord()
+		const org = await createOrgWithAdmin(admin.id)
+		await addMember(org.id, otherAdmin.id, 'admin')
+
+		const response = await membersAction(page, org.slug, {
+			intent: 'remove-member',
+			userId: admin.id,
+		})
+		expect(response.status()).toBe(400)
+		expect(await response.text()).toContain('cannot remove yourself')
+		expect((await getMembership(org.id, admin.id))?.active).toBe(true)
+	})
+
+	test('Member cannot change roles or remove users', async ({
+		page,
+		login,
+	}) => {
+		const member = await openApp(login)
+		const owner = await createUserRecord()
+		const target = await createUserRecord()
+		const org = await createOrgWithAdmin(owner.id)
+		await addMember(org.id, member.id, 'member')
+		await addMember(org.id, target.id, 'member')
+
+		const update = await membersAction(page, org.slug, {
+			intent: 'update-member-role',
+			userId: target.id,
+			role: 'admin',
+		})
+		expect(update.status()).toBe(403)
+
+		const remove = await membersAction(page, org.slug, {
+			intent: 'remove-member',
+			userId: target.id,
+		})
+		expect(remove.status()).toBe(403)
+		expect((await getMembership(org.id, target.id))?.active).toBe(true)
 	})
 })

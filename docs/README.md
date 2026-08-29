@@ -19,6 +19,8 @@ in the coming weeks. Stay tuned!
   steps (D1, Workers, tenant-api, Pages).
 - [Launch Checklist](./launch-checklist.md) - Product launch phases
   (`LAUNCH_STATUS`), waitlist, Discord verification, and go-live smoke tests.
+- [Marketing CMS markdown](./marketing-cms-markdown.md) - Markdown syntax for
+  Emdash titles, headings, and descriptions on the marketing site.
 - [Authentication](./authentication.md) - Operator login (App) vs customer phone
   OTP on tenant Sites.
 - [Tenant data residency](./tenant-data-residency.md) - Regional tenant-api,

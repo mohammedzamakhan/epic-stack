@@ -45,6 +45,7 @@ import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'
 import { ErrorList } from '#app/components/forms.tsx'
+import { MAX_ORGANIZATION_INVITES_PER_REQUEST } from '#app/utils/organization/invitation.ts'
 import { type OrganizationRoleName } from '#app/utils/organization/organizations.server.ts'
 
 // Create role descriptions map
@@ -67,7 +68,11 @@ function createInviteSchema(availableRoles: OrganizationRoleName[]) {
 					),
 				}),
 			)
-			.min(1, 'At least one invite is required'),
+			.min(1, 'At least one invite is required')
+			.max(
+				MAX_ORGANIZATION_INVITES_PER_REQUEST,
+				`You can invite at most ${MAX_ORGANIZATION_INVITES_PER_REQUEST} people at a time`,
+			),
 	})
 }
 

@@ -81,6 +81,9 @@ a **Benefits List** block below it for the numbered “why join early” section
 (eyebrow, headline, and benefit lines). No email field — account signup is
 required for the waitlist.
 
+Headlines and descriptions support markdown (`**bold**`, `==highlight==`,
+`^^brand color^^`). See [Marketing CMS markdown](./marketing-cms-markdown.md).
+
 E2E coverage: `apps/app/tests/e2e/waitlist-referral.test.ts` (requires
 `LAUNCH_STATUS=CLOSED_BETA`).
 

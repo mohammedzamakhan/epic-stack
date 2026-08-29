@@ -1,4 +1,5 @@
 ---
+import MarkdownInline from '../site/MarkdownInline.astro'
 import { cn } from '../../lib/utils'
 import Section from '../site/Section.astro'
 import Eyebrow from '../site/Eyebrow.astro'
@@ -39,7 +40,7 @@ const {
     <div class="max-w-xl">
       {eyebrow && <Eyebrow class="mb-4">{eyebrow}</Eyebrow>}
       <h2 class="font-display text-balance text-[32px] font-medium tracking-[-0.02em] text-foreground sm:text-[40px]">
-        {title}
+        <MarkdownInline content={title} />
       </h2>
     </div>
     {actionLabel && actionUrl && (
@@ -64,7 +65,7 @@ const {
             )}
           </div>
           <h3 class="text-pretty text-[19px] font-medium leading-snug tracking-[-0.01em] text-foreground">
-            {item.title}
+            <MarkdownInline content={item.title} />
           </h3>
           <p class="mt-auto text-[13px] text-muted-foreground">
             {item.meta}
