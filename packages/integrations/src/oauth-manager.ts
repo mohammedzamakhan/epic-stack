@@ -36,14 +36,20 @@ export class OAuthStateManager {
 		}
 	}
 
-	private static getStateSecret(): string {
-		const secret = process.env.INTEGRATIONS_OAUTH_STATE_SECRET
-		if (!secret) {
+	private static getHmacKey(): string {
+		const key = process.env.INTEGRATIONS_OAUTH_STATE_SECRET
+		if (!key) {
 			throw new Error(
 				'INTEGRATIONS_OAUTH_STATE_SECRET environment variable is required for OAuth security',
 			)
 		}
-		return secret
+		return key
+	}
+
+	private static signPayload(payloadString: string): string {
+		return createHmac('sha256', this.getHmacKey())
+			.update(payloadString)
+			.digest('hex')
 	}
 
 	/**
@@ -74,8 +80,8 @@ export class OAuthStateManager {
 			'base64',
 		)
 
-		// Create signature to prevent tampering
-		const signature = this.createStateSignature(statePayload)
+		// Create HMAC signature to prevent tampering
+		const signature = this.signPayload(statePayload)
 
 		// Combine payload and signature
 		return `${statePayload}.${signature}`
@@ -105,21 +111,22 @@ export class OAuthStateManager {
 		}
 
 		// Verify HMAC signature using timingSafeEqual
-		const expectedHmac = this.createStateSignature(statePayload)
+		const expectedSignature = this.signPayload(statePayload)
 		const sigBuf = Buffer.from(signature)
-		const hmacBuf = Buffer.from(expectedHmac)
+		const expectedBuf = Buffer.from(expectedSignature)
 
-		const isHmacValid =
-			sigBuf.length === hmacBuf.length && timingSafeEqual(sigBuf, hmacBuf)
+		const isSignatureValid =
+			sigBuf.length === expectedBuf.length &&
+			timingSafeEqual(sigBuf, expectedBuf)
 
-		if (!isHmacValid) {
+		if (!isSignatureValid) {
 			throw new Error('Invalid state: signature verification failed')
 		}
 
 		// Parse state data
 		let stateData: OAuthState
 		try {
-			const decoded = Buffer.from(statePayload, 'base64').toString()
+			const decoded = Buffer.from(statePayload, 'base64').toString('utf8')
 			stateData = JSON.parse(decoded) as OAuthState
 		} catch (error) {
 			throw new Error(`Invalid state: failed to parse data: ${error}`)
@@ -158,17 +165,6 @@ export class OAuthStateManager {
 		}
 
 		return stateData
-	}
-
-	/**
-	 * Create HMAC signature for state payload
-	 * @param payload - State payload to sign
-	 * @returns Signature string
-	 */
-	private static createStateSignature(payload: string): string {
-		return createHmac('sha256', this.getStateSecret())
-			.update(payload)
-			.digest('hex')
 	}
 }
 
@@ -245,9 +241,3 @@ export class OAuthCallbackHandler {
 		return provider.getAuthUrl(organizationId, redirectUri, additionalParams)
 	}
 }
-
-/**
- * OAuth flow orchestrator that combines all OAuth management utilities
- */
-
-// All utilities are exported above with their class definitions
