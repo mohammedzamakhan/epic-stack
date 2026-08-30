@@ -242,11 +242,11 @@ export async function action({ request }: ActionFunctionArgs) {
 				userId,
 				imageObjectKey,
 			})
-			const launchStatus = getLaunchStatus()
-			const shouldShowPricing =
-				trialConfig.creditCardRequired === 'stripe' &&
-				launchStatus !== 'PUBLIC_BETA' &&
-				launchStatus !== 'CLOSED_BETA'
+			// const launchStatus = getLaunchStatus()
+			// const shouldShowPricing =
+			// 	trialConfig.creditCardRequired === 'stripe' &&
+			// 	launchStatus !== 'PUBLIC_BETA' &&
+			// 	launchStatus !== 'CLOSED_BETA'
 
 			return redirect(`/organizations/create?step=2&orgId=${organization.id}`)
 		} catch (error) {
