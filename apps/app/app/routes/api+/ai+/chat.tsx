@@ -1,34 +1,180 @@
-import { handleChat } from '@repo/ai/route-handlers'
+import {
+	handleChat,
+	type PageEditorPromptContext,
+	type WebsitePageListItem,
+} from '@repo/ai/route-handlers'
 import { createChatStream, buildNoteChatSystemPrompt } from '@repo/ai/server'
 import { requireUserId } from '@repo/auth'
 import { markStepCompleted } from '@repo/common/onboarding'
 import { brand } from '@repo/config/brand'
+import {
+	and,
+	asc,
+	db,
+	desc,
+	eq,
+	inArray,
+	WebsitePage,
+	WebsitePageSection,
+} from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
+import { z } from 'zod'
+import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
-import { db, WebsitePage, WebsitePageSection, eq } from '@repo/database'
-import { z } from 'zod'
+import { ADDABLE_BLOCK_TYPES } from '#app/utils/website/block-types.ts'
 
-const getPageEditorTools = () =>
+const ADDABLE_SECTION_TYPES = ADDABLE_BLOCK_TYPES.map((block) => block.type)
+
+type PageSectionRow = {
+	id: string
+	type: string
+	position: number
+	config?: string
+}
+
+async function loadWebsitePages(
+	organizationId: string,
+): Promise<WebsitePageListItem[]> {
+	const pages = await db
+		.select({
+			id: WebsitePage.id,
+			title: WebsitePage.title,
+			slug: WebsitePage.slug,
+			isHomePage: WebsitePage.isHomePage,
+		})
+		.from(WebsitePage)
+		.where(eq(WebsitePage.organizationId, organizationId))
+		.orderBy(
+			desc(WebsitePage.isHomePage),
+			asc(WebsitePage.position),
+			asc(WebsitePage.createdAt),
+		)
+
+	if (pages.length === 0) return []
+
+	const sections = await db
+		.select({
+			id: WebsitePageSection.id,
+			type: WebsitePageSection.type,
+			position: WebsitePageSection.position,
+			pageId: WebsitePageSection.pageId,
+		})
+		.from(WebsitePageSection)
+		.where(
+			inArray(
+				WebsitePageSection.pageId,
+				pages.map((page) => page.id),
+			),
+		)
+
+	const sectionsByPage = new Map<string, PageSectionRow[]>()
+	for (const section of sections) {
+		const list = sectionsByPage.get(section.pageId) ?? []
+		list.push({
+			id: section.id,
+			type: section.type,
+			position: section.position,
+		})
+		sectionsByPage.set(section.pageId, list)
+	}
+
+	return pages.map((page) => ({
+		...page,
+		sections: (sectionsByPage.get(page.id) ?? []).sort(
+			(a, b) => a.position - b.position,
+		),
+	}))
+}
+
+async function loadPageContext(
+	pageId: string,
+	organizationId: string,
+): Promise<PageEditorPromptContext['currentPage']> {
+	const [page] = await db
+		.select({
+			id: WebsitePage.id,
+			title: WebsitePage.title,
+			slug: WebsitePage.slug,
+			isHomePage: WebsitePage.isHomePage,
+		})
+		.from(WebsitePage)
+		.where(
+			and(
+				eq(WebsitePage.id, pageId),
+				eq(WebsitePage.organizationId, organizationId),
+			),
+		)
+		.limit(1)
+
+	if (!page) return null
+
+	const sections = await db
+		.select({
+			id: WebsitePageSection.id,
+			type: WebsitePageSection.type,
+			config: WebsitePageSection.config,
+			position: WebsitePageSection.position,
+		})
+		.from(WebsitePageSection)
+		.where(eq(WebsitePageSection.pageId, page.id))
+
+	sections.sort((a, b) => a.position - b.position)
+
+	return {
+		...page,
+		sections,
+	}
+}
+
+const getPageEditorTools = (organizationId: string) =>
 	({
-		addSection: {
+		getPageContext: {
 			description:
-				'Add a new section (block) to the website page. Valid types: hero, content, gallery, testimonials, faq, cta, features, cards, video, blank, article, showcase.',
-			parameters: z.object({
+				'Inspect a website page by ID. Returns title, slug, and every section with its ID, type, position, and JSON config. Call this before editing a page whose full section configs are not already in the prompt.',
+			inputSchema: z.object({
+				pageId: z
+					.string()
+					.describe(
+						'The ID of the page to inspect from the website pages list',
+					),
+			}),
+			execute: async ({ pageId }: { pageId: string }) => {
+				const page = await loadPageContext(pageId, organizationId)
+				if (!page) {
+					return { error: 'Page not found in this organization' }
+				}
+				return page
+			},
+		},
+		navigateToPage: {
+			description:
+				'Open a page in the website page editor. Always call this first when the user wants to change a page they are not currently viewing, then call addSection, updateSection, or removeSection.',
+			inputSchema: z.object({
+				pageId: z.string().describe('The ID of the page to open in the editor'),
+			}),
+		},
+		addSection: {
+			description: `Add a new section (block) to a website page. Valid types: ${ADDABLE_SECTION_TYPES.join(', ')}.`,
+			inputSchema: z.object({
+				pageId: z.string().describe('The ID of the page to add the section to'),
 				type: z
 					.string()
 					.describe('The type of section to add, e.g., hero, features, faq'),
 				position: z
 					.number()
-					.describe('The 0-based position to insert the section at'),
+					.describe(
+						'The 0-based body position to insert the section at. Use 0 to insert at the top.',
+					),
 			}),
 		},
 		updateSection: {
 			description:
 				'Update the JSON configuration of an existing section. Use this when the user asks to modify the content of a specific section.',
-			parameters: z.object({
+			inputSchema: z.object({
+				pageId: z.string().describe('The ID of the page that owns the section'),
 				sectionId: z.string().describe('The ID of the section to update'),
 				config: z
 					.string()
@@ -38,29 +184,88 @@ const getPageEditorTools = () =>
 			}),
 		},
 		removeSection: {
-			description: 'Remove an existing section from the page',
-			parameters: z.object({
+			description: 'Remove an existing section from a page',
+			inputSchema: z.object({
+				pageId: z.string().describe('The ID of the page that owns the section'),
 				sectionId: z.string().describe('The ID of the section to remove'),
 			}),
 		},
 	}) as Record<string, any>
 
-const buildPageEditorSystemPrompt = (
-	basePrompt: string,
-	pageContext: any,
-) => `${basePrompt}
+const formatPageList = (pages: WebsitePageListItem[]) => {
+	if (pages.length === 0) {
+		return 'No website pages exist yet.'
+	}
 
-You are assisting the user in designing and editing their website page. 
-You can use tools to add, modify, or remove sections on the page. 
-When asked to make a change, use the appropriate tool. 
-If modifying an existing section, use the exact section ID from the current page state.
+	return pages
+		.map((page) => {
+			const home = page.isHomePage ? ', home page' : ''
+			const sections =
+				page.sections.length === 0
+					? '    (no sections)'
+					: page.sections
+							.map(
+								(section) =>
+									`    - Position: ${section.position}, ID: ${section.id}, Type: ${section.type}`,
+							)
+							.join('\n')
+			return `- ID: ${page.id}, Title: ${page.title}, Slug: ${page.slug}${home}\n${sections}`
+		})
+		.join('\n')
+}
 
-Current Page State:
-Title: ${pageContext.title}
-Slug: ${pageContext.slug}
+const formatCurrentPage = (
+	page: NonNullable<PageEditorPromptContext['currentPage']>,
+) => {
+	const sections =
+		page.sections.length === 0
+			? '(no sections)'
+			: page.sections
+					.map(
+						(section, idx) =>
+							`- Position: ${idx}, ID: ${section.id}, Type: ${section.type}, Config: ${section.config}`,
+					)
+					.join('\n')
+
+	return `Title: ${page.title}
+Slug: ${page.slug}
+ID: ${page.id}
 
 Current Sections (ordered by position):
-${pageContext.sections.map((s: any, idx: number) => `- Position: ${idx}, ID: ${s.id}, Type: ${s.type}, Config: ${s.config}`).join('\n')}
+${sections}`
+}
+
+const buildPageEditorSystemPrompt = (
+	basePrompt: string,
+	pageContext: PageEditorPromptContext,
+) => `${basePrompt}
+
+You are assisting the user in designing and editing their website pages.
+You can edit ANY page in the organization, not only the page currently open.
+
+When the user names a page (for example "home", "homepage", "about", "about us"), match it to the list below by title, slug, or the home-page flag.
+
+Website pages:
+${formatPageList(pageContext.pages)}
+
+Currently viewing: ${
+	pageContext.currentPage
+		? `${pageContext.currentPage.title} (ID: ${pageContext.currentPage.id})`
+		: 'the user is not in the page editor'
+}
+
+Workflow for every page change:
+1. Identify the target page ID from the list (or by asking if it is ambiguous).
+2. If you need that page's section configs and they are not already listed under "Currently viewing", call getPageContext with that page ID.
+3. Call navigateToPage with that page ID so the page editor opens. Do this BEFORE addSection, updateSection, or removeSection whenever the user is not already viewing that page.
+4. Call addSection, updateSection, or removeSection and always pass the same pageId.
+5. When modifying an existing section, use the exact section ID from getPageContext or the current page state.
+
+${
+	pageContext.currentPage
+		? `Current Page State:\n${formatCurrentPage(pageContext.currentPage)}`
+		: ''
+}
 `
 
 // Allow streaming responses up to 30 seconds
@@ -79,30 +284,20 @@ export const action = async (args: ActionFunctionArgs) => {
 		buildNoteChatSystemPrompt,
 		buildPageEditorSystemPrompt,
 		brandSystemPrompt: brand.ai.systemPrompt,
-		getPageEditorTools,
-		getPageContext: async (pageId) => {
-			const [page] = await db
-				.select({ title: WebsitePage.title, slug: WebsitePage.slug })
-				.from(WebsitePage)
-				.where(eq(WebsitePage.id, pageId))
-				.limit(1)
-
-			const sections = await db
-				.select({
-					id: WebsitePageSection.id,
-					type: WebsitePageSection.type,
-					config: WebsitePageSection.config,
-					position: WebsitePageSection.position,
-				})
-				.from(WebsitePageSection)
-				.where(eq(WebsitePageSection.pageId, pageId))
-
-			sections.sort((a, b) => a.position - b.position)
-
-			return {
-				...page,
-				sections,
-			}
+		getPageEditorTools: ({ organizationId }) =>
+			getPageEditorTools(organizationId),
+		getPageContext: loadPageContext,
+		getWebsitePages: loadWebsitePages,
+		resolveOrganizationFromSlug: async (request, orgSlug) => {
+			const organization = await requireUserOrganization(request, orgSlug, {
+				id: true,
+			})
+			await requireUserWithOrganizationPermission(
+				request,
+				organization.id,
+				ORG_PERMISSIONS.READ_WEBSITE_ANY,
+			)
+			return organization
 		},
 		markStepCompleted,
 	})

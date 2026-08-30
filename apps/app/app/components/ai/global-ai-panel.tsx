@@ -1,18 +1,19 @@
 'use client'
 
 import { Trans, useLingui } from '@lingui/react/macro'
+import { useIsMobile } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
-import { useIsMobile } from '@repo/ui'
 import {
 	Component,
 	lazy,
 	Suspense,
+	useCallback,
 	useEffect,
 	type ErrorInfo,
 	type ReactNode,
 } from 'react'
-import { useParams, useFetcher } from 'react-router'
+import { useFetcher, useNavigate, useParams } from 'react-router'
 import { useAIPanel } from './ai-panel-context'
 
 // Lazy-load the AIChat component (and the heavy @repo/ai dependency tree)
@@ -84,61 +85,108 @@ function CloseButton() {
 	)
 }
 
+function getToolInput(toolCall: { input?: unknown; args?: unknown }) {
+	const raw = toolCall.input ?? toolCall.args
+	if (raw && typeof raw === 'object') {
+		return raw as Record<string, unknown>
+	}
+	return {}
+}
+
+function asString(value: unknown) {
+	if (typeof value === 'string') return value
+	if (typeof value === 'number') return String(value)
+	if (value == null) return ''
+	return JSON.stringify(value)
+}
+
 function PanelBody() {
 	const params = useParams()
 	const fetcher = useFetcher()
+	const navigate = useNavigate()
 	const pageId = params.pageId
 	const orgSlug = params.orgSlug
 
-	const handleToolCall = async ({ toolCall }: { toolCall: any }) => {
-		if (!pageId || !orgSlug) return 'Error: Not on a page editor'
+	const openPageEditor = useCallback(
+		(targetPageId: string) => {
+			if (!orgSlug) return
+			if (targetPageId === pageId) return
+			void navigate(`/${orgSlug}/website/pages/${targetPageId}`)
+		},
+		[navigate, orgSlug, pageId],
+	)
 
-		if (toolCall.toolName === 'addSection') {
-			fetcher.submit(
-				{
-					intent: 'add-section',
-					type: toolCall.args.type,
-					position: toolCall.args.position?.toString(),
-				},
-				{
-					method: 'POST',
-					action: `/${orgSlug}/website/pages/${pageId}`,
-				},
-			)
-			return 'Section added successfully'
-		}
+	const handleToolCall = useCallback(
+		async ({ toolCall }: { toolCall: any }) => {
+			if (!orgSlug) return 'Error: Not in an organization'
 
-		if (toolCall.toolName === 'updateSection') {
-			fetcher.submit(
-				{
-					intent: 'update-section',
-					sectionId: toolCall.args.sectionId,
-					config: toolCall.args.config,
-				},
-				{
-					method: 'POST',
-					action: `/${orgSlug}/website/pages/${pageId}`,
-				},
-			)
-			return 'Section updated successfully'
-		}
+			const input = getToolInput(toolCall)
+			const targetPageId = asString(input.pageId) || pageId
 
-		if (toolCall.toolName === 'removeSection') {
-			fetcher.submit(
-				{
-					intent: 'remove-section',
-					sectionId: toolCall.args.sectionId,
-				},
-				{
-					method: 'POST',
-					action: `/${orgSlug}/website/pages/${pageId}`,
-				},
-			)
-			return 'Section removed successfully'
-		}
+			if (toolCall.toolName === 'navigateToPage') {
+				if (!targetPageId) return 'Error: Missing pageId'
+				openPageEditor(targetPageId)
+				return `Opened the page editor for ${targetPageId}`
+			}
 
-		return 'Unknown tool'
-	}
+			if (!targetPageId) {
+				return 'Error: Missing pageId. Navigate to a page editor or pass pageId.'
+			}
+
+			// Open the target page editor first so the user can see the change,
+			// even when the request started from the dashboard or another page.
+			openPageEditor(targetPageId)
+
+			const action = `/${orgSlug}/website/pages/${targetPageId}`
+
+			if (toolCall.toolName === 'addSection') {
+				void fetcher.submit(
+					{
+						intent: 'add-section',
+						type: asString(input.type),
+						position: asString(input.position),
+					},
+					{
+						method: 'POST',
+						action,
+					},
+				)
+				return 'Section added successfully'
+			}
+
+			if (toolCall.toolName === 'updateSection') {
+				void fetcher.submit(
+					{
+						intent: 'update-section',
+						sectionId: asString(input.sectionId),
+						config: asString(input.config),
+					},
+					{
+						method: 'POST',
+						action,
+					},
+				)
+				return 'Section updated successfully'
+			}
+
+			if (toolCall.toolName === 'removeSection') {
+				void fetcher.submit(
+					{
+						intent: 'remove-section',
+						sectionId: asString(input.sectionId),
+					},
+					{
+						method: 'POST',
+						action,
+					},
+				)
+				return 'Section removed successfully'
+			}
+
+			return 'Unknown tool'
+		},
+		[fetcher, openPageEditor, orgSlug, pageId],
+	)
 
 	return (
 		<>

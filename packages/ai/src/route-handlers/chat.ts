@@ -10,6 +10,33 @@ import {
 	eq,
 } from '@repo/database'
 
+export type WebsitePageSectionContext = {
+	id: string
+	type: string
+	position: number
+	config?: string
+}
+
+export type WebsitePageListItem = {
+	id: string
+	title: string
+	slug: string
+	isHomePage: boolean
+	sections: WebsitePageSectionContext[]
+}
+
+export type PageEditorPromptContext = {
+	pages: WebsitePageListItem[]
+	currentPageId: string | null
+	currentPage: {
+		id: string
+		title: string
+		slug: string
+		isHomePage?: boolean
+		sections: WebsitePageSectionContext[]
+	} | null
+}
+
 export interface ChatDependencies {
 	requireUserId: (request: Request) => Promise<string>
 	/**
@@ -27,16 +54,40 @@ export interface ChatDependencies {
 		tools?: Record<string, any>
 	}) => any
 	buildNoteChatSystemPrompt: (basePrompt: string, noteContext: any) => string
-	buildPageEditorSystemPrompt?: (basePrompt: string, pageContext: any) => string
+	buildPageEditorSystemPrompt?: (
+		basePrompt: string,
+		pageContext: PageEditorPromptContext,
+	) => string
 	brandSystemPrompt: string
-	getPageEditorTools?: () => Record<string, any>
-	getPageContext?: (pageId: string) => Promise<any>
+	getPageEditorTools?: (ctx: { organizationId: string }) => Record<string, any>
+	getPageContext?: (
+		pageId: string,
+		organizationId: string,
+	) => Promise<PageEditorPromptContext['currentPage']>
+	getWebsitePages?: (organizationId: string) => Promise<WebsitePageListItem[]>
+	resolveOrganizationFromSlug?: (
+		request: Request,
+		orgSlug: string,
+	) => Promise<{ id: string }>
 	markStepCompleted?: (
 		userId: string,
 		organizationId: string,
 		stepKey: string,
 		options: any,
 	) => Promise<void>
+}
+
+function toChatStreamResponse(result: {
+	toUIMessageStreamResponse?: () => Response
+	toDataStreamResponse?: () => Response
+}) {
+	if (typeof result.toUIMessageStreamResponse === 'function') {
+		return result.toUIMessageStreamResponse()
+	}
+	if (typeof result.toDataStreamResponse === 'function') {
+		return result.toDataStreamResponse()
+	}
+	throw new Error('Chat stream result is missing a response converter')
 }
 
 /**
@@ -58,32 +109,63 @@ export async function handleChat(
 	const userId = await deps.requireUserId(request)
 	const url = new URL(request.url)
 	const noteId = url.searchParams.get('noteId')
-	const pageId = url.searchParams.get('pageId')
+	const orgSlug = url.searchParams.get('orgSlug')
 
-	const { messages } = (await request.json()) as { messages: ModelMessage[] }
+	const body = (await request.json()) as {
+		messages: ModelMessage[]
+		pageId?: string | null
+	}
+	const { messages } = body
+	const pageId = url.searchParams.get('pageId') ?? body.pageId ?? null
 
-	// When pageId is present, run a page editor conversation.
-	if (pageId && deps.getPageEditorTools) {
-		const pageContext = deps.getPageContext
-			? await deps.getPageContext(pageId)
-			: { pageId }
-		const systemPrompt = deps.buildPageEditorSystemPrompt
-			? deps.buildPageEditorSystemPrompt(deps.brandSystemPrompt, pageContext)
-			: deps.brandSystemPrompt +
-				'\n\nYou are helping the user edit a website page.'
-		const result = deps.createChatStream({
-			messages,
-			systemPrompt,
-			tools: deps.getPageEditorTools(),
-		})
-		return result.toDataStreamResponse()
+	// When noteId is absent, website tools are available for any org page —
+	// not only the page currently open in the editor. Missing website
+	// permission falls through to general chat instead of failing the request.
+	if (
+		!noteId &&
+		orgSlug &&
+		deps.getPageEditorTools &&
+		deps.resolveOrganizationFromSlug
+	) {
+		try {
+			const organization = await deps.resolveOrganizationFromSlug(
+				request,
+				orgSlug,
+			)
+			const pages = deps.getWebsitePages
+				? await deps.getWebsitePages(organization.id)
+				: []
+			const currentPage =
+				pageId && deps.getPageContext
+					? await deps.getPageContext(pageId, organization.id)
+					: (pages.find((page) => page.id === pageId) ?? null)
+			const pageContext: PageEditorPromptContext = {
+				pages,
+				currentPageId: pageId,
+				currentPage,
+			}
+			const systemPrompt = deps.buildPageEditorSystemPrompt
+				? deps.buildPageEditorSystemPrompt(deps.brandSystemPrompt, pageContext)
+				: deps.brandSystemPrompt +
+					'\n\nYou are helping the user edit their website pages.'
+			const result = deps.createChatStream({
+				messages,
+				systemPrompt,
+				tools: deps.getPageEditorTools({ organizationId: organization.id }),
+			})
+			return toChatStreamResponse(result)
+		} catch (error) {
+			if (!(error instanceof Response) || error.status !== 403) {
+				throw error
+			}
+		}
 	}
 
 	// When noteId is absent, run a general (note-less) conversation.
 	if (!noteId) {
 		const systemPrompt = deps.brandSystemPrompt
 		const result = deps.createChatStream({ messages, systemPrompt })
-		return result.toDataStreamResponse()
+		return toChatStreamResponse(result)
 	}
 
 	const [noteMeta] = await db
@@ -179,5 +261,5 @@ export async function handleChat(
 		systemPrompt,
 	})
 
-	return result.toDataStreamResponse()
+	return toChatStreamResponse(result)
 }

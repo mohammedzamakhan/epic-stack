@@ -37,6 +37,20 @@ export interface AIChatProps {
 	onToolCall?: (options: { toolCall: any }) => any
 }
 
+function buildChatApiUrl({
+	noteId,
+	orgSlug,
+}: {
+	noteId?: string
+	orgSlug?: string
+}) {
+	const params = new URLSearchParams()
+	if (noteId) params.set('noteId', noteId)
+	if (orgSlug) params.set('orgSlug', orgSlug)
+	const query = params.toString()
+	return query ? `/api/ai/chat?${query}` : '/api/ai/chat'
+}
+
 // Message Content Component
 function MessageContentRenderer({
 	parts,
@@ -281,23 +295,46 @@ export function AIChat({
 }: AIChatProps) {
 	const [input, setInput] = useState('')
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
+	const pageIdRef = useRef(pageId)
+	const onToolCallRef = useRef(onToolCall)
+	const addToolOutputRef = useRef<
+		| null
+		| ((args: { tool: string; toolCallId: string; output: unknown }) => void)
+	>(null)
+	pageIdRef.current = pageId
+	onToolCallRef.current = onToolCall
 	const { _ } = useLingui()
+	const transport = useMemo(
+		() =>
+			new DefaultChatTransport({
+				api: buildChatApiUrl({ noteId, orgSlug }),
+				body: () => (pageIdRef.current ? { pageId: pageIdRef.current } : {}),
+			}),
+		[noteId, orgSlug],
+	)
 	const {
 		messages,
 		sendMessage,
 		status,
 		stop: stopGeneration,
 		regenerate,
+		addToolOutput,
 	} = useChat({
-		transport: new DefaultChatTransport({
-			api: noteId
-				? `/api/ai/chat?noteId=${noteId}`
-				: pageId
-					? `/api/ai/chat?pageId=${pageId}`
-					: '/api/ai/chat',
-		}),
-		onToolCall,
+		transport,
+		onToolCall: ({ toolCall }) => {
+			const handler = onToolCallRef.current
+			if (!handler) return
+			void (async () => {
+				const output = await handler({ toolCall })
+				addToolOutputRef.current?.({
+					tool: toolCall.toolName,
+					toolCallId: toolCall.toolCallId,
+					output: output ?? 'ok',
+				})
+			})()
+		},
 	})
+	addToolOutputRef.current = addToolOutput
 
 	const smartSuggestions = useSmartSuggestions(messages, Boolean(noteId))
 	const [showFollowUpSuggestions, setShowFollowUpSuggestions] = useState(true)
