@@ -44,7 +44,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				or(
 					eq(note.isPublic, true),
 					eq(note.createdById, userId),
-					sql`EXISTS (SELECT 1 FROM OrganizationNoteAccess WHERE noteId = ${note.id} AND userId = ${userId})`,
+					sql`EXISTS (SELECT 1 FROM NoteAccess WHERE noteId = ${note.id} AND userId = ${userId})`,
 				),
 				query
 					? or(like(note.title, `%${query}%`), like(note.content, `%${query}%`))
