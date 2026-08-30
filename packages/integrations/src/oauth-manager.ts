@@ -7,7 +7,7 @@
  * - Token refresh with retry logic
  */
 
-import { randomBytes, createHmac, timingSafeEqual } from 'crypto'
+import { randomBytes, pbkdf2Sync, timingSafeEqual } from 'crypto'
 import { providerRegistry } from './provider'
 import {
 	type TokenData,
@@ -47,9 +47,13 @@ export class OAuthStateManager {
 	}
 
 	private static signPayload(payloadString: string): string {
-		return createHmac('sha256', this.getHmacKey())
-			.update(payloadString)
-			.digest('hex')
+		return pbkdf2Sync(
+			payloadString,
+			this.getHmacKey(),
+			1000,
+			32,
+			'sha256',
+		).toString('hex')
 	}
 
 	/**
