@@ -1,3 +1,4 @@
+import { brand } from '@repo/config/brand.ts'
 import { jwtVerify } from 'jose'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as tenantApiServer from '#app/utils/tenant-api.server.ts'
@@ -106,23 +107,26 @@ describe('Adversarial Security & Robustness Suite: Marketing Journey Builder', (
 			})
 				.setProtectedHeader({ alg: 'HS256' })
 				.setAudience('tenant-api-operator')
+				.setIssuer(brand.shortName)
 				.setExpirationTime('15m')
 				.sign(new TextEncoder().encode(internalSecret))
 
 			const verified = await jwtVerify(
 				token,
 				new TextEncoder().encode(internalSecret),
-				{ audience: 'tenant-api-operator' },
+				{ audience: 'tenant-api-operator', issuer: brand.shortName },
 			)
 
 			expect(verified.payload.orgId).toBe('org_tenant_isolated_123')
 			expect(verified.payload.role).toBe('operator')
 			expect(verified.payload.aud).toBe('tenant-api-operator')
+			expect(verified.payload.iss).toBe(brand.shortName)
 
 			// Verify that an invalid audience fails verification
 			await expect(
 				jwtVerify(token, new TextEncoder().encode(internalSecret), {
 					audience: 'wrong-audience',
+					issuer: brand.shortName,
 				}),
 			).rejects.toThrow()
 		})

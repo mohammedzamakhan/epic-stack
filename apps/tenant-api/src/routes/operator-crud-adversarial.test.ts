@@ -17,6 +17,7 @@ import {
 import { authRoutes } from './auth.ts'
 import { journeyOperatorRoutes } from './journeys.ts'
 import { hmacHash } from '../lib/secrets.ts'
+import { brand } from '@repo/config/brand.ts'
 
 const orgId1 = 'clw9x0a12000008l00test01'
 const orgId2 = 'clw9x0a12000008l00test02'
@@ -96,6 +97,7 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 		})
 			.setProtectedHeader({ alg: 'HS256' })
 			.setAudience('tenant-api-operator')
+			.setIssuer(brand.shortName)
 			.setExpirationTime(expiresIn)
 			.sign(secret)
 	}

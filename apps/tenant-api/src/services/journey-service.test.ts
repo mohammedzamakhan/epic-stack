@@ -870,5 +870,57 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				.get()
 			expect(run?.triggerEvent).toBe('manual')
 		})
+
+		it('enforces 30s processing window idempotency on duplicate step execution requests', async () => {
+			const db = await getTenantDb(orgId)
+
+			const customerInsert = await db
+				.insert(customers)
+				.values({ name: 'Idempotent User', email: 'idem@example.com' })
+				.returning()
+			const customer = customerInsert[0]!
+
+			const createRes = await createJourney(orgId, {
+				name: 'Idempotency Journey',
+				nodes: validGraph.nodes,
+				edges: validGraph.edges,
+			})
+			const journeyId = createRes.journeyId!
+			const testRes = await triggerTestJourney(orgId, {
+				journeyId,
+				customerId: customer.id,
+			})
+			const runId = testRes.runId!
+
+			// Insert a step execution that is currently processing (started 5 seconds ago)
+			const recentProcessingTime = new Date(Date.now() - 5_000)
+			const existingExecInsert = await db
+				.insert(journeyStepExecutions)
+				.values({
+					runId,
+					nodeId: 'email-1',
+					stepType: 'email',
+					status: 'processing',
+					executedAt: recentProcessingTime,
+				})
+				.returning()
+			const existingExec = existingExecInsert[0]!
+
+			// Attempt duplicate execution during the 30s window
+			const duplicateRes = await executeJourneyStep(orgId, {
+				runId,
+				nodeId: 'email-1',
+				nodeType: 'email',
+				customerId: customer.id,
+				stepConfig: {
+					subject: 'Welcome',
+					body: 'Hello',
+				},
+			})
+
+			expect(duplicateRes.success).toBe(true)
+			expect(duplicateRes.status).toBe('processing')
+			expect(duplicateRes.executionId).toBe(existingExec.id)
+		})
 	})
 })

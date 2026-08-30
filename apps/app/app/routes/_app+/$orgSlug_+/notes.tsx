@@ -110,9 +110,14 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				},
 				noteAccess: { columns: { userId: true } },
 			},
-			where: (note, { and, eq, like, or }) =>
+			where: (note, { and, eq, like, or, sql }) =>
 				and(
 					eq(note.organizationId, organization.id),
+					or(
+						eq(note.isPublic, true),
+						eq(note.createdById, userId),
+						sql`EXISTS (SELECT 1 FROM OrganizationNoteAccess WHERE noteId = ${note.id} AND userId = ${userId})`,
+					),
 					searchQuery
 						? or(
 								like(note.title, `%${searchQuery}%`),

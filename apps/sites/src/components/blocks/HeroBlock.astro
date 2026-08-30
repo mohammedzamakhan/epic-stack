@@ -1,6 +1,10 @@
 ---
 import SiteAnchor from '~/components/SiteAnchor.astro'
-import { resolveMediaUrl, siteButtonClass } from '~/lib/media'
+import {
+	resolveImageSrcSet,
+	resolveMediaUrl,
+	siteButtonClass,
+} from '~/lib/media'
 
 interface Link {
 	url?: unknown
@@ -46,7 +50,9 @@ const {
 	videoControls = false,
 } = config
 
-const imageSrc = resolveMediaUrl(media?.url ?? imageUrl)
+const rawImageMedia = media?.url ?? imageUrl
+const imageSrc = resolveMediaUrl(rawImageMedia)
+const imageSrcSet = resolveImageSrcSet(rawImageMedia)
 const videoUrl = resolveMediaUrl(videoSrc)
 const hasMedia =
 	(assetType === 'image' && Boolean(imageSrc)) ||
@@ -63,10 +69,11 @@ const secondary = links[1]
 	{hasMedia && assetType === 'image' && imageSrc ? (
 		<img
 			src={imageSrc}
+			srcset={imageSrcSet || undefined}
 			alt={media?.alt || heading || ''}
 			width="1920"
 			height="1080"
-			sizes="100vw"
+			sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
 			class="absolute inset-0 size-full object-cover"
 			loading="eager"
 			decoding="async"

@@ -51,6 +51,29 @@ export function resolveMediaUrl(src: string | null | undefined): string | null {
 	return `${origin}/${src}`
 }
 
+export function resolveImageSrcSet(
+	src: string | null | undefined,
+): string | null {
+	const resolved = resolveMediaUrl(src)
+	if (!resolved || resolved.startsWith('data:') || resolved.startsWith('blob:'))
+		return null
+
+	const transformBase = (
+		process.env.MEDIA_TRANSFORM_BASE_URL ||
+		(ENV as unknown as Record<string, string | undefined>)
+			.MEDIA_TRANSFORM_BASE_URL ||
+		''
+	).replace(/\/$/, '')
+	if (transformBase) {
+		const path = resolved.startsWith('http')
+			? new URL(resolved).pathname
+			: resolved
+		return `${transformBase}/cdn-cgi/image/width=640,format=auto,quality=85${path} 640w, ${transformBase}/cdn-cgi/image/width=1024,format=auto,quality=85${path} 1024w, ${transformBase}/cdn-cgi/image/width=1920,format=auto,quality=85${path} 1920w`
+	}
+
+	return null
+}
+
 export type SiteLocaleLink = {
 	code: string
 	label: string

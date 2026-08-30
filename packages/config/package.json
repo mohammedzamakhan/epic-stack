@@ -19,9 +19,24 @@
   },
   "exports": {
     "./eslint-preset": "./eslint-preset.js",
-    "./brand": "./dist/brand.js",
-    "./manifest": "./dist/manifest.js",
-    "./marketing-email": "./dist/marketing-email.js"
+    "./brand": {
+      "types": "./brand.ts",
+      "import": "./brand.ts",
+      "default": "./dist/brand.js"
+    },
+    "./brand.ts": "./brand.ts",
+    "./manifest": {
+      "types": "./manifest.ts",
+      "import": "./manifest.ts",
+      "default": "./dist/manifest.js"
+    },
+    "./manifest.ts": "./manifest.ts",
+    "./marketing-email": {
+      "types": "./marketing-email.ts",
+      "import": "./marketing-email.ts",
+      "default": "./dist/marketing-email.js"
+    },
+    "./marketing-email.ts": "./marketing-email.ts"
   },
   "dependencies": {
     "@epic-web/config": "^1.20.1",

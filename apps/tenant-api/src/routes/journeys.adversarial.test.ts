@@ -24,6 +24,7 @@ import {
 	getJourneyDefinition,
 	evaluateAndSpawnTriggers,
 } from '../services/journey-service.ts'
+import { brand } from '@repo/config/brand.ts'
 
 vi.mock('../lib/origin.ts', () => ({
 	findActiveOrganizationById: vi
@@ -86,6 +87,7 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 		secretKey = operatorToken,
 		audience = 'tenant-api-operator',
 		expiresIn = '1h',
+		issuer = brand.shortName,
 	) {
 		const secret = new TextEncoder().encode(secretKey)
 		return new SignJWT({
@@ -94,6 +96,7 @@ describe('Adversarial Stress Testing: Journey Service, Step Execution, Auth & PI
 		})
 			.setProtectedHeader({ alg: 'HS256' })
 			.setAudience(audience)
+			.setIssuer(issuer)
 			.setExpirationTime(expiresIn)
 			.sign(secret)
 	}

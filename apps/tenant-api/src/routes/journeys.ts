@@ -31,6 +31,7 @@ import {
 	getJourneyRunTimeline,
 	triggerTestJourney,
 } from '../services/journey-service.ts'
+import { brand } from '@repo/config/brand'
 
 function getEnvVar(key: string, defaultValue = ''): string {
 	if (process.env[key]) return process.env[key]!
@@ -248,6 +249,7 @@ export async function authenticateOperator(c: Context) {
 		const secret = new TextEncoder().encode(operatorToken)
 		const { payload } = await jwtVerify(token, secret, {
 			audience: 'tenant-api-operator',
+			issuer: brand.shortName,
 		})
 		decoded = payload as typeof decoded
 	} catch {

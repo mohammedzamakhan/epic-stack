@@ -224,6 +224,20 @@ describe('OAuthStateManager', () => {
 				OAuthStateManager.validateState(futureState)
 			}).toThrow('Invalid state: timestamp is in the future')
 		})
+
+		it('should reject consumed nonces on replay', () => {
+			OAuthStateManager.clearConsumedNonces()
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
+			// First validation succeeds and marks nonce as consumed
+			const first = OAuthStateManager.validateState(state, true)
+			expect(first.organizationId).toBe('org-123')
+
+			// Replay attempt fails
+			expect(() => {
+				OAuthStateManager.validateState(state, true)
+			}).toThrow('Invalid state: nonce already consumed (replay detected)')
+		})
 	})
 })
 

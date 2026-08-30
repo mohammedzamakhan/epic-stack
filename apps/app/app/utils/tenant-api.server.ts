@@ -1,5 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { requireUserId } from '@repo/auth'
+import { brand } from '@repo/config/brand'
 import { and, db, eq, Organization, UserOrganization } from '@repo/database'
 import { SignJWT } from 'jose'
 import { ENV } from 'varlock/env'
@@ -127,6 +128,7 @@ export async function getOperatorTenantClient(
 	})
 		.setProtectedHeader({ alg: 'HS256' })
 		.setAudience('tenant-api-operator')
+		.setIssuer(brand.shortName)
 		.setExpirationTime('15m')
 		.sign(secret)
 

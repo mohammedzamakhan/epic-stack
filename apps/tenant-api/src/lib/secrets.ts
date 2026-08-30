@@ -27,10 +27,11 @@ export function getOperatorToken() {
 }
 
 export function assertTenantApiSecrets() {
-	const internalToken = ENV.INTERNAL_COMMAND_TOKEN || ''
+	const internalToken =
+		process.env.INTERNAL_COMMAND_TOKEN || ENV.INTERNAL_COMMAND_TOKEN || ''
 	const operatorToken = getOperatorToken()
-	const jwtSecret = ENV.JWT_SECRET || ''
-	const hmacSecret = process.env.AUTH_HMAC_SECRET || ''
+	const jwtSecret = process.env.JWT_SECRET || ENV.JWT_SECRET || ''
+	const hmacSecret = process.env.AUTH_HMAC_SECRET || ENV.AUTH_HMAC_SECRET || ''
 	const isProd = process.env.NODE_ENV === 'production'
 
 	if (internalToken.length < 16) {

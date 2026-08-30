@@ -5,7 +5,11 @@ import {
 } from '@repo/tenant-db'
 import { createTenantApiApp } from '../src/app.ts'
 import { organizationFromProvisionPayload } from '../src/lib/origin.ts'
-import { getBearerToken, timingSafeEqualString } from '../src/lib/secrets.ts'
+import {
+	assertTenantApiSecrets,
+	getBearerToken,
+	timingSafeEqualString,
+} from '../src/lib/secrets.ts'
 import { assertOrgOnUsNode, resolveOrgId } from './org-router.ts'
 import { TENANT_ORG_HEADER, TenantOrg } from './tenant-org.ts'
 import { TenantRegistry } from './tenant-registry.ts'
@@ -130,6 +134,7 @@ async function handleProvision(
 export default {
 	async fetch(request: Request, env: TenantApiWorkerEnv): Promise<Response> {
 		applyWorkerEnv(env)
+		assertTenantApiSecrets()
 
 		setListTenantOrgIdsProvider(async () => registryStub(env).list())
 

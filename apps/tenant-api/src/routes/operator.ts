@@ -400,8 +400,12 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 			.where(eq(marketingCampaigns.id, campaignId))
 
 		let hitCap = false
-		// 2. Dispatch
-		for (const customer of targetCustomers) {
+		const BATCH_SIZE = 25
+
+		// 2. Dispatch in concurrency batches
+		for (let i = 0; i < targetCustomers.length; i += BATCH_SIZE) {
+			const chunk = targetCustomers.slice(i, i + BATCH_SIZE)
+
 			// Enforce the global send cap to prevent runaway Twilio/OCI costs.
 			const cap = checkGlobalSendCap()
 			if (cap.limited) {
@@ -412,58 +416,92 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 				break
 			}
 
-			// Create outbox row
-			const messageId = randomUUID()
-			await db.insert(marketingMessages).values({
-				id: messageId,
-				campaignId,
-				customerId: customer.id,
-				status: 'Processing',
+			// Pre-generate message IDs and bulk insert Processing rows
+			const chunkItems = chunk.map((customer) => ({
+				messageId: randomUUID(),
+				customer,
+			}))
+
+			await db.insert(marketingMessages).values(
+				chunkItems.map((item) => ({
+					id: item.messageId,
+					campaignId,
+					customerId: item.customer.id,
+					status: 'Processing',
+				})),
+			)
+
+			// Process sends concurrently across the batch
+			const results = await Promise.allSettled(
+				chunkItems.map(async ({ messageId, customer }) => {
+					// Templating engine via standard interpolateMergeTags
+					const parsedContent = interpolateMergeTags(
+						campaign.content,
+						customer,
+						{},
+					)
+					const parsedSubject = campaign.subject
+						? interpolateMergeTags(campaign.subject, customer, {})
+						: ''
+
+					if (campaign.channel === 'email') {
+						if (!customer.email) throw new Error('No email address')
+						const emailRes = await sendTenantEmail({
+							to: customer.email,
+							toName: customer.name,
+							subject: parsedSubject || 'Notification',
+							text: parsedContent,
+							html: `<p>${parsedContent}</p>`,
+							context: {
+								orgId,
+								campaignId,
+								customerId: customer.id,
+								messageId,
+							},
+						})
+						if (emailRes.status === 'error') {
+							throw new Error(emailRes.error.message)
+						}
+					} else if (campaign.channel === 'sms') {
+						if (!customer.phone) throw new Error('No phone number')
+						await sendSms({
+							to: customer.phone,
+							message: parsedContent,
+						})
+					}
+					return messageId
+				}),
+			)
+
+			const sentIds: string[] = []
+			const failedIds: string[] = []
+
+			results.forEach((res, idx) => {
+				const id = chunkItems[idx]!.messageId
+				if (res.status === 'fulfilled') {
+					sentIds.push(id)
+				} else {
+					console.error(
+						`Failed to send to customer ${chunkItems[idx]!.customer.id}`,
+						res.reason,
+					)
+					failedIds.push(id)
+				}
 			})
 
-			// Templating engine via standard interpolateMergeTags
-			const parsedContent = interpolateMergeTags(campaign.content, customer, {})
-			const parsedSubject = campaign.subject
-				? interpolateMergeTags(campaign.subject, customer, {})
-				: ''
-
-			let deliveryStatus = 'Sent'
-			try {
-				if (campaign.channel === 'email') {
-					if (!customer.email) throw new Error('No email address')
-					const emailRes = await sendTenantEmail({
-						to: customer.email,
-						toName: customer.name,
-						subject: parsedSubject || 'Notification',
-						text: parsedContent,
-						html: `<p>${parsedContent}</p>`,
-						context: {
-							orgId,
-							campaignId,
-							customerId: customer.id,
-							messageId,
-						},
-					})
-					if (emailRes.status === 'error') {
-						throw new Error(emailRes.error.message)
-					}
-				} else if (campaign.channel === 'sms') {
-					if (!customer.phone) throw new Error('No phone number')
-					await sendSms({
-						to: customer.phone,
-						message: parsedContent,
-					})
-				}
-			} catch (err) {
-				console.error(`Failed to send to customer ${customer.id}`, err)
-				deliveryStatus = 'Failed'
+			// Bulk update outcomes for the batch
+			if (sentIds.length > 0) {
+				await db
+					.update(marketingMessages)
+					.set({ status: 'Sent', sentAt: new Date() })
+					.where(inArray(marketingMessages.id, sentIds))
 			}
-
-			// Update outbox
-			await db
-				.update(marketingMessages)
-				.set({ status: deliveryStatus })
-				.where(eq(marketingMessages.id, messageId))
+			if (failedIds.length > 0) {
+				await db
+					.update(marketingMessages)
+					.set({ status: 'Failed' })
+					.where(inArray(marketingMessages.id, failedIds))
+			}
 		}
 
 		// If hit send cap, mark any remaining processing messages as failed
