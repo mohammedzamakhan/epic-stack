@@ -1123,20 +1123,23 @@ describe('Adversarial Stress Suite: Operator CRUD & Auth Lifecycle Triggers', ()
 
 			expect(res.status).toBe(200)
 
-			await new Promise((resolve) => setTimeout(resolve, 100))
+			await vi.waitFor(
+				async () => {
+					const runs = await db
+						.select()
+						.from(journeyRuns)
+						.where(eq(journeyRuns.customerId, customer.id))
+						.all()
 
-			const runs = await db
-				.select()
-				.from(journeyRuns)
-				.where(eq(journeyRuns.customerId, customer.id))
-				.all()
-
-			// Should have spawned exactly 5 runs (one for each active journey)
-			expect(runs).toHaveLength(5)
-			for (const r of runs) {
-				expect(r.triggerEvent).toBe('phone_verified')
-				expect(r.status).toBe('running')
-			}
+					// Should have spawned exactly 5 runs (one for each active journey)
+					expect(runs).toHaveLength(5)
+					for (const r of runs) {
+						expect(r.triggerEvent).toBe('phone_verified')
+						expect(r.status).toBe('running')
+					}
+				},
+				{ timeout: 4000, interval: 50 },
+			)
 		})
 	})
 })
