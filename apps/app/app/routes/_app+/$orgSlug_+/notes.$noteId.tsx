@@ -772,7 +772,7 @@ export default function NoteRoute() {
 
 					<TabsContent
 						value="ai-assistant"
-						className="bg-muted/20 flex-1 overflow-hidden"
+						className="bg-background flex-1 overflow-hidden"
 					>
 						<LazyLoadErrorBoundary
 							fallback={

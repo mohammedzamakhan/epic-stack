@@ -65,43 +65,42 @@ export function ReportLibrary({
 	return (
 		<aside
 			className={cn(
-				'bg-muted/20 flex h-full shrink-0 flex-col border-r',
-				compact ? 'hidden w-72 lg:flex' : 'w-full lg:w-72',
+				// Full-height side rail: no rounded corners, no card border.
+				// Just a subtle background + a right divider that runs the
+				// entire page height, matching the rest of the workspace.
+				'bg-muted/20 shrink-0 flex-col gap-4 self-stretch p-4 lg:border-r',
+				compact ? 'hidden w-72 lg:flex' : 'flex w-full lg:w-72',
 			)}
 		>
-			<div className="space-y-3 p-4">
-				<div>
-					<p className="text-foreground text-sm font-semibold">
-						Report Builder
-					</p>
-					<p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-						{scope === 'platform'
-							? 'Platform counts for operators, orgs, and waitlist.'
-							: 'Segment customers, shop orders, notes, members, and feedback.'}
-					</p>
-				</div>
-				<Button
-					className="w-full justify-start"
-					render={<Link to={`${basePath}/new`} />}
-				>
-					<Icon name="plus" className="size-4" />
-					New Report
-				</Button>
-				<div className="relative">
-					<Icon
-						name="search"
-						className="text-muted-foreground pointer-events-none absolute top-2.5 left-2.5 size-4"
-					/>
-					<Input
-						value={query}
-						onChange={(event) => setQuery(event.target.value)}
-						placeholder="Search templates…"
-						aria-label="Search templates"
-						className="pl-8"
-					/>
-				</div>
+			<div>
+				<p className="text-foreground text-sm font-semibold">Report Builder</p>
+				<p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
+					{scope === 'platform'
+						? 'Platform counts for operators, orgs, and waitlist.'
+						: 'Segment customers, shop orders, notes, members, and feedback.'}
+				</p>
 			</div>
-			<div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+			<Button
+				className="w-full justify-start"
+				render={<Link to={`${basePath}/new`} />}
+			>
+				<Icon name="plus" className="size-4" />
+				New Report
+			</Button>
+			<div className="relative">
+				<Icon
+					name="search"
+					className="text-muted-foreground pointer-events-none absolute top-2.5 left-2.5 size-4"
+				/>
+				<Input
+					value={query}
+					onChange={(event) => setQuery(event.target.value)}
+					placeholder="Search templates…"
+					aria-label="Search templates"
+					className="pl-8"
+				/>
+			</div>
+			<div className="px-0">
 				{!hasMatches ? (
 					<p className="text-muted-foreground px-2 py-6 text-center text-sm">
 						No templates match “{query.trim()}”.
@@ -180,8 +179,8 @@ export function ReportStart({
 	const categories = templateCategories(templates)
 
 	return (
-		<div className="hidden min-h-0 min-w-0 flex-1 flex-col overflow-y-auto lg:flex">
-			<div className="max-w-3xl px-8 py-10">
+		<div className="min-w-0 flex-1">
+			<div className="max-w-3xl py-6">
 				<h1 className="text-foreground text-2xl font-semibold tracking-tight">
 					{heading}
 				</h1>

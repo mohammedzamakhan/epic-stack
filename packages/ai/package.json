@@ -27,6 +27,7 @@
     "@radix-ui/react-tooltip": "^1.2.2",
     "@react-email/preview-server": "^5.0.8",
     "@remix-run/server-runtime": "^2.17.5",
+    "@repo/config": "*",
     "@repo/ui": "*",
     "@sentry/react-router": "10.29.0",
     "ai": "^7.0.84",
