@@ -1,5 +1,5 @@
 import { invariant, invariantResponse } from '@epic-web/invariant'
-import type { CoreMessage } from 'ai'
+import type { ModelMessage } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
 import {
 	NoteAccess,
@@ -22,7 +22,7 @@ export interface ChatDependencies {
 		organizationId: string,
 	) => Promise<unknown>
 	createChatStream: (params: {
-		messages: CoreMessage[]
+		messages: ModelMessage[]
 		systemPrompt: string
 	}) => any
 	buildNoteChatSystemPrompt: (basePrompt: string, noteContext: any) => string
@@ -127,7 +127,7 @@ export async function handleChat(
 		}
 	}
 
-	const { messages } = (await request.json()) as { messages: CoreMessage[] }
+	const { messages } = (await request.json()) as { messages: ModelMessage[] }
 
 	// Build note context
 	const noteContext = {

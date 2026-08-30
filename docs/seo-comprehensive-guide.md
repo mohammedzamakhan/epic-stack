@@ -28,7 +28,7 @@ Epic Stack now includes comprehensive SEO support across all applications:
 - **Marketing Site (Astro)**: Complete SEO implementation with comprehensive
   meta tags
 - **Admin App**: Protected routes with appropriate robots directives
-- **CMS**: SEO plugin integration with Payload CMS
+- **CMS**: SEO plugin integration with EmDash
 
 ### Key Features
 

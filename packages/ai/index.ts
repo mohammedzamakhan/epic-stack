@@ -1,5 +1,5 @@
 // Re-export types from ai package
-export type { CoreMessage } from 'ai'
+export type { ModelMessage as CoreMessage } from 'ai'
 
 // Components
 export * from './src/components/index.js'

@@ -1,8 +1,8 @@
 import { google } from '@ai-sdk/google'
-import { streamText, type CoreMessage } from 'ai'
+import { streamText, type ModelMessage } from 'ai'
 
 export type ChatStreamOptions = {
-	messages: CoreMessage[]
+	messages: ModelMessage[]
 	systemPrompt: string
 	modelName?: string
 	maxDuration?: number

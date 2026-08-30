@@ -242,6 +242,11 @@ export async function action({ request }: ActionFunctionArgs) {
 				userId,
 				imageObjectKey,
 			})
+			const launchStatus = getLaunchStatus()
+			const shouldShowPricing =
+				trialConfig.creditCardRequired === 'stripe' &&
+				launchStatus !== 'PUBLIC_BETA' &&
+				launchStatus !== 'CLOSED_BETA'
 
 			return redirect(`/organizations/create?step=2&orgId=${organization.id}`)
 		} catch (error) {
@@ -325,8 +330,14 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 		}
 
-		// Determine next step based on trial configuration
-		const nextStep = trialConfig.creditCardRequired === 'stripe' ? 4 : 3
+		const launchStatus = getLaunchStatus()
+		const shouldShowPricing =
+			trialConfig.creditCardRequired === 'stripe' &&
+			launchStatus !== 'PUBLIC_BETA' &&
+			launchStatus !== 'CLOSED_BETA'
+
+		// Determine next step based on trial configuration and launch status
+		const nextStep = shouldShowPricing ? 4 : 3
 		return redirect(`/organizations/create?step=${nextStep}&orgId=${orgId}`)
 	}
 
@@ -427,55 +438,60 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function CreateOrganizationPage() {
 	const actionData = useActionData<typeof action>()
-	const { trialConfig, plansAndPrices } = useLoaderData<typeof loader>()
+	const { trialConfig, plansAndPrices, launchStatus } =
+		useLoaderData<typeof loader>()
 	const [searchParams] = useSearchParams()
 	const rawStep = parseInt(searchParams.get('step') || '1')
 	// Validate step to prevent logic bypass
 	const currentStep = Math.max(1, Math.min(rawStep, 5))
 	const orgId = searchParams.get('orgId')
 
+	const shouldShowPricing =
+		trialConfig.creditCardRequired === 'stripe' &&
+		launchStatus !== 'PUBLIC_BETA' &&
+		launchStatus !== 'CLOSED_BETA'
+
 	// Dynamic step configuration based on trial mode
-	const steps =
-		trialConfig.creditCardRequired === 'stripe'
-			? [
-					{
-						number: 1,
-						title: 'Organization Details',
-						description: 'Basic information',
-					},
-					{
-						number: 2,
-						title: 'Choose Plan',
-						description: 'Select subscription',
-					},
-					{
-						number: 3,
-						title: 'Invite Members',
-						description: 'Add team members',
-					},
-					{
-						number: 4,
-						title: 'Additional Info',
-						description: 'Complete setup',
-					},
-				]
-			: [
-					{
-						number: 1,
-						title: 'Organization Details',
-						description: 'Basic information',
-					},
-					{
-						number: 2,
-						title: 'Invite Members',
-						description: 'Add team members',
-					},
-					{
-						number: 3,
-						title: 'Additional Info',
-						description: 'Complete setup',
-					},
-				]
+	const steps = shouldShowPricing
+		? [
+				{
+					number: 1,
+					title: 'Organization Details',
+					description: 'Basic information',
+				},
+				{
+					number: 2,
+					title: 'Choose Plan',
+					description: 'Select subscription',
+				},
+				{
+					number: 3,
+					title: 'Invite Members',
+					description: 'Add team members',
+				},
+				{
+					number: 4,
+					title: 'Additional Info',
+					description: 'Complete setup',
+				},
+			]
+		: [
+				{
+					number: 1,
+					title: 'Organization Details',
+					description: 'Basic information',
+				},
+				{
+					number: 2,
+					title: 'Invite Members',
+					description: 'Add team members',
+				},
+				{
+					number: 3,
+					title: 'Additional Info',
+					description: 'Complete setup',
+				},
+			]
 	const totalSteps = steps.length
 
 	return (
@@ -503,7 +519,7 @@ export default function CreateOrganizationPage() {
 
 			{/* Step content */}
 			{currentStep === 1 && <Step1 actionData={actionData} />}
-			{trialConfig.creditCardRequired === 'stripe' ? (
+			{shouldShowPricing ? (
 				<>
 					{currentStep === 2 && orgId && plansAndPrices && (
 						<SubscriptionStep

@@ -13,9 +13,6 @@ Once you've completed the initial setup, you can develop completely offline:
 
 - **Main App**: SQLite database with LiteFS
 - **Admin Dashboard**: Shares SQLite database
-- **CMS (Payload)**: Local SQLite file (`@payloadcms/db-sqlite`) + local file
-  storage — no Docker, no cloud database
-- **CMS Media**: Stored in `apps/cms/public/media/` directory (no R2 needed)
 - **Mobile App**: Expo with local development server
 - **UI Development**: All components and packages
 - **Testing**: Unit tests and E2E tests
@@ -69,12 +66,6 @@ Mock OAuth providers are automatically used when prefixed with `MOCK_`.
 
 ### Object Storage (Tigris / R2)
 
-**CMS (Payload)**: Uses local file storage in every environment today. Files are
-stored in `apps/cms/public/media/` and served directly by Next.js. An R2 binding
-is declared in `apps/cms/wrangler.jsonc` but is not yet wired into Payload, so
-there is no local-dev/production storage difference to toggle. See
-[CMS storage](./cms-storage.md).
-
 **Main App**: Uses custom S3 client with mock credentials (Tigris in
 production).
 
@@ -126,7 +117,7 @@ If ports are already in use:
 All data is stored locally and persists between sessions:
 
 - **SQLite (App/Admin)**: `packages/database/data.db`
-- **SQLite (CMS)**: `apps/cms/data/cms.db`
+- **SQLite (CMS)**: `apps/web/.emdash/data.db`
 - **Cache**: `other/cache.db`
 
 To reset data:
@@ -134,9 +125,6 @@ To reset data:
 ```bash
 # Reset App/Admin SQLite
 npm run db:reset
-
-# Reset CMS SQLite: just delete the local file
-rm apps/cms/data/cms.db
 ```
 
 ## CI/CD Considerations

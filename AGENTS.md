@@ -63,7 +63,6 @@ npm run dev
 # Start specific apps
 npm run dev:app             # Main React Router app (port 3001)
 npm run dev:web             # Astro marketing site (port 3002)
-npm run dev:cms             # Payload CMS (port 3006)
 npm run dev:sites           # Tenant public sites (port 3008)
 npm run dev:tenant-api      # US tenant-api (port 3007, DATA_REGION=us)
 npm run dev:tenant-api:ksa  # KSA tenant-api (port 3009, DATA_REGION=ksa)
@@ -405,8 +404,6 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 
 - Local: `apps/cms/public/media/`
 - Vercel: R2 via S3 API (`R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`)
-- Cloudflare Workers: `R2_BUCKET` binding (`@payloadcms/storage-r2`)
-- See `docs/cms-storage.md`
 
 ## PR & Commit Guidelines
 

@@ -462,7 +462,6 @@ test.describe('Accessibility', () => {
 					// Check if field has aria-describedby pointing to error message
 					const describedBy = await field.getAttribute('aria-describedby')
 					if (describedBy) {
-						// eslint-disable-next-line playwright/no-raw-locators -- dynamic ID selector required for aria-describedby lookup
 						const errorElement = page.locator(`#${describedBy}`)
 						await expect(errorElement).toBeVisible()
 					}

@@ -100,7 +100,6 @@
   "dependencies": {
     "@opentelemetry/propagator-jaeger": "^2.10.0",
     "@opentelemetry/sdk-node": "^0.217.0",
-    "@payloadcms/graphql": "^3.87.0",
     "@varlock/nextjs-integration": "^0.1.2",
     "astro": "^7.1.6",
     "liquidjs": "^10.28.0",

@@ -1,8 +1,8 @@
+import { redirectWithToast } from '@repo/common/toast'
 import {
 	createErasureRequest,
 	cancelErasureRequest,
 } from '#app/utils/gdpr.server.ts'
-import { redirectWithToast } from '@repo/common/toast'
 
 type PrivacyActionArgs = {
 	request: Request

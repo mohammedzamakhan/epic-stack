@@ -13,8 +13,7 @@ import { fontless } from 'fontless'
 
 const domain = getBrandDomain()
 const isDevCommand =
-	process.env.npm_lifecycle_event === 'dev' ||
-	process.argv.includes('dev')
+	process.env.npm_lifecycle_event === 'dev' || process.argv.includes('dev')
 const isCloudflareBuild =
 	process.env.npm_lifecycle_event === 'build' ||
 	process.env.CLOUDFLARE_BUILD === 'true'

@@ -77,9 +77,8 @@ function patchAdminBundle(code) {
 			return null
 		}
 
-		patched = patched.replace(
-			markdownAnchor,
-			(match) => match.replace('default: return', `${MARKDOWN_INPUT_CASE}default: return`),
+		patched = patched.replace(markdownAnchor, (match) =>
+			match.replace('default: return', `${MARKDOWN_INPUT_CASE}default: return`),
 		)
 	}
 

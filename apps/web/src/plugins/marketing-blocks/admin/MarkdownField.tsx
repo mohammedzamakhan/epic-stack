@@ -112,7 +112,7 @@ export default function MarkdownField({
 	)
 
 	return (
-		<div className="space-y-2">
+		<div className="w-full space-y-2">
 			{label && (
 				<label className="text-kumo-default block text-sm font-medium">
 					{label}
@@ -120,6 +120,7 @@ export default function MarkdownField({
 			)}
 			{multiline ? (
 				<Textarea
+					className="w-full"
 					value={text}
 					onChange={(event) => onChange(event.target.value)}
 					rows={4}
@@ -127,6 +128,7 @@ export default function MarkdownField({
 				/>
 			) : (
 				<Input
+					className="w-full"
 					value={text}
 					onChange={(event) => onChange(event.target.value)}
 					placeholder="Write markdown…"

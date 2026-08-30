@@ -23,11 +23,11 @@ SOC 2 evaluates organizations based on five Trust Service Criteria.
 
 ### Availability
 
-| Control                | Implementation                  | Evidence                          |
-| ---------------------- | ------------------------------- | --------------------------------- |
-| A1.1 Capacity Planning | Cloudflare auto-scaling         | Workers configuration             |
-| A1.2 System Monitoring | Health checks, metrics          | `/resources/healthcheck` endpoint |
-| A1.3 Backup/Recovery   | Automated backups               | `.github/workflows/backup.yml`    |
+| Control                | Implementation          | Evidence                          |
+| ---------------------- | ----------------------- | --------------------------------- |
+| A1.1 Capacity Planning | Cloudflare auto-scaling | Workers configuration             |
+| A1.2 System Monitoring | Health checks, metrics  | `/resources/healthcheck` endpoint |
+| A1.3 Backup/Recovery   | Automated backups       | `.github/workflows/backup.yml`    |
 
 ### Processing Integrity
 
@@ -205,11 +205,11 @@ await db.insert(AuditLogRetentionPolicy).values({
 
 Epic Stack leverages certified infrastructure:
 
-| Provider           | Certifications      |
-| ------------------ | ------------------- |
-| Cloudflare         | SOC 2 Type II       |
-| Tigris (S3)        | SOC 2 Type II       |
-| Sentry             | SOC 2 Type II, GDPR |
-| Resend (Email)     | SOC 2 Type II       |
+| Provider       | Certifications      |
+| -------------- | ------------------- |
+| Cloudflare     | SOC 2 Type II       |
+| Tigris (S3)    | SOC 2 Type II       |
+| Sentry         | SOC 2 Type II, GDPR |
+| Resend (Email) | SOC 2 Type II       |
 
 Request vendor security documentation for your audit package.
