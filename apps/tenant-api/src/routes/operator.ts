@@ -5,6 +5,7 @@ import {
 	customers,
 	marketingCampaigns,
 	marketingMessages,
+	interpolateMergeTags,
 } from '@repo/tenant-db'
 import { getBearerToken, getOperatorToken } from '../lib/secrets.ts'
 import { checkGlobalSendCap } from '../lib/rate-limit.ts'
@@ -350,6 +351,7 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 			.set({ targetAudienceCount: allCustomers.length })
 			.where(eq(marketingCampaigns.id, campaignId))
 
+		let hitCap = false
 		// 2. Dispatch
 		for (const customer of allCustomers) {
 			// Enforce the global send cap to prevent runaway Twilio/OCI costs.
@@ -358,6 +360,7 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 				console.warn(
 					`Campaign dispatch for ${campaignId} hit the global send cap; stopping early.`,
 				)
+				hitCap = true
 				break
 			}
 
@@ -370,11 +373,11 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 				status: 'Processing', // Or 'Sent'/'Failed' later
 			})
 
-			// Templating engine (basic merge tags)
-			let parsedContent = campaign.content.replace(
-				/\{\{name\}\}/g,
-				customer.name || 'Customer',
-			)
+			// Templating engine via standard interpolateMergeTags
+			const parsedContent = interpolateMergeTags(campaign.content, customer, {})
+			const parsedSubject = campaign.subject
+				? interpolateMergeTags(campaign.subject, customer, {})
+				: ''
 
 			let deliveryStatus = 'Sent'
 			try {
@@ -383,7 +386,7 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 					const emailRes = await sendTenantEmail({
 						to: customer.email,
 						toName: customer.name,
-						subject: campaign.subject!,
+						subject: parsedSubject || 'Notification',
 						text: parsedContent,
 						html: `<p>${parsedContent}</p>`,
 						context: {
@@ -415,10 +418,10 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 				.where(eq(marketingMessages.id, messageId))
 		}
 
-		// Mark completed
+		// Mark status
 		await db
 			.update(marketingCampaigns)
-			.set({ status: 'Completed' })
+			.set({ status: hitCap ? 'Failed' : 'Completed' })
 			.where(eq(marketingCampaigns.id, campaignId))
 	} catch (error) {
 		console.error(`Campaign dispatch failed for ${campaignId}`, error)

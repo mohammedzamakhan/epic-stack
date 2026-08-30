@@ -469,6 +469,16 @@ function updateEnvFiles(domain) {
 		'apps/sites/.env',
 		'apps/tenant-api/.env',
 		'apps/web/.env',
+		'apps/app/.env.example',
+		'apps/admin/.env.example',
+		'apps/sites/.env.example',
+		'apps/tenant-api/.env.example',
+		'apps/web/.env.example',
+		'apps/app/.env.schema',
+		'apps/admin/.env.schema',
+		'apps/sites/.env.schema',
+		'apps/tenant-api/.env.schema',
+		'apps/web/.env.schema',
 	]
 
 	let updatedCount = 0
@@ -478,7 +488,6 @@ function updateEnvFiles(domain) {
 
 		try {
 			if (!existsSync(envPath)) {
-				log(`⚠️  Environment file not found: ${envFile}`, 'yellow')
 				continue
 			}
 
@@ -490,13 +499,23 @@ function updateEnvFiles(domain) {
 				/^PUBLIC_ROOT_APP=.*$/m,
 				`PUBLIC_ROOT_APP=${domain}`,
 			)
+			content = content.replace(
+				/CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET=sites\.epic-startup\.me/g,
+				`CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET=sites.${domain}`,
+			)
+			content = content.replace(
+				/PUBLIC_TENANT_API_URL=https:\/\/api\.epic-startup\.me/g,
+				`PUBLIC_TENANT_API_URL=https://api.${domain}`,
+			)
+			content = content.replace(
+				/PUBLIC_TENANT_API_URL_KSA=https:\/\/api-ksa\.epic-startup\.me/g,
+				`PUBLIC_TENANT_API_URL_KSA=https://api-ksa.${domain}`,
+			)
 
 			if (content !== original) {
 				writeFileSync(envPath, content, 'utf-8')
 				updatedCount++
-				log(`✅ Updated ROOT_APP in ${envFile} to ${domain}`, 'green')
-			} else {
-				log(`⚠️  ROOT_APP not found in ${envFile}`, 'yellow')
+				log(`✅ Updated domain references in ${envFile} to ${domain}`, 'green')
 			}
 		} catch (error) {
 			log(`⚠️  Failed to update ${envFile}: ${error.message}`, 'yellow')
@@ -505,7 +524,7 @@ function updateEnvFiles(domain) {
 
 	if (updatedCount > 0) {
 		log(
-			`\n✅ Successfully updated ROOT_APP in ${updatedCount} environment files`,
+			`\n✅ Successfully updated domain references in ${updatedCount} environment/schema files`,
 			'green',
 		)
 	}

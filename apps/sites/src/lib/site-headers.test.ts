@@ -99,4 +99,12 @@ describe('publishedHtmlCacheUrl', () => {
 			publishedHtmlCacheUrl(requestUrl, 'acme13.preview.example.dev').href,
 		).toBe('https://acme13.preview.example.dev/')
 	})
+
+	it('normalizes casing and trims whitespace on host headers', () => {
+		const requestUrl = new URL('https://sites.example.workers.dev/page')
+		expect(
+			publishedHtmlCacheUrl(requestUrl, '  ACME12.Preview.Example.Dev:443  ')
+				.href,
+		).toBe('https://acme12.preview.example.dev/page')
+	})
 })

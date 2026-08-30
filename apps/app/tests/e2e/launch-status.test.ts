@@ -68,14 +68,20 @@ test.describe.serial('Launch Status Flows', () => {
 		// Wait for the next step to load
 		await page.waitForLoadState('networkidle')
 
-		// Check if we're on the invitations step (step 2) or additional info step (step 3)
-		const currentUrl = page.url()
-
-		if (currentUrl.includes('step=2')) {
-			// We're on invitations step - skip it
-			await page.getByRole('button', { name: /skip for now/i }).click()
-			await page.waitForLoadState('networkidle')
+		// Wait for the next step to render (either Invitations or Additional Info)
+		// Instead of checking URL which might be flaky, we check if the Skip button is visible
+		const skipButton = page.getByRole('button', { name: /skip for now/i })
+		try {
+			await skipButton.waitFor({ state: 'visible', timeout: 5000 })
+			await skipButton.click()
+		} catch {
+			// Button didn't appear, must be on Step 4 directly
 		}
+
+		// Wait until Step 4 is definitely visible
+		await page
+			.getByText(/tell us more about your organization/i)
+			.waitFor({ state: 'visible' })
 
 		// Now we should be on the additional info step
 		await page.getByRole('combobox').first().click()
@@ -136,14 +142,20 @@ test.describe.serial('Launch Status Flows', () => {
 		// Wait for the next step to load
 		await page.waitForLoadState('networkidle')
 
-		// Check if we're on the invitations step (step 2) or additional info step (step 3)
-		const currentUrl = page.url()
-
-		if (currentUrl.includes('step=2')) {
-			// We're on invitations step - skip it
-			await page.getByRole('button', { name: /skip for now/i }).click()
-			await page.waitForLoadState('networkidle')
+		// Wait for the next step to render (either Invitations or Additional Info)
+		// Instead of checking URL which might be flaky, we check if the Skip button is visible
+		const skipButton = page.getByRole('button', { name: /skip for now/i })
+		try {
+			await skipButton.waitFor({ state: 'visible', timeout: 5000 })
+			await skipButton.click()
+		} catch {
+			// Button didn't appear, must be on Step 4 directly
 		}
+
+		// Wait until Step 4 is definitely visible
+		await page
+			.getByText(/tell us more about your organization/i)
+			.waitFor({ state: 'visible' })
 
 		// Now we should be on the additional info step
 		await page.getByRole('combobox').first().click()
@@ -155,14 +167,9 @@ test.describe.serial('Launch Status Flows', () => {
 		// Should go to the org dashboard
 		await expect(page).toHaveURL(new RegExp(`/${orgSlug}`))
 
-		// Expand settings if it's collapsed (collapsible sidebar group)
+		// Expand settings (it's collapsed by default on the dashboard)
 		const settingsButton = page.getByRole('button', { name: /^settings$/i })
-		if (await settingsButton.isVisible()) {
-			const isExpanded = await settingsButton.getAttribute('aria-expanded')
-			if (isExpanded === 'false') {
-				await settingsButton.click()
-			}
-		}
+		await settingsButton.click()
 
 		// Billing SHOULD be visible in LAUNCHED status
 		await expect(page.getByRole('link', { name: /^billing$/i })).toBeVisible()

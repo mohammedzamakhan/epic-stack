@@ -90,6 +90,20 @@ export async function executeJourneyStep(
 		}
 	}
 
+	const processingExecution = existing.find(
+		(e) =>
+			e.status === 'processing' &&
+			e.executedAt &&
+			Date.now() - new Date(e.executedAt).getTime() < 30_000,
+	)
+	if (processingExecution) {
+		return {
+			success: true,
+			executionId: processingExecution.id,
+			status: 'processing',
+		}
+	}
+
 	const stepExecutionId = randomUUID()
 
 	const rawType = payload.nodeType
@@ -780,14 +794,29 @@ export async function evaluateAndSpawnTriggers(
 				console.warn(
 					`Workflow worker returned status ${res.status} for journey run ${runId}`,
 				)
+				await db
+					.update(journeyRuns)
+					.set({
+						errorMessage: `Workflow worker returned status ${res.status}`,
+						updatedAt: new Date(),
+					})
+					.where(eq(journeyRuns.id, runId))
 				spawnedRuns.push({ journeyId: journey.id, runId })
 			}
 		} catch (err) {
-			// In dev or test environments where worker is not running, gracefully continue
+			// In dev or test environments where worker is not running, gracefully continue but record error
 			console.warn(
 				`Could not dispatch to workflow worker at ${workerUrl} for run ${runId}:`,
 				err instanceof Error ? err.message : err,
 			)
+			const errorMsg = err instanceof Error ? err.message : String(err)
+			await db
+				.update(journeyRuns)
+				.set({
+					errorMessage: `Workflow worker dispatch error: ${errorMsg}`,
+					updatedAt: new Date(),
+				})
+				.where(eq(journeyRuns.id, runId))
 			spawnedRuns.push({ journeyId: journey.id, runId })
 		}
 	}

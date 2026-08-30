@@ -52,7 +52,7 @@ npm run test:e2e:install
 
 **Requirements**:
 
-- Node.js 22.15.0, npm 10.9.0 (pinned with Volta)
+- Node.js 22.18.0, npm 10.9.0 (pinned with Volta)
 
 ## Development
 

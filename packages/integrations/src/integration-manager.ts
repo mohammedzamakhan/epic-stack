@@ -22,6 +22,7 @@ import {
 	desc,
 	eq,
 	gte,
+	inArray,
 } from '@repo/database'
 import {
 	type Integration,
@@ -869,19 +870,25 @@ export class IntegrationManager {
 			.where(eq(ConnectionTable.integrationId, integration.id))
 			.orderBy(desc(ConnectionTable.createdAt))
 
+		const noteIds = Array.from(
+			new Set(connections.map((c) => c.noteId).filter(Boolean)),
+		)
+		const notes =
+			noteIds.length > 0
+				? await db
+						.select()
+						.from(NoteTable)
+						.where(inArray(NoteTable.id, noteIds))
+				: []
+		const notesMap = new Map(notes.map((n) => [n.id, n]))
+
 		return {
 			...integration,
 			organization,
-			connections: await Promise.all(
-				connections.map(async (connection) => {
-					const [note] = await db
-						.select()
-						.from(NoteTable)
-						.where(eq(NoteTable.id, connection.noteId))
-						.limit(1)
-					return { ...connection, note }
-				}),
-			),
+			connections: connections.map((connection) => ({
+				...connection,
+				note: notesMap.get(connection.noteId),
+			})),
 		}
 	}
 

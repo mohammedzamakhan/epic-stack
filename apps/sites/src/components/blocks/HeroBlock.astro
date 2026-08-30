@@ -66,6 +66,8 @@ const secondary = links[1]
 			alt={media?.alt || heading || ''}
 			class="absolute inset-0 size-full object-cover"
 			loading="eager"
+			decoding="async"
+			fetchpriority="high"
 		/>
 	) : null}
 

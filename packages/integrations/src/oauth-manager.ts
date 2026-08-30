@@ -7,7 +7,7 @@
  * - Token refresh with retry logic
  */
 
-import { randomBytes, createHash } from 'crypto'
+import { randomBytes, createHmac, createHash, timingSafeEqual } from 'crypto'
 import { providerRegistry } from './provider'
 import {
 	type TokenData,
@@ -20,6 +20,21 @@ import {
  */
 export class OAuthStateManager {
 	private static readonly STATE_EXPIRY_MINUTES = 30
+	private static consumedNonces = new Map<string, number>()
+
+	static clearConsumedNonces(): void {
+		this.consumedNonces.clear()
+	}
+
+	private static cleanExpiredNonces(): void {
+		const now = Date.now()
+		const maxAge = this.STATE_EXPIRY_MINUTES * 60 * 1000
+		for (const [nonce, timestamp] of this.consumedNonces.entries()) {
+			if (now - timestamp > maxAge) {
+				this.consumedNonces.delete(nonce)
+			}
+		}
+	}
 
 	private static getStateSecret(): string {
 		const secret = process.env.INTEGRATIONS_OAUTH_STATE_SECRET
@@ -69,10 +84,11 @@ export class OAuthStateManager {
 	/**
 	 * Validate and parse OAuth state
 	 * @param state - State string to validate
+	 * @param consumeNonce - Whether to mark nonce as consumed
 	 * @returns Parsed state data
 	 * @throws Error if state is invalid or expired
 	 */
-	static validateState(state: string): OAuthState {
+	static validateState(state: string, consumeNonce = true): OAuthState {
 		if (!state || typeof state !== 'string') {
 			throw new Error('Invalid state: empty or non-string')
 		}
@@ -88,9 +104,22 @@ export class OAuthStateManager {
 			throw new Error('Invalid state: missing payload or signature')
 		}
 
-		// Verify signature
-		const expectedSignature = this.createStateSignature(statePayload)
-		if (signature !== expectedSignature) {
+		// Verify signature using timingSafeEqual (supports HMAC and legacy SHA-256)
+		const expectedHmac = this.createStateSignature(statePayload)
+		const expectedLegacy = createHash('sha256')
+			.update(statePayload + this.getStateSecret())
+			.digest('hex')
+
+		const sigBuf = Buffer.from(signature)
+		const hmacBuf = Buffer.from(expectedHmac)
+		const legacyBuf = Buffer.from(expectedLegacy)
+
+		const isHmacValid =
+			sigBuf.length === hmacBuf.length && timingSafeEqual(sigBuf, hmacBuf)
+		const isLegacyValid =
+			sigBuf.length === legacyBuf.length && timingSafeEqual(sigBuf, legacyBuf)
+
+		if (!isHmacValid && !isLegacyValid) {
 			throw new Error('Invalid state: signature verification failed')
 		}
 
@@ -123,6 +152,18 @@ export class OAuthStateManager {
 			throw new Error('Invalid state: expired')
 		}
 
+		if (stateData.nonce) {
+			this.cleanExpiredNonces()
+			if (this.consumedNonces.has(stateData.nonce)) {
+				throw new Error(
+					'Invalid state: nonce already consumed (replay detected)',
+				)
+			}
+			if (consumeNonce) {
+				this.consumedNonces.set(stateData.nonce, Date.now())
+			}
+		}
+
 		return stateData
 	}
 
@@ -132,8 +173,8 @@ export class OAuthStateManager {
 	 * @returns Signature string
 	 */
 	private static createStateSignature(payload: string): string {
-		return createHash('sha256')
-			.update(payload + this.getStateSecret())
+		return createHmac('sha256', this.getStateSecret())
+			.update(payload)
 			.digest('hex')
 	}
 }
