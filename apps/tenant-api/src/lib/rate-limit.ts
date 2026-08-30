@@ -39,14 +39,16 @@ export function rateLimit(name: string, config: RateLimitConfig) {
 		}
 
 		// IP resolution priority for rate limiting:
-		// 1. cf-connecting-ip: Set by Cloudflare's proxy — most reliable when behind Cloudflare
-		// 2. Last x-forwarded-for value: Appended by our trusted upstream proxy (sites app)
-		// 3. x-real-ip: Fallback only — can be set by clients if not stripped by upstream
+		// 1. cf-connecting-ip: Set by Cloudflare edge proxy (verified)
+		// 2. x-forwarded-for: First client IP if behind trusted reverse proxy
+		// 3. Fallback: 'unknown'
 		const forwardedFor = c.req.header('x-forwarded-for')
+		const clientIpFromForwarded = forwardedFor
+			? forwardedFor.split(',')[0]?.trim()
+			: null
 		const ip =
-			c.req.header('cf-connecting-ip') ||
-			(forwardedFor ? forwardedFor.split(',').pop()?.trim() : null) ||
-			c.req.header('x-real-ip') ||
+			c.req.header('cf-connecting-ip')?.trim() ||
+			clientIpFromForwarded ||
 			'unknown'
 
 		const now = Date.now()

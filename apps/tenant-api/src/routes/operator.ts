@@ -1,22 +1,22 @@
+import { and, count, eq, inArray } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { jwtVerify } from 'jose'
-import {
-	getTenantDb,
-	customers,
-	marketingCampaigns,
-	marketingMessages,
-	interpolateMergeTags,
-} from '@repo/tenant-db'
-import { getBearerToken, getOperatorToken } from '../lib/secrets.ts'
-import { checkGlobalSendCap } from '../lib/rate-limit.ts'
-import { count, eq } from 'drizzle-orm'
-import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
-import { sendSms } from '@repo/sms'
 import {
 	getOciMarketingMetrics,
 	isOciEngagementLoggingConfigured,
 } from '@repo/email'
+import { sendSms } from '@repo/sms'
+import {
+	customers,
+	getTenantDb,
+	interpolateMergeTags,
+	marketingCampaigns,
+	marketingMessages,
+} from '@repo/tenant-db'
+import { z } from 'zod'
+import { checkGlobalSendCap } from '../lib/rate-limit.ts'
+import { getBearerToken, getOperatorToken } from '../lib/secrets.ts'
 import { sendTenantEmail } from '../lib/tenant-email.ts'
 import { ensureEmailEngagementSynced } from '../services/email-engagement-sync.ts'
 
@@ -38,30 +38,29 @@ async function authenticateOperator(c: Context) {
 		const secret = new TextEncoder().encode(operatorToken)
 		const { payload } = await jwtVerify(token, secret, {
 			audience: 'tenant-api-operator',
+			issuer: 'epic-stack',
 		})
-		decoded = payload as typeof decoded
-	} catch {
-		throw c.json({ error: 'Invalid or expired operator token' }, 401)
+		decoded = payload as { orgId: string; role: string }
+	} catch (error) {
+		console.error('Operator token verification failed:', error)
+		throw c.json({ error: 'Unauthorized' }, 401)
 	}
 
-	if (decoded.role !== 'operator') {
-		throw c.json({ error: 'Invalid role' }, 403)
+	if (!decoded.orgId) {
+		throw c.json({ error: 'Unauthorized' }, 401)
 	}
 
 	return decoded
 }
 
 const updateCustomerSchema = z.object({
-	name: z.string().trim().min(1, 'Name is required').max(200),
+	name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
 	email: z
 		.string()
-		.trim()
-		.max(320)
-		.refine(
-			(value) => value === '' || z.string().email().safeParse(value).success,
-			'Invalid email address',
-		)
-		.transform((value) => (value === '' ? null : value)),
+		.email('Invalid email address')
+		.nullable()
+		.optional()
+		.transform((val) => val || null),
 })
 
 operatorRoutes.get('/customers', async (c) => {
@@ -75,8 +74,29 @@ operatorRoutes.get('/customers', async (c) => {
 	const { orgId } = auth
 	try {
 		const db = await getTenantDb(orgId)
-		const orgCustomers = await db.select().from(customers).all()
-		return c.json({ customers: orgCustomers })
+		const page = Math.max(1, parseInt(c.req.query('page') || '1', 10))
+		const limit = Math.min(
+			500,
+			Math.max(1, parseInt(c.req.query('limit') || '100', 10)),
+		)
+		const offset = (page - 1) * limit
+
+		const [totalCountResult] = await db
+			.select({ value: count() })
+			.from(customers)
+		const orgCustomers = await db
+			.select()
+			.from(customers)
+			.limit(limit)
+			.offset(offset)
+			.all()
+
+		return c.json({
+			customers: orgCustomers,
+			total: totalCountResult?.value ?? orgCustomers.length,
+			page,
+			limit,
+		})
 	} catch (error) {
 		console.error('Error fetching customers:', error)
 		return c.json({ error: 'Tenant Database unavailable' }, 500)
@@ -142,20 +162,37 @@ operatorRoutes.get('/marketing/metrics', async (c) => {
 	try {
 		await ensureEmailEngagementSynced(orgId)
 		const db = await getTenantDb(orgId)
-		const allEmails = await db.select().from(marketingMessages).all()
-		const activeCampaigns = await db
-			.select({ count: count() })
-			.from(marketingCampaigns)
-			.where(eq(marketingCampaigns.status, 'Processing'))
-			.all()
 
-		const emailsSent = allEmails.filter((message) =>
-			['Sent', 'Opened', 'Clicked'].includes(message.status),
-		).length
-		const openCount = allEmails.filter(
-			(e) => e.status === 'Opened' || e.status === 'Clicked',
-		).length
-		const clickCount = allEmails.filter((e) => e.status === 'Clicked').length
+		// SQL aggregation using indexed marketing_messages.status column
+		const [sentResult, openedResult, clickedResult, activeCampaigns] =
+			await Promise.all([
+				db
+					.select({ count: count() })
+					.from(marketingMessages)
+					.where(
+						inArray(marketingMessages.status, ['Sent', 'Opened', 'Clicked']),
+					)
+					.all(),
+				db
+					.select({ count: count() })
+					.from(marketingMessages)
+					.where(inArray(marketingMessages.status, ['Opened', 'Clicked']))
+					.all(),
+				db
+					.select({ count: count() })
+					.from(marketingMessages)
+					.where(eq(marketingMessages.status, 'Clicked'))
+					.all(),
+				db
+					.select({ count: count() })
+					.from(marketingCampaigns)
+					.where(eq(marketingCampaigns.status, 'Processing'))
+					.all(),
+			])
+
+		const emailsSent = sentResult[0]?.count || 0
+		const openCount = openedResult[0]?.count || 0
+		const clickCount = clickedResult[0]?.count || 0
 
 		let openRate = emailsSent > 0 ? (openCount / emailsSent) * 100 : 0
 		let clickRate = emailsSent > 0 ? (clickCount / emailsSent) * 100 : 0
@@ -264,12 +301,12 @@ operatorRoutes.get('/marketing/campaigns/:campaignId', async (c) => {
 })
 
 const createCampaignSchema = z.object({
-	name: z.string().min(1),
+	name: z.string().min(1, 'Name is required'),
 	channel: z.enum(['email', 'sms']),
+	audience: z.enum(['all', 'verified', 'unverified']).default('all'),
 	subject: z.string().optional(),
-	content: z.string().min(1),
-	audience: z.string().default('all'),
-	scheduledAt: z.string().optional(),
+	content: z.string().min(1, 'Content is required'),
+	scheduledAt: z.string().datetime().optional().nullable(),
 })
 
 operatorRoutes.post('/marketing/campaigns', async (c) => {
@@ -281,32 +318,27 @@ operatorRoutes.post('/marketing/campaigns', async (c) => {
 	}
 
 	const { orgId } = auth
-
+	let body: z.infer<typeof createCampaignSchema>
 	try {
-		const body = await c.req.json()
-		const parsed = createCampaignSchema.safeParse(body)
-		if (!parsed.success) {
+		body = createCampaignSchema.parse(await c.req.json())
+	} catch (error) {
+		if (error instanceof z.ZodError) {
 			return c.json(
-				{ error: 'Invalid input', issues: parsed.error.issues },
+				{ error: error.issues[0]?.message ?? 'Invalid request body' },
 				400,
 			)
 		}
+		return c.json({ error: 'Invalid request body' }, 400)
+	}
 
-		const { name, channel, subject, content, audience, scheduledAt } =
-			parsed.data
+	const { name, channel, audience, subject, content, scheduledAt } = body
 
-		if (channel === 'email' && !subject) {
-			return c.json({ error: 'Email campaigns require a subject' }, 400)
-		}
-
+	try {
 		const db = await getTenantDb(orgId)
-
 		const campaignId = randomUUID()
-		const isScheduled = !!scheduledAt
-		const status = isScheduled ? 'Scheduled' : 'Processing'
+		const isScheduled = scheduledAt && new Date(scheduledAt) > new Date()
+		const status = isScheduled ? 'Draft' : 'Processing'
 
-		// In a real generic SaaS, 'audience' could be a complex JSON filter.
-		// For now we store it in segmentationRules.
 		await db.insert(marketingCampaigns).values({
 			id: campaignId,
 			name,
@@ -318,7 +350,6 @@ operatorRoutes.post('/marketing/campaigns', async (c) => {
 			scheduledAt: isScheduled ? new Date(scheduledAt) : null,
 		})
 
-		// Background dispatch (Fire and Forget)
 		if (!isScheduled) {
 			void dispatchCampaign(orgId, campaignId)
 		}
@@ -341,19 +372,36 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 		const campaign = campaignArr[0]
 		if (!campaign) return
 
-		// 1. Fetch audience
-		// Here, a real system parses `segmentationRules`. We assume 'all'.
+		// 1. Fetch audience and evaluate segmentation rules
 		const allCustomers = await db.select().from(customers).all()
+		let targetCustomers = allCustomers
+		if (campaign.segmentationRules) {
+			try {
+				const rules =
+					typeof campaign.segmentationRules === 'string'
+						? (JSON.parse(campaign.segmentationRules) as {
+								audience?: string
+							})
+						: (campaign.segmentationRules as { audience?: string })
+				if (rules?.audience === 'verified') {
+					targetCustomers = allCustomers.filter((c) => Boolean(c.phoneVerified))
+				} else if (rules?.audience === 'unverified') {
+					targetCustomers = allCustomers.filter((c) => !c.phoneVerified)
+				}
+			} catch {
+				// Fallback to all
+			}
+		}
 
 		// Update target audience count
 		await db
 			.update(marketingCampaigns)
-			.set({ targetAudienceCount: allCustomers.length })
+			.set({ targetAudienceCount: targetCustomers.length })
 			.where(eq(marketingCampaigns.id, campaignId))
 
 		let hitCap = false
 		// 2. Dispatch
-		for (const customer of allCustomers) {
+		for (const customer of targetCustomers) {
 			// Enforce the global send cap to prevent runaway Twilio/OCI costs.
 			const cap = checkGlobalSendCap()
 			if (cap.limited) {
@@ -370,7 +418,7 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 				id: messageId,
 				campaignId,
 				customerId: customer.id,
-				status: 'Processing', // Or 'Sent'/'Failed' later
+				status: 'Processing',
 			})
 
 			// Templating engine via standard interpolateMergeTags
@@ -418,6 +466,19 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 				.where(eq(marketingMessages.id, messageId))
 		}
 
+		// If hit send cap, mark any remaining processing messages as failed
+		if (hitCap) {
+			await db
+				.update(marketingMessages)
+				.set({ status: 'Failed' })
+				.where(
+					and(
+						eq(marketingMessages.campaignId, campaignId),
+						eq(marketingMessages.status, 'Processing'),
+					),
+				)
+		}
+
 		// Mark status
 		await db
 			.update(marketingCampaigns)
@@ -425,10 +486,26 @@ async function dispatchCampaign(orgId: string, campaignId: string) {
 			.where(eq(marketingCampaigns.id, campaignId))
 	} catch (error) {
 		console.error(`Campaign dispatch failed for ${campaignId}`, error)
-		const db = await getTenantDb(orgId)
-		await db
-			.update(marketingCampaigns)
-			.set({ status: 'Failed' })
-			.where(eq(marketingCampaigns.id, campaignId))
+		try {
+			const db = await getTenantDb(orgId)
+			await db
+				.update(marketingMessages)
+				.set({ status: 'Failed' })
+				.where(
+					and(
+						eq(marketingMessages.campaignId, campaignId),
+						eq(marketingMessages.status, 'Processing'),
+					),
+				)
+			await db
+				.update(marketingCampaigns)
+				.set({ status: 'Failed' })
+				.where(eq(marketingCampaigns.id, campaignId))
+		} catch (cleanupError) {
+			console.error(
+				'Failed to mark campaign and messages as failed:',
+				cleanupError,
+			)
+		}
 	}
 }
