@@ -385,6 +385,9 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `INTERNAL_COMMAND_TOKEN` - Shared by App, Admin, every tenant-api, and
   `apps/jobs-cron` (≥16 chars). Authenticates cron POSTs to `/resources/jobs/*`
   and tenant provision/deprovision.
+- `TENANT_OPERATOR_TOKEN` - Shared secret between App and tenant-api (≥16
+  chars). Signs and validates operator JWT tokens for tenant-api `/operator/*`
+  routes.
 - `JOBS_CRON_WORKER_URL` - App only. Public URL of `apps/jobs-cron` Worker used
   to start storage migration workflows.
 - `MEDIA_TRANSFORM_BASE_URL` - App only. Cloudflare-proxied hostname with Media

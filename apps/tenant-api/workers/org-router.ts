@@ -47,6 +47,7 @@ async function orgIdFromOperatorJwt(
 		const secret = new TextEncoder().encode(env.TENANT_OPERATOR_TOKEN)
 		const { payload } = await jwtVerify(token, secret, {
 			audience: 'tenant-api-operator',
+			issuer: brand.shortName,
 		})
 		if (payload.role !== 'operator') return null
 		return typeof payload.orgId === 'string' ? payload.orgId : null

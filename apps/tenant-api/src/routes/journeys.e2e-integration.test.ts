@@ -22,6 +22,7 @@ import { evaluateAndSpawnTriggers } from '../services/journey-service.ts'
 import * as emailModule from '@repo/email'
 import { getMarketingEmailHeaders } from '@repo/config/marketing-email'
 import * as smsModule from '@repo/sms'
+import { brand } from '@repo/config/brand.ts'
 
 vi.mock('../lib/origin.ts', () => ({
 	findActiveOrganizationById: vi
@@ -97,6 +98,7 @@ describe('Marketing Automation End-to-End Integration Suite (Milestones 1 - 5)',
 		})
 			.setProtectedHeader({ alg: 'HS256' })
 			.setAudience('tenant-api-operator')
+			.setIssuer(brand.shortName)
 			.setExpirationTime('2h')
 			.sign(secret)
 
@@ -803,6 +805,7 @@ describe('Marketing Automation End-to-End Integration Suite (Milestones 1 - 5)',
 		})
 			.setProtectedHeader({ alg: 'HS256' })
 			.setAudience('tenant-api-operator')
+			.setIssuer(brand.shortName)
 			.sign(secret)
 
 		const memberRes = await app.fetch(

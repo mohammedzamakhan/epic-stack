@@ -1,6 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { requireUserId } from '@repo/auth'
-import { and, db, eq, like, Organization } from '@repo/database'
+import { db, eq, Organization } from '@repo/database'
 import { type LoaderFunctionArgs } from 'react-router'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
@@ -38,38 +38,31 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			user: { columns: { name: true, username: true } },
 			noteAccess: { columns: { userId: true } },
 		},
-		where: (note, operators) =>
+		where: (note, { and, eq, like, or, sql }) =>
 			and(
 				eq(note.organizationId, organization.id),
+				or(
+					eq(note.isPublic, true),
+					eq(note.createdById, userId),
+					sql`EXISTS (SELECT 1 FROM NoteAccess WHERE noteId = ${note.id} AND userId = ${userId})`,
+				),
 				query
-					? operators.or(
-							like(note.title, `%${query}%`),
-							like(note.content, `%${query}%`),
-						)
+					? or(like(note.title, `%${query}%`), like(note.content, `%${query}%`))
 					: undefined,
 			),
 		orderBy: (note, { desc }) => [desc(note.updatedAt)],
-		limit: 100,
+		limit: 10,
 	})
 
-	const formattedNotes = notes
-		.filter(
-			(note) =>
-				note.isPublic ||
-				note.createdById === userId ||
-				note.noteAccess.some((access) => access.userId === userId),
-		)
-		.slice(0, 10)
-		.map((note) => ({
-			id: note.id,
-			title: note.title,
-			content:
-				note.content.substring(0, 100) +
-				(note.content.length > 100 ? '...' : ''),
-			createdAt: note.createdAt.toISOString(),
-			updatedAt: note.updatedAt.toISOString(),
-			createdByName: note.user?.name || note.user?.username || 'Unknown',
-		}))
+	const formattedNotes = notes.map((note) => ({
+		id: note.id,
+		title: note.title,
+		content:
+			note.content.substring(0, 100) + (note.content.length > 100 ? '...' : ''),
+		createdAt: note.createdAt.toISOString(),
+		updatedAt: note.updatedAt.toISOString(),
+		createdByName: note.user?.name || note.user?.username || 'Unknown',
+	}))
 
 	return Response.json({ notes: formattedNotes })
 }

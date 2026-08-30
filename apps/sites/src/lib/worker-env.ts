@@ -16,9 +16,18 @@ function readBinding(key: keyof SitesWorkerConfig): string | undefined {
 		return fromWorker
 	}
 
-	const fromVarlock = (ENV as SitesWorkerConfig)[key]
-	if (typeof fromVarlock === 'string' && fromVarlock.length > 0) {
-		return fromVarlock
+	const fromProcess = process.env[key]
+	if (typeof fromProcess === 'string' && fromProcess.length > 0) {
+		return fromProcess
+	}
+
+	try {
+		const fromVarlock = (ENV as SitesWorkerConfig)[key]
+		if (typeof fromVarlock === 'string' && fromVarlock.length > 0) {
+			return fromVarlock
+		}
+	} catch {
+		// varlock ENV may not be initialized in test runner
 	}
 
 	return undefined

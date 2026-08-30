@@ -13,6 +13,7 @@ import {
 	journeyRuns,
 } from '@repo/tenant-db'
 import { journeySystemRoutes, journeyOperatorRoutes } from './journeys.ts'
+import { brand } from '@repo/config/brand.ts'
 
 vi.mock('../lib/origin.ts', () => ({
 	findActiveOrganizationById: vi
@@ -74,6 +75,7 @@ describe('Journey API Routes (System & Operator)', () => {
 		})
 			.setProtectedHeader({ alg: 'HS256' })
 			.setAudience('tenant-api-operator')
+			.setIssuer(brand.shortName)
 			.setExpirationTime('1h')
 			.sign(secret)
 	}
