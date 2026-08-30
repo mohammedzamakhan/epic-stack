@@ -7,7 +7,7 @@
  * - Token refresh with retry logic
  */
 
-import { randomBytes, createHmac, createHash, timingSafeEqual } from 'crypto'
+import { randomBytes, createHmac, timingSafeEqual } from 'crypto'
 import { providerRegistry } from './provider'
 import {
 	type TokenData,
@@ -104,22 +104,15 @@ export class OAuthStateManager {
 			throw new Error('Invalid state: missing payload or signature')
 		}
 
-		// Verify signature using timingSafeEqual (supports HMAC and legacy SHA-256)
+		// Verify HMAC signature using timingSafeEqual
 		const expectedHmac = this.createStateSignature(statePayload)
-		const expectedLegacy = createHash('sha256')
-			.update(statePayload + this.getStateSecret())
-			.digest('hex')
-
 		const sigBuf = Buffer.from(signature)
 		const hmacBuf = Buffer.from(expectedHmac)
-		const legacyBuf = Buffer.from(expectedLegacy)
 
 		const isHmacValid =
 			sigBuf.length === hmacBuf.length && timingSafeEqual(sigBuf, hmacBuf)
-		const isLegacyValid =
-			sigBuf.length === legacyBuf.length && timingSafeEqual(sigBuf, legacyBuf)
 
-		if (!isHmacValid && !isLegacyValid) {
+		if (!isHmacValid) {
 			throw new Error('Invalid state: signature verification failed')
 		}
 
