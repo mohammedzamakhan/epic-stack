@@ -87,13 +87,8 @@ test.describe.serial('Launch Status Flows', () => {
 		// Should go to the org dashboard
 		await expect(page).toHaveURL(new RegExp(`/${orgSlug}`))
 
-		// Expand settings if it's collapsed (collapsible sidebar group)
-		const settingsButton = page.getByRole('button', { name: /^settings$/i })
-		await settingsButton.waitFor({ state: 'visible' })
-		const isExpanded = await settingsButton.getAttribute('aria-expanded')
-		if (isExpanded !== 'true') {
-			await settingsButton.click()
-		}
+		// Navigate to settings
+		await navigate(`/${orgSlug}/settings`)
 
 		// Billing should NOT be visible in public beta
 		await expect(
@@ -154,16 +149,8 @@ test.describe.serial('Launch Status Flows', () => {
 		// Should go to the org dashboard
 		await expect(page).toHaveURL(new RegExp(`/${orgSlug}`))
 
-		// Expand settings (it's collapsed by default on the dashboard)
-		const launchedSettingsButton = page.getByRole('button', {
-			name: /^settings$/i,
-		})
-		await launchedSettingsButton.waitFor({ state: 'visible' })
-		const isLaunchedExpanded =
-			await launchedSettingsButton.getAttribute('aria-expanded')
-		if (isLaunchedExpanded !== 'true') {
-			await launchedSettingsButton.click()
-		}
+		// Navigate to settings
+		await navigate(`/${orgSlug}/settings`)
 
 		// Billing SHOULD be visible in LAUNCHED status
 		await expect(page.getByRole('link', { name: /^billing$/i })).toBeVisible()
