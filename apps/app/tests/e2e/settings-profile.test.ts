@@ -136,9 +136,9 @@ test('Users can change their email address', async ({
 
 	// Target the DialogTrigger button specifically using data attributes
 	// This is the button that actually opens the email dialog
-	/* eslint-disable playwright/no-raw-locators -- data-slot attribute filter needed to distinguish dialog trigger button */
+
 	const changeEmailButton = page.getByRole('button', { name: /^change$/i })
-	/* eslint-enable playwright/no-raw-locators */
+
 	await expect(changeEmailButton).toBeVisible()
 	await changeEmailButton.click()
 

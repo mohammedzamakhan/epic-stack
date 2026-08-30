@@ -22,10 +22,7 @@ const DEV_PORTS = [
 	{ port: 24679, name: 'app Vite HMR' },
 ]
 
-const protectedPids = new Set([
-	String(process.pid),
-	String(process.ppid),
-])
+const protectedPids = new Set([String(process.pid), String(process.ppid)])
 
 function pidsListeningOn(port) {
 	try {

@@ -149,15 +149,15 @@ describe('Rate Limiting', () => {
 		it('should reject requests exceeding the limit', async () => {
 			const token = `token-reject-${faker.string.uuid()}`
 
-			// Make 1000 requests (at limit)
-			for (let i = 0; i < 1000; i++) {
+			// Make maxRequests requests (at limit)
+			for (let i = 0; i < RATE_LIMITS.toolInvocation.maxRequests; i++) {
 				await checkRateLimit(
 					{ type: 'token', value: token },
 					RATE_LIMITS.toolInvocation,
 				)
 			}
 
-			// 1001st request should be rejected
+			// (maxRequests + 1)th request should be rejected
 			const result = await checkRateLimit(
 				{ type: 'token', value: token },
 				RATE_LIMITS.toolInvocation,

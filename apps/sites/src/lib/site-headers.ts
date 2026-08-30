@@ -69,7 +69,7 @@ export function isSitesAppRoute(pathname: string) {
 export function publishedHtmlCacheUrl(requestUrl: URL, host: string | null) {
 	const cacheUrl = new URL(requestUrl)
 	if (host) {
-		const [hostname, port] = host.split(':')
+		const [hostname, port] = host.toLowerCase().trim().split(':')
 		if (hostname) cacheUrl.hostname = hostname
 		cacheUrl.port = port ?? ''
 	}

@@ -10,8 +10,8 @@ instructions:
 
 ### System Requirements
 
-- [Node.js](https://nodejs.org/) >= 20.0.0
-- [npm](https://npmjs.com/) >= 8.18.0
+- [Node.js](https://nodejs.org/) >= 22.18.0
+- [npm](https://npmjs.com/) >= 10.9.0
 - [git](https://git-scm.com/) >= 2.38.0
 
 ### Setup steps

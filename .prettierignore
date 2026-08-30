@@ -28,7 +28,6 @@ node_modules
 # Generated files
 **/components/ui/icons
 **/importMap.js
-**/payload-types.ts
 package-lock.json
 pnpm-lock.yaml
 yarn.lock

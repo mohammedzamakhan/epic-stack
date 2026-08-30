@@ -7,7 +7,7 @@
  * - Token refresh with retry logic
  */
 
-import { randomBytes, createHash } from 'crypto'
+import { randomBytes, pbkdf2Sync, timingSafeEqual } from 'crypto'
 import { providerRegistry } from './provider'
 import {
 	type TokenData,
@@ -20,15 +20,40 @@ import {
  */
 export class OAuthStateManager {
 	private static readonly STATE_EXPIRY_MINUTES = 30
+	private static consumedNonces = new Map<string, number>()
 
-	private static getStateSecret(): string {
-		const secret = process.env.INTEGRATIONS_OAUTH_STATE_SECRET
-		if (!secret) {
+	static clearConsumedNonces(): void {
+		this.consumedNonces.clear()
+	}
+
+	private static cleanExpiredNonces(): void {
+		const now = Date.now()
+		const maxAge = this.STATE_EXPIRY_MINUTES * 60 * 1000
+		for (const [nonce, timestamp] of this.consumedNonces.entries()) {
+			if (now - timestamp > maxAge) {
+				this.consumedNonces.delete(nonce)
+			}
+		}
+	}
+
+	private static getHmacKey(): string {
+		const key = process.env.INTEGRATIONS_OAUTH_STATE_SECRET
+		if (!key) {
 			throw new Error(
 				'INTEGRATIONS_OAUTH_STATE_SECRET environment variable is required for OAuth security',
 			)
 		}
-		return secret
+		return key
+	}
+
+	private static signPayload(payloadString: string): string {
+		return pbkdf2Sync(
+			payloadString,
+			this.getHmacKey(),
+			1000,
+			32,
+			'sha256',
+		).toString('hex')
 	}
 
 	/**
@@ -59,8 +84,8 @@ export class OAuthStateManager {
 			'base64',
 		)
 
-		// Create signature to prevent tampering
-		const signature = this.createStateSignature(statePayload)
+		// Create HMAC signature to prevent tampering
+		const signature = this.signPayload(statePayload)
 
 		// Combine payload and signature
 		return `${statePayload}.${signature}`
@@ -69,10 +94,11 @@ export class OAuthStateManager {
 	/**
 	 * Validate and parse OAuth state
 	 * @param state - State string to validate
+	 * @param consumeNonce - Whether to mark nonce as consumed
 	 * @returns Parsed state data
 	 * @throws Error if state is invalid or expired
 	 */
-	static validateState(state: string): OAuthState {
+	static validateState(state: string, consumeNonce = true): OAuthState {
 		if (!state || typeof state !== 'string') {
 			throw new Error('Invalid state: empty or non-string')
 		}
@@ -88,16 +114,23 @@ export class OAuthStateManager {
 			throw new Error('Invalid state: missing payload or signature')
 		}
 
-		// Verify signature
-		const expectedSignature = this.createStateSignature(statePayload)
-		if (signature !== expectedSignature) {
+		// Verify HMAC signature using timingSafeEqual
+		const expectedSignature = this.signPayload(statePayload)
+		const sigBuf = Buffer.from(signature)
+		const expectedBuf = Buffer.from(expectedSignature)
+
+		const isSignatureValid =
+			sigBuf.length === expectedBuf.length &&
+			timingSafeEqual(sigBuf, expectedBuf)
+
+		if (!isSignatureValid) {
 			throw new Error('Invalid state: signature verification failed')
 		}
 
 		// Parse state data
 		let stateData: OAuthState
 		try {
-			const decoded = Buffer.from(statePayload, 'base64').toString()
+			const decoded = Buffer.from(statePayload, 'base64').toString('utf8')
 			stateData = JSON.parse(decoded) as OAuthState
 		} catch (error) {
 			throw new Error(`Invalid state: failed to parse data: ${error}`)
@@ -123,18 +156,19 @@ export class OAuthStateManager {
 			throw new Error('Invalid state: expired')
 		}
 
-		return stateData
-	}
+		if (stateData.nonce) {
+			this.cleanExpiredNonces()
+			if (this.consumedNonces.has(stateData.nonce)) {
+				throw new Error(
+					'Invalid state: nonce already consumed (replay detected)',
+				)
+			}
+			if (consumeNonce) {
+				this.consumedNonces.set(stateData.nonce, Date.now())
+			}
+		}
 
-	/**
-	 * Create HMAC signature for state payload
-	 * @param payload - State payload to sign
-	 * @returns Signature string
-	 */
-	private static createStateSignature(payload: string): string {
-		return createHash('sha256')
-			.update(payload + this.getStateSecret())
-			.digest('hex')
+		return stateData
 	}
 }
 
@@ -211,9 +245,3 @@ export class OAuthCallbackHandler {
 		return provider.getAuthUrl(organizationId, redirectUri, additionalParams)
 	}
 }
-
-/**
- * OAuth flow orchestrator that combines all OAuth management utilities
- */
-
-// All utilities are exported above with their class definitions

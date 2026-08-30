@@ -105,9 +105,11 @@ Blog and post card titles on the home page also parse markdown for display.
    - `MarkdownInline` inside heading tags for titles
    - `MarkdownText` for body/description copy
 
-3. Run `node apps/web/scripts/patch-emdash-admin.mjs` after `npm install` if the
-   admin widget is missing (the web app `postinstall` / dev scripts should run
-   this automatically).
+3. `npm run dev:web` / `npm run build` in `apps/web` run
+   `scripts/patch-emdash-admin.mjs` automatically (`predev` / `prebuild`). After
+   `npm install`, restart the web dev server so Vite re-bundles the patched
+   admin. If the widget is still missing, run
+   `node apps/web/scripts/patch-emdash-admin.mjs` and restart.
 
 ### Tests
 

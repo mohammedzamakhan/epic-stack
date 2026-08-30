@@ -64,8 +64,13 @@ const secondary = links[1]
 		<img
 			src={imageSrc}
 			alt={media?.alt || heading || ''}
+			width="1920"
+			height="1080"
+			sizes="100vw"
 			class="absolute inset-0 size-full object-cover"
 			loading="eager"
+			decoding="async"
+			fetchpriority="high"
 		/>
 	) : null}
 

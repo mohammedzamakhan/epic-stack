@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'apps/web/**'
+      - 'apps/sites/**'
       - 'packages/ui/**'
       - 'packages/config/**'
 

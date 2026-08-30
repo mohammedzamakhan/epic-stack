@@ -5,9 +5,11 @@
   "description": "Epic Stack marketing website built with Astro",
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS=\"--use-system-ca\" astro dev --port 3002",
+    "predev": "node scripts/patch-emdash-admin.mjs",
+    "prebuild": "node scripts/patch-emdash-admin.mjs",
+    "dev": "npm run predev && NODE_OPTIONS=\"--use-system-ca\" astro dev --port 3002",
     "start": "astro dev --port 3002",
-    "build": "CLOUDFLARE_BUILD=true astro build",
+    "build": "npm run prebuild && CLOUDFLARE_BUILD=true astro build",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",

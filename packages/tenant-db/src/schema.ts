@@ -226,30 +226,42 @@ export const marketingCampaigns = sqliteTable('marketing_campaigns', {
 	),
 })
 
-export const marketingMessages = sqliteTable('marketing_messages', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => randomUUID()),
-	campaignId: text('campaign_id').references(() => marketingCampaigns.id, {
-		onDelete: 'cascade',
-	}),
-	journeyStepExecutionId: text('journey_step_execution_id').references(
-		() => journeyStepExecutions.id,
-		{ onDelete: 'set null' },
-	),
-	customerId: text('customer_id')
-		.notNull()
-		.references(() => customers.id, { onDelete: 'cascade' }),
-	channel: text('channel', { enum: ['email', 'sms'] })
-		.notNull()
-		.default('email'),
-	status: text('status').notNull().default('Sent'),
-	sentAt: integer('sent_at', { mode: 'timestamp' }).default(
-		sql`(strftime('%s', 'now'))`,
-	),
-	openedAt: integer('opened_at', { mode: 'timestamp' }),
-	clickedAt: integer('clicked_at', { mode: 'timestamp' }),
-})
+export const marketingMessages = sqliteTable(
+	'marketing_messages',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => randomUUID()),
+		campaignId: text('campaign_id').references(() => marketingCampaigns.id, {
+			onDelete: 'cascade',
+		}),
+		journeyStepExecutionId: text('journey_step_execution_id').references(
+			() => journeyStepExecutions.id,
+			{ onDelete: 'set null' },
+		),
+		customerId: text('customer_id')
+			.notNull()
+			.references(() => customers.id, { onDelete: 'cascade' }),
+		channel: text('channel', { enum: ['email', 'sms'] })
+			.notNull()
+			.default('email'),
+		status: text('status').notNull().default('Sent'),
+		sentAt: integer('sent_at', { mode: 'timestamp' }).default(
+			sql`(strftime('%s', 'now'))`,
+		),
+		openedAt: integer('opened_at', { mode: 'timestamp' }),
+		clickedAt: integer('clicked_at', { mode: 'timestamp' }),
+	},
+	(table) => [
+		index('idx_marketing_messages_campaign').on(table.campaignId),
+		index('idx_marketing_messages_customer').on(table.customerId),
+		index('idx_marketing_messages_status').on(table.status),
+		index('idx_marketing_messages_sent_at').on(table.sentAt),
+		index('idx_marketing_messages_journey_step').on(
+			table.journeyStepExecutionId,
+		),
+	],
+)
 
 // ==========================================
 // 6. RELATIONS

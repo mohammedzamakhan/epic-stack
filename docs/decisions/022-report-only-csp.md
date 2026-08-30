@@ -1,31 +1,28 @@
 # Report-only CSP
 
-Date: 2023-07-14
+Date: 2023-07-14 (Superseded: 2024)
 
-Status: accepted
+Status: superseded by enforced CSP
 
 ## Context
 
-The Epic Stack uses a strict
-[Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP).
-All the reasons for this explained in
-[the decision document](./008-content-security-policy.md) still apply. However,
-As people adapt the Epic Stack to their own needs, they may easily forget to add
-important sources to the CSP. This can lead to a frustrating experience for new
-users of the Epic Stack.
+The original Epic Stack used a report-only
+[Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+during initial setup.
 
-There's an option for CSPs called `report-only` which allows the browser to
-report CSP violations without actually blocking the resource. This turns the CSP
-into an opt-in which follows our [guiding principle](#app/guiding-principles.md)
-of "Minimize Setup Friction" (similar to deferring setup of third-party services
-until they're actually needed).
+In Epic Startup, production applications (`apps/web`, `apps/sites`, `apps/app`,
+and `apps/admin`) enforce strict Content Security Policy headers by default to
+guarantee tenant isolation and defense-in-depth against cross-site scripting
+(XSS) and injection attacks.
 
 ## Decision
 
-Enable report-only on the CSP by default.
+Supersede report-only CSP in favor of enforced blocking CSP with tailored
+directives per application surface (`apps/sites/src/middleware.ts`,
+`apps/web/src/middleware.ts`).
 
 ## Consequences
 
-New users of the Epic Stack won't be blocked by the CSP by default. But this
-also means they won't be as safe by default. We'll need to make sure enforcing
-the CSP is documented well.
+- Direct blocking of untrusted scripts, objects, and connect sources.
+- Safe-by-default security posture across all public and authenticated operator
+  surfaces.

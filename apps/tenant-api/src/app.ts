@@ -13,6 +13,8 @@ import {
 import { operatorRoutes } from './routes/operator.ts'
 import { provisionRoutes } from './routes/provision.ts'
 
+import { rateLimit } from './lib/rate-limit.ts'
+
 /**
  * Shared Hono app for Node (OCI) and Durable Object (Cloudflare) runtimes.
  */
@@ -46,6 +48,11 @@ export function createTenantApiApp() {
 			c.res.headers.append('Vary', 'Origin')
 		}
 	})
+
+	app.use(
+		'/operator/*',
+		rateLimit('operator', { windowMs: 60 * 1000, maxRequests: 120 }),
+	)
 
 	app.get('/health', (c) => {
 		return c.json({

@@ -69,7 +69,6 @@ Public-facing marketing and documentation site.
 - **Purpose**: Marketing content, landing pages, and public information
 - **Key Features**:
   - Static site generation for optimal performance
-  - Integration with Payload CMS for content management
   - Live preview support
   - Cloudflare deployment ready
 
@@ -79,35 +78,6 @@ Public-facing marketing and documentation site.
 npm run dev              # Start development server
 npm run build            # Build for production
 npm run preview          # Preview production build
-```
-
-### CMS (`apps/cms`)
-
-Headless CMS powered by Payload CMS for managing content consumed by the
-marketing website (`apps/web`). Deploys to Cloudflare Workers.
-
-- **Tech Stack**: Payload CMS 3.x, Next.js, local SQLite (`@payloadcms/db-sqlite`),
-  deployed with OpenNext. Cloudflare D1 and R2 bindings are declared in
-  `wrangler.jsonc` but not yet wired into Payload (see
-  [CMS storage](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/cms-storage.md))
-- **Port**: 3006 (development)
-- **Purpose**: Content management for the marketing website
-- **Key Features**:
-  - Rich text editor with Lexical
-  - SEO plugin for meta management
-  - Form builder plugin
-  - Nested documents support
-  - Search functionality
-  - Local file storage today, in every environment — an R2 binding is
-    declared but not yet wired in (see [CMS storage](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/cms-storage.md))
-  - Redirects management
-
-**Development Commands**:
-
-```bash
-npm run dev              # Start CMS development server
-npm run build            # Build for production
-npm run payload          # Run Payload CLI commands
 ```
 
 ### Chrome Extension (`apps/chrome-extension`)

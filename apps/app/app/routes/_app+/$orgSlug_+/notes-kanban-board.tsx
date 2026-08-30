@@ -473,7 +473,11 @@ export function NotesKanbanBoard({
 							orgSlug={orgSlug}
 							activeNote={activeNote}
 							isDragDestination={dragDestination?.columnId === col.id}
-							dragPosition={dragDestination?.columnId === col.id ? dragDestination.position : undefined}
+							dragPosition={
+								dragDestination?.columnId === col.id
+									? dragDestination.position
+									: undefined
+							}
 							organizationId={organizationId}
 							isActive={activeColumn?.id === col.id}
 						/>

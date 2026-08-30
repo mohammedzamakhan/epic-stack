@@ -4,7 +4,10 @@
 	"main": "./workers/app.ts",
 	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2026-08-20",
-	"compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+	"compatibility_flags": [
+		"nodejs_compat",
+		"nodejs_compat_populate_process_env",
+	],
 	"observability": {
 		"enabled": true,
 	},
@@ -52,6 +55,5 @@
 		"GITHUB_CLIENT_ID": "MOCK_GITHUB_CLIENT_ID",
 		"SENTRY_DSN": "your-dsn",
 		"STRIPE_PORTAL_URL": "",
-		
 	},
 }

@@ -19,7 +19,6 @@ const rootDir = resolve(__dirname, '..')
 const RESERVED_SUBDOMAINS = new Set([
 	'app',
 	'admin',
-	'cms',
 	'docs',
 	'studio',
 	'api',
@@ -40,7 +39,6 @@ const PRODUCT_SUBDOMAINS = [
 	'admin.',
 	'studio.',
 	'docs.',
-	'cms.',
 	'api.',
 	'api-ksa.',
 ]
@@ -250,7 +248,6 @@ async function main() {
 		log(`  Admin: https://admin.${domain}:2999`, 'gray')
 		log(`  Studio: https://studio.${domain}:2999`, 'gray')
 		log(`  Docs: https://docs.${domain}:2999`, 'gray')
-		log(`  CMS: https://cms.${domain}:2999`, 'gray')
 
 		if (orgSlugs.length > 0) {
 			log(`\n  Organization Sites:`, 'blue')

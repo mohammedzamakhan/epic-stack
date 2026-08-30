@@ -1025,6 +1025,12 @@ const definition = {
 							},
 							{
 								type: 'text_input',
+								action_id: 'svg',
+								label: 'SVG (paste markup; used instead of Image when set)',
+								multiline: true,
+							},
+							{
+								type: 'text_input',
 								action_id: 'imageAlt',
 								label: 'Image Alt Text',
 							},

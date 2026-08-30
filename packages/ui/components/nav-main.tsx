@@ -138,6 +138,7 @@ export function NavMain({
 												onClick={() => toggleItem(item.title)}
 												tooltip={item.title}
 												isActive={item.isActive}
+												aria-expanded={isOpen}
 												className="w-full justify-between"
 												onMouseEnter={() =>
 													handleMenuItemMouseEnter(item.title)

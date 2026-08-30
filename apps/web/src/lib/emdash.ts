@@ -1,6 +1,5 @@
 /**
  * Emdash CMS content-fetching utilities
- * Replaces the Payload CMS REST API client
  */
 import {
 	getEmDashEntry,

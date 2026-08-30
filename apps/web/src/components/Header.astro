@@ -6,6 +6,7 @@ import LanguageSwitcher from './LanguageSwitcher.astro'
 import Button from './ui/Button.astro'
 import Navigation from './Navigation.astro'
 import { resolveSiteLogo } from '../lib/emdash'
+import { ENV } from 'varlock/env'
 
 interface Props {
 	bannerEnabled?: boolean
@@ -23,13 +24,10 @@ const siteTitle = settings?.title || brand.name
 const siteLogo = resolveSiteLogo(settings)
 
 const currentUrl = Astro.url
-const protocol = currentUrl.protocol
-const hostname = currentUrl.hostname
 const port = currentUrl.port
 
-const appHostname = hostname.startsWith('app.') ? hostname : `app.${hostname}`
-const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
-const loginUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/login`
+const demoUrl = `https://app.${ENV.PUBLIC_ROOT_APP}${port ? `:2999` : ''}/signup`
+const loginUrl = `https://app.${ENV.PUBLIC_ROOT_APP}${port ? `:2999` : ''}/login`
 ---
 
 <header class="fixed inset-x-0 top-0 z-50" data-banner-enabled={bannerEnabled}>

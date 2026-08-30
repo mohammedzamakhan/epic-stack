@@ -119,6 +119,14 @@ function withSecurityHeaders(
 		newHeaders.set(key, value)
 	}
 
+	const existingVary = newHeaders.get('Vary')
+	const varyValues = new Set(
+		existingVary ? existingVary.split(',').map((v) => v.trim()) : [],
+	)
+	varyValues.add('Host')
+	varyValues.add('Accept-Encoding')
+	newHeaders.set('Vary', Array.from(varyValues).join(', '))
+
 	if (pathname.startsWith('/api/')) {
 		newHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate')
 	} else if (cacheControl) {
@@ -149,8 +157,8 @@ function waitUntil(context: { locals: App.Locals }, task: Promise<unknown>) {
 
 export const onRequest = defineMiddleware(async (context, next) => {
 	const hostEnv = siteHostEnv()
-	const forwardedHost = context.request.headers.get('x-forwarded-host')
-	const host = forwardedHost || context.request.headers.get('host')
+	const url = new URL(context.request.url)
+	const host = context.request.headers.get('host') || url.host
 	const resolved = resolveHost(host, hostEnv)
 
 	context.locals.orgSlug = resolved.kind === 'slug' ? resolved.orgSlug : null
@@ -159,8 +167,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	context.locals.defaultLocale ??= 'en'
 	context.locals.i18n ??= createSiteI18n(context.locals.requestedLocale)
 	context.locals.organization = null
-
-	const url = new URL(context.request.url)
 
 	if (isStaticPath(url.pathname)) {
 		return withSecurityHeaders(await next(), url.pathname, hostEnv)
