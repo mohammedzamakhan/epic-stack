@@ -24,9 +24,13 @@ export interface ChatDependencies {
 	createChatStream: (params: {
 		messages: ModelMessage[]
 		systemPrompt: string
+		tools?: Record<string, any>
 	}) => any
 	buildNoteChatSystemPrompt: (basePrompt: string, noteContext: any) => string
+	buildPageEditorSystemPrompt?: (basePrompt: string, pageContext: any) => string
 	brandSystemPrompt: string
+	getPageEditorTools?: () => Record<string, any>
+	getPageContext?: (pageId: string) => Promise<any>
 	markStepCompleted?: (
 		userId: string,
 		organizationId: string,
@@ -54,8 +58,26 @@ export async function handleChat(
 	const userId = await deps.requireUserId(request)
 	const url = new URL(request.url)
 	const noteId = url.searchParams.get('noteId')
+	const pageId = url.searchParams.get('pageId')
 
 	const { messages } = (await request.json()) as { messages: ModelMessage[] }
+
+	// When pageId is present, run a page editor conversation.
+	if (pageId && deps.getPageEditorTools) {
+		const pageContext = deps.getPageContext
+			? await deps.getPageContext(pageId)
+			: { pageId }
+		const systemPrompt = deps.buildPageEditorSystemPrompt
+			? deps.buildPageEditorSystemPrompt(deps.brandSystemPrompt, pageContext)
+			: deps.brandSystemPrompt +
+				'\n\nYou are helping the user edit a website page.'
+		const result = deps.createChatStream({
+			messages,
+			systemPrompt,
+			tools: deps.getPageEditorTools(),
+		})
+		return result.toDataStreamResponse()
+	}
 
 	// When noteId is absent, run a general (note-less) conversation.
 	if (!noteId) {

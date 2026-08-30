@@ -12,6 +12,7 @@ import {
 	type ErrorInfo,
 	type ReactNode,
 } from 'react'
+import { useParams, useFetcher } from 'react-router'
 import { useAIPanel } from './ai-panel-context'
 
 // Lazy-load the AIChat component (and the heavy @repo/ai dependency tree)
@@ -84,6 +85,61 @@ function CloseButton() {
 }
 
 function PanelBody() {
+	const params = useParams()
+	const fetcher = useFetcher()
+	const pageId = params.pageId
+	const orgSlug = params.orgSlug
+
+	const handleToolCall = async ({ toolCall }: { toolCall: any }) => {
+		if (!pageId || !orgSlug) return 'Error: Not on a page editor'
+
+		if (toolCall.toolName === 'addSection') {
+			fetcher.submit(
+				{
+					intent: 'add-section',
+					type: toolCall.args.type,
+					position: toolCall.args.position?.toString(),
+				},
+				{
+					method: 'POST',
+					action: `/${orgSlug}/website/pages/${pageId}`,
+				},
+			)
+			return 'Section added successfully'
+		}
+
+		if (toolCall.toolName === 'updateSection') {
+			fetcher.submit(
+				{
+					intent: 'update-section',
+					sectionId: toolCall.args.sectionId,
+					config: toolCall.args.config,
+				},
+				{
+					method: 'POST',
+					action: `/${orgSlug}/website/pages/${pageId}`,
+				},
+			)
+			return 'Section updated successfully'
+		}
+
+		if (toolCall.toolName === 'removeSection') {
+			fetcher.submit(
+				{
+					intent: 'remove-section',
+					sectionId: toolCall.args.sectionId,
+				},
+				{
+					method: 'POST',
+					action: `/${orgSlug}/website/pages/${pageId}`,
+				},
+			)
+			return 'Section removed successfully'
+		}
+
+		return 'Unknown tool'
+	}
+
 	return (
 		<>
 			<div className="border-border/70 flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2">
@@ -106,7 +162,11 @@ function PanelBody() {
 					fallback={<ErrorShell onRetry={() => window.location.reload()} />}
 				>
 					<Suspense fallback={<LoadingShell />}>
-						<AIChat />
+						<AIChat
+							pageId={pageId}
+							orgSlug={orgSlug}
+							onToolCall={handleToolCall}
+						/>
 					</Suspense>
 				</PanelErrorBoundary>
 			</div>

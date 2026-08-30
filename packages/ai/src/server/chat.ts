@@ -5,6 +5,7 @@ export type ChatStreamOptions = {
 	messages: ModelMessage[]
 	systemPrompt: string
 	modelName?: string
+	tools?: Record<string, any>
 	maxDuration?: number
 }
 
@@ -18,12 +19,14 @@ export function createChatStream(options: ChatStreamOptions) {
 		messages,
 		systemPrompt,
 		modelName = 'models/gemini-2.5-flash',
+		tools,
 	} = options
 
 	const result = streamText({
 		model: google(modelName),
 		messages,
 		system: systemPrompt,
+		tools,
 	})
 
 	return result

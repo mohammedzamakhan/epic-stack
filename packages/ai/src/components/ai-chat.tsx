@@ -26,12 +26,15 @@ export interface AIChatProps {
 	 * runs as a general (note-less) conversation.
 	 */
 	noteId?: string
+	pageId?: string
+	orgSlug?: string
 	userName?: string
 	greeting?: string
 	subtitle?: string
 	placeholder?: string
 	initialSuggestions?: string[]
 	className?: string
+	onToolCall?: (options: { toolCall: any }) => any
 }
 
 // Message Content Component
@@ -267,11 +270,14 @@ function ThinkingDots() {
 
 export function AIChat({
 	noteId,
+	pageId,
+	orgSlug,
 	userName = brand.name,
 	greeting,
 	subtitle,
 	placeholder,
 	className,
+	onToolCall,
 }: AIChatProps) {
 	const [input, setInput] = useState('')
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -284,8 +290,13 @@ export function AIChat({
 		regenerate,
 	} = useChat({
 		transport: new DefaultChatTransport({
-			api: noteId ? `/api/ai/chat?noteId=${noteId}` : '/api/ai/chat',
+			api: noteId
+				? `/api/ai/chat?noteId=${noteId}`
+				: pageId
+					? `/api/ai/chat?pageId=${pageId}`
+					: '/api/ai/chat',
 		}),
+		onToolCall,
 	})
 
 	const smartSuggestions = useSmartSuggestions(messages, Boolean(noteId))
