@@ -35,7 +35,7 @@ export default function ReportsIndex() {
 	const basePath = `/${data.orgSlug}/reports`
 
 	return (
-		<div className="-mx-4 flex h-[calc(100dvh-var(--header-height,3rem))] min-h-0 overflow-hidden md:-mx-2">
+		<div className="-mx-4 flex flex-col gap-6 md:-mx-2 lg:flex-row lg:items-stretch">
 			<ReportLibrary
 				scope="organization"
 				templates={data.templates}

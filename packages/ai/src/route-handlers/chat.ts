@@ -55,8 +55,13 @@ export async function handleChat(
 	const url = new URL(request.url)
 	const noteId = url.searchParams.get('noteId')
 
+	const { messages } = (await request.json()) as { messages: ModelMessage[] }
+
+	// When noteId is absent, run a general (note-less) conversation.
 	if (!noteId) {
-		invariant(noteId, 'Note ID is required')
+		const systemPrompt = deps.brandSystemPrompt
+		const result = deps.createChatStream({ messages, systemPrompt })
+		return result.toDataStreamResponse()
 	}
 
 	const [noteMeta] = await db
@@ -126,8 +131,6 @@ export async function handleChat(
 			console.error('Failed to track AI chat onboarding step:', error)
 		}
 	}
-
-	const { messages } = (await request.json()) as { messages: ModelMessage[] }
 
 	// Build note context
 	const noteContext = {

@@ -3,8 +3,10 @@ import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { Kbd } from '@repo/ui/kbd'
 import { SidebarTrigger } from '@repo/ui/sidebar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useFetcher } from 'react-router'
+import { GlobalAIToggle } from '#app/components/ai/global-ai-panel.tsx'
+import { useAIPanel } from '#app/components/ai/ai-panel-context.tsx'
 import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { CommandMenu } from './command-menu'
 import NotificationBell from './ui/notification-bell'
@@ -12,8 +14,20 @@ import NotificationBell from './ui/notification-bell'
 export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 	const [commandOpen, setCommandOpen] = useState(false)
 	const sidebar = useFetcher()
-	// Setup global hotkeys
+	const { toggle: toggleAIPanel } = useAIPanel()
+
+	// Bind cmd+/ to toggle the AI panel.
 	useGlobalHotkeys(setCommandOpen)
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+				e.preventDefault()
+				toggleAIPanel()
+			}
+		}
+		window.addEventListener('keydown', onKey)
+		return () => window.removeEventListener('keydown', onKey)
+	}, [toggleAIPanel])
 
 	return (
 		<>
@@ -35,7 +49,7 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 						type="submit"
 					/>
 				</div>
-				<div className="flex flex-1 gap-4 px-2 pr-6 md:flex-none">
+				<div className="flex flex-1 items-center justify-end gap-2 px-2 pr-4 md:flex-none md:pr-6">
 					<Button
 						variant="outline"
 						className="bg-muted/50 text-muted-foreground relative h-8 w-[calc(100%-1rem)] flex-1 flex-row-reverse justify-start rounded-[0.5rem] text-sm font-normal shadow-none md:w-40 lg:w-64 ltr:text-left ltr:sm:pr-12 rtl:text-right rtl:sm:pl-12"
@@ -51,6 +65,7 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 							<span className="text-xs">⌘</span>K
 						</Kbd>
 					</Button>
+					<GlobalAIToggle />
 					<NotificationBell />
 				</div>
 			</header>

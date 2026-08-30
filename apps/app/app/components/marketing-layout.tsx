@@ -2,6 +2,8 @@ import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { SidebarInset, SidebarProvider } from '@repo/ui/sidebar'
 import { type ReactNode } from 'react'
 import { AppSidebar } from '#app/components/app-sidebar.tsx'
+import { AIPanelProvider } from '#app/components/ai/ai-panel-context.tsx'
+import { GlobalAIChat } from '#app/components/ai/global-ai-panel.tsx'
 import { SiteHeader } from '#app/components/site-header.tsx'
 import { EpicProgress } from './progress-bar'
 
@@ -21,7 +23,7 @@ export function MarketingLayout({
 	extensionId = null,
 }: MarketingLayoutProps) {
 	return (
-		<>
+		<AIPanelProvider>
 			<SidebarProvider
 				open={!isCollapsed}
 				style={
@@ -37,17 +39,20 @@ export function MarketingLayout({
 					trialStatus={trialStatus || undefined}
 					extensionId={extensionId || undefined}
 				/>
-				<SidebarInset role="main">
+				{/* Main column: the inset (sidebar + header + page content). */}
+				<SidebarInset role="main" className="min-w-0">
 					<SiteHeader isCollapsed={isCollapsed} />
-					<div className="flex flex-1 flex-col">
-						<div className="@container/main flex flex-1 flex-col gap-2 px-4 md:px-2">
-							{children}
-						</div>
+					<div className="@container/main flex flex-1 flex-col gap-2 px-4 md:px-2">
+						{children}
 					</div>
 				</SidebarInset>
+				{/* AI panel — sibling of the inset, pinned to the right edge of
+				    the viewport. Animates its own width; never wraps the main
+				    content. */}
+				<GlobalAIChat />
 			</SidebarProvider>
 			<EpicProgress />
-		</>
+		</AIPanelProvider>
 	)
 }
 

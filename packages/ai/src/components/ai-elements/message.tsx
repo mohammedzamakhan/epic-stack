@@ -1,5 +1,5 @@
 import { type UIMessage } from 'ai'
-import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import { Avatar, type Avatar as AvatarType } from '@repo/ui/avatar'
 import { type ComponentProps, type HTMLAttributes } from 'react'
 
 import { cn } from '@repo/ui'
@@ -11,51 +11,50 @@ export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 export const Message = ({ className, from, ...props }: MessageProps) => (
 	<div
 		className={cn(
-			'group flex w-full items-end justify-end gap-2 py-4',
-			from === 'user' ? 'is-user' : 'is-assistant flex-row-reverse justify-end',
-			'[&>div]:max-w-[80%]',
+			'flex w-full',
+			from === 'user' ? 'justify-end' : 'justify-start',
 			className,
 		)}
 		{...props}
 	/>
 )
 
-export type MessageContentProps = HTMLAttributes<HTMLDivElement>
+export type MessageContentProps = HTMLAttributes<HTMLDivElement> & {
+	from?: UIMessage['role']
+}
 
 export const MessageContent = ({
 	children,
 	className,
+	from,
 	...props
-}: MessageContentProps) => (
-	<div
-		className={cn(
-			'text-foreground flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-sm',
-			'group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground',
-			'group-[.is-assistant]:bg-secondary group-[.is-assistant]:text-foreground',
-			className,
-		)}
-		{...props}
-	>
-		<div className="is-user:dark">{children}</div>
-	</div>
-)
+}: MessageContentProps) => {
+	const isUser = from === 'user'
+	return (
+		<div
+			className={cn(
+				'max-w-[min(78ch,100%)] text-sm leading-relaxed break-words',
+				isUser && 'bg-muted text-foreground rounded-2xl px-4 py-2.5',
+				!isUser && 'text-foreground',
+				className,
+			)}
+			{...props}
+		>
+			{children}
+		</div>
+	)
+}
 
 export type MessageAvatarProps = ComponentProps<typeof Avatar> & {
 	src: string
 	name?: string
 }
 
+// Kept for API stability — not rendered by AIChat anymore.
 export const MessageAvatar = ({
-	src,
-	name,
-	className,
-	...props
-}: MessageAvatarProps) => (
-	<Avatar
-		className={cn('ring-border size-8 ring ring-1', className)}
-		{...props}
-	>
-		<AvatarImage alt="" className="mt-0 mb-0" src={src} />
-		<AvatarFallback>{name?.slice(0, 2) || 'ME'}</AvatarFallback>
-	</Avatar>
-)
+	className: _ignoredClassName,
+	..._ignoredProps
+}: MessageAvatarProps) => null
+
+// Type re-export so consumers can still import the avatar component type.
+export type { AvatarType }
