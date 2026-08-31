@@ -2,6 +2,7 @@ import { and, count, eq, inArray } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { jwtVerify } from 'jose'
 import { randomUUID } from 'node:crypto'
+import { brand } from '@repo/config/brand'
 import {
 	getOciMarketingMetrics,
 	isOciEngagementLoggingConfigured,
@@ -38,7 +39,7 @@ async function authenticateOperator(c: Context) {
 		const secret = new TextEncoder().encode(operatorToken)
 		const { payload } = await jwtVerify(token, secret, {
 			audience: 'tenant-api-operator',
-			issuer: 'epic-stack',
+			issuer: brand.shortName,
 		})
 		decoded = payload as { orgId: string; role: string }
 	} catch (error) {
