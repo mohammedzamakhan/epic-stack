@@ -36,7 +36,9 @@ export function encrypt(text: string, masterKey: string): string {
 	const key = deriveKey(masterKey, salt)
 
 	// Create cipher
-	const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
+	const cipher = crypto.createCipheriv(ALGORITHM, key, iv, {
+		authTagLength: TAG_LENGTH,
+	})
 	cipher.setAAD(salt) // Use salt as additional authenticated data
 
 	// Encrypt the text
@@ -83,7 +85,9 @@ export function decrypt(encryptedData: string, masterKey: string): string {
 		const key = deriveKey(masterKey, salt)
 
 		// Create decipher
-		const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
+		const decipher = crypto.createDecipheriv(ALGORITHM, key, iv, {
+			authTagLength: TAG_LENGTH,
+		})
 		decipher.setAAD(salt) // Use salt as additional authenticated data
 		decipher.setAuthTag(tag)
 

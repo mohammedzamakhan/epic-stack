@@ -1,0 +1,5 @@
+# Local dev tooling — not deployed to production
+dev-proxy.js
+
+# One-time local setup scripts (mkcert, /etc/hosts)
+scripts/setup-*.mjs

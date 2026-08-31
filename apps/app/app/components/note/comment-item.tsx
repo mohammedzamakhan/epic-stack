@@ -182,6 +182,7 @@ export function CommentItem({
 
 						<div
 							className="text-foreground prose prose-sm prose-p:my-1 mb-2 max-w-none text-sm leading-relaxed tracking-wider"
+							// nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml
 							dangerouslySetInnerHTML={{ __html: sanitizedContent }}
 						/>
 
