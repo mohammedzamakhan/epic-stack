@@ -1,9 +1,11 @@
 import { type Meta, type StoryObj } from '@storybook/react'
+import { Frame } from '../frame'
 import {
 	Table,
 	TableBody,
 	TableCaption,
 	TableCell,
+	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -100,5 +102,42 @@ export const WithFooter: Story = {
 				</TableRow>
 			</TableBody>
 		</Table>
+	),
+}
+
+export const CardInFrame: Story = {
+	render: () => (
+		<Frame className="w-full">
+			<Table variant="card">
+				<TableHeader>
+					<TableRow>
+						<TableHead>Project</TableHead>
+						<TableHead>Status</TableHead>
+						<TableHead>Team</TableHead>
+						<TableHead className="text-right">Budget</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					<TableRow>
+						<TableCell className="font-medium">Website Redesign</TableCell>
+						<TableCell>Paid</TableCell>
+						<TableCell>Frontend Team</TableCell>
+						<TableCell className="text-right">$12,500</TableCell>
+					</TableRow>
+					<TableRow>
+						<TableCell className="font-medium">Mobile App</TableCell>
+						<TableCell>Unpaid</TableCell>
+						<TableCell>Mobile Team</TableCell>
+						<TableCell className="text-right">$8,750</TableCell>
+					</TableRow>
+				</TableBody>
+				<TableFooter>
+					<TableRow>
+						<TableCell colSpan={3}>Total Budget</TableCell>
+						<TableCell className="text-right">$21,250</TableCell>
+					</TableRow>
+				</TableFooter>
+			</Table>
+		</Frame>
 	),
 }

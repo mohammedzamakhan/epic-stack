@@ -33,12 +33,14 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@repo/ui/dropdown-menu'
+import { Frame } from '@repo/ui/frame'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import {
 	Table,
 	TableBody,
 	TableCell,
+	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -385,9 +387,16 @@ function PageRow({
 				{page.createdByName}
 			</TableCell>
 			<TableCell>
-				<Badge
-					variant={optimisticStatus === 'published' ? 'default' : 'secondary'}
-				>
+				<Badge variant="outline">
+					<span
+						aria-hidden="true"
+						className={cn(
+							'size-1.5 rounded-full',
+							optimisticStatus === 'published'
+								? 'bg-emerald-500'
+								: 'bg-muted-foreground/64',
+						)}
+					/>
 					{optimisticStatus === 'published' ? (
 						<Trans>Published</Trans>
 					) : (
@@ -530,6 +539,8 @@ export default function WebsitePagesRoute() {
 		[searchParams, setSearchParams],
 	)
 
+	const pageCount = pages.length
+
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -590,8 +601,8 @@ export default function WebsitePagesRoute() {
 							icons={['search']}
 						/>
 					) : (
-						<div className="overflow-x-auto">
-							<Table>
+						<Frame className="w-full">
+							<Table variant="card">
 								<TableHeader>
 									<TableRow>
 										<TableHead>
@@ -618,8 +629,20 @@ export default function WebsitePagesRoute() {
 										<PageRow key={page.id} page={page} />
 									))}
 								</TableBody>
+								<TableFooter>
+									<TableRow>
+										<TableCell colSpan={4}>
+											{pageCount === 1 ? (
+												<Trans>1 page</Trans>
+											) : (
+												<Trans>{pageCount} pages</Trans>
+											)}
+										</TableCell>
+										<TableCell />
+									</TableRow>
+								</TableFooter>
 							</Table>
-						</div>
+						</Frame>
 					)}
 				</div>
 			)}

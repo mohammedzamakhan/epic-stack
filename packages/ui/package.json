@@ -80,6 +80,7 @@
     "./use-mobile": "./utils/use-mobile.ts",
     "./logo": "./components/logo.tsx",
     "./frame": "./components/frame.tsx",
+    "./filters": "./components/filters/index.ts",
     "./alert-dialog": "./components/ui/alert-dialog.tsx",
     "./radio-group": "./components/ui/radio-group.tsx",
     "./spinner": "./components/ui/spinner.tsx",

@@ -9,6 +9,7 @@ import {
 	marketingMessages,
 	provisionTenantDb,
 } from '@repo/tenant-db'
+import { brand } from '@repo/config/brand'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { SignJWT } from 'jose'
@@ -52,7 +53,7 @@ describe('Operator Routes', () => {
 		})
 			.setProtectedHeader({ alg: 'HS256' })
 			.setAudience('tenant-api-operator')
-			.setIssuer('epic-stack')
+			.setIssuer(brand.shortName)
 			.setExpirationTime('1h')
 			.sign(secret)
 

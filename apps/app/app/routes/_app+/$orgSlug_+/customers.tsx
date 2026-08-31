@@ -2,34 +2,48 @@ import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@repo/ui/dialog'
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
+import {
+	BadgesOrStack,
+	createFilterQuery,
+	Filters,
+	flattenFilterConditions,
+	type FilterCondition,
+	type FilterField,
+	type FilterQuery,
+} from '@repo/ui/filters'
+import { Frame } from '@repo/ui/frame'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
-import {
-	Item,
-	ItemActions,
-	ItemContent,
-	ItemDescription,
-	ItemGroup,
-	ItemTitle,
-} from '@repo/ui/item'
 import { Label } from '@repo/ui/label'
 import { PageTitle } from '@repo/ui/page-title'
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from '@repo/ui/sheet'
 import { Skeleton } from '@repo/ui/skeleton'
-import { useEffect, useState } from 'react'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableFooter,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@repo/ui/table'
+import { formatDistanceToNow } from 'date-fns'
+import { useEffect, useMemo, useState } from 'react'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { getOperatorTenantClient } from '#app/utils/tenant-api.server.ts'
-
-const VERIFICATION_FILTERS = ['all', 'verified', 'unverified'] as const
-
-type VerificationFilter = (typeof VERIFICATION_FILTERS)[number]
 
 interface CustomerListItem {
 	id: string
@@ -38,6 +52,179 @@ interface CustomerListItem {
 	phone: string | null
 	phoneVerified: boolean | null
 	createdAt: string
+}
+
+const VERIFICATION_TONES = {
+	verified: {
+		dot: 'bg-emerald-500',
+		badge:
+			'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/25 dark:bg-emerald-400/15 dark:text-emerald-300',
+	},
+	unverified: {
+		dot: 'bg-muted-foreground/64',
+		badge:
+			'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
+	},
+} as const
+
+function Swatch({ className }: { className: string }) {
+	return (
+		<span
+			aria-hidden="true"
+			className={cn('size-2.5 shrink-0 rounded-full', className)}
+		/>
+	)
+}
+
+const CUSTOMER_FILTER_FIELDS: FilterField[] = [
+	{
+		id: 'status',
+		label: 'Status',
+		type: 'select',
+		defaultOperator: 'is_any_of',
+		searchable: false,
+		icon: <Icon name="circle-check" className="size-3.5" />,
+		options: [
+			{
+				value: 'verified',
+				label: 'Verified',
+				icon: <Swatch className={VERIFICATION_TONES.verified.dot} />,
+			},
+			{
+				value: 'unverified',
+				label: 'Unverified',
+				icon: <Swatch className={VERIFICATION_TONES.unverified.dot} />,
+			},
+		],
+		renderValue: ({ options }) => (
+			<BadgesOrStack
+				options={options}
+				fallback="any status"
+				badgeClassName={(value) =>
+					VERIFICATION_TONES[value as keyof typeof VERIFICATION_TONES]?.badge
+				}
+				dotClassName={(value) =>
+					VERIFICATION_TONES[value as keyof typeof VERIFICATION_TONES]?.dot
+				}
+			/>
+		),
+	},
+	{
+		id: 'name',
+		label: 'Name',
+		type: 'text',
+		defaultOperator: 'contains',
+		placeholder: 'Enter a name',
+		icon: <Icon name="user" className="size-3.5" />,
+	},
+	{
+		id: 'email',
+		label: 'Email',
+		type: 'text',
+		defaultOperator: 'contains',
+		placeholder: 'Enter an email',
+		icon: <Icon name="mail" className="size-3.5" />,
+	},
+	{
+		id: 'phone',
+		label: 'Phone',
+		type: 'text',
+		defaultOperator: 'contains',
+		placeholder: 'Enter a phone number',
+		icon: <Icon name="smartphone" className="size-3.5" />,
+	},
+]
+
+function getCustomerFieldValue(
+	customer: CustomerListItem,
+	field: string,
+): string {
+	switch (field) {
+		case 'status':
+			return customer.phoneVerified ? 'verified' : 'unverified'
+		case 'name':
+			return customer.name
+		case 'email':
+			return customer.email ?? ''
+		case 'phone':
+			return customer.phone ?? ''
+		default:
+			return ''
+	}
+}
+
+function matchesTextOperator(
+	value: string,
+	operator: string,
+	values: unknown[],
+): boolean {
+	const haystack = value.toLowerCase()
+	const needle = String(values[0] ?? '').toLowerCase()
+
+	switch (operator) {
+		case 'contains':
+			return haystack.includes(needle)
+		case 'not_contains':
+			return !haystack.includes(needle)
+		case 'starts_with':
+			return haystack.startsWith(needle)
+		case 'ends_with':
+			return haystack.endsWith(needle)
+		case 'is':
+			return haystack === needle
+		case 'is_not':
+			return haystack !== needle
+		case 'empty':
+			return haystack.trim().length === 0
+		case 'not_empty':
+			return haystack.trim().length > 0
+		default:
+			return true
+	}
+}
+
+function matchesSelectOperator(
+	value: string,
+	operator: string,
+	values: unknown[],
+): boolean {
+	const selected = values.map(String)
+
+	switch (operator) {
+		case 'is':
+			return selected.length > 0 && selected[0] === value
+		case 'is_not':
+			return selected.length > 0 && selected[0] !== value
+		case 'is_any_of':
+			return selected.length === 0 || selected.includes(value)
+		case 'is_none_of':
+			return selected.length > 0 && !selected.includes(value)
+		case 'has_any_of':
+			return selected.length === 0 || selected.includes(value)
+		case 'has_all_of':
+			return selected.every((entry) => entry === value)
+		case 'has_none_of':
+			return !selected.includes(value)
+		case 'empty':
+			return value.trim().length === 0
+		case 'not_empty':
+			return value.trim().length > 0
+		default:
+			return true
+	}
+}
+
+function matchesCustomerCondition(
+	customer: CustomerListItem,
+	condition: FilterCondition,
+): boolean {
+	const value = getCustomerFieldValue(customer, condition.field)
+	const matches =
+		condition.field === 'status'
+			? matchesSelectOperator(value, condition.operator, condition.values)
+			: matchesTextOperator(value, condition.operator, condition.values)
+
+	return condition.negated ? !matches : matches
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -50,14 +237,85 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	return { jwt, tenantApiUrl: publicTenantApiUrl }
 }
 
+function CustomerRow({
+	customer,
+	onEdit,
+}: {
+	customer: CustomerListItem
+	onEdit: (customer: CustomerListItem) => void
+}) {
+	return (
+		<TableRow
+			className="cursor-pointer"
+			onClick={() => onEdit(customer)}
+			onKeyDown={(event) => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault()
+					onEdit(customer)
+				}
+			}}
+			tabIndex={0}
+		>
+			<TableCell className="font-medium">{customer.name}</TableCell>
+			<TableCell className="text-muted-foreground hidden text-sm sm:table-cell">
+				{customer.phone || '—'}
+			</TableCell>
+			<TableCell className="text-muted-foreground hidden text-sm md:table-cell">
+				{customer.email || '—'}
+			</TableCell>
+			<TableCell>
+				<Badge variant="outline">
+					<span
+						aria-hidden="true"
+						className={cn(
+							'size-1.5 rounded-full',
+							customer.phoneVerified
+								? 'bg-emerald-500'
+								: 'bg-muted-foreground/64',
+						)}
+					/>
+					{customer.phoneVerified ? 'Verified' : 'Unverified'}
+				</Badge>
+			</TableCell>
+			<TableCell className="text-muted-foreground hidden text-sm lg:table-cell">
+				{formatDistanceToNow(new Date(customer.createdAt), { addSuffix: true })}
+			</TableCell>
+			<TableCell
+				className="text-right"
+				onClick={(event) => event.stopPropagation()}
+			>
+				<DropdownMenu>
+					<DropdownMenuTrigger
+						render={
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								aria-label="Customer actions"
+							>
+								<Icon name="ellipsis" className="size-4" />
+							</Button>
+						}
+					/>
+					<DropdownMenuContent align="end">
+						<DropdownMenuItem onClick={() => onEdit(customer)}>
+							<Icon name="pencil" className="mr-2 size-4" />
+							Edit
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</TableCell>
+		</TableRow>
+	)
+}
+
 export default function CustomersRoute() {
 	const { jwt, tenantApiUrl } = useLoaderData<typeof loader>()
 	const [customers, setCustomers] = useState<CustomerListItem[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
-	const [searchQuery, setSearchQuery] = useState('')
-	const [verificationFilter, setVerificationFilter] =
-		useState<VerificationFilter>('all')
+	const [filterQuery, setFilterQuery] = useState<FilterQuery>(() =>
+		createFilterQuery(),
+	)
 	const [editingCustomer, setEditingCustomer] =
 		useState<CustomerListItem | null>(null)
 	const [editName, setEditName] = useState('')
@@ -88,25 +346,24 @@ export default function CustomersRoute() {
 		void fetchCustomers()
 	}, [jwt, tenantApiUrl])
 
-	const filteredCustomers = customers.filter((customer) => {
-		const query = searchQuery.trim().toLowerCase()
-		const matchesSearch =
-			query.length === 0 ||
-			customer.name.toLowerCase().includes(query) ||
-			(customer.email?.toLowerCase().includes(query) ?? false) ||
-			(customer.phone?.toLowerCase().includes(query) ?? false)
+	const filterConditions = useMemo(
+		() => flattenFilterConditions(filterQuery),
+		[filterQuery],
+	)
 
-		const matchesVerification =
-			verificationFilter === 'all' ||
-			(verificationFilter === 'verified' && customer.phoneVerified === true) ||
-			(verificationFilter === 'unverified' && !customer.phoneVerified)
+	const filteredCustomers = useMemo(
+		() =>
+			customers.filter((customer) =>
+				filterConditions.every((condition) =>
+					matchesCustomerCondition(customer, condition),
+				),
+			),
+		[customers, filterConditions],
+	)
 
-		return matchesSearch && matchesVerification
-	})
+	const hasFilters = filterConditions.length > 0
 
-	const hasFilters = searchQuery.length > 0 || verificationFilter !== 'all'
-
-	function openEditDialog(customer: CustomerListItem) {
+	function openEditSheet(customer: CustomerListItem) {
 		setEditingCustomer(customer)
 		setEditName(customer.name)
 		setEditEmail(customer.email ?? '')
@@ -169,47 +426,56 @@ export default function CustomersRoute() {
 				/>
 			</div>
 
-			<div className="space-y-8">
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<div className="relative max-w-sm flex-1">
-						<Icon
-							name="search"
-							className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
-						/>
-						<Input
-							placeholder="Search by name, email, or phone..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="h-9 pl-9"
-							disabled={loading}
-						/>
-					</div>
-					<div className="flex flex-wrap items-center gap-1">
-						{VERIFICATION_FILTERS.map((filter) => (
-							<button
-								key={filter}
-								type="button"
-								onClick={() => setVerificationFilter(filter)}
-								disabled={loading}
-								className={cn(
-									'rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors',
-									verificationFilter === filter
-										? 'bg-muted text-foreground'
-										: 'text-muted-foreground hover:text-foreground',
-								)}
-							>
-								{filter}
-							</button>
-						))}
-					</div>
-				</div>
+			<div className="space-y-6">
+				<Filters
+					fields={CUSTOMER_FILTER_FIELDS}
+					query={filterQuery}
+					onQueryChange={setFilterQuery}
+					showClear
+					disabled={loading}
+				/>
 
 				{loading ? (
-					<ItemGroup>
-						{Array.from({ length: 5 }).map((_, index) => (
-							<Skeleton key={index} className="h-16 w-full rounded-lg" />
-						))}
-					</ItemGroup>
+					<Frame className="w-full">
+						<Table variant="card">
+							<TableHeader>
+								<TableRow>
+									<TableHead>Name</TableHead>
+									<TableHead className="hidden sm:table-cell">Phone</TableHead>
+									<TableHead className="hidden md:table-cell">Email</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead className="hidden lg:table-cell">Joined</TableHead>
+									<TableHead className="w-16">
+										<span className="sr-only">Actions</span>
+									</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{Array.from({ length: 5 }).map((_, index) => (
+									<TableRow key={index}>
+										<TableCell>
+											<Skeleton className="h-4 w-32" />
+										</TableCell>
+										<TableCell className="hidden sm:table-cell">
+											<Skeleton className="h-4 w-24" />
+										</TableCell>
+										<TableCell className="hidden md:table-cell">
+											<Skeleton className="h-4 w-36" />
+										</TableCell>
+										<TableCell>
+											<Skeleton className="h-5 w-20" />
+										</TableCell>
+										<TableCell className="hidden lg:table-cell">
+											<Skeleton className="h-4 w-24" />
+										</TableCell>
+										<TableCell>
+											<Skeleton className="ml-auto h-8 w-8" />
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</Frame>
 				) : error ? (
 					<p className="text-destructive text-sm">{error}</p>
 				) : filteredCustomers.length === 0 ? (
@@ -217,50 +483,50 @@ export default function CustomersRoute() {
 						title="No customers found"
 						description={
 							hasFilters
-								? 'Try adjusting your search or filter.'
+								? 'Try adjusting your filters or clear them to see all customers.'
 								: 'Customers appear here after they sign up on your site.'
 						}
 						icons={['users', 'user', 'search']}
 					/>
 				) : (
-					<ItemGroup>
-						{filteredCustomers.map((customer) => (
-							<Item key={customer.id} variant="outline" size="sm">
-								<ItemContent>
-									<ItemTitle>
-										{customer.name}
-										{customer.phoneVerified ? (
-											<Badge variant="secondary" className="text-[10px]">
-												Verified
-											</Badge>
-										) : null}
-									</ItemTitle>
-									<ItemDescription>
-										{customer.phone || 'No phone'}
-										{' · '}
-										{customer.email || 'No email'}
-										{' · '}
-										Joined {new Date(customer.createdAt).toLocaleDateString()}
-									</ItemDescription>
-								</ItemContent>
-								<ItemActions>
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										className="gap-1.5"
-										onClick={() => openEditDialog(customer)}
-									>
-										<Icon name="pencil" className="size-3.5" />
-										Edit
-									</Button>
-								</ItemActions>
-							</Item>
-						))}
-					</ItemGroup>
+					<Frame className="w-full">
+						<Table variant="card">
+							<TableHeader>
+								<TableRow>
+									<TableHead>Name</TableHead>
+									<TableHead className="hidden sm:table-cell">Phone</TableHead>
+									<TableHead className="hidden md:table-cell">Email</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead className="hidden lg:table-cell">Joined</TableHead>
+									<TableHead className="w-16">
+										<span className="sr-only">Actions</span>
+									</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{filteredCustomers.map((customer) => (
+									<CustomerRow
+										key={customer.id}
+										customer={customer}
+										onEdit={openEditSheet}
+									/>
+								))}
+							</TableBody>
+							<TableFooter>
+								<TableRow>
+									<TableCell colSpan={5}>
+										{filteredCustomers.length === 1
+											? '1 customer'
+											: `${filteredCustomers.length} customers`}
+									</TableCell>
+									<TableCell />
+								</TableRow>
+							</TableFooter>
+						</Table>
+					</Frame>
 				)}
 
-				<Dialog
+				<Sheet
 					open={editingCustomer !== null}
 					onOpenChange={(open) => {
 						if (!open && !isSaving) {
@@ -268,52 +534,60 @@ export default function CustomersRoute() {
 						}
 					}}
 				>
-					<DialogContent className="sm:max-w-md">
-						<DialogHeader>
-							<DialogTitle>Edit customer</DialogTitle>
-							<DialogDescription>
+					<SheetContent
+						side="right"
+						className="flex w-full flex-col gap-0 sm:max-w-lg"
+					>
+						<SheetHeader className="border-b">
+							<SheetTitle>Edit customer</SheetTitle>
+							<SheetDescription>
 								Update name and email. Phone number is managed through site
 								sign-in.
-							</DialogDescription>
-						</DialogHeader>
+							</SheetDescription>
+						</SheetHeader>
 
 						{editingCustomer ? (
-							<form onSubmit={handleSave} className="space-y-4">
-								<div className="space-y-2">
-									<Label htmlFor="customer-name">Name</Label>
-									<Input
-										id="customer-name"
-										value={editName}
-										onChange={(e) => setEditName(e.target.value)}
-										required
-										autoComplete="name"
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<Label htmlFor="customer-email">Email</Label>
-									<Input
-										id="customer-email"
-										type="email"
-										value={editEmail}
-										onChange={(e) => setEditEmail(e.target.value)}
-										placeholder="Optional"
-										autoComplete="email"
-									/>
-								</div>
-
-								{editingCustomer.phone ? (
-									<div className="space-y-1">
-										<Label className="text-muted-foreground">Phone</Label>
-										<p className="text-sm">{editingCustomer.phone}</p>
+							<form
+								onSubmit={handleSave}
+								className="flex min-h-0 flex-1 flex-col"
+							>
+								<div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+									<div className="space-y-2">
+										<Label htmlFor="customer-name">Name</Label>
+										<Input
+											id="customer-name"
+											value={editName}
+											onChange={(e) => setEditName(e.target.value)}
+											required
+											autoComplete="name"
+										/>
 									</div>
-								) : null}
 
-								{saveError ? (
-									<p className="text-destructive text-sm">{saveError}</p>
-								) : null}
+									<div className="space-y-2">
+										<Label htmlFor="customer-email">Email</Label>
+										<Input
+											id="customer-email"
+											type="email"
+											value={editEmail}
+											onChange={(e) => setEditEmail(e.target.value)}
+											placeholder="Optional"
+											autoComplete="email"
+										/>
+									</div>
 
-								<DialogFooter>
+									{editingCustomer.phone ? (
+										<div className="space-y-1">
+											<Label className="text-muted-foreground">Phone</Label>
+											<p className="text-sm">{editingCustomer.phone}</p>
+										</div>
+									) : null}
+
+									{saveError ? (
+										<p className="text-destructive text-sm">{saveError}</p>
+									) : null}
+								</div>
+
+								<SheetFooter className="border-t sm:flex-row sm:justify-end">
 									<Button
 										type="button"
 										variant="outline"
@@ -328,11 +602,11 @@ export default function CustomersRoute() {
 									>
 										{isSaving ? 'Saving...' : 'Save changes'}
 									</Button>
-								</DialogFooter>
+								</SheetFooter>
 							</form>
 						) : null}
-					</DialogContent>
-				</Dialog>
+					</SheetContent>
+				</Sheet>
 			</div>
 		</div>
 	)

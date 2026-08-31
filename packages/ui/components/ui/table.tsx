@@ -2,15 +2,26 @@ import * as React from 'react'
 
 import { cn } from '../../lib/utils'
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+type TableVariant = 'default' | 'card'
+
+function Table({
+	className,
+	variant = 'default',
+	...props
+}: React.ComponentProps<'table'> & { variant?: TableVariant }) {
 	return (
 		<div
 			data-slot="table-container"
+			data-variant={variant}
 			className="relative w-full overflow-x-auto"
 		>
 			<table
 				data-slot="table"
-				className={cn('w-full caption-bottom text-sm', className)}
+				className={cn(
+					'w-full caption-bottom text-sm',
+					'in-data-[variant=card]:border-separate in-data-[variant=card]:border-spacing-0',
+					className,
+				)}
 				{...props}
 			/>
 		</div>
@@ -31,7 +42,28 @@ function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
 	return (
 		<tbody
 			data-slot="table-body"
-			className={cn('[&_tr:last-child]:border-0', className)}
+			className={cn(
+				'relative [&_tr:last-child]:border-0',
+				'in-data-[variant=card]:rounded-xl in-data-[variant=card]:shadow-xs/5',
+				'before:pointer-events-none before:absolute before:inset-px not-in-data-[variant=card]:before:hidden',
+				'before:rounded-[calc(var(--radius-xl)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)]',
+				'dark:before:shadow-[0_-1px_--theme(--color-white/8%)]',
+				'in-data-[variant=card]:*:[tr]:border-0',
+				'in-data-[variant=card]:*:[tr]:*:[td]:border-b',
+				'in-data-[variant=card]:*:[tr]:*:[td]:bg-card',
+				'in-data-[variant=card]:*:[tr]:first:*:[td]:first:rounded-ss-xl',
+				'in-data-[variant=card]:*:[tr]:*:[td]:first:border-s',
+				'in-data-[variant=card]:*:[tr]:first:*:[td]:border-t',
+				'in-data-[variant=card]:*:[tr]:last:*:[td]:last:rounded-ee-xl',
+				'in-data-[variant=card]:*:[tr]:*:[td]:last:border-e',
+				'in-data-[variant=card]:*:[tr]:first:*:[td]:last:rounded-se-xl',
+				'in-data-[variant=card]:*:[tr]:last:*:[td]:first:rounded-es-xl',
+				'in-data-[variant=card]:*:[tr]:hover:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-black)_2%)]',
+				'in-data-[variant=card]:*:[tr]:data-[state=selected]:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-black)_4%)]',
+				'dark:in-data-[variant=card]:*:[tr]:data-[state=selected]:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-white)_4%)]',
+				'dark:in-data-[variant=card]:*:[tr]:hover:*:[td]:bg-[color-mix(in_srgb,var(--card),var(--color-white)_2%)]',
+				className,
+			)}
 			{...props}
 		/>
 	)
@@ -42,7 +74,9 @@ function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
 		<tfoot
 			data-slot="table-footer"
 			className={cn(
-				'bg-muted/50 border-t font-medium [&>tr]:last:border-b-0',
+				'border-t font-medium [&>tr]:last:border-b-0',
+				'not-in-data-[variant=card]:bg-muted/50',
+				'in-data-[variant=card]:border-none in-data-[variant=card]:bg-transparent',
 				className,
 			)}
 			{...props}
@@ -55,7 +89,10 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
 		<tr
 			data-slot="table-row"
 			className={cn(
-				'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors',
+				'border-b',
+				'not-in-data-[variant=card]:hover:bg-muted/50',
+				'not-in-data-[variant=card]:data-[state=selected]:bg-muted',
+				'not-in-data-[variant=card]:transition-colors',
 				className,
 			)}
 			{...props}
@@ -73,7 +110,9 @@ function TableHead({
 			data-slot="table-head"
 			scope={scope}
 			className={cn(
-				'text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0',
+				'h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0',
+				'not-in-data-[variant=card]:text-foreground',
+				'in-data-[variant=card]:text-muted-foreground in-data-[variant=card]:px-2.5 in-data-[variant=card]:leading-none',
 				className,
 			)}
 			{...props}
@@ -87,6 +126,10 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
 			data-slot="table-cell"
 			className={cn(
 				'p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0',
+				'in-data-[variant=card]:bg-clip-padding in-data-[variant=card]:p-2.5 in-data-[variant=card]:leading-none',
+				'in-data-[slot=table-footer]:py-3.5',
+				'in-data-[variant=card]:first:ps-[calc(--spacing(2.5)-1px)]',
+				'in-data-[variant=card]:last:pe-[calc(--spacing(2.5)-1px)]',
 				className,
 			)}
 			{...props}
@@ -101,7 +144,11 @@ function TableCaption({
 	return (
 		<caption
 			data-slot="table-caption"
-			className={cn('text-muted-foreground mt-4 text-sm', className)}
+			className={cn(
+				'text-muted-foreground mt-4 text-sm',
+				'in-data-[variant=card]:my-4',
+				className,
+			)}
 			{...props}
 		/>
 	)

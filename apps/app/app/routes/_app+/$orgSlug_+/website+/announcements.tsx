@@ -16,14 +16,33 @@ import {
 	eq,
 	OrganizationAnnouncement,
 } from '@repo/database'
+import { cn } from '@repo/ui'
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@repo/ui/alert-dialog'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
+import { Frame } from '@repo/ui/frame'
 import { Icon } from '@repo/ui/icon'
 import { Switch } from '@repo/ui/switch'
 import {
 	Table,
 	TableBody,
 	TableCell,
+	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -326,14 +345,24 @@ function TypeBadge({ type }: { type: AnnouncementType }) {
 		success: _(msg`Success`),
 	}
 
-	const variant =
+	const dotColor =
 		type === 'error'
-			? 'destructive'
+			? 'bg-red-500'
 			: type === 'warning'
-				? 'secondary'
-				: 'outline'
+				? 'bg-amber-500'
+				: type === 'success'
+					? 'bg-emerald-500'
+					: 'bg-muted-foreground/64'
 
-	return <Badge variant={variant}>{labels[type]}</Badge>
+	return (
+		<Badge variant="outline">
+			<span
+				aria-hidden="true"
+				className={cn('size-1.5 rounded-full', dotColor)}
+			/>
+			{labels[type]}
+		</Badge>
+	)
 }
 
 function AnnouncementRow({
@@ -351,6 +380,7 @@ function AnnouncementRow({
 	const toggleFetcher = useFetcher()
 	const deleteFetcher = useFetcher()
 	const busy = toggleFetcher.state !== 'idle' || deleteFetcher.state !== 'idle'
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 	const isEnabled =
 		toggleFetcher.formData?.get('isEnabled') !== undefined
 			? toggleFetcher.formData.get('isEnabled') === 'true'
@@ -408,35 +438,68 @@ function AnnouncementRow({
 				})}
 			</TableCell>
 			<TableCell className="text-right">
-				<div className="flex justify-end gap-1">
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon-sm"
-						aria-label={_(msg`Edit announcement`)}
-						onClick={() => onEdit(announcement)}
-						disabled={busy}
-					>
-						<Icon name="pencil" className="size-4" />
-					</Button>
-					<deleteFetcher.Form method="POST">
-						<input
-							type="hidden"
-							name="intent"
-							value={deleteAnnouncementIntent}
-						/>
-						<input type="hidden" name="id" value={announcement.id} />
-						<Button
-							type="submit"
-							variant="ghost"
-							size="icon-sm"
-							aria-label={_(msg`Delete announcement`)}
-							disabled={busy}
+				<DropdownMenu>
+					<DropdownMenuTrigger
+						render={
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								disabled={busy}
+								aria-label={_(msg`Announcement actions`)}
+							>
+								<Icon name="ellipsis" className="size-4" />
+							</Button>
+						}
+					/>
+					<DropdownMenuContent align="end">
+						<DropdownMenuItem onClick={() => onEdit(announcement)}>
+							<Icon name="pencil" className="mr-2 size-4" />
+							<Trans>Edit</Trans>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							className="text-destructive focus:text-destructive"
+							onClick={() => setDeleteDialogOpen(true)}
 						>
-							<Icon name="trash-2" className="size-4" />
-						</Button>
-					</deleteFetcher.Form>
-				</div>
+							<Icon name="trash-2" className="mr-2 size-4" />
+							<Trans>Delete</Trans>
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+
+				<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>
+								<Trans>Delete announcement?</Trans>
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								<Trans>
+									This action cannot be undone. Are you sure you want to delete
+									this announcement?
+								</Trans>
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>
+								<Trans>Cancel</Trans>
+							</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={() => {
+									void deleteFetcher.submit(
+										{
+											intent: deleteAnnouncementIntent,
+											id: announcement.id,
+										},
+										{ method: 'POST' },
+									)
+									setDeleteDialogOpen(false)
+								}}
+							>
+								<Trans>Delete</Trans>
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
 			</TableCell>
 		</TableRow>
 	)
@@ -467,6 +530,8 @@ export default function WebsiteAnnouncementsRoute() {
 		setEditing(announcement)
 		setSheetOpen(true)
 	}, [])
+
+	const announcementCount = announcements.length
 
 	return (
 		<LocaleContext.Provider
@@ -517,8 +582,8 @@ export default function WebsiteAnnouncementsRoute() {
 							icons={['bell']}
 						/>
 					) : (
-						<div className="overflow-x-auto">
-							<Table>
+						<Frame className="w-full">
+							<Table variant="card">
 								<TableHeader>
 									<TableRow>
 										<TableHead className="w-18">
@@ -536,7 +601,7 @@ export default function WebsiteAnnouncementsRoute() {
 										<TableHead className="hidden md:table-cell">
 											<Trans>Updated</Trans>
 										</TableHead>
-										<TableHead className="w-22">
+										<TableHead className="w-16">
 											<span className="sr-only">
 												<Trans>Actions</Trans>
 											</span>
@@ -554,8 +619,20 @@ export default function WebsiteAnnouncementsRoute() {
 										/>
 									))}
 								</TableBody>
+								<TableFooter>
+									<TableRow>
+										<TableCell colSpan={5}>
+											{announcementCount === 1 ? (
+												<Trans>1 announcement</Trans>
+											) : (
+												<Trans>{announcementCount} announcements</Trans>
+											)}
+										</TableCell>
+										<TableCell />
+									</TableRow>
+								</TableFooter>
 							</Table>
-						</div>
+						</Frame>
 					)}
 				</div>
 
