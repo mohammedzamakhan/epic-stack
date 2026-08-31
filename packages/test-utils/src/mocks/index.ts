@@ -27,7 +27,13 @@ server.events.on('request:start', ({ request }) => {
 })
 
 // Configure MSW to bypass Stripe entirely
-const bypassUrls = ['api.stripe.com', 'stripe.com', '.sentry.io', '__rrdt']
+const bypassUrls = [
+	'api.stripe.com',
+	'stripe.com',
+	'.sentry.io',
+	'__rrdt',
+	'generativelanguage.googleapis.com',
+]
 
 server.listen({
 	onUnhandledRequest(request, print) {

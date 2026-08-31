@@ -5,7 +5,10 @@ import { t } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react'
 import { Trans } from '@lingui/react/macro'
 import { cn } from '@repo/ui'
-import { DefaultChatTransport } from 'ai'
+import {
+	DefaultChatTransport,
+	lastAssistantMessageIsCompleteWithToolCalls,
+} from 'ai'
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import {
 	Conversation,
@@ -26,12 +29,31 @@ export interface AIChatProps {
 	 * runs as a general (note-less) conversation.
 	 */
 	noteId?: string
+	pageId?: string
+	orgSlug?: string
+	currentPath?: string
+	routeParams?: Record<string, string>
 	userName?: string
 	greeting?: string
 	subtitle?: string
 	placeholder?: string
 	initialSuggestions?: string[]
 	className?: string
+	onToolCall?: (options: { toolCall: any }) => any
+}
+
+function buildChatApiUrl({
+	noteId,
+	orgSlug,
+}: {
+	noteId?: string
+	orgSlug?: string
+}) {
+	const params = new URLSearchParams()
+	if (noteId) params.set('noteId', noteId)
+	if (orgSlug) params.set('orgSlug', orgSlug)
+	const query = params.toString()
+	return query ? `/api/ai/chat?${query}` : '/api/ai/chat'
 }
 
 // Message Content Component
@@ -254,39 +276,76 @@ function IconRefresh({ className }: { className?: string }) {
 	)
 }
 
-// Animated thinking dots — one authored moment.
-function ThinkingDots() {
-	return (
-		<span className="inline-flex items-center gap-1" aria-hidden="true">
-			<span className="size-1.5 [animation:ai-dot-pulse_1.2s_ease-in-out_infinite] rounded-full bg-current opacity-60" />
-			<span className="size-1.5 [animation:ai-dot-pulse_1.2s_ease-in-out_0.15s_infinite] rounded-full bg-current opacity-60" />
-			<span className="size-1.5 [animation:ai-dot-pulse_1.2s_ease-in-out_0.3s_infinite] rounded-full bg-current opacity-60" />
-		</span>
-	)
-}
-
 export function AIChat({
 	noteId,
+	pageId,
+	orgSlug,
+	currentPath,
+	routeParams,
 	userName = brand.name,
 	greeting,
 	subtitle,
 	placeholder,
 	className,
+	onToolCall,
 }: AIChatProps) {
 	const [input, setInput] = useState('')
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
+	const pageIdRef = useRef(pageId)
+	const currentPathRef = useRef(currentPath)
+	const routeParamsRef = useRef(routeParams)
+	const onToolCallRef = useRef(onToolCall)
+	const addToolOutputRef = useRef<
+		| null
+		| ((args: { tool: string; toolCallId: string; output: unknown }) => void)
+	>(null)
+	pageIdRef.current = pageId
+	currentPathRef.current = currentPath
+	routeParamsRef.current = routeParams
+	onToolCallRef.current = onToolCall
 	const { _ } = useLingui()
+	const transport = useMemo(
+		() =>
+			new DefaultChatTransport({
+				api: buildChatApiUrl({ noteId, orgSlug }),
+				body: () => ({
+					...(pageIdRef.current ? { pageId: pageIdRef.current } : {}),
+					...(currentPathRef.current
+						? { currentPath: currentPathRef.current }
+						: {}),
+					...(routeParamsRef.current &&
+					Object.keys(routeParamsRef.current).length > 0
+						? { params: routeParamsRef.current }
+						: {}),
+				}),
+			}),
+		[noteId, orgSlug],
+	)
 	const {
 		messages,
 		sendMessage,
 		status,
 		stop: stopGeneration,
 		regenerate,
+		addToolOutput,
 	} = useChat({
-		transport: new DefaultChatTransport({
-			api: noteId ? `/api/ai/chat?noteId=${noteId}` : '/api/ai/chat',
-		}),
+		transport,
+		onToolCall: ({ toolCall }) => {
+			const handler = onToolCallRef.current
+			if (!handler) return
+			void (async () => {
+				const output = await handler({ toolCall })
+				addToolOutputRef.current?.({
+					tool: toolCall.toolName,
+					toolCallId: toolCall.toolCallId,
+					output: output ?? 'ok',
+				})
+			})()
+		},
+		sendAutomaticallyWhen: ({ messages }) =>
+			lastAssistantMessageIsCompleteWithToolCalls({ messages }),
 	})
+	addToolOutputRef.current = addToolOutput
 
 	const smartSuggestions = useSmartSuggestions(messages, Boolean(noteId))
 	const [showFollowUpSuggestions, setShowFollowUpSuggestions] = useState(true)
@@ -419,7 +478,7 @@ export function AIChat({
 					</div>
 				) : (
 					<Conversation className="flex-1">
-						<ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-6 pb-4 sm:px-6">
+						<ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-6 pb-4 sm:px-0">
 							{messages.map((message) => (
 								<Message key={message.id} from={message.role}>
 									<MessageContent from={message.role}>
@@ -433,15 +492,10 @@ export function AIChat({
 							{isBusy && (
 								<Message from="assistant">
 									<MessageContent>
-										<div
-											aria-live="polite"
-											className="text-muted-foreground flex items-center gap-2 text-sm"
-										>
-											<Loader size={14} />
-											<span className="text-foreground/80">
-												<Trans>Thinking</Trans>
+										<div aria-live="polite" className="text-sm">
+											<span className="shimmer text-muted-foreground">
+												<Trans>Thinking…</Trans>
 											</span>
-											<ThinkingDots />
 										</div>
 									</MessageContent>
 								</Message>
