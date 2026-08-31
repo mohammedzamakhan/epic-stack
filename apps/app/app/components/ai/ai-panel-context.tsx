@@ -12,9 +12,14 @@ import {
 
 type AIPanelContextValue = {
 	isOpen: boolean
+	isExpanded: boolean
+	hasActivated: boolean
 	open: () => void
 	close: () => void
 	toggle: () => void
+	expand: () => void
+	collapse: () => void
+	toggleExpanded: () => void
 }
 
 const AIPanelContext = createContext<AIPanelContextValue | null>(null)
@@ -23,20 +28,51 @@ const STORAGE_KEY = 'ai-panel-open'
 
 export function AIPanelProvider({ children }: { children: ReactNode }) {
 	const [isOpen, setIsOpen] = useState(false)
+	const [isExpanded, setIsExpanded] = useState(false)
+	const [hasActivated, setHasActivated] = useState(false)
 
 	// Restore from localStorage on first mount.
 	useEffect(() => {
 		try {
 			const stored = window.localStorage.getItem(STORAGE_KEY)
-			if (stored === 'true') setIsOpen(true)
+			if (stored === 'true') {
+				setIsOpen(true)
+				setHasActivated(true)
+			}
 		} catch {
 			// localStorage may be unavailable in some contexts; ignore.
 		}
 	}, [])
 
-	const open = useCallback(() => setIsOpen(true), [])
-	const close = useCallback(() => setIsOpen(false), [])
-	const toggle = useCallback(() => setIsOpen((v) => !v), [])
+	const open = useCallback(() => {
+		setIsOpen(true)
+		setHasActivated(true)
+	}, [])
+	const close = useCallback(() => {
+		setIsOpen(false)
+		setIsExpanded(false)
+	}, [])
+	const toggle = useCallback(() => {
+		setIsOpen((v) => {
+			const next = !v
+			if (next) setHasActivated(true)
+			return next
+		})
+		setIsExpanded(false)
+	}, [])
+	const expand = useCallback(() => {
+		setIsOpen(true)
+		setIsExpanded(true)
+		setHasActivated(true)
+	}, [])
+	const collapse = useCallback(() => setIsExpanded(false), [])
+	const toggleExpanded = useCallback(() => {
+		setIsExpanded((v) => !v)
+	}, [])
+
+	useEffect(() => {
+		if (isOpen) setHasActivated(true)
+	}, [isOpen])
 
 	useEffect(() => {
 		try {
@@ -47,8 +83,28 @@ export function AIPanelProvider({ children }: { children: ReactNode }) {
 	}, [isOpen])
 
 	const value = useMemo<AIPanelContextValue>(
-		() => ({ isOpen, open, close, toggle }),
-		[isOpen, open, close, toggle],
+		() => ({
+			isOpen,
+			isExpanded,
+			hasActivated,
+			open,
+			close,
+			toggle,
+			expand,
+			collapse,
+			toggleExpanded,
+		}),
+		[
+			isOpen,
+			isExpanded,
+			hasActivated,
+			open,
+			close,
+			toggle,
+			expand,
+			collapse,
+			toggleExpanded,
+		],
 	)
 
 	return (
@@ -62,4 +118,20 @@ export function useAIPanel() {
 		throw new Error('useAIPanel must be used within AIPanelProvider')
 	}
 	return ctx
+}
+
+/** Toggle the AI panel with ⌘/ or Ctrl+/ */
+export function useAIPanelHotkey() {
+	const { toggle } = useAIPanel()
+
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+				e.preventDefault()
+				toggle()
+			}
+		}
+		window.addEventListener('keydown', onKey)
+		return () => window.removeEventListener('keydown', onKey)
+	}, [toggle])
 }

@@ -40,6 +40,27 @@ export interface AIChatProps {
 	initialSuggestions?: string[]
 	className?: string
 	onToolCall?: (options: { toolCall: any }) => any
+	/**
+	 * When set, chat messages are restored from and saved to sessionStorage
+	 * so the conversation survives route changes and remounts.
+	 */
+	persistKey?: string
+}
+
+function loadPersistedMessages(storageKey: string): UIMessage[] | undefined {
+	if (typeof window === 'undefined') return undefined
+	try {
+		const raw = window.sessionStorage.getItem(storageKey)
+		if (!raw) return undefined
+		const parsed = JSON.parse(raw)
+		return Array.isArray(parsed) ? (parsed as UIMessage[]) : undefined
+	} catch {
+		return undefined
+	}
+}
+
+function buildPersistStorageKey(persistKey: string) {
+	return `ai-chat:${persistKey}`
 }
 
 function buildChatApiUrl({
@@ -288,6 +309,7 @@ export function AIChat({
 	placeholder,
 	className,
 	onToolCall,
+	persistKey,
 }: AIChatProps) {
 	const [input, setInput] = useState('')
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -299,6 +321,10 @@ export function AIChat({
 		| null
 		| ((args: { tool: string; toolCallId: string; output: unknown }) => void)
 	>(null)
+	const persistedMessages = useMemo(() => {
+		if (!persistKey) return undefined
+		return loadPersistedMessages(buildPersistStorageKey(persistKey))
+	}, [persistKey])
 	pageIdRef.current = pageId
 	currentPathRef.current = currentPath
 	routeParamsRef.current = routeParams
@@ -329,6 +355,7 @@ export function AIChat({
 		regenerate,
 		addToolOutput,
 	} = useChat({
+		...(persistKey ? { id: persistKey, messages: persistedMessages } : {}),
 		transport,
 		onToolCall: ({ toolCall }) => {
 			const handler = onToolCallRef.current
@@ -346,6 +373,18 @@ export function AIChat({
 			lastAssistantMessageIsCompleteWithToolCalls({ messages }),
 	})
 	addToolOutputRef.current = addToolOutput
+
+	useEffect(() => {
+		if (!persistKey || typeof window === 'undefined') return
+		try {
+			window.sessionStorage.setItem(
+				buildPersistStorageKey(persistKey),
+				JSON.stringify(messages),
+			)
+		} catch {
+			// sessionStorage may be unavailable; ignore.
+		}
+	}, [messages, persistKey])
 
 	const smartSuggestions = useSmartSuggestions(messages, Boolean(noteId))
 	const [showFollowUpSuggestions, setShowFollowUpSuggestions] = useState(true)

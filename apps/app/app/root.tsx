@@ -397,6 +397,11 @@ function Document({
 			lang={locale ?? 'en'}
 			dir={direction}
 			className={`${theme} h-full overflow-x-hidden`}
+			style={
+				{
+					'--header-height': 'calc(var(--spacing) * 12)',
+				} as unknown as React.CSSProperties
+			}
 		>
 			<head>
 				<ClientHintCheck nonce={nonce} />
