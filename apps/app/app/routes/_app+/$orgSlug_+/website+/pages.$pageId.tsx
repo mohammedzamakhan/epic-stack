@@ -118,6 +118,11 @@ import {
 	siteThemeActionIntent,
 	uploadSiteFontActionIntent,
 } from '#app/components/settings/cards/organization/site-theme-card.tsx'
+import { GlobalAIToggle } from '#app/components/ai/global-ai-panel.tsx'
+import {
+	useAIPanel,
+	useAIPanelHotkey,
+} from '#app/components/ai/ai-panel-context.tsx'
 import { BrandingPanel } from '#app/components/website/branding-panel.tsx'
 import { CreatePageDialog } from '#app/components/website/create-page-dialog.tsx'
 import {
@@ -4970,6 +4975,9 @@ export default function PageBuilderRoute() {
 	} = useLoaderData<typeof loader>()
 	const [themeConfig, setThemeConfig] = useState(initialTheme)
 
+	useAIPanelHotkey()
+	const { isOpen: isAIPanelOpen, isExpanded: isAIPanelExpanded } = useAIPanel()
+
 	useEffect(() => {
 		const handleThemeChange = (e: any) => setThemeConfig(e.detail)
 		window.addEventListener('epic-preview-theme-change', handleThemeChange)
@@ -5774,6 +5782,8 @@ export default function PageBuilderRoute() {
 									)}
 								</div>
 
+								<GlobalAIToggle />
+
 								<Button
 									size="sm"
 									onClick={handlePublish}
@@ -5840,39 +5850,46 @@ export default function PageBuilderRoute() {
 							onOpenChange={setCreatePageOpen}
 						/>
 
-						<div className="flex min-h-0 flex-1">
-							{isSplitLayout ? (
-								<ResizablePanelGroup
-									direction="horizontal"
-									autoSaveId="website-page-builder"
-									className="min-h-0 flex-1"
-								>
-									<ResizablePanel
-										id="sections"
-										order={1}
-										defaultSize={22}
-										minSize={15}
-										maxSize={40}
-										className="min-w-0"
-									>
-										{sectionsSidebar}
-									</ResizablePanel>
-									<ResizableHandle withHandle />
-									<ResizablePanel
-										id="preview"
-										order={2}
-										defaultSize={78}
-										minSize={40}
-										className="min-w-0"
-									>
-										{previewMain}
-									</ResizablePanel>
-								</ResizablePanelGroup>
-							) : (
-								<div className="min-h-0 flex-1">
-									{mode === 'build' ? sectionsSidebar : previewMain}
-								</div>
+						<div
+							className={cn(
+								'relative flex min-h-0 flex-1',
+								isAIPanelOpen && !isAIPanelExpanded && isLg && 'pr-[420px]',
 							)}
+						>
+							<div className="flex min-h-0 min-w-0 flex-1">
+								{isSplitLayout ? (
+									<ResizablePanelGroup
+										direction="horizontal"
+										autoSaveId="website-page-builder"
+										className="min-h-0 flex-1"
+									>
+										<ResizablePanel
+											id="sections"
+											order={1}
+											defaultSize={22}
+											minSize={15}
+											maxSize={40}
+											className="min-w-0"
+										>
+											{sectionsSidebar}
+										</ResizablePanel>
+										<ResizableHandle withHandle />
+										<ResizablePanel
+											id="preview"
+											order={2}
+											defaultSize={78}
+											minSize={40}
+											className="min-w-0"
+										>
+											{previewMain}
+										</ResizablePanel>
+									</ResizablePanelGroup>
+								) : (
+									<div className="min-h-0 flex-1">
+										{mode === 'build' ? sectionsSidebar : previewMain}
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
 				</SiteLinkBuilderContext.Provider>

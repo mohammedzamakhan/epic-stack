@@ -1,7 +1,7 @@
 'use client'
 
 import { Trans, useLingui } from '@lingui/react/macro'
-import { useIsMobile } from '@repo/ui'
+import { cn, useIsMobile } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import {
@@ -11,6 +11,7 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	type ErrorInfo,
 	type ReactNode,
 } from 'react'
@@ -24,6 +25,13 @@ import {
 import { type loader as rootLoader } from '#app/root.tsx'
 import { resolveAppNavPath } from '#app/utils/ai/app-nav-routes.ts'
 import { useAIPanel } from './ai-panel-context'
+
+const PAGE_EDITOR_PATH = /\/website\/pages\/[^/]+$/
+
+function useIsPageEditorRoute() {
+	const location = useLocation()
+	return PAGE_EDITOR_PATH.test(location.pathname)
+}
 
 // Lazy-load the AIChat component (and the heavy @repo/ai dependency tree)
 // so the dashboard never pays the cost until the panel is first opened.
@@ -94,6 +102,33 @@ function CloseButton() {
 	)
 }
 
+function ExpandButton() {
+	const { isExpanded, toggleExpanded } = useAIPanel()
+	const { i18n } = useLingui()
+	const label = isExpanded
+		? i18n._('Exit full screen')
+		: i18n._('Open full screen')
+	return (
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			type="button"
+			onClick={(e) => {
+				e.stopPropagation()
+				toggleExpanded()
+			}}
+			aria-label={label}
+			aria-pressed={isExpanded}
+			title={label}
+		>
+			<Icon
+				name={isExpanded ? 'minimize-2' : 'maximize-2'}
+				className="size-4"
+			/>
+		</Button>
+	)
+}
+
 function getToolInput(toolCall: { input?: unknown; args?: unknown }) {
 	const raw = toolCall.input ?? toolCall.args
 	if (raw && typeof raw === 'object') {
@@ -110,6 +145,7 @@ function asString(value: unknown) {
 }
 
 function PanelBody() {
+	const isPageEditor = useIsPageEditorRoute()
 	const params = useParams()
 	const location = useLocation()
 	const fetcher = useFetcher()
@@ -268,13 +304,21 @@ function PanelBody() {
 
 	return (
 		<>
-			<header className="flex h-(--header-height) w-full shrink-0 items-center justify-between border-b transition-[width,height] ease-linear">
+			<header
+				className={cn(
+					'flex w-full shrink-0 items-center justify-between border-b transition-[width,height] ease-linear',
+					isPageEditor ? 'h-12' : 'h-(--header-height)',
+				)}
+			>
 				<div className="flex items-center px-4">
 					<span className="text-md font-medium tracking-normal">
 						<Trans>AI Assistant</Trans>
 					</span>
 				</div>
-				<div className="flex items-center justify-end px-2 pr-4 md:pr-6">
+				<div className="flex items-center justify-end gap-0.5 px-2 pr-3 md:pr-4">
+					<div className={cn(!isPageEditor && 'hidden md:contents')}>
+						<ExpandButton />
+					</div>
 					<CloseButton />
 				</div>
 			</header>
@@ -285,6 +329,7 @@ function PanelBody() {
 				>
 					<Suspense fallback={<LoadingShell />}>
 						<AIChat
+							persistKey="global-assistant"
 							pageId={pageId}
 							orgSlug={orgSlug}
 							currentPath={currentPath}
@@ -298,82 +343,109 @@ function PanelBody() {
 	)
 }
 
-function MobilePanel() {
-	const { isOpen, close } = useAIPanel()
+function AIPanelSurface() {
+	const { isOpen, isExpanded, close, collapse, hasActivated } = useAIPanel()
 	const { i18n } = useLingui()
+	const isMobile = useIsMobile()
+	const isPageEditor = useIsPageEditorRoute()
+	const isFullscreen = isOpen && isExpanded
+	const isVisible = isOpen || isFullscreen
+	const hasEverMountedRef = useRef(false)
+	if (hasActivated) hasEverMountedRef.current = true
 
 	useEffect(() => {
 		if (!isOpen) return
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') close()
+			if (e.key !== 'Escape') return
+			if (isMobile) close()
+			else if (isExpanded) collapse()
+			else close()
 		}
 		window.addEventListener('keydown', onKey)
 		return () => window.removeEventListener('keydown', onKey)
-	}, [isOpen, close])
+	}, [isOpen, isExpanded, isMobile, close, collapse])
 
-	// Lock body scroll while open.
 	useEffect(() => {
-		if (!isOpen) return
+		const shouldLockScroll = isMobile ? isOpen : isFullscreen
+		if (!shouldLockScroll) return
 		const previous = document.body.style.overflow
 		document.body.style.overflow = 'hidden'
 		return () => {
 			document.body.style.overflow = previous
 		}
-	}, [isOpen])
+	}, [isFullscreen, isMobile, isOpen])
 
-	if (!isOpen) return null
+	if (!hasEverMountedRef.current) return null
 
 	return (
-		<div
-			role="dialog"
-			aria-modal="true"
-			aria-label={i18n._('AI assistant')}
-			className="bg-background fixed inset-0 z-50 flex flex-col"
-		>
-			<PanelBody />
-		</div>
-	)
-}
+		<>
+			{!isMobile && isFullscreen ? (
+				<button
+					type="button"
+					tabIndex={-1}
+					aria-label={i18n._('Exit full screen')}
+					onClick={collapse}
+					className={cn(
+						'animate-in fade-in-0 fixed inset-0 bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs',
+						isPageEditor ? 'z-[60]' : 'z-40',
+					)}
+				/>
+			) : null}
 
-function DesktopPanel() {
-	const { isOpen, close } = useAIPanel()
-	const { i18n } = useLingui()
-
-	useEffect(() => {
-		if (!isOpen) return
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') close()
-		}
-		window.addEventListener('keydown', onKey)
-		return () => window.removeEventListener('keydown', onKey)
-	}, [isOpen, close])
-
-	// Animate the outer aside's width. Inner content keeps a fixed 420px
-	// surface so the chat doesn't reflow as the column collapses.
-	return (
-		<aside
-			aria-label={i18n._('AI assistant')}
-			aria-hidden={!isOpen}
-			className={[
-				'sticky top-2 m-2 ml-0 h-[calc(100svh-1rem)] shrink-0 self-start',
-				'bg-background overflow-hidden rounded-xl shadow-sm',
-				'transition-[width,opacity] duration-300 ease-out',
-				isOpen ? 'w-[420px] opacity-100' : 'pointer-events-none w-0 opacity-0',
-			].join(' ')}
-		>
-			<div className="flex h-full w-[420px] flex-col">
-				{isOpen ? <PanelBody /> : null}
-			</div>
-		</aside>
+			<aside
+				role={isFullscreen || isMobile ? 'dialog' : undefined}
+				aria-modal={isFullscreen || isMobile || undefined}
+				aria-label={i18n._('AI assistant')}
+				aria-hidden={!isVisible}
+				className={cn(
+					'bg-background flex flex-col overflow-hidden',
+					!isVisible && 'pointer-events-none',
+					isMobile &&
+						cn(
+							'fixed inset-0',
+							isPageEditor ? 'z-[60]' : 'z-50',
+							!isOpen && 'invisible',
+						),
+					!isMobile &&
+						isFullscreen &&
+						cn(
+							'ring-foreground/10 animate-in fade-in-0 zoom-in-95 fixed rounded-xl shadow-lg ring-1 duration-200',
+							isPageEditor
+								? 'inset-3 z-[70] sm:inset-4'
+								: 'inset-3 z-50 sm:inset-4',
+						),
+					!isMobile &&
+						!isFullscreen &&
+						isPageEditor &&
+						cn(
+							'border-border fixed top-12 right-0 bottom-0 z-[60] w-[420px] border-l shadow-lg',
+							!isVisible && 'hidden',
+						),
+					!isMobile &&
+						!isFullscreen &&
+						!isPageEditor &&
+						cn(
+							'fixed top-2 right-2 bottom-2 z-40 rounded-xl shadow-sm',
+							'transition-[width,opacity] duration-300 ease-out',
+							isVisible ? 'w-[420px] opacity-100' : 'w-0 opacity-0',
+						),
+				)}
+			>
+				<div
+					className={cn(
+						'flex h-full flex-col',
+						isMobile || isFullscreen ? 'w-full' : 'w-[420px]',
+					)}
+				>
+					<PanelBody />
+				</div>
+			</aside>
+		</>
 	)
 }
 
 export function GlobalAIChat() {
-	const isMobile = useIsMobile()
-	// Avoid SSR hydration mismatch: render nothing until the media query
-	// resolves on the client.
-	if (isMobile === undefined) return null
-	return isMobile ? <MobilePanel /> : <DesktopPanel />
+	return <AIPanelSurface />
 }
 
 export function GlobalAIToggle() {

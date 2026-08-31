@@ -3,10 +3,10 @@ import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { Kbd } from '@repo/ui/kbd'
 import { SidebarTrigger } from '@repo/ui/sidebar'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useFetcher } from 'react-router'
+import { useAIPanelHotkey } from '#app/components/ai/ai-panel-context.tsx'
 import { GlobalAIToggle } from '#app/components/ai/global-ai-panel.tsx'
-import { useAIPanel } from '#app/components/ai/ai-panel-context.tsx'
 import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { CommandMenu } from './command-menu'
 import NotificationBell from './ui/notification-bell'
@@ -14,20 +14,10 @@ import NotificationBell from './ui/notification-bell'
 export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 	const [commandOpen, setCommandOpen] = useState(false)
 	const sidebar = useFetcher()
-	const { toggle: toggleAIPanel } = useAIPanel()
 
 	// Bind cmd+/ to toggle the AI panel.
 	useGlobalHotkeys(setCommandOpen)
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if ((e.metaKey || e.ctrlKey) && e.key === '/') {
-				e.preventDefault()
-				toggleAIPanel()
-			}
-		}
-		window.addEventListener('keydown', onKey)
-		return () => window.removeEventListener('keydown', onKey)
-	}, [toggleAIPanel])
+	useAIPanelHotkey()
 
 	return (
 		<>

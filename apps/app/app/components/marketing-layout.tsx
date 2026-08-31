@@ -1,11 +1,33 @@
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { SidebarInset, SidebarProvider } from '@repo/ui/sidebar'
 import { type ReactNode } from 'react'
+import { useLocation } from 'react-router'
+import { useAIPanel } from '#app/components/ai/ai-panel-context.tsx'
 import { AppSidebar } from '#app/components/app-sidebar.tsx'
-import { AIPanelProvider } from '#app/components/ai/ai-panel-context.tsx'
-import { GlobalAIChat } from '#app/components/ai/global-ai-panel.tsx'
 import { SiteHeader } from '#app/components/site-header.tsx'
 import { EpicProgress } from './progress-bar'
+
+const PAGE_EDITOR_PATH = /\/website\/pages\/[^/]+$/
+
+function useIsPageEditorRoute() {
+	const location = useLocation()
+	return PAGE_EDITOR_PATH.test(location.pathname)
+}
+
+function AIPanelDockSpacer() {
+	const { isOpen, isExpanded } = useAIPanel()
+	const isPageEditor = useIsPageEditorRoute()
+	const showSpacer = isOpen && !isExpanded && !isPageEditor
+
+	if (!showSpacer) return null
+
+	return (
+		<div
+			className="m-2 ml-0 hidden h-[calc(100svh-1rem)] w-[420px] shrink-0 self-start md:block"
+			aria-hidden="true"
+		/>
+	)
+}
 
 type MarketingLayoutProps = {
 	children: ReactNode
@@ -23,7 +45,7 @@ export function MarketingLayout({
 	extensionId = null,
 }: MarketingLayoutProps) {
 	return (
-		<AIPanelProvider>
+		<>
 			<SidebarProvider
 				open={!isCollapsed}
 				style={
@@ -46,13 +68,10 @@ export function MarketingLayout({
 						{children}
 					</div>
 				</SidebarInset>
-				{/* AI panel — sibling of the inset, pinned to the right edge of
-				    the viewport. Animates its own width; never wraps the main
-				    content. */}
-				<GlobalAIChat />
+				<AIPanelDockSpacer />
 			</SidebarProvider>
 			<EpicProgress />
-		</AIPanelProvider>
+		</>
 	)
 }
 
