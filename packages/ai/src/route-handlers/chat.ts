@@ -1,5 +1,5 @@
 import { invariant, invariantResponse } from '@epic-web/invariant'
-import type { ModelMessage } from 'ai'
+import { convertToModelMessages, type ModelMessage } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
 import {
 	NoteAccess,
@@ -37,6 +37,20 @@ export type PageEditorPromptContext = {
 	} | null
 }
 
+export type AppLocationContext = {
+	currentPath: string | null
+	orgSlug: string | null
+	params: Record<string, string>
+}
+
+export type NavigableAppRoute = {
+	id: string
+	title: string
+	aliases?: string[]
+	description: string
+	path: string
+}
+
 export interface ChatDependencies {
 	requireUserId: (request: Request) => Promise<string>
 	/**
@@ -60,6 +74,16 @@ export interface ChatDependencies {
 	) => string
 	brandSystemPrompt: string
 	getPageEditorTools?: (ctx: { organizationId: string }) => Record<string, any>
+	getNavigationTools?: () => Record<string, any>
+	getNavigableRoutes?: (ctx: { orgSlug: string | null }) => NavigableAppRoute[]
+	buildNavigationSystemPrompt?: (
+		basePrompt: string,
+		ctx: { location: AppLocationContext; routes: NavigableAppRoute[] },
+	) => string
+	hasWebsiteAccess?: (
+		request: Request,
+		organizationId: string,
+	) => Promise<boolean>
 	getPageContext?: (
 		pageId: string,
 		organizationId: string,
@@ -75,6 +99,65 @@ export interface ChatDependencies {
 		stepKey: string,
 		options: any,
 	) => Promise<void>
+}
+
+async function convertIncomingMessages(
+	rawMessages: unknown[],
+	tools?: Record<string, any>,
+): Promise<ModelMessage[]> {
+	return convertToModelMessages(
+		rawMessages as any,
+		tools ? { tools } : undefined,
+	)
+}
+
+function sanitizeCurrentPath(value: unknown): string | null {
+	if (typeof value !== 'string') return null
+	if (!value.startsWith('/') || value.includes('://') || value.length > 500) {
+		return null
+	}
+	return value
+}
+
+function sanitizeRouteParams(value: unknown): Record<string, string> {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+	const result: Record<string, string> = {}
+	for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+		if (!/^[A-Za-z][A-Za-z0-9_]*$/u.test(key)) continue
+		if (typeof raw !== 'string' || raw.length === 0 || raw.length > 200) {
+			continue
+		}
+		result[key] = raw
+		if (Object.keys(result).length >= 20) break
+	}
+	return result
+}
+
+function parseAppLocation(
+	body: {
+		currentPath?: unknown
+		params?: unknown
+	},
+	orgSlugFromUrl: string | null,
+): AppLocationContext {
+	const params = sanitizeRouteParams(body.params)
+	const orgSlug = orgSlugFromUrl || params.orgSlug || null
+	return {
+		currentPath: sanitizeCurrentPath(body.currentPath),
+		orgSlug,
+		params,
+	}
+}
+
+/** Website CMS tools bloat the prompt; only attach them in the page editor or website section. */
+export function shouldAttachWebsiteEditorContext(
+	location: AppLocationContext,
+	pageId: string | null,
+): boolean {
+	if (pageId) return true
+	const path = location.currentPath
+	if (!path) return false
+	return /\/website(?:\/|$)/.test(path)
 }
 
 function toChatStreamResponse(result: {
@@ -112,59 +195,89 @@ export async function handleChat(
 	const orgSlug = url.searchParams.get('orgSlug')
 
 	const body = (await request.json()) as {
-		messages: ModelMessage[]
+		messages: unknown[]
 		pageId?: string | null
+		currentPath?: unknown
+		params?: unknown
 	}
-	const { messages } = body
+	const { messages: rawMessages } = body
 	const pageId = url.searchParams.get('pageId') ?? body.pageId ?? null
 
-	// When noteId is absent, website tools are available for any org page —
-	// not only the page currently open in the editor. Missing website
-	// permission falls through to general chat instead of failing the request.
-	if (
-		!noteId &&
-		orgSlug &&
-		deps.getPageEditorTools &&
-		deps.resolveOrganizationFromSlug
-	) {
-		try {
-			const organization = await deps.resolveOrganizationFromSlug(
-				request,
-				orgSlug,
-			)
-			const pages = deps.getWebsitePages
-				? await deps.getWebsitePages(organization.id)
-				: []
-			const currentPage =
-				pageId && deps.getPageContext
-					? await deps.getPageContext(pageId, organization.id)
-					: (pages.find((page) => page.id === pageId) ?? null)
-			const pageContext: PageEditorPromptContext = {
-				pages,
-				currentPageId: pageId,
-				currentPage,
-			}
-			const systemPrompt = deps.buildPageEditorSystemPrompt
-				? deps.buildPageEditorSystemPrompt(deps.brandSystemPrompt, pageContext)
-				: deps.brandSystemPrompt +
-					'\n\nYou are helping the user edit their website pages.'
-			const result = deps.createChatStream({
-				messages,
-				systemPrompt,
-				tools: deps.getPageEditorTools({ organizationId: organization.id }),
+	// When noteId is absent, attach app-navigation tools plus (when allowed)
+	// website editor tools. Missing website permission still keeps navigation.
+	if (!noteId) {
+		const location = parseAppLocation(body, orgSlug)
+		const navigationTools = deps.getNavigationTools?.() ?? {}
+		let tools: Record<string, any> = { ...navigationTools }
+		let systemPrompt = deps.brandSystemPrompt
+		const routes =
+			deps.getNavigableRoutes?.({ orgSlug: location.orgSlug }) ?? []
+		if (deps.buildNavigationSystemPrompt && routes.length > 0) {
+			systemPrompt = deps.buildNavigationSystemPrompt(systemPrompt, {
+				location,
+				routes,
 			})
-			return toChatStreamResponse(result)
-		} catch (error) {
-			if (!(error instanceof Response) || error.status !== 403) {
-				throw error
+		}
+
+		if (location.orgSlug && deps.resolveOrganizationFromSlug) {
+			try {
+				const organization = await deps.resolveOrganizationFromSlug(
+					request,
+					location.orgSlug,
+				)
+				const hasWebsiteAccess = deps.hasWebsiteAccess
+					? await deps.hasWebsiteAccess(request, organization.id)
+					: Boolean(deps.getPageEditorTools)
+
+				if (
+					hasWebsiteAccess &&
+					deps.getPageEditorTools &&
+					shouldAttachWebsiteEditorContext(location, pageId)
+				) {
+					const pages = deps.getWebsitePages
+						? await deps.getWebsitePages(organization.id)
+						: []
+					const currentPage =
+						pageId && deps.getPageContext
+							? await deps.getPageContext(pageId, organization.id)
+							: (pages.find((page) => page.id === pageId) ?? null)
+					const pageContext: PageEditorPromptContext = {
+						pages,
+						currentPageId: pageId,
+						currentPage,
+					}
+					systemPrompt = deps.buildPageEditorSystemPrompt
+						? deps.buildPageEditorSystemPrompt(systemPrompt, pageContext)
+						: systemPrompt +
+							'\n\nYou are helping the user edit their website pages.'
+					const pageEditorTools = deps.getPageEditorTools({
+						organizationId: organization.id,
+					})
+					tools =
+						Object.keys(tools).length > 0
+							? { ...tools, ...pageEditorTools }
+							: pageEditorTools
+				}
+			} catch (error) {
+				if (
+					!(error instanceof Response) ||
+					(error.status !== 403 && error.status !== 404)
+				) {
+					throw error
+				}
 			}
 		}
-	}
 
-	// When noteId is absent, run a general (note-less) conversation.
-	if (!noteId) {
-		const systemPrompt = deps.brandSystemPrompt
-		const result = deps.createChatStream({ messages, systemPrompt })
+		const hasTools = Object.keys(tools).length > 0
+		const messages = await convertIncomingMessages(
+			rawMessages,
+			hasTools ? tools : undefined,
+		)
+		const result = deps.createChatStream({
+			messages,
+			systemPrompt,
+			...(hasTools ? { tools } : {}),
+		})
 		return toChatStreamResponse(result)
 	}
 
@@ -257,7 +370,7 @@ export async function handleChat(
 
 	// Create streaming chat response
 	const result = deps.createChatStream({
-		messages,
+		messages: await convertIncomingMessages(rawMessages),
 		systemPrompt,
 	})
 

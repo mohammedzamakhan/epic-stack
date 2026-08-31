@@ -4,7 +4,9 @@ export {
 } from './generate-content.ts'
 export {
 	handleChat,
+	type AppLocationContext,
 	type ChatDependencies,
+	type NavigableAppRoute,
 	type PageEditorPromptContext,
 	type WebsitePageListItem,
 	type WebsitePageSectionContext,

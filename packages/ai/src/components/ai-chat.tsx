@@ -5,7 +5,10 @@ import { t } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react'
 import { Trans } from '@lingui/react/macro'
 import { cn } from '@repo/ui'
-import { DefaultChatTransport } from 'ai'
+import {
+	DefaultChatTransport,
+	lastAssistantMessageIsCompleteWithToolCalls,
+} from 'ai'
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import {
 	Conversation,
@@ -28,6 +31,8 @@ export interface AIChatProps {
 	noteId?: string
 	pageId?: string
 	orgSlug?: string
+	currentPath?: string
+	routeParams?: Record<string, string>
 	userName?: string
 	greeting?: string
 	subtitle?: string
@@ -271,21 +276,12 @@ function IconRefresh({ className }: { className?: string }) {
 	)
 }
 
-// Animated thinking dots — one authored moment.
-function ThinkingDots() {
-	return (
-		<span className="inline-flex items-center gap-1" aria-hidden="true">
-			<span className="size-1.5 [animation:ai-dot-pulse_1.2s_ease-in-out_infinite] rounded-full bg-current opacity-60" />
-			<span className="size-1.5 [animation:ai-dot-pulse_1.2s_ease-in-out_0.15s_infinite] rounded-full bg-current opacity-60" />
-			<span className="size-1.5 [animation:ai-dot-pulse_1.2s_ease-in-out_0.3s_infinite] rounded-full bg-current opacity-60" />
-		</span>
-	)
-}
-
 export function AIChat({
 	noteId,
 	pageId,
 	orgSlug,
+	currentPath,
+	routeParams,
 	userName = brand.name,
 	greeting,
 	subtitle,
@@ -296,19 +292,32 @@ export function AIChat({
 	const [input, setInput] = useState('')
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const pageIdRef = useRef(pageId)
+	const currentPathRef = useRef(currentPath)
+	const routeParamsRef = useRef(routeParams)
 	const onToolCallRef = useRef(onToolCall)
 	const addToolOutputRef = useRef<
 		| null
 		| ((args: { tool: string; toolCallId: string; output: unknown }) => void)
 	>(null)
 	pageIdRef.current = pageId
+	currentPathRef.current = currentPath
+	routeParamsRef.current = routeParams
 	onToolCallRef.current = onToolCall
 	const { _ } = useLingui()
 	const transport = useMemo(
 		() =>
 			new DefaultChatTransport({
 				api: buildChatApiUrl({ noteId, orgSlug }),
-				body: () => (pageIdRef.current ? { pageId: pageIdRef.current } : {}),
+				body: () => ({
+					...(pageIdRef.current ? { pageId: pageIdRef.current } : {}),
+					...(currentPathRef.current
+						? { currentPath: currentPathRef.current }
+						: {}),
+					...(routeParamsRef.current &&
+					Object.keys(routeParamsRef.current).length > 0
+						? { params: routeParamsRef.current }
+						: {}),
+				}),
 			}),
 		[noteId, orgSlug],
 	)
@@ -333,6 +342,8 @@ export function AIChat({
 				})
 			})()
 		},
+		sendAutomaticallyWhen: ({ messages }) =>
+			lastAssistantMessageIsCompleteWithToolCalls({ messages }),
 	})
 	addToolOutputRef.current = addToolOutput
 
@@ -467,7 +478,7 @@ export function AIChat({
 					</div>
 				) : (
 					<Conversation className="flex-1">
-						<ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-6 pb-4 sm:px-6">
+						<ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-6 pb-4 sm:px-0">
 							{messages.map((message) => (
 								<Message key={message.id} from={message.role}>
 									<MessageContent from={message.role}>
@@ -481,15 +492,10 @@ export function AIChat({
 							{isBusy && (
 								<Message from="assistant">
 									<MessageContent>
-										<div
-											aria-live="polite"
-											className="text-muted-foreground flex items-center gap-2 text-sm"
-										>
-											<Loader size={14} />
-											<span className="text-foreground/80">
-												<Trans>Thinking</Trans>
+										<div aria-live="polite" className="text-sm">
+											<span className="shimmer text-muted-foreground">
+												<Trans>Thinking…</Trans>
 											</span>
-											<ThinkingDots />
 										</div>
 									</MessageContent>
 								</Message>

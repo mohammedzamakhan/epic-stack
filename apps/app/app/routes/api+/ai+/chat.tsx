@@ -19,10 +19,15 @@ import {
 } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
+import {
+	buildNavigationSystemPrompt,
+	getNavigableAppRoutes,
+} from '#app/utils/ai/app-nav-routes.ts'
+import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
-	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
+	requireUserWithOrganizationPermission,
 } from '#app/utils/organization/permissions.server.ts'
 import { ADDABLE_BLOCK_TYPES } from '#app/utils/website/block-types.ts'
 
@@ -151,13 +156,36 @@ const getPageEditorTools = (organizationId: string) =>
 		},
 		navigateToPage: {
 			description:
-				'Open a page in the website page editor. Always call this first when the user wants to change a page they are not currently viewing, then call addSection, updateSection, or removeSection.',
+				'Open a page in the website page editor. Always call this first when the user wants to change a page they are not currently viewing, then call addSection, updateSection, or removeSection. Do not use this to open app screens such as settings — use navigateToAppPage for those.',
 			inputSchema: z.object({
 				pageId: z.string().describe('The ID of the page to open in the editor'),
 			}),
 		},
+		createPage: {
+			description:
+				'Create a new website page and open it in the page editor. Use this when the user asks to add, create, or make a new page. Choose a clear title and a valid lowercase hyphenated slug.',
+			inputSchema: z.object({
+				title: z
+					.string()
+					.min(1)
+					.max(200)
+					.describe('The human-readable title for the new page'),
+				slug: z
+					.string()
+					.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+					.max(200)
+					.describe(
+						'The URL slug for the new page, using lowercase letters, numbers, and hyphens',
+					),
+				template: z
+					.enum(['blank', 'article', 'showcase'])
+					.describe(
+						'The starting template: blank for a custom page, article for long-form content, or showcase for a visual page',
+					),
+			}),
+		},
 		addSection: {
-			description: `Add a new section (block) to a website page. Valid types: ${ADDABLE_SECTION_TYPES.join(', ')}.`,
+			description: `Add a new section (block) to a website page. Always provide a complete, useful JSON config with real content; never use placeholder text such as "Question 1" or "Answer 1". For FAQ sections, include several specific question-and-answer pairs relevant to the user's topic. Valid types: ${ADDABLE_SECTION_TYPES.join(', ')}.`,
 			inputSchema: z.object({
 				pageId: z.string().describe('The ID of the page to add the section to'),
 				type: z
@@ -167,6 +195,11 @@ const getPageEditorTools = (organizationId: string) =>
 					.number()
 					.describe(
 						'The 0-based body position to insert the section at. Use 0 to insert at the top.',
+					),
+				config: z
+					.string()
+					.describe(
+						'Complete JSON string for the section configuration. For FAQ sections, include 3-6 helpful, SEO/AEO-friendly question-and-answer pairs with no placeholders.',
 					),
 			}),
 		},
@@ -188,6 +221,21 @@ const getPageEditorTools = (organizationId: string) =>
 			inputSchema: z.object({
 				pageId: z.string().describe('The ID of the page that owns the section'),
 				sectionId: z.string().describe('The ID of the section to remove'),
+			}),
+		},
+	}) as Record<string, any>
+
+const getNavigationTools = () =>
+	({
+		navigateToAppPage: {
+			description:
+				'Open an app screen such as organization settings, notes, marketing, billing, or the user profile. Pass the route id from the app navigation list. Use this when the user says "go to settings", "open members", "take me to billing", and similar. Do not use this to edit a website CMS page — use navigateToPage with a page ID for that.',
+			inputSchema: z.object({
+				routeId: z
+					.string()
+					.describe(
+						'The id of the destination from the app navigation list, e.g. org-settings, notes, marketing-campaigns, account-profile',
+					),
 			}),
 		},
 	}) as Record<string, any>
@@ -257,9 +305,11 @@ Currently viewing: ${
 Workflow for every page change:
 1. Identify the target page ID from the list (or by asking if it is ambiguous).
 2. If you need that page's section configs and they are not already listed under "Currently viewing", call getPageContext with that page ID.
-3. Call navigateToPage with that page ID so the page editor opens. Do this BEFORE addSection, updateSection, or removeSection whenever the user is not already viewing that page.
-4. Call addSection, updateSection, or removeSection and always pass the same pageId.
-5. When modifying an existing section, use the exact section ID from getPageContext or the current page state.
+3. When the user asks for a new page, call createPage with a clear title, a valid lowercase hyphenated slug, and the most appropriate template. The tool opens the new page editor and returns its page ID.
+4. For an existing page, call navigateToPage with that page ID so the page editor opens before addSection, updateSection, or removeSection. createPage already opens the new page editor.
+5. For addSection, always provide a complete JSON config with real, topic-specific content. Never leave default placeholder values. For FAQ sections, create 3-6 concise questions and answers that directly address the user's topic and use natural language suitable for search engines and answer engines.
+6. Call addSection, updateSection, or removeSection and always pass the same pageId.
+7. When modifying an existing section, use the exact section ID from getPageContext or the current page state.
 
 ${
 	pageContext.currentPage
@@ -286,18 +336,33 @@ export const action = async (args: ActionFunctionArgs) => {
 		brandSystemPrompt: brand.ai.systemPrompt,
 		getPageEditorTools: ({ organizationId }) =>
 			getPageEditorTools(organizationId),
+		getNavigationTools,
+		getNavigableRoutes: () => {
+			const launchStatus = getLaunchStatus()
+			return getNavigableAppRoutes({
+				includeBilling:
+					launchStatus !== 'PUBLIC_BETA' && launchStatus !== 'CLOSED_BETA',
+			})
+		},
+		buildNavigationSystemPrompt,
 		getPageContext: loadPageContext,
 		getWebsitePages: loadWebsitePages,
 		resolveOrganizationFromSlug: async (request, orgSlug) => {
-			const organization = await requireUserOrganization(request, orgSlug, {
+			return requireUserOrganization(request, orgSlug, {
 				id: true,
 			})
-			await requireUserWithOrganizationPermission(
-				request,
-				organization.id,
-				ORG_PERMISSIONS.READ_WEBSITE_ANY,
-			)
-			return organization
+		},
+		hasWebsiteAccess: async (request, organizationId) => {
+			try {
+				await requireUserWithOrganizationPermission(
+					request,
+					organizationId,
+					ORG_PERMISSIONS.READ_WEBSITE_ANY,
+				)
+				return true
+			} catch {
+				return false
+			}
 		},
 		markStepCompleted,
 	})

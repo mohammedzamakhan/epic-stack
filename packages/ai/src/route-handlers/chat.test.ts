@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import { db } from '@repo/database'
 
-import { handleChat, type ChatDependencies } from './chat'
+import {
+	handleChat,
+	shouldAttachWebsiteEditorContext,
+	type ChatDependencies,
+} from './chat'
 
 vi.mock('@repo/database', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('@repo/database')>()
@@ -41,6 +45,31 @@ function baseDeps(overrides: Partial<ChatDependencies> = {}): ChatDependencies {
 }
 
 describe('handleChat', () => {
+	it('only attaches website editor context on website routes or with a pageId', () => {
+		expect(
+			shouldAttachWebsiteEditorContext(
+				{ currentPath: '/acme', orgSlug: 'acme', params: {} },
+				null,
+			),
+		).toBe(false)
+		expect(
+			shouldAttachWebsiteEditorContext(
+				{
+					currentPath: '/acme/website/pages/home-1',
+					orgSlug: 'acme',
+					params: {},
+				},
+				null,
+			),
+		).toBe(true)
+		expect(
+			shouldAttachWebsiteEditorContext(
+				{ currentPath: '/acme', orgSlug: 'acme', params: {} },
+				'page-123',
+			),
+		).toBe(true)
+	})
+
 	it('calls requireOrgMembership before fetching full note details and comments', async () => {
 		const request = new Request(
 			'http://localhost/api/ai/chat?noteId=note-123',
@@ -64,32 +93,18 @@ describe('handleChat', () => {
 		expect(requireOrgMembership).toHaveBeenCalledWith(request, 'org-456')
 	})
 
-	it('enables website editor tools for any org page, not only the current editor', async () => {
+	it('does not attach website editor tools on the org dashboard', async () => {
 		const request = new Request('http://localhost/api/ai/chat?orgSlug=acme', {
 			method: 'POST',
-			body: JSON.stringify({ messages: [] }),
+			body: JSON.stringify({
+				messages: [],
+				currentPath: '/acme',
+				params: { orgSlug: 'acme' },
+			}),
 		})
 
-		const pages = [
-			{
-				id: 'home-1',
-				title: 'Home',
-				slug: 'home',
-				isHomePage: true,
-				sections: [{ id: 'hero-1', type: 'hero', position: 0 }],
-			},
-			{
-				id: 'about-1',
-				title: 'About Us',
-				slug: 'about',
-				isHomePage: false,
-				sections: [{ id: 'content-1', type: 'content', position: 0 }],
-			},
-		]
-		const tools = { navigateToPage: {} }
-		const getPageEditorTools = vi.fn(() => tools)
-		const getWebsitePages = vi.fn().mockResolvedValue(pages)
-		const getPageContext = vi.fn()
+		const getPageEditorTools = vi.fn(() => ({ navigateToPage: {} }))
+		const getWebsitePages = vi.fn().mockResolvedValue([])
 		const buildPageEditorSystemPrompt = vi.fn(
 			(base: string) => `${base}\nwebsite`,
 		)
@@ -103,30 +118,55 @@ describe('handleChat', () => {
 			buildPageEditorSystemPrompt,
 			getPageEditorTools,
 			getWebsitePages,
-			getPageContext,
 			resolveOrganizationFromSlug,
+			hasWebsiteAccess: vi.fn().mockResolvedValue(true),
 		})
 
 		const response = await handleChat({ request, params: {} } as any, deps)
 
 		expect(response).toBeInstanceOf(Response)
-		expect(resolveOrganizationFromSlug).toHaveBeenCalledWith(request, 'acme')
-		expect(getWebsitePages).toHaveBeenCalledWith('org-456')
-		expect(getPageContext).not.toHaveBeenCalled()
-		expect(getPageEditorTools).toHaveBeenCalledWith({
-			organizationId: 'org-456',
-		})
-		expect(buildPageEditorSystemPrompt).toHaveBeenCalledWith('system prompt', {
-			pages,
-			currentPageId: null,
-			currentPage: null,
-		})
+		expect(getWebsitePages).not.toHaveBeenCalled()
+		expect(getPageEditorTools).not.toHaveBeenCalled()
+		expect(buildPageEditorSystemPrompt).not.toHaveBeenCalled()
 		expect(createChatStream).toHaveBeenCalledWith(
 			expect.objectContaining({
-				tools,
-				systemPrompt: 'system prompt\nwebsite',
+				systemPrompt: 'system prompt',
 			}),
 		)
+		expect(createChatStream).toHaveBeenCalledWith(
+			expect.not.objectContaining({
+				tools: expect.objectContaining({ navigateToPage: {} }),
+			}),
+		)
+	})
+
+	it('converts UI messages to ModelMessages before creating the stream', async () => {
+		const request = new Request('http://localhost/api/ai/chat', {
+			method: 'POST',
+			body: JSON.stringify({
+				messages: [
+					{
+						id: 'message-1',
+						role: 'user',
+						parts: [{ type: 'text', text: 'Help me get started' }],
+					},
+				],
+			}),
+		})
+		const createChatStream = vi.fn(() => streamResult())
+		const deps = baseDeps({ createChatStream })
+
+		await handleChat({ request, params: {} } as any, deps)
+
+		expect(createChatStream).toHaveBeenCalledWith({
+			messages: [
+				{
+					role: 'user',
+					content: [{ type: 'text', text: 'Help me get started' }],
+				},
+			],
+			systemPrompt: 'system prompt',
+		})
 	})
 
 	it('loads the currently viewed page when pageId is provided', async () => {
@@ -189,5 +229,97 @@ describe('handleChat', () => {
 			messages: [],
 			systemPrompt: 'system prompt',
 		})
+	})
+
+	it('attaches app navigation tools and current location without website access', async () => {
+		const request = new Request('http://localhost/api/ai/chat?orgSlug=acme', {
+			method: 'POST',
+			body: JSON.stringify({
+				messages: [],
+				currentPath: '/acme/notes',
+				params: { orgSlug: 'acme' },
+			}),
+		})
+		const navTools = { navigateToAppPage: {} }
+		const routes = [
+			{
+				id: 'org-settings',
+				title: 'Organization settings',
+				description: 'Organization general settings',
+				path: '/:orgSlug/settings',
+			},
+		]
+		const createChatStream = vi.fn(() => streamResult())
+		const buildNavigationSystemPrompt = vi.fn(
+			(base: string) => `${base}\nnavigation`,
+		)
+
+		const deps = baseDeps({
+			createChatStream,
+			getNavigationTools: vi.fn(() => navTools),
+			getNavigableRoutes: vi.fn(() => routes),
+			buildNavigationSystemPrompt,
+			hasWebsiteAccess: vi.fn().mockResolvedValue(false),
+			resolveOrganizationFromSlug: vi.fn().mockResolvedValue({ id: 'org-456' }),
+			getPageEditorTools: vi.fn(() => ({ navigateToPage: {} })),
+		})
+
+		await handleChat({ request, params: {} } as any, deps)
+
+		expect(deps.hasWebsiteAccess).toHaveBeenCalledWith(
+			expect.any(Request),
+			'org-456',
+		)
+		expect(deps.getPageEditorTools).not.toHaveBeenCalled()
+		expect(buildNavigationSystemPrompt).toHaveBeenCalledWith('system prompt', {
+			location: {
+				currentPath: '/acme/notes',
+				orgSlug: 'acme',
+				params: { orgSlug: 'acme' },
+			},
+			routes,
+		})
+		expect(createChatStream).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tools: navTools,
+				systemPrompt: 'system prompt\nnavigation',
+			}),
+		)
+	})
+
+	it('merges navigation tools with website editor tools', async () => {
+		const request = new Request('http://localhost/api/ai/chat?orgSlug=acme', {
+			method: 'POST',
+			body: JSON.stringify({
+				messages: [],
+				currentPath: '/acme/website/pages/home-1',
+			}),
+		})
+		const navTools = { navigateToAppPage: {} }
+		const pageTools = { navigateToPage: {} }
+		const createChatStream = vi.fn(() => streamResult())
+
+		const deps = baseDeps({
+			createChatStream,
+			getNavigationTools: vi.fn(() => navTools),
+			getNavigableRoutes: vi.fn(() => []),
+			getPageEditorTools: vi.fn(() => pageTools),
+			getWebsitePages: vi.fn().mockResolvedValue([]),
+			resolveOrganizationFromSlug: vi.fn().mockResolvedValue({ id: 'org-456' }),
+			hasWebsiteAccess: vi.fn().mockResolvedValue(true),
+			buildPageEditorSystemPrompt: vi.fn((base: string) => `${base}\nwebsite`),
+		})
+
+		await handleChat({ request, params: {} } as any, deps)
+
+		expect(createChatStream).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tools: {
+					navigateToAppPage: {},
+					navigateToPage: {},
+				},
+				systemPrompt: 'system prompt\nwebsite',
+			}),
+		)
 	})
 })
