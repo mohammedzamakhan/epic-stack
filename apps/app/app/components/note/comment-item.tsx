@@ -9,6 +9,8 @@ import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useMemo, useState } from 'react'
 
+import { SanitizedHtml } from '#app/components/sanitized-html.tsx'
+
 import CommentInput, { type MentionUser } from './comment-input'
 
 // Enforce rel="noopener noreferrer" for all target="_blank" links
@@ -180,10 +182,9 @@ export function CommentItem({
 							)}
 						</div>
 
-						<div
+						<SanitizedHtml
 							className="text-foreground prose prose-sm prose-p:my-1 mb-2 max-w-none text-sm leading-relaxed tracking-wider"
-							// nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml
-							dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+							html={sanitizedContent}
 						/>
 
 						{/* Comment Images */}
