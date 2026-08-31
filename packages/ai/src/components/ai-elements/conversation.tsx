@@ -2,6 +2,7 @@
 
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
+import { ScrollArea } from '@repo/ui/scroll-area'
 import { type ComponentProps, useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
@@ -11,7 +12,7 @@ export type ConversationProps = ComponentProps<typeof StickToBottom>
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
 	<StickToBottom
-		className={cn('relative flex-1 overflow-y-auto', className)}
+		className={cn('relative min-h-0 flex-1 overflow-hidden', className)}
 		initial="smooth"
 		resize="smooth"
 		role="log"
@@ -25,10 +26,28 @@ export type ConversationContentProps = ComponentProps<
 
 export const ConversationContent = ({
 	className,
+	scrollClassName,
 	...props
-}: ConversationContentProps) => (
-	<StickToBottom.Content className={cn('p-4', className)} {...props} />
-)
+}: ConversationContentProps) => {
+	const context = useStickToBottomContext()
+	const { children, ...contentProps } = props
+
+	return (
+		<ScrollArea
+			className="h-full"
+			viewportClassName={scrollClassName}
+			viewportRef={context.scrollRef}
+		>
+			<div
+				{...contentProps}
+				ref={context.contentRef}
+				className={cn('p-4', className)}
+			>
+				{typeof children === 'function' ? children(context) : children}
+			</div>
+		</ScrollArea>
+	)
+}
 
 export type ConversationScrollButtonProps = ComponentProps<typeof Button>
 

@@ -432,6 +432,7 @@ const AddSectionSchema = z.object({
 	intent: z.literal(addSectionIntent),
 	type: z.string().min(1),
 	position: z.coerce.number(),
+	config: z.string().min(1).optional(),
 })
 
 const UpdateSectionSchema = z.object({
@@ -972,7 +973,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ status: 'error', result: submission.reply() })
 		}
 
-		const { type, position } = submission.value
+		const { type, position, config } = submission.value
 
 		if (isLockedBlockType(type)) {
 			return Response.json(
@@ -985,6 +986,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				{ status: 'error', error: 'Unknown section type' },
 				{ status: 400 },
 			)
+		}
+
+		let sectionConfig = getDefaultConfig(type as BlockType)
+		if (config) {
+			try {
+				const parsedConfig: unknown = JSON.parse(config)
+				if (
+					!parsedConfig ||
+					typeof parsedConfig !== 'object' ||
+					Array.isArray(parsedConfig)
+				) {
+					throw new Error('Section config must be a JSON object')
+				}
+				sectionConfig = {
+					...sectionConfig,
+					...(parsedConfig as Record<string, unknown>),
+				}
+			} catch {
+				return Response.json(
+					{ status: 'error', error: 'Invalid JSON section config' },
+					{ status: 400 },
+				)
+			}
 		}
 
 		const existing = await db
@@ -1012,7 +1036,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			pageId: page.id,
 			type,
 			position: bodyPosition,
-			config: JSON.stringify(getDefaultConfig(type as BlockType)),
+			config: JSON.stringify(sectionConfig),
 		})
 		return Response.json({ status: 'success' })
 	}
