@@ -334,7 +334,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build App
-        run: npx turbo run build --filter=app
+        run: DEPLOY_TARGET=cloudflare npx turbo run build --filter=app
 
       - name: 🚀 Deploy App
         working-directory: apps/app
@@ -366,7 +366,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build Admin
-        run: npx turbo run build --filter=admin
+        run: DEPLOY_TARGET=cloudflare npx turbo run build --filter=admin
 
       - name: 🚀 Deploy Admin
         working-directory: apps/admin
