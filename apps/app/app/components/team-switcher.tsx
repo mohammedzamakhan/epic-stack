@@ -44,7 +44,12 @@ function OrganizationAvatar({
 	className?: string
 }) {
 	return (
-		<Avatar className={cn('size-7 rounded-md after:rounded-md', className)}>
+		<Avatar
+			className={cn(
+				'size-7 shrink-0 rounded-md group-data-[collapsible=icon]:size-6 after:rounded-md',
+				className,
+			)}
+		>
 			{organization.image?.objectKey ? (
 				<AvatarImage
 					src={`/resources/images?objectKey=${organization.image.objectKey}`}
@@ -113,10 +118,10 @@ export function TeamSwitcher() {
 							<SidebarMenuButton
 								size="lg"
 								tooltip={activeTeam.name}
-								className="group/org h-12 gap-3 px-2 transition-colors duration-150 ease-out group-data-[collapsible=icon]:justify-center motion-reduce:transition-none"
+								className="group/org h-12 gap-3 px-2 transition-colors duration-150 ease-out group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 motion-reduce:transition-none"
 							>
 								<OrganizationAvatar organization={activeTeam} />
-								<div className="grid min-w-0 flex-1 leading-tight ltr:text-left rtl:text-right">
+								<div className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden ltr:text-left rtl:text-right">
 									<span className="text-sidebar-foreground truncate text-sm leading-5 font-medium">
 										{activeTeam.name}
 									</span>
@@ -133,7 +138,7 @@ export function TeamSwitcher() {
 								</div>
 								<Icon
 									name="chevron-down"
-									className="text-sidebar-foreground/50 size-4 shrink-0 transition-transform duration-200 ease-out group-data-popup-open/org:rotate-180 motion-reduce:transition-none"
+									className="text-sidebar-foreground/50 size-4 shrink-0 transition-transform duration-200 ease-out group-data-popup-open/org:rotate-180 group-data-[collapsible=icon]:hidden motion-reduce:transition-none"
 								/>
 							</SidebarMenuButton>
 						}

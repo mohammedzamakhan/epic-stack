@@ -302,6 +302,26 @@ function PanelBody() {
 		],
 	)
 
+	const resolveDestinationLabel = useCallback(
+		(toolName: string, input: Record<string, unknown>) => {
+			if (toolName === 'navigateToAppPage') {
+				const resolved = resolveAppNavPath(asString(input.routeId), {
+					orgSlug,
+				})
+				if (resolved.ok) return resolved.route.title
+			}
+
+			if (toolName === 'navigateToPage') {
+				const pageTitle = asString(input.title).trim()
+				if (pageTitle) return pageTitle
+				return 'the page editor'
+			}
+
+			return undefined
+		},
+		[orgSlug],
+	)
+
 	return (
 		<>
 			<header
@@ -335,6 +355,7 @@ function PanelBody() {
 							currentPath={currentPath}
 							routeParams={routeParams}
 							onToolCall={handleToolCall}
+							resolveDestinationLabel={resolveDestinationLabel}
 						/>
 					</Suspense>
 				</PanelErrorBoundary>
@@ -387,7 +408,7 @@ function AIPanelSurface() {
 					onClick={collapse}
 					className={cn(
 						'animate-in fade-in-0 fixed inset-0 bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs',
-						isPageEditor ? 'z-[60]' : 'z-40',
+						isPageEditor ? 'z-60' : 'z-40',
 					)}
 				/>
 			) : null}
@@ -403,7 +424,7 @@ function AIPanelSurface() {
 					isMobile &&
 						cn(
 							'fixed inset-0',
-							isPageEditor ? 'z-[60]' : 'z-50',
+							isPageEditor ? 'z-60' : 'z-50',
 							!isOpen && 'invisible',
 						),
 					!isMobile &&
@@ -411,14 +432,14 @@ function AIPanelSurface() {
 						cn(
 							'ring-foreground/10 animate-in fade-in-0 zoom-in-95 fixed rounded-xl shadow-lg ring-1 duration-200',
 							isPageEditor
-								? 'inset-3 z-[70] sm:inset-4'
+								? 'inset-3 z-70 sm:inset-4'
 								: 'inset-3 z-50 sm:inset-4',
 						),
 					!isMobile &&
 						!isFullscreen &&
 						isPageEditor &&
 						cn(
-							'border-border fixed top-12 right-0 bottom-0 z-[60] w-[420px] border-l shadow-lg',
+							'fixed top-14 right-2 bottom-2 z-80 rounded-xl shadow-sm',
 							!isVisible && 'hidden',
 						),
 					!isMobile &&
@@ -427,14 +448,14 @@ function AIPanelSurface() {
 						cn(
 							'fixed top-2 right-2 bottom-2 z-40 rounded-xl shadow-sm',
 							'transition-[width,opacity] duration-300 ease-out',
-							isVisible ? 'w-[420px] opacity-100' : 'w-0 opacity-0',
+							isVisible ? 'w-105 opacity-100' : 'w-0 opacity-0',
 						),
 				)}
 			>
 				<div
 					className={cn(
 						'flex h-full flex-col',
-						isMobile || isFullscreen ? 'w-full' : 'w-[420px]',
+						isMobile || isFullscreen ? 'w-full' : 'w-105',
 					)}
 				>
 					<PanelBody />

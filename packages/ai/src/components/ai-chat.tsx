@@ -9,7 +9,10 @@ import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
 } from 'ai'
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import {
 	Conversation,
 	ConversationContent,
@@ -40,6 +43,13 @@ export interface AIChatProps {
 	initialSuggestions?: string[]
 	className?: string
 	onToolCall?: (options: { toolCall: any }) => any
+	/**
+	 * Maps tool inputs to human-readable destination labels for navigation cards.
+	 */
+	resolveDestinationLabel?: (
+		toolName: string,
+		input: Record<string, unknown>,
+	) => string | undefined
 	/**
 	 * When set, chat messages are restored from and saved to sessionStorage
 	 * so the conversation survives route changes and remounts.
@@ -77,13 +87,268 @@ function buildChatApiUrl({
 	return query ? `/api/ai/chat?${query}` : '/api/ai/chat'
 }
 
+function resolveToolName(part: { toolName?: string; type?: string }) {
+	return (
+		part.toolName ||
+		(typeof part.type === 'string' && part.type.startsWith('tool-')
+			? part.type.replace(/^tool-/, '')
+			: part.type) ||
+		'action'
+	)
+}
+
+function humanizeDestinationId(value: string) {
+	return value
+		.split(/[-_]/u)
+		.filter(Boolean)
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+		.join(' ')
+}
+
+function resolveNavigationTitle(
+	toolName: string,
+	input: Record<string, unknown>,
+	resolveDestinationLabel?: AIChatProps['resolveDestinationLabel'],
+) {
+	const resolved = resolveDestinationLabel?.(toolName, input)
+	if (resolved) return resolved
+
+	if (typeof input.title === 'string' && input.title.trim()) {
+		return input.title.trim()
+	}
+
+	if (toolName === 'navigateToPage') {
+		return 'the page editor'
+	}
+
+	const routeId =
+		typeof input.routeId === 'string'
+			? input.routeId
+			: typeof input.pageId === 'string'
+				? input.pageId
+				: ''
+	if (routeId) return humanizeDestinationId(routeId)
+
+	return 'this page'
+}
+
+function useToolActivityLabel(toolName: string, isComplete: boolean) {
+	const { _ } = useLingui()
+
+	const labels: Record<string, { active: string; done: string }> = {
+		getPageDetails: {
+			active: _(t`Reading page details`),
+			done: _(t`Read page details`),
+		},
+		createPage: {
+			active: _(t`Creating page`),
+			done: _(t`Created page`),
+		},
+		addSection: {
+			active: _(t`Adding section`),
+			done: _(t`Added section`),
+		},
+		updateSection: {
+			active: _(t`Updating section`),
+			done: _(t`Updated section`),
+		},
+		removeSection: {
+			active: _(t`Removing section`),
+			done: _(t`Removed section`),
+		},
+	}
+
+	const label = labels[toolName]
+	if (label) return isComplete ? label.done : label.active
+	return isComplete ? _(t`Done`) : _(t`Working on it`)
+}
+
+function ActivityStatusRow({
+	label,
+	state,
+	errorText,
+	showDoneBadge = true,
+}: {
+	label: string
+	state: string
+	errorText?: string
+	showDoneBadge?: boolean
+}) {
+	const isPending = state === 'input-available' || state === 'input-streaming'
+	const isCompleted = state === 'output-available'
+	const isError = state === 'output-error' || Boolean(errorText)
+
+	return (
+		<div
+			className={cn(
+				'border-border/60 bg-muted/30 my-2 flex items-center gap-2.5 rounded-lg border px-3 py-2',
+				isError && 'border-destructive/30 bg-destructive/5',
+			)}
+		>
+			{isPending ? (
+				<Loader size={14} className="text-muted-foreground shrink-0" />
+			) : isError ? (
+				<Icon
+					name="octagon-alert"
+					className="text-destructive size-3.5 shrink-0"
+				/>
+			) : (
+				<Icon name="check-circle" className="text-primary size-3.5 shrink-0" />
+			)}
+			<p
+				className={cn(
+					'min-w-0 flex-1 text-sm',
+					isError ? 'text-destructive' : 'text-muted-foreground',
+				)}
+			>
+				{isError
+					? errorText || <Trans>Something went wrong. Try again.</Trans>
+					: label}
+			</p>
+			{showDoneBadge && isCompleted && !isError ? (
+				<Badge variant="secondary" className="shrink-0 text-[10px]">
+					<Trans>Done</Trans>
+				</Badge>
+			) : null}
+		</div>
+	)
+}
+
+function NavigationConfirmCard({
+	routeTitle,
+	state,
+	output,
+	onConfirm,
+	onCancel,
+}: {
+	routeTitle: string
+	state: string
+	output?: unknown
+	onConfirm: () => void
+	onCancel: () => void
+}) {
+	const { _ } = useLingui()
+	const isCompleted = state === 'output-available'
+	const isError = state === 'output-error'
+	const outputText = typeof output === 'string' ? output : ''
+	const wasDeclined =
+		outputText.toLowerCase().includes('declined') ||
+		outputText.toLowerCase().includes('cancelled')
+
+	if (isCompleted && !isError) {
+		return (
+			<ActivityStatusRow
+				label={
+					wasDeclined
+						? _(t`Stayed on current page`)
+						: _(t`Opened ${routeTitle}`)
+				}
+				state={state}
+				showDoneBadge={false}
+			/>
+		)
+	}
+
+	if (isError) {
+		return (
+			<ActivityStatusRow
+				label={_(t`Couldn't open ${routeTitle}`)}
+				state={state}
+				errorText={_(t`Ask me to try again or choose a different destination.`)}
+				showDoneBadge={false}
+			/>
+		)
+	}
+
+	return (
+		<div className="border-border/60 bg-muted/20 my-2 space-y-3 rounded-lg border p-3">
+			<div className="flex items-center gap-2.5">
+				<Icon name="arrow-right" className="text-primary size-4 shrink-0" />
+				<p className="text-foreground text-sm font-medium">
+					<Trans>Open {routeTitle}?</Trans>
+				</p>
+			</div>
+			<div className="flex gap-2">
+				<Button
+					type="button"
+					size="sm"
+					onClick={onConfirm}
+					className="h-8 flex-1 text-xs font-medium"
+				>
+					<Trans>Go there</Trans>
+				</Button>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={onCancel}
+					className="h-8 flex-1 text-xs font-medium"
+				>
+					<Trans>Not now</Trans>
+				</Button>
+			</div>
+		</div>
+	)
+}
+
+function ToolPartRenderer({
+	part,
+	onConfirmTool,
+	onCancelTool,
+	resolveDestinationLabel,
+}: {
+	part: any
+	onConfirmTool?: (toolCallId: string, toolName: string, input: any) => void
+	onCancelTool?: (toolCallId: string, toolName: string, input: any) => void
+	resolveDestinationLabel?: AIChatProps['resolveDestinationLabel']
+}) {
+	const toolName = resolveToolName(part)
+	const state =
+		part.state || (part.output ? 'output-available' : 'input-available')
+	const input = part.input || part.args || {}
+	const isComplete = state === 'output-available'
+	const activityLabel = useToolActivityLabel(toolName, isComplete)
+
+	if (toolName === 'navigateToAppPage' || toolName === 'navigateToPage') {
+		const title = resolveNavigationTitle(
+			toolName,
+			input,
+			resolveDestinationLabel,
+		)
+
+		return (
+			<NavigationConfirmCard
+				routeTitle={title}
+				state={state}
+				output={part.output}
+				onConfirm={() => onConfirmTool?.(part.toolCallId, toolName, input)}
+				onCancel={() => onCancelTool?.(part.toolCallId, toolName, input)}
+			/>
+		)
+	}
+
+	return (
+		<ActivityStatusRow
+			label={activityLabel}
+			state={state}
+			errorText={part.errorText}
+		/>
+	)
+}
+
 // Message Content Component
 function MessageContentRenderer({
 	parts,
 	isUser,
+	onConfirmTool,
+	onCancelTool,
+	resolveDestinationLabel,
 }: {
 	parts: UIMessage['parts']
 	isUser: boolean
+	onConfirmTool?: (toolCallId: string, toolName: string, input: any) => void
+	onCancelTool?: (toolCallId: string, toolName: string, input: any) => void
+	resolveDestinationLabel?: AIChatProps['resolveDestinationLabel']
 }) {
 	if (isUser) {
 		return (
@@ -98,13 +363,30 @@ function MessageContentRenderer({
 		)
 	}
 
-	// Use the Response component for AI messages with markdown support
+	// Use the Response component for AI messages with markdown support & tool parts
 	return (
-		<div className="leading-relaxed">
+		<div className="space-y-2 leading-relaxed">
 			{parts.map((part, index) => {
 				if (part.type === 'text') {
 					return <Response key={index}>{part.text}</Response>
 				}
+
+				// Render tool calls / invocations
+				if (
+					part.type === 'dynamic-tool' ||
+					(typeof part.type === 'string' && part.type.startsWith('tool-'))
+				) {
+					return (
+						<ToolPartRenderer
+							key={index}
+							part={part}
+							onConfirmTool={onConfirmTool}
+							onCancelTool={onCancelTool}
+							resolveDestinationLabel={resolveDestinationLabel}
+						/>
+					)
+				}
+
 				return null
 			})}
 		</div>
@@ -127,10 +409,10 @@ function useSmartSuggestions(messages: UIMessage[], hasContent: boolean) {
 						_(t`Find potential issues`),
 					]
 				: [
-						_(t`Help me get started`),
 						_(t`What can you help me with?`),
-						_(t`Explain this platform`),
-						_(t`Show me features`),
+						_(t`Take me to settings`),
+						_(t`Help me get started`),
+						_(t`Draft something for me`),
 					]
 		}
 
@@ -188,62 +470,6 @@ function useSmartSuggestions(messages: UIMessage[], hasContent: boolean) {
 			_(t`How can I implement this?`),
 		]
 	}, [messages, _])
-}
-
-// Inline icon set — one stroke weight, one size vocabulary.
-function IconPaperclip({ className }: { className?: string }) {
-	return (
-		<svg
-			className={className}
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.75"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			aria-hidden="true"
-		>
-			<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-		</svg>
-	)
-}
-
-function IconMoreHorizontal({ className }: { className?: string }) {
-	return (
-		<svg
-			className={className}
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.75"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			aria-hidden="true"
-		>
-			<circle cx="5" cy="12" r="1" />
-			<circle cx="12" cy="12" r="1" />
-			<circle cx="19" cy="12" r="1" />
-		</svg>
-	)
-}
-
-function IconMic({ className }: { className?: string }) {
-	return (
-		<svg
-			className={className}
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.75"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			aria-hidden="true"
-		>
-			<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-			<path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-			<line x1="12" x2="12" y1="19" y2="22" />
-		</svg>
-	)
 }
 
 function IconArrowUp({ className }: { className?: string }) {
@@ -309,6 +535,7 @@ export function AIChat({
 	placeholder,
 	className,
 	onToolCall,
+	resolveDestinationLabel,
 	persistKey,
 }: AIChatProps) {
 	const [input, setInput] = useState('')
@@ -358,6 +585,13 @@ export function AIChat({
 		...(persistKey ? { id: persistKey, messages: persistedMessages } : {}),
 		transport,
 		onToolCall: ({ toolCall }) => {
+			// Interactive navigation tools wait for user confirmation click
+			if (
+				toolCall.toolName === 'navigateToAppPage' ||
+				toolCall.toolName === 'navigateToPage'
+			) {
+				return
+			}
 			const handler = onToolCallRef.current
 			if (!handler) return
 			void (async () => {
@@ -435,13 +669,55 @@ export function AIChat({
 	const isBusy = isStreaming || isSubmitted
 	const canSend = !isBusy && input.trim().length > 0
 
-	const displayGreeting = greeting || _(t`Hi, it's ${userName}.`)
-	const displaySubtitle = subtitle || _(t`Ask me anything.`)
-	const inputPlaceholder = placeholder || _(t`What can I help with?`)
+	const isPersonalizedGreeting = userName !== brand.name
+	const displayGreeting =
+		greeting ||
+		(isPersonalizedGreeting ? _(t`Hi, ${userName}`) : _(t`How can I help?`))
+	const displaySubtitle =
+		subtitle ||
+		(noteId
+			? _(t`Ask about this note, or tell me where you'd like to go.`)
+			: _(t`Notes, navigation, and your site — just ask.`))
+	const inputPlaceholder = placeholder || _(t`Ask anything…`)
 
 	const lastMessage = messages[messages.length - 1]
 	const lastIsAssistant = lastMessage?.role === 'assistant'
 	const canRegenerate = !isBusy && lastIsAssistant
+
+	const handleConfirmTool = useCallback(
+		async (toolCallId: string, toolName: string, input: any) => {
+			const handler = onToolCallRef.current
+			if (handler) {
+				const output = await handler({
+					toolCall: {
+						toolCallId,
+						toolName,
+						input,
+						args: input,
+					},
+				})
+				addToolOutputRef.current?.({
+					tool: toolName,
+					toolCallId,
+					output: output ?? 'ok',
+				})
+			}
+		},
+		[],
+	)
+
+	const handleCancelTool = useCallback(
+		(toolCallId: string, toolName: string, input: any) => {
+			const target =
+				input?.title || input?.routeId || input?.pageId || 'destination'
+			addToolOutputRef.current?.({
+				tool: toolName,
+				toolCallId,
+				output: `Navigation to ${target} was cancelled by user. Remained on current screen.`,
+			})
+		},
+		[],
+	)
 
 	return (
 		<div
@@ -524,6 +800,9 @@ export function AIChat({
 										<MessageContentRenderer
 											parts={message.parts}
 											isUser={message.role === 'user'}
+											onConfirmTool={handleConfirmTool}
+											onCancelTool={handleCancelTool}
+											resolveDestinationLabel={resolveDestinationLabel}
 										/>
 									</MessageContent>
 								</Message>
@@ -533,7 +812,7 @@ export function AIChat({
 									<MessageContent>
 										<div aria-live="polite" className="text-sm">
 											<span className="shimmer text-muted-foreground">
-												<Trans>Thinking…</Trans>
+												<Trans>One moment…</Trans>
 											</span>
 										</div>
 									</MessageContent>
@@ -595,95 +874,47 @@ export function AIChat({
 							)}
 						/>
 
-						<div className="flex items-center justify-between gap-1 pt-1">
-							{/* Left tools: Attach + More */}
-							<div className="flex items-center gap-0.5">
+						<div className="flex items-center justify-end gap-0.5 pt-1">
+							{canRegenerate ? (
 								<button
 									type="button"
+									onClick={() => regenerate()}
 									className={cn(
 										'text-muted-foreground cursor-pointer rounded-lg p-2',
 										'transition-colors duration-150',
 										'hover:bg-muted hover:text-foreground',
 										'focus-visible:ring-primary/30 focus-visible:ring-2 focus-visible:outline-none',
 									)}
-									title={_(t`Attach file`)}
-									aria-label={_(t`Attach file`)}
+									title={_(t`Try another answer`)}
+									aria-label={_(t`Try another answer`)}
 								>
-									<IconPaperclip className="size-[18px]" />
+									<IconRefresh className="size-[18px]" />
 								</button>
-								<button
-									type="button"
-									className={cn(
-										'text-muted-foreground cursor-pointer rounded-lg p-2',
-										'transition-colors duration-150',
-										'hover:bg-muted hover:text-foreground',
-										'focus-visible:ring-primary/30 focus-visible:ring-2 focus-visible:outline-none',
-									)}
-									title={_(t`More options`)}
-									aria-label={_(t`More options`)}
-								>
-									<IconMoreHorizontal className="size-[18px]" />
-								</button>
-							</div>
+							) : null}
 
-							{/* Right tools: regenerate (assistant last) + mic + submit/stop */}
-							<div className="flex items-center gap-0.5">
-								{canRegenerate && (
-									<button
-										type="button"
-										onClick={() => regenerate()}
-										className={cn(
-											'text-muted-foreground cursor-pointer rounded-lg p-2',
-											'transition-colors duration-150',
-											'hover:bg-muted hover:text-foreground',
-											'focus-visible:ring-primary/30 focus-visible:ring-2 focus-visible:outline-none',
-										)}
-										title={_(t`Regenerate response`)}
-										aria-label={_(t`Regenerate response`)}
-									>
-										<IconRefresh className="size-[18px]" />
-									</button>
-								)}
-								<button
-									type="button"
-									className={cn(
-										'text-muted-foreground cursor-pointer rounded-lg p-2',
-										'transition-colors duration-150',
-										'hover:bg-muted hover:text-foreground',
-										'focus-visible:ring-primary/30 focus-visible:ring-2 focus-visible:outline-none',
-									)}
-									title={_(t`Voice input`)}
-									aria-label={_(t`Voice input`)}
-								>
-									<IconMic className="size-[18px]" />
-								</button>
-
-								<button
-									type={isStreaming ? 'button' : 'submit'}
-									onClick={isStreaming ? () => stopGeneration() : undefined}
-									disabled={!isStreaming && !canSend}
-									aria-label={
-										isStreaming ? _(t`Stop generation`) : _(t`Send message`)
-									}
-									className={cn(
-										'ml-1 flex size-8 items-center justify-center rounded-full transition-all duration-150 ease-out',
-										'focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none',
-										isStreaming
+							<button
+								type={isStreaming ? 'button' : 'submit'}
+								onClick={isStreaming ? () => stopGeneration() : undefined}
+								disabled={!isStreaming && !canSend}
+								aria-label={isStreaming ? _(t`Stop`) : _(t`Send`)}
+								className={cn(
+									'ml-1 flex size-8 items-center justify-center rounded-full transition-all duration-150 ease-out',
+									'focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none',
+									isStreaming
+										? 'bg-foreground text-background cursor-pointer hover:opacity-90 active:scale-95'
+										: canSend
 											? 'bg-foreground text-background cursor-pointer hover:opacity-90 active:scale-95'
-											: canSend
-												? 'bg-foreground text-background cursor-pointer hover:opacity-90 active:scale-95'
-												: 'bg-muted text-muted-foreground/50 cursor-not-allowed',
-									)}
-								>
-									{isStreaming ? (
-										<IconSquare className="size-3" />
-									) : isSubmitted ? (
-										<Loader size={14} />
-									) : (
-										<IconArrowUp className="size-4" />
-									)}
-								</button>
-							</div>
+											: 'bg-muted text-muted-foreground/50 cursor-not-allowed',
+								)}
+							>
+								{isStreaming ? (
+									<IconSquare className="size-3" />
+								) : isSubmitted ? (
+									<Loader size={14} />
+								) : (
+									<IconArrowUp className="size-4" />
+								)}
+							</button>
 						</div>
 					</form>
 				</div>

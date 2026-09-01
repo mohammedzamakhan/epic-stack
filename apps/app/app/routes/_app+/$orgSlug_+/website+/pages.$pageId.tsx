@@ -1523,7 +1523,7 @@ function AddSectionDialog({
 }: {
 	position: number
 	onAdd: (type: BlockType, position: number) => void
-	trigger?: 'button' | 'insert' | 'footer'
+	trigger?: 'button' | 'insert' | 'footer' | 'link'
 }) {
 	const [open, setOpen] = useState(false)
 	const [selected, setSelected] = useState<BlockType>(
@@ -4891,7 +4891,7 @@ function FieldAssetUpload({
 
 type InspectorId = 'sections' | 'branding' | 'page'
 
-function InspectorNav({
+function InspectorTabs({
 	value,
 	onChange,
 }: {
@@ -4920,14 +4920,11 @@ function InspectorNav({
 	]
 
 	return (
-		<nav
-			aria-label="Builder panels"
-			className="border-border bg-muted/40 flex h-full w-12 shrink-0 flex-col items-center border-r py-2"
-		>
+		<nav aria-label="Builder panels" className="flex items-center">
 			<div
 				role="tablist"
-				aria-orientation="vertical"
-				className="flex flex-col items-center gap-1"
+				aria-orientation="horizontal"
+				className="flex items-center gap-0.5"
 			>
 				{items.map((item) => {
 					const selected = value === item.id
@@ -4937,16 +4934,16 @@ function InspectorNav({
 								render={
 									<Button
 										variant="ghost"
-										size="icon"
+										size="icon-xs"
 										role="tab"
 										aria-selected={selected}
 										aria-label={item.ariaLabel}
 										className={cn(
-											'text-muted-foreground rounded-md transition-colors duration-150 ease-out',
+											'text-muted-foreground relative rounded-md transition-colors duration-150 ease-out',
 											'hover:text-foreground hover:bg-muted',
 											'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
 											selected &&
-												'bg-muted text-foreground hover:bg-muted hover:text-foreground',
+												'text-foreground bg-muted hover:bg-muted hover:text-foreground',
 										)}
 										onClick={() => onChange(item.id)}
 									>
@@ -4954,7 +4951,7 @@ function InspectorNav({
 									</Button>
 								}
 							/>
-							<TooltipContent side="right">{item.label}</TooltipContent>
+							<TooltipContent side="bottom">{item.label}</TooltipContent>
 						</Tooltip>
 					)
 				})}
@@ -5351,8 +5348,7 @@ export default function PageBuilderRoute() {
 	const isSplitLayout = mode === 'build' && isLg
 
 	const sectionsSidebar = (
-		<aside className="border-border bg-background flex h-full min-w-0">
-			<InspectorNav value={inspector} onChange={setInspector} />
+		<aside className="border-border bg-background flex h-full min-w-0 rounded-xl">
 			<div className="flex min-h-0 min-w-0 flex-1 flex-col">
 				{inspector === 'page' ? (
 					<PageSettingsPanel
@@ -5451,116 +5447,76 @@ export default function PageBuilderRoute() {
 								/>
 							)}
 						</ScrollArea>
-
-						{page.sections.length > 0 ? (
-							<div className="border-border border-t p-3">
-								<AddSectionDialog
-									position={nextSectionPosition}
-									onAdd={handleAddSection}
-									trigger="footer"
-								/>
-							</div>
-						) : null}
 					</>
 				)}
 			</div>
 		</aside>
 	)
 
-	const previewMain = (
-		<main className="bg-muted/40 relative flex h-full min-w-0 flex-col">
-			<div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2">
-				<div className="bg-muted flex w-fit rounded-lg p-0.5">
-					<Tooltip>
-						<TooltipTrigger
-							render={
-								<Button
-									variant="ghost"
-									size="icon-xs"
-									className={cn(
-										'relative rounded-md transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:absolute after:-inset-2.5 after:content-[""] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100',
-										previewViewport === 'desktop' &&
-											'bg-background text-foreground hover:bg-background shadow-sm',
-									)}
-									onClick={() => setPreviewViewport('desktop')}
-									aria-label="Desktop preview"
-									aria-pressed={previewViewport === 'desktop'}
-								>
-									<Icon name="laptop" className="size-3.5" />
-								</Button>
-							}
-						/>
-						<TooltipContent>
-							<Trans>Desktop</Trans>
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger
-							render={
-								<Button
-									variant="ghost"
-									size="icon-xs"
-									className={cn(
-										'relative rounded-md transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:absolute after:-inset-2.5 after:content-[""] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100',
-										previewViewport === 'mobile' &&
-											'bg-background text-foreground hover:bg-background shadow-sm',
-									)}
-									onClick={() => setPreviewViewport('mobile')}
-									aria-label="Mobile preview"
-									aria-pressed={previewViewport === 'mobile'}
-								>
-									<Icon name="smartphone" className="size-3.5" />
-								</Button>
-							}
-						/>
-						<TooltipContent>
-							<Trans>Mobile</Trans>
-						</TooltipContent>
-					</Tooltip>
-				</div>
-				<div className="bg-background text-muted-foreground mx-auto flex w-full max-w-lg min-w-0 items-center justify-center gap-2 rounded-full border px-3 py-1 text-xs">
-					<Icon name="lock" className="size-3 shrink-0" />
-					<span className="truncate">{previewHost || previewUrl}</span>
-				</div>
-				<div className="flex justify-end">
-					<Tooltip>
-						<TooltipTrigger
-							render={
-								<Button
-									variant="ghost"
-									size="icon-xs"
-									onClick={() => setIframeKey(Date.now())}
-									aria-label="Refresh preview"
-								>
-									<Icon name="refresh-cw" className="size-3.5" />
-								</Button>
-							}
-						/>
-						<TooltipContent>
-							<Trans>Refresh preview</Trans>
-						</TooltipContent>
-					</Tooltip>
-				</div>
-			</div>
+	const previewViewportToggle = (
+		<div className="bg-muted flex rounded-lg p-0.5">
+			<Tooltip>
+				<TooltipTrigger
+					render={
+						<Button
+							variant="ghost"
+							size="icon-xs"
+							className={cn(
+								'relative rounded-md transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:absolute after:-inset-2.5 after:content-[""] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100',
+								previewViewport === 'desktop' &&
+									'bg-background text-foreground hover:bg-background shadow-sm',
+							)}
+							onClick={() => setPreviewViewport('desktop')}
+							aria-label="Desktop preview"
+							aria-pressed={previewViewport === 'desktop'}
+						>
+							<Icon name="laptop" className="size-3.5" />
+						</Button>
+					}
+				/>
+				<TooltipContent>
+					<Trans>Desktop</Trans>
+				</TooltipContent>
+			</Tooltip>
+			<Tooltip>
+				<TooltipTrigger
+					render={
+						<Button
+							variant="ghost"
+							size="icon-xs"
+							className={cn(
+								'relative rounded-md transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] after:absolute after:-inset-2.5 after:content-[""] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100',
+								previewViewport === 'mobile' &&
+									'bg-background text-foreground hover:bg-background shadow-sm',
+							)}
+							onClick={() => setPreviewViewport('mobile')}
+							aria-label="Mobile preview"
+							aria-pressed={previewViewport === 'mobile'}
+						>
+							<Icon name="smartphone" className="size-3.5" />
+						</Button>
+					}
+				/>
+				<TooltipContent>
+					<Trans>Mobile</Trans>
+				</TooltipContent>
+			</Tooltip>
+		</div>
+	)
 
+	const previewMain = (
+		<main className="bg-muted/30 relative flex h-full min-w-0 flex-col">
 			{previewUrl ? (
 				<div
 					ref={previewFrameRef}
-					className={cn(
-						'relative min-h-0 flex-1 overflow-hidden transition-[padding] duration-200 ease-[cubic-bezier(0.645,0.045,0.355,1)] motion-reduce:transition-none',
-						mode === 'build' || previewViewport === 'mobile'
-							? 'px-3 pb-3'
-							: 'px-0 pb-0',
-					)}
+					className="relative min-h-0 flex-1 overflow-hidden p-2"
 				>
 					<div
 						className={cn(
-							'bg-background mx-auto h-full w-full overflow-hidden transition-[max-width,border-radius,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.645,0.045,0.355,1)] motion-reduce:transition-none',
+							'bg-background mx-auto h-full w-full overflow-hidden transition-[max-width,border-radius,box-shadow] duration-200 ease-[cubic-bezier(0.645,0.045,0.355,1)] motion-reduce:transition-none',
 							previewViewport === 'mobile'
-								? 'rounded-4xl border shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]'
-								: mode === 'build'
-									? 'rounded-xl border shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]'
-									: 'rounded-none border-transparent shadow-none',
+								? 'max-w-93.75 rounded-[2rem] border shadow-sm'
+								: 'rounded-xl border shadow-sm',
 						)}
 						style={{
 							maxWidth:
@@ -5626,9 +5582,9 @@ export default function PageBuilderRoute() {
 								: null,
 					}}
 				>
-					<div className="bg-background fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden">
-						<header className="border-border flex h-12 shrink-0 items-center justify-between gap-3 border-b px-3">
-							<div className="flex min-w-0 items-center gap-1.5">
+					<div className="bg-muted fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden">
+						<header className="border-border bg-background flex h-12 shrink-0 items-center justify-between gap-3 border-b px-3">
+							<div className="flex min-w-0 items-center gap-2">
 								<Button
 									variant="ghost"
 									size="icon-xs"
@@ -5637,6 +5593,24 @@ export default function PageBuilderRoute() {
 								>
 									<Icon name="arrow-left" className="size-4" />
 								</Button>
+
+								<div
+									className="bg-border hidden h-5 w-px sm:block"
+									aria-hidden
+								/>
+
+								<InspectorTabs
+									value={inspector}
+									onChange={(next) => {
+										setInspector(next)
+										if (next !== 'sections') setSelectedSectionId(null)
+									}}
+								/>
+
+								<div
+									className="bg-border mx-1 hidden h-5 w-px md:block"
+									aria-hidden
+								/>
 
 								{editingTitle ? (
 									<LocalizedInput
@@ -5677,7 +5651,7 @@ export default function PageBuilderRoute() {
 												}
 											/>
 											<DropdownMenuContent align="start" className="w-56">
-												<div className="max-h-[300px] overflow-y-auto">
+												<div className="max-h-75 overflow-y-auto">
 													{linkPages.map((p) => (
 														<DropdownMenuItem
 															key={p.id}
@@ -5733,7 +5707,14 @@ export default function PageBuilderRoute() {
 							</div>
 
 							<div className="flex shrink-0 items-center gap-2">
-								<div className="bg-muted flex rounded-lg p-0.5">
+								<div className="hidden lg:block">{previewViewportToggle}</div>
+
+								<div
+									className="bg-border hidden h-5 w-px lg:block"
+									aria-hidden
+								/>
+
+								<div className="bg-muted flex rounded-lg p-0.5 lg:hidden">
 									<Button
 										variant="ghost"
 										size="sm"
@@ -5811,6 +5792,11 @@ export default function PageBuilderRoute() {
 										}
 									/>
 									<DropdownMenuContent align="end" className="min-w-44">
+										<DropdownMenuItem onClick={() => setIframeKey(Date.now())}>
+											<Icon name="refresh-cw" className="size-4" />
+											<Trans>Refresh preview</Trans>
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
 										<DropdownMenuItem
 											onClick={() => {
 												if (previewUrl) window.open(previewUrl, '_blank')
@@ -5853,7 +5839,7 @@ export default function PageBuilderRoute() {
 						<div
 							className={cn(
 								'relative flex min-h-0 flex-1',
-								isAIPanelOpen && !isAIPanelExpanded && isLg && 'pr-105',
+								isAIPanelOpen && !isAIPanelExpanded && isLg && 'pr-107',
 							)}
 						>
 							<div className="flex min-h-0 min-w-0 flex-1">
@@ -5861,23 +5847,23 @@ export default function PageBuilderRoute() {
 									<ResizablePanelGroup
 										direction="horizontal"
 										autoSaveId="website-page-builder"
-										className="min-h-0 flex-1"
+										className="bg-muted min-h-0 flex-1"
 									>
 										<ResizablePanel
 											id="sections"
 											order={1}
-											defaultSize={22}
-											minSize={15}
+											defaultSize={28}
+											minSize={20}
 											maxSize={40}
-											className="min-w-0"
+											className="m-2 mr-0 min-w-0 rounded-lg"
 										>
 											{sectionsSidebar}
 										</ResizablePanel>
-										<ResizableHandle withHandle />
+										<ResizableHandle withHandle className="bg-transparent" />
 										<ResizablePanel
 											id="preview"
 											order={2}
-											defaultSize={78}
+											defaultSize={72}
 											minSize={40}
 											className="min-w-0"
 										>

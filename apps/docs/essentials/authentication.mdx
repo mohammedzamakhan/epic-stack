@@ -21,6 +21,7 @@ The classic approach to authentication:
 Social login options:
 
 - GitHub OAuth integration
+- Google OAuth integration
 - Easy to add other OAuth providers
 
 ## Passkeys
@@ -30,6 +31,19 @@ Modern authentication with passkeys (WebAuthn):
 - Biometric authentication support
 - No more passwords
 - Enhanced security
+
+
+## Single Sign-On (SSO)
+
+Enterprise OpenID Connect (OIDC) authentication:
+
+- Okta, Microsoft Entra ID (Azure AD), Google Workspace, Auth0, and custom OIDC providers
+- OIDC Discovery (`/.well-known/openid-configuration`) with connection testing
+- PKCE (RFC 7636) and AES-256-GCM encrypted tokens
+- Just-in-Time (JIT) user auto-provisioning and role assignment
+- Domain restrictions and email verification enforcement
+
+Read the [Single Sign-On (SSO) Guide](/essentials/sso) for complete setup instructions.
 
 ## Sessions
 
