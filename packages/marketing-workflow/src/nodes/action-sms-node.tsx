@@ -29,7 +29,7 @@ function ActionSmsNodeComponent({
 			/>
 
 			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
+				<CardTitle as="h4" className="flex items-center gap-2">
 					<span className="text-muted-foreground flex size-5 items-center justify-center">
 						<Icon name="smartphone" size="xs" />
 					</span>

@@ -26,7 +26,7 @@ function DelayNodeComponent({ data, selected }: NodeProps<DelayFlowNode>) {
 			/>
 
 			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
+				<CardTitle as="h4" className="flex items-center gap-2">
 					<span className="text-muted-foreground flex size-5 items-center justify-center">
 						<Icon name="clock" size="xs" />
 					</span>

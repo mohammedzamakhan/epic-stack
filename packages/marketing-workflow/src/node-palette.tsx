@@ -95,6 +95,7 @@ export function NodePalette({ onAddNode, className }: NodePaletteProps) {
 										type="button"
 										variant="ghost"
 										size="sm"
+										aria-label={_(msg`Add ${item.label}`)}
 										className="text-muted-foreground size-7 p-0 opacity-0 transition-opacity group-hover/item:opacity-100"
 										onClick={(e) => {
 											e.stopPropagation()
