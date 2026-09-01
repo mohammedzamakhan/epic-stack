@@ -1,6 +1,7 @@
 import { msg, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { memo } from 'react'
@@ -17,33 +18,30 @@ function TriggerNodeComponent({ data, selected }: NodeProps<TriggerFlowNode>) {
 	}
 
 	return (
-		<div
+		<Card
+			size="sm"
 			className={cn(
-				'bg-card relative min-w-[280px] rounded-md border p-0 shadow-sm transition-all',
-				'border-border hover:shadow-md',
-				selected && 'ring-ring border-foreground/20 ring-1',
+				'relative w-[280px] overflow-visible transition-shadow',
+				selected && 'ring-ring ring-2',
 			)}
 		>
-			<div className="border-border flex items-center justify-between border-b p-3">
-				<div className="flex items-center gap-2">
-					<div className="text-muted-foreground flex size-5 items-center justify-center">
+			<CardHeader>
+				<CardTitle className="flex items-center gap-2">
+					<span className="text-muted-foreground flex size-5 items-center justify-center">
 						<Icon name="play" size="xs" />
-					</div>
-					<h4 className="text-foreground text-sm font-medium">
-						<Trans>Trigger</Trans>
-					</h4>
-				</div>
-				<Icon name="user" size="xs" className="text-muted-foreground" />
-			</div>
+					</span>
+					<Trans>Trigger</Trans>
+				</CardTitle>
+			</CardHeader>
 
-			<div className="p-4 text-center">
+			<CardContent className="ml-7">
 				<p className="text-muted-foreground text-sm">
 					<Trans>
 						When someone does{' '}
-						<span className="text-foreground font-semibold">{info.label}</span>
+						<span className="text-foreground font-medium">{info.label}</span>
 					</Trans>
 				</p>
-			</div>
+			</CardContent>
 
 			<Handle
 				type="source"
@@ -51,7 +49,7 @@ function TriggerNodeComponent({ data, selected }: NodeProps<TriggerFlowNode>) {
 				id="output"
 				className="border-background bg-muted-foreground size-3 border-2"
 			/>
-		</div>
+		</Card>
 	)
 }
 

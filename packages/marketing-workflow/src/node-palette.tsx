@@ -4,8 +4,17 @@ import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Icon, type IconName } from '@repo/ui/icon'
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemMedia,
+	ItemTitle,
+} from '@repo/ui/item'
 import { ScrollArea } from '@repo/ui/scroll-area'
-import { type DragEvent } from 'react'
+import { Fragment, type DragEvent } from 'react'
 import { type PaletteItem } from './types.ts'
 import { useWorkflowConfig } from './workflow-config.tsx'
 
@@ -54,21 +63,21 @@ export function NodePalette({ onAddNode, className }: NodePaletteProps) {
 			</div>
 
 			<ScrollArea className="min-h-0 flex-1">
-				<div className="flex flex-col gap-2 p-3">
+				<ItemGroup className="gap-0">
 					{paletteItems.map((item) => (
-						<div
-							key={item.type}
-							draggable
-							onDragStart={(e) => onDragStart(e, item.type, item.defaultData)}
-							className="group bg-card hover:bg-muted/40 flex cursor-grab items-center justify-between rounded-lg border px-3 py-2.5 transition-colors active:cursor-grabbing"
-						>
-							<div className="flex min-w-0 items-center gap-3">
-								<span className="text-muted-foreground bg-muted/40 flex size-7 shrink-0 items-center justify-center rounded-md border">
+						<Fragment key={item.type}>
+							<Item
+								role="listitem"
+								draggable
+								onDragStart={(e) => onDragStart(e, item.type, item.defaultData)}
+								className="border-b-border rounded-none border-b"
+							>
+								<ItemMedia>
 									<Icon name={PALETTE_ICONS[item.type] ?? 'blocks'} size="xs" />
-								</span>
-								<div className="min-w-0">
-									<div className="flex items-center gap-1.5">
-										<p className="truncate text-xs font-medium">{item.label}</p>
+								</ItemMedia>
+								<ItemContent>
+									<ItemTitle>
+										<span className="truncate">{item.label}</span>
 										{item.isGated ? (
 											<Badge
 												variant="outline"
@@ -77,29 +86,29 @@ export function NodePalette({ onAddNode, className }: NodePaletteProps) {
 												<Trans>Pro</Trans>
 											</Badge>
 										) : null}
-									</div>
-									<p className="text-muted-foreground line-clamp-1 text-[11px]">
-										{item.description}
-									</p>
-								</div>
-							</div>
+									</ItemTitle>
+									<ItemDescription>{item.description}</ItemDescription>
+								</ItemContent>
 
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								className="text-muted-foreground size-7 shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-								onClick={(e) => {
-									e.stopPropagation()
-									onAddNode(item)
-								}}
-								title={_(msg`Add ${item.label}`)}
-							>
-								<Icon name="plus" size="xs" />
-							</Button>
-						</div>
+								<ItemActions>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="text-muted-foreground size-7 p-0 opacity-0 transition-opacity group-hover/item:opacity-100"
+										onClick={(e) => {
+											e.stopPropagation()
+											onAddNode(item)
+										}}
+										title={_(msg`Add ${item.label}`)}
+									>
+										<Icon name="plus" size="xs" />
+									</Button>
+								</ItemActions>
+							</Item>
+						</Fragment>
 					))}
-				</div>
+				</ItemGroup>
 			</ScrollArea>
 		</div>
 	)

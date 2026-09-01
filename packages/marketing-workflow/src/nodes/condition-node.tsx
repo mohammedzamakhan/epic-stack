@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/macro'
 import { cn } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { memo } from 'react'
@@ -13,11 +14,11 @@ function ConditionNodeComponent({
 	const { conditionFieldLabel } = useWorkflowUiLabels()
 
 	return (
-		<div
+		<Card
+			size="sm"
 			className={cn(
-				'bg-card relative min-w-[280px] rounded-md border p-0 shadow-sm transition-all',
-				'border-border hover:shadow-md',
-				selected && 'ring-ring border-foreground/20 ring-1',
+				'relative w-[280px] overflow-visible transition-shadow',
+				selected && 'ring-ring ring-2',
 			)}
 		>
 			<Handle
@@ -27,30 +28,27 @@ function ConditionNodeComponent({
 				className="border-background bg-muted-foreground size-3 border-2"
 			/>
 
-			<div className="border-border flex items-center justify-between border-b p-3">
-				<div className="flex items-center gap-2">
-					<div className="text-muted-foreground flex size-5 items-center justify-center">
+			<CardHeader>
+				<CardTitle className="flex items-center gap-2">
+					<span className="text-muted-foreground flex size-5 items-center justify-center">
 						<Icon name="route" size="xs" />
-					</div>
-					<h4 className="text-foreground text-sm font-medium">
-						<Trans>Conditional split</Trans>
-					</h4>
-				</div>
-				<Icon name="ellipsis" size="xs" className="text-muted-foreground" />
-			</div>
+					</span>
+					<Trans>Conditional split</Trans>
+				</CardTitle>
+			</CardHeader>
 
-			<div className="p-4 text-center">
+			<CardContent className="ml-7">
 				<p className="text-muted-foreground line-clamp-2 text-sm">
 					{data.field === 'phoneVerified' ? (
 						<Trans>
 							Customer{' '}
-							<span className="text-foreground font-semibold">Phone</span> is{' '}
+							<span className="text-foreground font-medium">Phone</span> is{' '}
 							{data.value === 'true' ? '' : 'not '}
-							<span className="text-foreground font-semibold">Verified</span>
+							<span className="text-foreground font-medium">Verified</span>
 						</Trans>
 					) : (
 						<Trans>
-							<span className="text-foreground font-semibold">
+							<span className="text-foreground font-medium">
 								{conditionFieldLabel(data.field || 'email')}
 							</span>{' '}
 							{data.operator === 'equals'
@@ -58,13 +56,13 @@ function ConditionNodeComponent({
 								: data.operator === 'not_equals'
 									? 'is not'
 									: 'contains'}{' '}
-							<span className="text-foreground font-semibold">
+							<span className="text-foreground font-medium">
 								"{data.value}"
 							</span>
 						</Trans>
 					)}
 				</p>
-			</div>
+			</CardContent>
 
 			<Handle
 				type="source"
@@ -87,7 +85,7 @@ function ConditionNodeComponent({
 			<div className="border-border bg-card text-muted-foreground absolute -bottom-6 left-[75%] z-10 -translate-x-1/2 rounded border px-1.5 py-0.5 text-[10px] font-medium shadow-sm">
 				<Trans>No</Trans>
 			</div>
-		</div>
+		</Card>
 	)
 }
 
