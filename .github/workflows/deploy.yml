@@ -57,7 +57,7 @@ jobs:
         run: |
           # Get the base ref for comparison
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.ref }}"
+            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
           else
             BASE_REF="HEAD~1"
           fi
@@ -334,9 +334,12 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build App
-        run: DEPLOY_TARGET=cloudflare npx turbo run build --filter=app
+        run:
+          NODE_OPTIONS=--max-old-space-size=6144 DEPLOY_TARGET=cloudflare npx
+          turbo run build --filter=app
 
       - name: 🚀 Deploy App
+        if: ${{ github.event_name == 'push' }}
         working-directory: apps/app
         run:
           npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
@@ -366,9 +369,12 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build Admin
-        run: DEPLOY_TARGET=cloudflare npx turbo run build --filter=admin
+        run:
+          NODE_OPTIONS=--max-old-space-size=6144 DEPLOY_TARGET=cloudflare npx
+          turbo run build --filter=admin
 
       - name: 🚀 Deploy Admin
+        if: ${{ github.event_name == 'push' }}
         working-directory: apps/admin
         run:
           npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env

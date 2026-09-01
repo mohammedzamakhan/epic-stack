@@ -124,7 +124,10 @@ export default defineConfig((config) => ({
 					}
 				},
 
-		sourcemap: true,
+		// The Cloudflare bundle includes the entire SSR dependency graph. Generating
+		// source maps for it pushes the CI build beyond the hosted runner's heap,
+		// while Sentry uploads are disabled for this target below.
+		sourcemap: !isCloudflareDeploy,
 	},
 	optimizeDeps: {
 		include: ['@repo/email', '@repo/integrations', '@repo/ai', '@repo/ui'],

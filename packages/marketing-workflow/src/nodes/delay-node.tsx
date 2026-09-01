@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/macro'
 import { cn } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { memo } from 'react'
@@ -10,11 +11,11 @@ function DelayNodeComponent({ data, selected }: NodeProps<DelayFlowNode>) {
 	const { delayUnitLabel } = useWorkflowUiLabels()
 
 	return (
-		<div
+		<Card
+			size="sm"
 			className={cn(
-				'bg-card relative mx-auto min-w-[240px] rounded-md border p-0 shadow-sm transition-all',
-				'border-border hover:shadow-md',
-				selected && 'ring-ring border-foreground/20 ring-1',
+				'relative w-[280px] overflow-visible transition-shadow',
+				selected && 'ring-ring ring-2',
 			)}
 		>
 			<Handle
@@ -24,25 +25,22 @@ function DelayNodeComponent({ data, selected }: NodeProps<DelayFlowNode>) {
 				className="border-background bg-muted-foreground size-3 border-2"
 			/>
 
-			<div className="flex items-center justify-between p-3">
-				<div className="flex items-center gap-2">
-					<div className="text-muted-foreground flex size-5 items-center justify-center">
+			<CardHeader>
+				<CardTitle as="h4" className="flex items-center gap-2">
+					<span className="text-muted-foreground flex size-5 items-center justify-center">
 						<Icon name="clock" size="xs" />
-					</div>
-					<h4 className="text-foreground text-sm font-medium">
-						<Trans>Time delay</Trans>
-					</h4>
-				</div>
-				<Icon name="ellipsis" size="xs" className="text-muted-foreground" />
-			</div>
+					</span>
+					<Trans>Time delay</Trans>
+				</CardTitle>
+			</CardHeader>
 
-			<div className="px-4 pb-4">
-				<div className="border-border bg-muted text-foreground rounded border px-3 py-2 text-center text-sm font-medium">
+			<CardContent className="ml-7">
+				<p className="text-foreground text-sm">
 					<Trans>
 						Wait {data.duration} {delayUnitLabel(data.unit)}
 					</Trans>
-				</div>
-			</div>
+				</p>
+			</CardContent>
 
 			<Handle
 				type="source"
@@ -50,7 +48,7 @@ function DelayNodeComponent({ data, selected }: NodeProps<DelayFlowNode>) {
 				id="output"
 				className="border-background bg-muted-foreground size-3 border-2"
 			/>
-		</div>
+		</Card>
 	)
 }
 
