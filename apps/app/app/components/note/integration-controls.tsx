@@ -52,14 +52,22 @@ interface IntegrationControlsProps {
 	noteId: string
 	connections: Connection[]
 	availableIntegrations: Integration[]
+	open?: boolean
+	onOpenChange?: (open: boolean) => void
+	showTrigger?: boolean
 }
 
 export function IntegrationControls({
 	noteId,
 	connections,
 	availableIntegrations,
+	open: controlledOpen,
+	onOpenChange,
+	showTrigger = true,
 }: IntegrationControlsProps) {
-	const [isDialogOpen, setIsDialogOpen] = useState(false)
+	const [internalOpen, setInternalOpen] = useState(false)
+	const open = controlledOpen ?? internalOpen
+	const setOpen = onOpenChange ?? setInternalOpen
 	const connectFetcher = useFetcher()
 	const disconnectFetcher = useFetcher()
 
@@ -71,9 +79,8 @@ export function IntegrationControls({
 	}
 
 	return (
-		<div className="flex items-center gap-2">
-			{/* Connection Status */}
-			{hasConnections && (
+		<div className={showTrigger ? 'flex items-center gap-2' : undefined}>
+			{showTrigger && hasConnections && (
 				<div className="flex items-center gap-1">
 					<Icon name="link-2" className="text-muted-foreground h-4 w-4" />
 					<Badge variant="secondary" className="text-xs">
@@ -82,28 +89,29 @@ export function IntegrationControls({
 				</div>
 			)}
 
-			{/* Manage Connections Dialog */}
-			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<DialogTrigger
-					render={
-						<Button
-							variant="outline"
-							size="sm"
-							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-						>
-							<Icon name="link-2" className="h-4 w-4 max-md:scale-125">
-								<span className="ml-1.5 max-md:hidden">
-									{hasConnections ? 'Integrations' : 'Connect'}
-								</span>
-							</Icon>
-							{hasConnections && (
-								<span className="bg-primary/10 text-primary ml-1 rounded-full px-1.5 py-0.5 text-xs max-md:hidden">
-									{connections.length}
-								</span>
-							)}
-						</Button>
-					}
-				></DialogTrigger>
+			<Dialog open={open} onOpenChange={setOpen}>
+				{showTrigger ? (
+					<DialogTrigger
+						render={
+							<Button
+								variant="outline"
+								size="sm"
+								className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+							>
+								<Icon name="link-2" className="h-4 w-4 max-md:scale-125">
+									<span className="ml-1.5 max-md:hidden">
+										{hasConnections ? 'Integrations' : 'Connect'}
+									</span>
+								</Icon>
+								{hasConnections && (
+									<span className="bg-primary/10 text-primary ml-1 rounded-full px-1.5 py-0.5 text-xs max-md:hidden">
+										{connections.length}
+									</span>
+								)}
+							</Button>
+						}
+					></DialogTrigger>
+				) : null}
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
 						<DialogTitle>Integration Connections</DialogTitle>

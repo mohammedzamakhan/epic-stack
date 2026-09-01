@@ -83,7 +83,7 @@ export function NavMain({
 
 	return (
 		<SidebarGroup>
-			<SidebarGroupContent className="flex flex-col gap-2">
+			<SidebarGroupContent className="flex flex-col">
 				<SidebarMenu>
 					{items.map((item) => {
 						const hasSubItems = item.items && item.items.length > 0
@@ -107,7 +107,7 @@ export function NavMain({
 															handleMenuItemMouseLeave(item.title)
 														}
 													>
-														<div className="flex items-center gap-2">
+														<div className="flex min-w-0 items-center gap-2">
 															{item.icon && (
 																<item.icon
 																	ref={(ref: any) =>
@@ -147,14 +147,16 @@ export function NavMain({
 													handleMenuItemMouseLeave(item.title)
 												}
 											>
-												<div className="flex items-center gap-2">
+												<div className="flex min-w-0 items-center gap-3">
 													{item.icon && (
-														<item.icon
-															ref={(ref: any) =>
-																(iconRefs.current[item.title] = ref)
-															}
-															size={16}
-														/>
+														<span className="flex size-7 shrink-0 items-center justify-center group-data-[collapsible=icon]:size-4">
+															<item.icon
+																ref={(ref: any) =>
+																	(iconRefs.current[item.title] = ref)
+																}
+																size={16}
+															/>
+														</span>
 													)}
 													<span>{item.title}</span>
 												</div>
@@ -184,19 +186,21 @@ export function NavMain({
 								) : (
 									<SidebarMenuButton
 										render={
-											<Link to={item.url} className="flex items-center gap-2">
+											<Link to={item.url} className="flex items-center gap-3">
 												{item.icon && (
-													<item.icon
-														ref={(ref: any) =>
-															(iconRefs.current[item.title] = ref)
-														}
-														size={16}
-														className={
-															item.icon.displayName === 'ArrowLeftIcon'
-																? 'rtl:rotate-180'
-																: ''
-														}
-													/>
+													<span className="flex size-7 shrink-0 items-center justify-center group-data-[collapsible=icon]:size-4">
+														<item.icon
+															ref={(ref: any) =>
+																(iconRefs.current[item.title] = ref)
+															}
+															size={16}
+															className={
+																item.icon.displayName === 'ArrowLeftIcon'
+																	? 'rtl:rotate-180'
+																	: ''
+															}
+														/>
+													</span>
 												)}
 												<span>{item.title}</span>
 											</Link>

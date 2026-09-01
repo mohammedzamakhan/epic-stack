@@ -22,12 +22,12 @@ import {
 	operatorTakesValue,
 	resolveFilterOperators,
 } from './filters-operators'
-import type {
-	FilterField,
-	FilterOperator,
-	FilterOption,
-	FilterRule,
-	FilterValueDisplayContext,
+import {
+	type FilterField,
+	type FilterOperator,
+	type FilterOption,
+	type FilterRule,
+	type FilterValueDisplayContext,
 } from './filters-types'
 
 function defaultValueLabel(

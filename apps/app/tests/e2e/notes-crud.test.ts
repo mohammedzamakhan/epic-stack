@@ -125,27 +125,25 @@ test.describe('Notes CRUD Operations', () => {
 		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
-		// delete the note
-		const deleteButton = page.getByRole('button', { name: /delete/i })
-		const hasDeleteButton = await deleteButton
+		const actionsButton = page.getByRole('button', { name: /note actions/i })
+		await expect(actionsButton).toBeVisible()
+		await actionsButton.click()
+
+		const deleteMenuItem = page.getByRole('menuitem', { name: /^delete$/i })
+		const hasDeleteMenuItem = await deleteMenuItem
 			.isVisible({ timeout: 5000 })
 			.catch(() => false)
 
 		let deletionAttempted = false
 
-		if (hasDeleteButton) {
-			await deleteButton.click()
+		if (hasDeleteMenuItem) {
+			await deleteMenuItem.click()
 			deletionAttempted = true
 
-			// Confirm deletion if there's a confirmation dialog
-			await page.waitForTimeout(1000)
-			const confirmButton = page
-				.getByRole('button', { name: /confirm|delete/i })
-				.first()
-			if (await confirmButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-				await confirmButton.click()
-				await page.waitForTimeout(2000)
-			}
+			const confirmButton = page.getByRole('button', { name: /^delete$/i })
+			await expect(confirmButton).toBeVisible()
+			await confirmButton.click()
+			await page.waitForTimeout(2000)
 
 			// Check for success message or URL change
 			const hasSuccessMessage = await page

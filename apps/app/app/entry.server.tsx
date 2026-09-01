@@ -100,6 +100,7 @@ function applyContentSecurity(
 							? process.env.TENANT_API_URL_KSA.replace(/\/$/, '')
 							: undefined,
 						process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
+						'https://cdn.jsdelivr.net',
 						"'self'",
 						...tenantApiConnectSrc(process.env),
 					],

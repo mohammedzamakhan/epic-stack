@@ -2,9 +2,10 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardFooter } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
 import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
 import Mention from '@tiptap/extension-mention'
+import Placeholder from '@tiptap/extension-placeholder'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import React, { useEffect, useState } from 'react'
@@ -26,30 +27,48 @@ interface CommentInputProps {
 	onSubmit: (comment: string, images?: File[]) => void
 	value: string
 	className?: string
+	variant?: 'default' | 'inline' | 'edit'
 	reply?: boolean
 	onCancel?: () => void
 	placeholder?: string
 	disabled?: boolean
 }
 
+const editorChromeClassName =
+	'[&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]'
+
 const CommentInput: React.FC<CommentInputProps> = ({
 	onSubmit,
 	value,
 	className,
+	variant = 'default',
 	reply,
 	onCancel,
 	users,
-	placeholder: _placeholder = 'Add a comment...',
+	placeholder,
 	disabled = false,
 }) => {
 	const { _ } = useLingui()
 	const [initialValue] = useState(value)
 	const [content, setContent] = useState(value)
 	const [selectedImages, setSelectedImages] = useState<File[]>([])
+	const [isFocused, setIsFocused] = useState(false)
+	const isInline = variant === 'inline'
+	const isEdit = variant === 'edit'
+	const resolvedPlaceholder =
+		placeholder ??
+		(isInline
+			? _(msg`Leave a reply...`)
+			: isEdit
+				? _(msg`Edit comment...`)
+				: _(msg`Add a comment...`))
 
 	const editor = useEditor({
 		extensions: [
 			StarterKit,
+			Placeholder.configure({
+				placeholder: resolvedPlaceholder,
+			}),
 			Mention.configure({
 				suggestion: getSuggestions(users),
 				HTMLAttributes: {
@@ -67,12 +86,14 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		editorProps: {
 			attributes: {
 				class:
-					'text-sm min-h-[40px] focus-visible:outline-none max-w-full prose prose-sm max-w-none',
+					'text-sm min-h-5 py-0.5 focus-visible:outline-none max-w-full prose prose-sm max-w-none',
 			},
 		},
 		onUpdate: ({ editor }: { editor: Editor }) => {
 			setContent(editor.getHTML())
 		},
+		onFocus: () => setIsFocused(true),
+		onBlur: () => setIsFocused(false),
 	})
 
 	useEffect(() => {
@@ -81,17 +102,31 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		}
 	}, [editor, value])
 
+	useEffect(() => {
+		if (isInline && editor) {
+			editor.commands.focus()
+		}
+	}, [editor, isInline])
+
+	useEffect(() => {
+		if (isEdit && editor) {
+			editor.commands.focus('end')
+		}
+	}, [editor, isEdit])
+
 	const handleSubmit = () => {
 		if ((content.trim() || selectedImages.length > 0) && !disabled) {
-			onSubmit(content, selectedImages)
-			editor?.commands.clearContent()
-			setContent('')
-			setSelectedImages([])
+			onSubmit(content, isEdit ? undefined : selectedImages)
+			if (!isEdit) {
+				editor?.commands.clearContent()
+				setContent('')
+				setSelectedImages([])
+			}
 		}
 	}
 
 	const handleImagesSelected = (files: File[]) => {
-		setSelectedImages((prev) => [...prev, ...files].slice(0, 3)) // Max 3 images
+		setSelectedImages((prev) => [...prev, ...files].slice(0, 3))
 	}
 
 	const handleRemoveImage = (index: number) => {
@@ -103,6 +138,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
 			event.preventDefault()
 			handleSubmit()
 		}
+		if (event.key === 'Escape' && onCancel) {
+			event.preventDefault()
+			onCancel()
+		}
 	}
 
 	const handleEmojiSelect = (emoji: string) => {
@@ -111,72 +150,175 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		}
 	}
 
-	return (
-		<Card
-			className={cn(
-				'focus-within:ring-ring w-full transition-all focus-within:ring-2 focus-within:ring-offset-2',
-				className,
-			)}
-			onKeyDown={handleKeyDown}
+	const preventToolbarBlur = (event: React.MouseEvent) => {
+		event.preventDefault()
+	}
+
+	const focusEditor = () => {
+		editor?.commands.focus()
+	}
+
+	const submitLabel = isEdit ? (
+		<Trans>Save</Trans>
+	) : reply ? (
+		<Trans>Reply</Trans>
+	) : (
+		<Trans>Comment</Trans>
+	)
+
+	const toolbar = (
+		<div
+			className="flex items-center justify-between gap-2"
+			onMouseDown={preventToolbarBlur}
+			onClick={(event) => event.stopPropagation()}
 		>
-			<CardContent className="py-0">
-				<EditorContent
-					editor={editor}
-					className="min-h-[60px] focus:outline-none"
-					placeholder={_(msg`Add a comment...`)}
-				/>
-				{selectedImages.length > 0 && (
-					<div className="mt-3">
+			<div className="flex min-w-0 items-center gap-0.5">
+				{!isEdit ? (
+					<>
+						<CommentImageUpload
+							onImagesSelected={handleImagesSelected}
+							maxImages={3 - selectedImages.length}
+							disabled={disabled || selectedImages.length >= 3}
+							className="text-muted-foreground"
+						/>
+						<EmojiPickerButton
+							onEmojiSelect={handleEmojiSelect}
+							disabled={disabled}
+						/>
+						{/* <p className="text-muted-foreground ms-1 truncate text-xs">
+							<Trans>@ to mention · ⌘↵ to send</Trans>
+						</p> */}
+					</>
+				) : (
+					<EmojiPickerButton
+						onEmojiSelect={handleEmojiSelect}
+						disabled={disabled}
+					/>
+				)}
+			</div>
+			<div className="flex shrink-0 items-center gap-2">
+				{isEdit && onCancel ? (
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						onClick={onCancel}
+						disabled={disabled}
+						className="px-4"
+					>
+						<Trans>Cancel</Trans>
+					</Button>
+				) : null}
+				<Button
+					size="sm"
+					disabled={
+						(!content.trim() && selectedImages.length === 0) || disabled
+					}
+					onClick={handleSubmit}
+					className="px-5"
+				>
+					{submitLabel}
+				</Button>
+			</div>
+		</div>
+	)
+
+	if (isInline) {
+		return (
+			<div className={cn('relative', className)} onKeyDown={handleKeyDown}>
+				{onCancel ? (
+					<Button
+						type="button"
+						variant="outline"
+						size="icon-sm"
+						onClick={onCancel}
+						disabled={disabled}
+						className="bg-background absolute top-2.5 -left-7 size-6 rounded-full"
+						aria-label={_(msg`Cancel reply`)}
+					>
+						<Icon name="x" className="size-3.5" />
+					</Button>
+				) : null}
+
+				<div
+					className={cn(
+						'border-border/80 bg-muted/20 w-full rounded-2xl border px-4 py-2.5 motion-safe:transition-colors',
+						editorChromeClassName,
+						isFocused && 'border-border bg-muted/40',
+					)}
+				>
+					<EditorContent editor={editor} />
+				</div>
+
+				{selectedImages.length > 0 ? (
+					<div className="mt-2">
 						<CommentImagePreview
 							files={selectedImages}
 							onRemove={handleRemoveImage}
 						/>
 					</div>
-				)}
-			</CardContent>
-			<CardFooter className="flex items-center justify-between p-1">
-				<div className="flex items-center">
-					<CommentImageUpload
-						onImagesSelected={handleImagesSelected}
-						maxImages={3 - selectedImages.length}
-						disabled={disabled || selectedImages.length >= 3}
-					/>
-					<EmojiPickerButton
-						onEmojiSelect={handleEmojiSelect}
-						disabled={disabled}
-					/>
-					<div className="text-muted-foreground ml-2 text-xs">
-						{reply ? (
-							<Trans>Replying to comment</Trans>
-						) : (
-							<Trans>Use @ to mention someone • Cmd+Enter to submit</Trans>
-						)}
-					</div>
-				</div>
-				<div className="flex gap-2">
-					{reply && onCancel && (
-						<Button
-							type="button"
-							onClick={onCancel}
-							variant="outline"
-							size="sm"
+				) : null}
+
+				<div
+					className="mt-2 flex items-center justify-between gap-2"
+					onMouseDown={preventToolbarBlur}
+				>
+					<div className="flex items-center">
+						<CommentImageUpload
+							onImagesSelected={handleImagesSelected}
+							maxImages={3 - selectedImages.length}
+							disabled={disabled || selectedImages.length >= 3}
+						/>
+						<EmojiPickerButton
+							onEmojiSelect={handleEmojiSelect}
 							disabled={disabled}
-						>
-							<Trans>Cancel</Trans>
-						</Button>
-					)}
+						/>
+					</div>
 					<Button
 						size="sm"
 						disabled={
 							(!content.trim() && selectedImages.length === 0) || disabled
 						}
 						onClick={handleSubmit}
+						className="rounded-full px-4"
 					>
-						{reply ? <Trans>Reply</Trans> : <Trans>Comment</Trans>}
+						<Trans>Reply</Trans>
 					</Button>
 				</div>
-			</CardFooter>
-		</Card>
+			</div>
+		)
+	}
+
+	return (
+		<div
+			className={cn(
+				'border-border/60 bg-muted/40 flex w-full cursor-text flex-col rounded-2xl border p-3 motion-safe:transition-[box-shadow,border-color,background-color]',
+				isFocused && 'border-border/80 bg-muted/50 ring-border/30 ring-1',
+				className,
+			)}
+			onClick={focusEditor}
+			onKeyDown={handleKeyDown}
+		>
+			<div
+				className={cn(
+					editorChromeClassName,
+					'[&_.ProseMirror]:min-h-6 [&_.ProseMirror]:outline-none [&_.ProseMirror_p]:my-0 [&_.ProseMirror_p]:leading-normal',
+				)}
+			>
+				<EditorContent editor={editor} />
+			</div>
+
+			{selectedImages.length > 0 ? (
+				<div className="mt-2">
+					<CommentImagePreview
+						files={selectedImages}
+						onRemove={handleRemoveImage}
+					/>
+				</div>
+			) : null}
+
+			<div className="mt-2">{toolbar}</div>
+		</div>
 	)
 }
 

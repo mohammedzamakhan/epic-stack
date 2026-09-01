@@ -44,9 +44,10 @@ export function CommentsSection({
 	const { _ } = useLingui()
 	const [newComment] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [replyingToId, setReplyingToId] = useState<string | null>(null)
+	const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
 	const revalidator = useRevalidator()
 
-	// Shared helper to submit comments and replies
 	const submitComment = async (
 		content: string,
 		images: File[] | undefined,
@@ -61,7 +62,6 @@ export function CommentsSection({
 			formData.append('parentId', parentId)
 		}
 
-		// Add images to form data
 		if (images && images.length > 0) {
 			images.forEach((image, index) => {
 				formData.append(`image-${index}`, image)
@@ -76,7 +76,7 @@ export function CommentsSection({
 			})
 
 			if (response.ok) {
-				// Revalidate the data to show the new comment/reply
+				setReplyingToId(null)
 				void revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
@@ -106,6 +106,40 @@ export function CommentsSection({
 		await submitComment(content, images, parentId)
 	}
 
+	const handleReplyTo = (commentId: string) => {
+		setEditingCommentId(null)
+		setReplyingToId(commentId)
+	}
+
+	const handleEditTo = (commentId: string) => {
+		setReplyingToId(null)
+		setEditingCommentId(commentId)
+	}
+
+	const handleEdit = async (commentId: string, content: string) => {
+		const formData = new FormData()
+		formData.append('intent', 'edit-comment')
+		formData.append('commentId', commentId)
+		formData.append('content', content)
+
+		try {
+			const response = await fetch(window.location.pathname, {
+				method: 'POST',
+				body: formData,
+			})
+
+			if (response.ok) {
+				setEditingCommentId(null)
+				void revalidator.revalidate()
+			} else {
+				const errorText = await response.text()
+				console.error('Edit failed:', errorText)
+			}
+		} catch (error) {
+			console.error('Error editing comment:', error)
+		}
+	}
+
 	const handleDelete = async (commentId: string) => {
 		const formData = new FormData()
 		formData.append('intent', 'delete-comment')
@@ -118,7 +152,12 @@ export function CommentsSection({
 			})
 
 			if (response.ok) {
-				// Revalidate the data to remove the deleted comment
+				if (replyingToId === commentId) {
+					setReplyingToId(null)
+				}
+				if (editingCommentId === commentId) {
+					setEditingCommentId(null)
+				}
 				void revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
@@ -129,66 +168,53 @@ export function CommentsSection({
 		}
 	}
 
-	// Comments are already organized on the server side, no need to reorganize
-	const organizedComments = comments
-
 	return (
-		<div>
-			{/* Section Header */}
-			<div className="mb-2 flex items-center gap-2">
-				<Icon name="message-square" className="text-muted-foreground h-5 w-5" />
-				<h2 className="text-lg font-semibold">
-					<Trans>Comments</Trans>
-				</h2>
-				{comments.length > 0 && (
-					<span className="text-muted-foreground bg-muted rounded-full px-2 py-0.5 text-sm">
-						{comments.length}
-					</span>
-				)}
-			</div>
+		<div className="flex flex-col gap-4">
+			<CommentInput
+				users={users}
+				onSubmit={handleAddComment}
+				value={newComment}
+				disabled={isSubmitting}
+				placeholder={_(msg`Add a comment...`)}
+			/>
 
-			{/* Add new comment */}
-			<div className="mb-6">
-				<CommentInput
-					users={users}
-					onSubmit={handleAddComment}
-					value={newComment}
-					disabled={isSubmitting}
-					placeholder={_(msg`Add a comment...`)}
-				/>
-			</div>
-
-			{/* Display comments */}
-			<div className="flex flex-col space-y-2">
-				{organizedComments.length > 0 ? (
-					organizedComments.map((comment) => (
+			{comments.length > 0 ? (
+				<div>
+					{comments.map((comment) => (
 						<CommentItem
 							key={comment.id}
 							comment={comment}
 							currentUserId={currentUserId}
 							users={users}
+							replyingToId={replyingToId}
+							editingCommentId={editingCommentId}
+							onReplyTo={handleReplyTo}
+							onCancelReply={() => setReplyingToId(null)}
+							onEditTo={handleEditTo}
+							onCancelEdit={() => setEditingCommentId(null)}
 							onReply={handleReply}
+							onEdit={handleEdit}
 							onDelete={handleDelete}
 							organizationId={organizationId}
 						/>
-					))
-				) : (
-					<div className="py-12 text-center">
-						<div className="bg-muted mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-							<Icon
-								name="chat-bubble"
-								className="text-muted-foreground h-6 w-6"
-							/>
-						</div>
-						<h3 className="text-foreground mb-1 text-sm font-medium">
-							<Trans>No comments yet</Trans>
-						</h3>
-						<p className="text-muted-foreground text-sm">
-							<Trans>Start the conversation by adding the first comment.</Trans>
-						</p>
+					))}
+				</div>
+			) : (
+				<div className="flex flex-col items-center py-10 text-center">
+					<div className="bg-muted/50 mb-4 flex size-14 items-center justify-center rounded-full">
+						<Icon
+							name="message-square"
+							className="text-muted-foreground size-7"
+						/>
 					</div>
-				)}
-			</div>
+					<p className="text-foreground mb-1 text-sm font-medium">
+						<Trans>No comments yet</Trans>
+					</p>
+					<p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
+						<Trans>Start the conversation by adding the first comment.</Trans>
+					</p>
+				</div>
+			)}
 		</div>
 	)
 }

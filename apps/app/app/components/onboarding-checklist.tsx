@@ -88,7 +88,7 @@ export function OnboardingChecklist({
 			<Link
 				to={`/${orgSlug}`}
 				aria-label={t`Get started: ${completedCount} of ${totalSteps} steps complete`}
-				className={`group/onboarding border-sidebar-border hover:bg-sidebar-accent/60 focus-visible:ring-sidebar-ring bg-background mx-2 mt-2 block rounded-md border px-3 py-2.5 transition-colors duration-150 ease-out group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none ${className}`}
+				className={`group/onboarding border-sidebar-border hover:bg-sidebar-accent/60 focus-visible:ring-sidebar-ring bg-background mx-2 mt-2 block rounded-md border px-3 py-3 transition-colors duration-150 ease-out group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none ${className}`}
 			>
 				<div className="flex items-center justify-between gap-2">
 					<span className="text-sidebar-foreground/60 text-xs font-medium">
@@ -99,7 +99,7 @@ export function OnboardingChecklist({
 					</span>
 				</div>
 
-				<div className="mt-1 flex items-center gap-1.5">
+				<div className="mt-1.5 flex items-center gap-2">
 					<span className="text-sidebar-foreground min-w-0 flex-1 truncate text-sm font-medium">
 						{nextStep ? nextStep.title : <Trans>All steps complete</Trans>}
 					</span>
@@ -112,7 +112,7 @@ export function OnboardingChecklist({
 				<Progress
 					value={progressPercentage}
 					aria-label={t`Onboarding progress`}
-					className="**:data-[slot=progress-track]:bg-sidebar-accent mt-2.5"
+					className="**:data-[slot=progress-track]:bg-sidebar-accent mt-3"
 				/>
 			</Link>
 		)

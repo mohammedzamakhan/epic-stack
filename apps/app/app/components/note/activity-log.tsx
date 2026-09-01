@@ -1,9 +1,9 @@
 import { Trans } from '@lingui/react/macro'
 
 import { cn } from '@repo/ui'
-import { Badge } from '@repo/ui/badge'
-import { Icon } from '@repo/ui/icon'
+import { Icon, type IconName } from '@repo/ui/icon'
 import { format, isToday, isYesterday } from 'date-fns'
+
 import { UserAvatar } from '../user-avatar'
 
 export type ActivityLog = {
@@ -34,17 +34,14 @@ interface ActivityLogProps {
 }
 
 type ActionConfig = {
-	icon: string
-	label: string
-	variant: 'default' | 'secondary' | 'outline' | 'destructive'
-	bgColor: string
+	icon: IconName
 	iconColor: string
 }
 
-function parseMetadata(metadata: string | null): Record<string, any> {
+function parseMetadata(metadata: string | null): Record<string, unknown> {
 	if (!metadata) return {}
 	try {
-		return JSON.parse(metadata) as Record<string, any>
+		return JSON.parse(metadata) as Record<string, unknown>
 	} catch {
 		return {}
 	}
@@ -53,105 +50,33 @@ function parseMetadata(metadata: string | null): Record<string, any> {
 function getActionConfig(action: string): ActionConfig {
 	switch (action) {
 		case 'viewed':
-			return {
-				icon: 'eye',
-				label: 'Viewed',
-				variant: 'secondary',
-				bgColor: 'bg-blue-500/10',
-				iconColor: 'text-blue-500',
-			}
+			return { icon: 'activity', iconColor: 'text-blue-500' }
 		case 'created':
-			return {
-				icon: 'plus',
-				label: 'Created',
-				variant: 'secondary',
-				bgColor: 'bg-green-500/10',
-				iconColor: 'text-green-500',
-			}
+			return { icon: 'plus', iconColor: 'text-green-600' }
 		case 'updated':
-			return {
-				icon: 'pencil',
-				label: 'Edited',
-				variant: 'secondary',
-				bgColor: 'bg-amber-500/10',
-				iconColor: 'text-amber-500',
-			}
+			return { icon: 'pencil', iconColor: 'text-amber-600' }
 		case 'deleted':
-			return {
-				icon: 'trash-2',
-				label: 'Deleted',
-				variant: 'destructive',
-				bgColor: 'bg-red-500/10',
-				iconColor: 'text-red-500',
-			}
+			return { icon: 'trash-2', iconColor: 'text-destructive' }
 		case 'sharing_changed':
-			return {
-				icon: 'globe',
-				label: 'Sharing',
-				variant: 'secondary',
-				bgColor: 'bg-purple-500/10',
-				iconColor: 'text-purple-500',
-			}
+			return { icon: 'share-2', iconColor: 'text-purple-500' }
 		case 'access_granted':
-			return {
-				icon: 'user-plus',
-				label: 'Invited',
-				variant: 'secondary',
-				bgColor: 'bg-teal-500/10',
-				iconColor: 'text-teal-500',
-			}
+			return { icon: 'user-plus', iconColor: 'text-teal-600' }
 		case 'access_revoked':
-			return {
-				icon: 'user-x',
-				label: 'Removed',
-				variant: 'destructive',
-				bgColor: 'bg-red-500/10',
-				iconColor: 'text-red-500',
-			}
+			return { icon: 'ban', iconColor: 'text-destructive' }
 		case 'integration_connected':
-			return {
-				icon: 'link-2',
-				label: 'Connected',
-				variant: 'secondary',
-				bgColor: 'bg-indigo-500/10',
-				iconColor: 'text-indigo-500',
-			}
+			return { icon: 'link-2', iconColor: 'text-indigo-500' }
 		case 'integration_disconnected':
-			return {
-				icon: 'unlink',
-				label: 'Disconnected',
-				variant: 'outline',
-				bgColor: 'bg-gray-500/10',
-				iconColor: 'text-gray-500',
-			}
+			return { icon: 'minus', iconColor: 'text-muted-foreground' }
 		case 'comment_added':
-			return {
-				icon: 'message-circle',
-				label: 'Comment',
-				variant: 'secondary',
-				bgColor: 'bg-cyan-500/10',
-				iconColor: 'text-cyan-500',
-			}
+			return { icon: 'message-circle', iconColor: 'text-cyan-600' }
 		case 'comment_deleted':
-			return {
-				icon: 'message-square',
-				label: 'Deleted',
-				variant: 'outline',
-				bgColor: 'bg-gray-500/10',
-				iconColor: 'text-gray-500',
-			}
+			return { icon: 'message-square', iconColor: 'text-muted-foreground' }
 		default:
-			return {
-				icon: 'clock',
-				label: 'Activity',
-				variant: 'outline',
-				bgColor: 'bg-gray-500/10',
-				iconColor: 'text-muted-foreground',
-			}
+			return { icon: 'clock', iconColor: 'text-muted-foreground' }
 	}
 }
 
-function formatActivityDescription(log: ActivityLog): string {
+function formatActivityAction(log: ActivityLog): string {
 	const metadata = parseMetadata(log.metadata)
 
 	switch (log.action) {
@@ -181,7 +106,9 @@ function formatActivityDescription(log: ActivityLog): string {
 		}
 		case 'integration_connected': {
 			const channelName =
-				metadata.channelName || metadata.externalId || 'channel'
+				(metadata.channelName as string | undefined) ||
+				(metadata.externalId as string | undefined) ||
+				'channel'
 			return `connected to ${log.integration?.providerName || 'integration'} (${channelName})`
 		}
 		case 'integration_disconnected':
@@ -215,79 +142,73 @@ function groupLogsByDate(logs: ActivityLog[]): Map<string, ActivityLog[]> {
 	return groups
 }
 
-function ActivityItem({ log, isLast }: { log: ActivityLog; isLast: boolean }) {
+function ActivityRow({ log, isLast }: { log: ActivityLog; isLast: boolean }) {
 	const config = getActionConfig(log.action)
 	const userName = log.user.name || log.user.username
+	const action = formatActivityAction(log)
 
 	return (
-		<div className="group relative flex gap-3">
-			{!isLast && (
-				<div className="bg-border/60 absolute top-10 bottom-0 left-4 w-px" />
-			)}
+		<div className="relative flex gap-3 py-2.5">
+			{!isLast ? (
+				<div
+					aria-hidden="true"
+					className="bg-border absolute top-9 bottom-0 left-3.5 w-px"
+				/>
+			) : null}
 
-			<div className="relative z-10">
+			<div className="relative shrink-0">
 				<UserAvatar
 					user={{
 						name: log.user.name,
 						username: log.user.username,
 						image: log.user.image,
 					}}
-					className="ring-background size-8 ring-2"
-					fallbackClassName="bg-muted text-muted-foreground text-xs font-medium"
+					className="ring-background size-7 ring-2"
+					fallbackClassName="bg-muted text-muted-foreground text-[10px] font-medium"
 					alt={userName}
 				/>
-			</div>
-
-			<div className="flex-1 pb-4">
-				<div className="bg-card hover:bg-accent/30 ring-border/50 rounded-xl p-3 shadow-sm ring-1 transition-colors">
-					<div className="flex items-center justify-between gap-2">
-						<div className="flex items-center gap-2">
-							<span className="text-foreground text-sm font-medium">
-								{userName}
-							</span>
-							<Badge
-								variant={config.variant}
-								className={cn(
-									'gap-1 px-1.5 py-0 text-[10px]',
-									config.variant === 'default' && config.bgColor,
-								)}
-							>
-								<Icon
-									name={config.icon as any}
-									className={cn(
-										'h-2.5 w-2.5',
-										config.variant !== 'default' && config.iconColor,
-									)}
-								/>
-								{config.label}
-							</Badge>
-						</div>
-						<span className="text-muted-foreground text-xs">
-							{format(new Date(log.createdAt), 'h:mm a')}
-						</span>
-					</div>
-
-					<p className="text-muted-foreground mt-1 text-sm">
-						{formatActivityDescription(log)}
-					</p>
+				<div
+					className={cn(
+						'bg-background ring-background absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full ring-2',
+					)}
+				>
+					<Icon
+						name={config.icon}
+						className={cn('size-2.5', config.iconColor)}
+					/>
 				</div>
 			</div>
+
+			<div className="min-w-0 flex-1 pt-0.5">
+				<p className="text-sm leading-snug">
+					<span className="text-foreground font-medium">{userName}</span>{' '}
+					<span className="text-muted-foreground">{action}</span>
+				</p>
+			</div>
+
+			<time
+				dateTime={new Date(log.createdAt).toISOString()}
+				className="text-muted-foreground shrink-0 pt-0.5 text-xs tabular-nums"
+			>
+				{format(new Date(log.createdAt), 'h:mm a')}
+			</time>
 		</div>
 	)
 }
 
 function EmptyState() {
 	return (
-		<div className="flex flex-col items-center justify-center py-12 text-center">
-			<div className="bg-muted/50 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-				<Icon name="clock" className="text-muted-foreground h-8 w-8" />
+		<div className="flex flex-col items-center py-12 text-center">
+			<div className="bg-muted/50 mb-4 flex size-14 items-center justify-center rounded-full">
+				<Icon name="activity" className="text-muted-foreground size-7" />
 			</div>
-			<h3 className="text-foreground mb-1 font-medium">
+			<p className="text-foreground mb-1 text-sm font-medium">
 				<Trans>No activity yet</Trans>
-			</h3>
-			<p className="text-muted-foreground max-w-[240px] text-sm">
-				Activity will appear here as you and your team make changes to this
-				note.
+			</p>
+			<p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
+				<Trans>
+					Changes to this note will show up here as your team works on it.
+				</Trans>
 			</p>
 		</div>
 	)
@@ -301,46 +222,26 @@ export function ActivityLog({ activityLogs }: ActivityLogProps) {
 	const groupedLogs = groupLogsByDate(activityLogs)
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2">
-					<div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-						<Icon name="activity" className="text-primary h-4 w-4" />
-					</div>
+		<div className="space-y-5">
+			{Array.from(groupedLogs.entries()).map(([dateKey, logs]) => (
+				<section
+					key={dateKey}
+					aria-label={formatDateHeader(new Date(logs[0]!.createdAt))}
+				>
+					<h3 className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
+						{formatDateHeader(new Date(logs[0]!.createdAt))}
+					</h3>
 					<div>
-						<h2 className="text-foreground text-base font-semibold">
-							Activity
-						</h2>
-						<p className="text-muted-foreground text-xs">
-							{activityLogs.length}{' '}
-							{activityLogs.length === 1 ? 'event' : 'events'}
-						</p>
+						{logs.map((log, index) => (
+							<ActivityRow
+								key={log.id}
+								log={log}
+								isLast={index === logs.length - 1}
+							/>
+						))}
 					</div>
-				</div>
-			</div>
-
-			<div className="space-y-6">
-				{Array.from(groupedLogs.entries()).map(([dateKey, logs]) => (
-					<div key={dateKey}>
-						<div className="mb-3 flex items-center gap-2">
-							<span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-								{formatDateHeader(new Date(logs[0]!.createdAt))}
-							</span>
-							<div className="bg-border h-px flex-1" />
-						</div>
-
-						<div>
-							{logs.map((log, index) => (
-								<ActivityItem
-									key={log.id}
-									log={log}
-									isLast={index === logs.length - 1}
-								/>
-							))}
-						</div>
-					</div>
-				))}
-			</div>
+				</section>
+			))}
 		</div>
 	)
 }
