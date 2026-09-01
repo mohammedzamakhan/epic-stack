@@ -57,7 +57,7 @@ jobs:
         run: |
           # Get the base ref for comparison
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.ref }}"
+            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
           else
             BASE_REF="HEAD~1"
           fi
@@ -319,8 +319,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, affected]
     if:
-      ${{ needs.affected.outputs.app == 'true' && (github.event_name == 'push'
-      || (github.event_name == 'pull_request' && github.base_ref == 'main')) }}
+      ${{ (github.event_name == 'push' && needs.affected.outputs.app == 'true')
+      || (github.event_name == 'pull_request' && github.base_ref == 'main') }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -359,8 +359,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, affected]
     if:
-      ${{ needs.affected.outputs.admin == 'true' && (github.event_name == 'push'
-      || (github.event_name == 'pull_request' && github.base_ref == 'main')) }}
+      ${{ (github.event_name == 'push' && needs.affected.outputs.admin ==
+      'true') || (github.event_name == 'pull_request' && github.base_ref ==
+      'main') }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
