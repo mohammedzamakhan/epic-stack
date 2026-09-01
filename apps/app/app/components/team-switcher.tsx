@@ -113,15 +113,15 @@ export function TeamSwitcher() {
 							<SidebarMenuButton
 								size="lg"
 								tooltip={activeTeam.name}
-								className="group/org ml-1 h-12 gap-2.5 px-2 transition-colors duration-150 ease-out motion-reduce:transition-none"
+								className="group/org h-12 gap-3 px-2 transition-colors duration-150 ease-out group-data-[collapsible=icon]:justify-center motion-reduce:transition-none"
 							>
 								<OrganizationAvatar organization={activeTeam} />
 								<div className="grid min-w-0 flex-1 leading-tight ltr:text-left rtl:text-right">
-									<span className="text-sidebar-foreground truncate text-sm font-medium">
+									<span className="text-sidebar-foreground truncate text-sm leading-5 font-medium">
 										{activeTeam.name}
 									</span>
 									{memberCount > 0 ? (
-										<span className="text-sidebar-foreground/60 truncate text-xs">
+										<span className="text-sidebar-foreground/60 truncate text-xs leading-4">
 											{memberCount}{' '}
 											{memberCount === 1 ? (
 												<Trans>member</Trans>

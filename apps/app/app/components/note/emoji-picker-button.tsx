@@ -127,10 +127,10 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
 				>
 					<EmojiPicker.Root
 						onEmojiSelect={handleEmojiSelect}
-						className="bg-background flex h-[368px] w-fit flex-col"
+						className="bg-background isolate flex h-[368px] w-[320px] flex-col"
 					>
 						<EmojiPicker.Search className="bg-muted z-10 mx-2 mt-2 appearance-none rounded-md px-2.5 py-2 text-sm" />
-						<EmojiPicker.Viewport className="relative flex-1">
+						<EmojiPicker.Viewport className="relative min-h-0 flex-1 outline-hidden">
 							<EmojiPicker.Loading className="text-muted-foreground absolute inset-0 flex items-center justify-center text-sm">
 								Loading…
 							</EmojiPicker.Loading>
@@ -157,6 +157,7 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
 										<button
 											type="button"
 											className="data-[active]:bg-accent flex size-8 items-center justify-center rounded-md text-lg"
+											style={{ fontFamily: 'var(--frimousse-emoji-font)' }}
 											{...props}
 										>
 											{emoji.emoji}

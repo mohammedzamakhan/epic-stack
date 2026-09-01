@@ -1,14 +1,37 @@
 import { getFormProps, useForm } from '@conform-to/react'
 import { invariantResponse } from '@epic-web/invariant'
-import { Trans } from '@lingui/macro'
+import { Trans, t, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { getNoteActivityLogs } from '@repo/audit'
 import { requireUserId } from '@repo/auth'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
 import { and, db, eq, OrganizationNoteFavorite } from '@repo/database'
 import { integrationManager } from '@repo/integrations'
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@repo/ui/alert-dialog'
 import { Button } from '@repo/ui/button'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
-import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
+import {
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from '@repo/ui/sheet'
 import { StatusButton } from '@repo/ui/status-button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
 import { formatDistanceToNow } from 'date-fns'
@@ -26,6 +49,7 @@ import {
 import {
 	Form,
 	Link,
+	useFetcher,
 	useLoaderData,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
@@ -378,6 +402,12 @@ export const DeleteCommentSchema = z.object({
 	commentId: z.string(),
 })
 
+export const EditCommentSchema = z.object({
+	intent: z.literal('edit-comment'),
+	commentId: z.string(),
+	content: z.string().min(1, 'Comment content cannot be empty'),
+})
+
 export const ToggleFavoriteSchema = z.object({
 	intent: z.literal('toggle-favorite'),
 	noteId: z.string(),
@@ -412,6 +442,7 @@ export async function action(args: ActionFunctionArgs) {
 		handleBatchUpdateAccessIntent,
 		handleAddCommentIntent,
 		handleDeleteCommentIntent,
+		handleEditCommentIntent,
 		handleToggleFavoriteIntent,
 	} = await import('./notes.$noteId.server')
 
@@ -436,6 +467,8 @@ export async function action(args: ActionFunctionArgs) {
 			return handleAddCommentIntent(ctx)
 		case 'delete-comment':
 			return handleDeleteCommentIntent(ctx)
+		case 'edit-comment':
+			return handleEditCommentIntent(ctx)
 		case 'toggle-favorite':
 			return handleToggleFavoriteIntent(ctx)
 		default:
@@ -553,6 +586,7 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
+	const { _ } = useLingui()
 	const {
 		note,
 		timeAgo,
@@ -616,27 +650,40 @@ export default function NoteRoute() {
 		})
 	}, [note.content])
 
+	const noteTabContentClassName =
+		'min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 [scrollbar-gutter:stable]'
+
+	const tabLabels = {
+		overview: _(t`Overview`),
+		comments: _(t`Comments`),
+		activity: _(t`Activity`),
+		aiAssistant: _(t`AI Assistant`),
+	} as const
+
 	return (
 		<>
-			<SheetHeader className="border-b">
-				<SheetTitle className="text-left">
+			<SheetHeader className="border-b pb-4">
+				<SheetTitle
+					id="note-title"
+					className="pr-8 text-left text-lg leading-snug font-semibold"
+				>
 					{note.title || <Trans>Untitled Note</Trans>}
 				</SheetTitle>
-				<div className="text-muted-foreground flex items-center gap-2 text-sm">
-					<Icon name="clock" className="h-3.5 w-3.5" />
-					<span>
+				<SheetDescription className="flex flex-wrap items-center gap-x-2 gap-y-1">
+					<span className="inline-flex items-center gap-1.5">
+						<Icon name="clock" className="size-3.5 shrink-0" />
 						<Trans>Updated {timeAgo} ago</Trans>
 					</span>
 					{!note.isPublic && (
 						<>
-							<span>•</span>
-							<Icon name="lock" className="h-3.5 w-3.5" />
-							<span>
+							<span aria-hidden="true">·</span>
+							<span className="inline-flex items-center gap-1.5">
+								<Icon name="lock" className="size-3.5 shrink-0" />
 								<Trans>Private</Trans>
 							</span>
 						</>
 					)}
-				</div>
+				</SheetDescription>
 			</SheetHeader>
 
 			<section
@@ -650,153 +697,202 @@ export default function NoteRoute() {
 					onValueChange={setActiveTab}
 					className="flex min-h-0 flex-1 flex-col gap-0"
 				>
-					<TabsList className="w-full rounded-none">
-						<TabsTrigger value="overview" className="flex-1 gap-2">
-							<Icon name="file-text" className="h-4 w-4" />
-							<span className="hidden sm:inline">
-								<Trans>Overview</Trans>
-							</span>
-						</TabsTrigger>
-						<TabsTrigger value="comments" className="flex-1 gap-2">
-							<Icon name="message-square" className="h-4 w-4" />
-							<span className="hidden sm:inline">
-								<Trans>Comments</Trans>
-							</span>
-							{comments.length > 0 && (
-								<span className="bg-muted-foreground/20 rounded-full px-1.5 py-0.5 text-xs">
-									{comments.length}
+					<div className="border-b px-4">
+						<TabsList variant="line" className="h-10 w-full bg-transparent p-0">
+							<TabsTrigger
+								value="overview"
+								aria-label={tabLabels.overview}
+								className="flex-1 gap-2"
+							>
+								<Icon name="file-text" className="size-4" />
+								<span className="hidden sm:inline">{tabLabels.overview}</span>
+							</TabsTrigger>
+							<TabsTrigger
+								value="comments"
+								aria-label={tabLabels.comments}
+								className="flex-1 gap-2"
+							>
+								<Icon name="message-square" className="size-4" />
+								<span className="hidden sm:inline">{tabLabels.comments}</span>
+								{comments.length > 0 && (
+									<span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-xs tabular-nums">
+										{comments.length}
+									</span>
+								)}
+							</TabsTrigger>
+							<TabsTrigger
+								value="activity"
+								aria-label={tabLabels.activity}
+								className="flex-1 gap-2"
+							>
+								<Icon name="logs" className="size-4" />
+								<span className="hidden sm:inline">{tabLabels.activity}</span>
+							</TabsTrigger>
+							<TabsTrigger
+								value="ai-assistant"
+								aria-label={tabLabels.aiAssistant}
+								className="flex-1 gap-2"
+							>
+								<Icon name="sparkles" className="size-4" />
+								<span className="hidden sm:inline">
+									{tabLabels.aiAssistant}
 								</span>
-							)}
-						</TabsTrigger>
-						<TabsTrigger value="activity" className="flex-1 gap-2">
-							<Icon name="logs" className="h-4 w-4" />
-							<span className="hidden sm:inline">
-								<Trans>Activity</Trans>
-							</span>
-						</TabsTrigger>
-						<TabsTrigger value="ai-assistant" className="flex-1 gap-2">
-							<Icon name="sparkles" className="h-4 w-4" />
-							<span className="hidden sm:inline">
-								<Trans>AI Assistant</Trans>
-							</span>
-						</TabsTrigger>
-					</TabsList>
+							</TabsTrigger>
+						</TabsList>
+					</div>
 
-					<TabsContent
-						value="overview"
-						className="bg-muted/20 flex-1 overflow-y-auto px-6 pt-4 pb-8"
-					>
-						{/* Media Uploads */}
-						{note.uploads.length > 0 && (
-							<ul className="mb-6 flex flex-wrap gap-5">
-								{note.uploads
-									.filter((upload) => upload.type === 'image')
-									.map((image) => (
-										<li key={image.objectKey}>
-											<a
-												href={getNoteImgSrc(
-													image.objectKey,
-													note.organization.id,
-												)}
-											>
-												<Img
-													src={getNoteImgSrc(
+					<TabsContent value="overview" className={noteTabContentClassName}>
+						<div className="mx-auto flex w-full max-w-prose flex-col gap-6">
+							{note.uploads.length > 0 && (
+								<ul className="flex flex-wrap gap-3">
+									{note.uploads
+										.filter((upload) => upload.type === 'image')
+										.map((image) => (
+											<li key={image.objectKey}>
+												<a
+													href={getNoteImgSrc(
 														image.objectKey,
 														note.organization.id,
 													)}
-													alt={image.altText ?? ''}
-													className="size-32 rounded-lg object-cover"
-													width={512}
-													height={512}
-												/>
-											</a>
-										</li>
-									))}
-								{note.uploads
-									.filter((upload) => upload.type === 'video')
-									.map((video) => (
-										<li key={video.objectKey}>
-											<div className="relative size-32 overflow-hidden rounded-lg">
-												<VideoPoster
-													objectKey={video.objectKey}
-													organizationId={note.organization.id}
-													mediaTransformBaseUrl={mediaTransformBaseUrl}
-													alt={video.altText ?? 'Video thumbnail'}
-													className="size-32 rounded-lg"
-													width={512}
-													height={512}
-												/>
-												<div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-													<div className="rounded-full bg-black/50 p-2">
-														<Icon
-															name="arrow-right"
-															className="h-4 w-4 text-white"
-														/>
+													className="ring-border hover:ring-foreground/20 focus-visible:ring-ring block overflow-hidden rounded-lg ring-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-safe:transition-shadow"
+												>
+													<Img
+														src={getNoteImgSrc(
+															image.objectKey,
+															note.organization.id,
+														)}
+														alt={image.altText ?? ''}
+														className="size-28 object-cover sm:size-32"
+														width={512}
+														height={512}
+													/>
+												</a>
+											</li>
+										))}
+									{note.uploads
+										.filter((upload) => upload.type === 'video')
+										.map((video) => (
+											<li key={video.objectKey}>
+												<div className="ring-border relative size-28 overflow-hidden rounded-lg ring-1 sm:size-32">
+													<VideoPoster
+														objectKey={video.objectKey}
+														organizationId={note.organization.id}
+														mediaTransformBaseUrl={mediaTransformBaseUrl}
+														alt={video.altText ?? 'Video thumbnail'}
+														className="size-28 sm:size-32"
+														width={512}
+														height={512}
+													/>
+													<div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+														<div className="rounded-full bg-black/50 p-2">
+															<Icon
+																name="arrow-right"
+																className="size-4 text-white"
+															/>
+														</div>
 													</div>
 												</div>
-											</div>
-										</li>
-									))}
-							</ul>
-						)}
+											</li>
+										))}
+								</ul>
+							)}
 
-						{/* Note Content */}
-						<div className="prose prose-sm max-w-none">
-							<div
-								className="text-sm whitespace-break-spaces md:text-lg"
-								dangerouslySetInnerHTML={{ __html: sanitizedNoteContent }}
+							{sanitizedNoteContent.trim() ? (
+								<div className="prose prose-neutral dark:prose-invert selection:bg-primary/20 prose-p:my-3 prose-p:leading-relaxed prose-headings:mb-3 prose-headings:mt-6 prose-headings:scroll-mt-20 prose-li:my-1 prose-a:underline-offset-4 max-w-none">
+									<div
+										className="text-base leading-relaxed"
+										dangerouslySetInnerHTML={{ __html: sanitizedNoteContent }}
+									/>
+								</div>
+							) : note.uploads.length === 0 ? (
+								<div className="flex flex-col items-center py-10 text-center">
+									<div className="bg-muted/50 mb-4 flex size-14 items-center justify-center rounded-full">
+										<Icon
+											name="file-text"
+											className="text-muted-foreground size-7"
+										/>
+									</div>
+									<p className="text-foreground mb-1 text-sm font-medium">
+										<Trans>No content yet</Trans>
+									</p>
+									<p className="text-muted-foreground mb-5 max-w-xs text-sm leading-relaxed">
+										<Trans>
+											Add notes, links, or media to capture what matters.
+										</Trans>
+									</p>
+									<CanEditNote
+										noteOwnerId={note.createdById}
+										currentUserId={currentUserId}
+									>
+										<Button
+											variant="outline"
+											size="sm"
+											render={<Link to="edit" />}
+										>
+											<Icon name="pencil" className="size-4">
+												<Trans>Edit note</Trans>
+											</Icon>
+										</Button>
+									</CanEditNote>
+								</div>
+							) : null}
+						</div>
+					</TabsContent>
+
+					<TabsContent value="comments" className={noteTabContentClassName}>
+						<div className="mx-auto w-full max-w-prose">
+							<CommentsSection
+								noteId={note.id}
+								// SerializedComment is compatible with Comment interface
+								comments={comments as any}
+								currentUserId={currentUserId}
+								users={mentionUsers}
+								organizationId={note.organization.id}
 							/>
 						</div>
 					</TabsContent>
 
-					<TabsContent
-						value="comments"
-						className="bg-muted/20 flex-1 overflow-y-auto px-6 pt-4 pb-8"
-					>
-						<CommentsSection
-							noteId={note.id}
-							// SerializedComment is compatible with Comment interface
-							comments={comments as any}
-							currentUserId={currentUserId}
-							users={mentionUsers}
-							organizationId={note.organization.id}
-						/>
-					</TabsContent>
-
-					<TabsContent
-						value="activity"
-						className="bg-muted/20 flex-1 overflow-y-auto px-6 pt-4 pb-8"
-					>
-						<ActivityLog activityLogs={activityLogs} />
+					<TabsContent value="activity" className={noteTabContentClassName}>
+						<div className="mx-auto w-full max-w-prose">
+							<ActivityLog activityLogs={activityLogs} />
+						</div>
 					</TabsContent>
 
 					<TabsContent
 						value="ai-assistant"
-						className="bg-background flex-1 overflow-hidden"
+						className="min-h-0 flex-1 overflow-hidden"
 					>
 						<LazyLoadErrorBoundary
 							fallback={
-								<div className="flex h-full items-center justify-center p-4">
-									<div className="text-center">
-										<div className="text-muted-foreground mb-2">
+								<div className="flex h-full items-center justify-center p-6">
+									<div className="space-y-3 text-center">
+										<p className="text-muted-foreground text-sm">
 											<Trans>Failed to load AI Assistant</Trans>
-										</div>
-										<button
+										</p>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
 											onClick={() => window.location.reload()}
-											className="text-primary text-sm hover:underline"
 										>
 											<Trans>Reload page</Trans>
-										</button>
+										</Button>
 									</div>
 								</div>
 							}
 						>
 							<Suspense
 								fallback={
-									<div className="flex h-full items-center justify-center">
-										<div className="text-muted-foreground">
-											<Trans>Loading AI Assistant...</Trans>
+									<div className="flex h-full flex-col items-center justify-center gap-3 p-6">
+										<div className="bg-muted flex size-10 items-center justify-center rounded-full">
+											<Icon
+												name="sparkles"
+												className="text-muted-foreground size-5 motion-safe:animate-pulse"
+											/>
 										</div>
+										<p className="text-muted-foreground text-sm">
+											<Trans>Loading AI Assistant...</Trans>
+										</p>
 									</div>
 								}
 							>
@@ -806,51 +902,183 @@ export default function NoteRoute() {
 					</TabsContent>
 				</Tabs>
 
-				<div className="bg-background shrink-0 border-t px-6 py-4">
-					<div className="flex items-center justify-between">
-						<span className="text-foreground/90 text-sm max-[524px]:hidden">
-							<Icon name="clock" className="mr-1 h-4 w-4">
-								{timeAgo} ago
+				<NoteSheetActions
+					note={note}
+					currentUserId={currentUserId}
+					isFavorited={isFavorited}
+					organizationMembers={organizationMembers}
+					connections={connections}
+					availableIntegrations={availableIntegrations}
+				/>
+			</section>
+		</>
+	)
+}
+
+function NoteSheetActions({
+	note,
+	currentUserId,
+	isFavorited,
+	organizationMembers,
+	connections,
+	availableIntegrations,
+}: {
+	note: NoteLoaderData['note']
+	currentUserId: string
+	isFavorited: boolean
+	organizationMembers: NoteLoaderData['organizationMembers']
+	connections: NoteLoaderData['connections']
+	availableIntegrations: NoteLoaderData['availableIntegrations']
+}) {
+	const { _ } = useLingui()
+	const [shareOpen, setShareOpen] = useState(false)
+	const [integrationsOpen, setIntegrationsOpen] = useState(false)
+	const [deleteOpen, setDeleteOpen] = useState(false)
+	const favoriteFetcher = useFetcher()
+	const deleteFetcher = useFetcher()
+
+	const hasIntegrations =
+		availableIntegrations.length > 0 || connections.length > 0
+
+	const isFavoritePending =
+		favoriteFetcher.state !== 'idle' &&
+		favoriteFetcher.formData?.get('intent') === 'toggle-favorite'
+
+	const isDeletePending =
+		deleteFetcher.state !== 'idle' &&
+		deleteFetcher.formData?.get('intent') === 'delete-note'
+
+	return (
+		<>
+			<SheetFooter className="shrink-0 border-t sm:flex-row sm:justify-end">
+				<div className="flex w-full items-center justify-end gap-2">
+					<CanEditNote
+						noteOwnerId={note.createdById}
+						currentUserId={currentUserId}
+					>
+						<Button variant="default" size="sm" render={<Link to="edit" />}>
+							<Icon name="pencil" className="size-4">
+								<Trans>Edit</Trans>
 							</Icon>
-						</span>
-						<div className="flex items-center gap-2 md:gap-3">
-							<FavoriteButton noteId={note.id} isFavorited={isFavorited} />
-							<ShareNoteButton
-								noteId={note.id}
-								isPublic={note.isPublic}
-								noteAccess={note.noteAccess}
-								organizationMembers={organizationMembers}
-							/>
-							<IntegrationControls
-								noteId={note.id}
-								connections={connections}
-								availableIntegrations={availableIntegrations}
-							/>
-							<CanEditNote
-								noteOwnerId={note.createdById}
-								currentUserId={currentUserId}
-							>
+						</Button>
+					</CanEditNote>
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={
 								<Button
 									variant="outline"
 									size="sm"
-									className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-									render={<Link to="edit" />}
+									aria-label={_(msg`Note actions`)}
 								>
-									<Icon name="pencil" className="h-4 w-4">
-										<span className="max-md:hidden">Edit</span>
-									</Icon>
+									<Icon name="ellipsis" className="size-4" />
 								</Button>
-							</CanEditNote>
+							}
+						/>
+						<DropdownMenuContent align="end" className="w-48">
+							<DropdownMenuItem
+								disabled={isFavoritePending}
+								onClick={() => {
+									const formData = new FormData()
+									formData.append('intent', 'toggle-favorite')
+									formData.append('noteId', note.id)
+									void favoriteFetcher.submit(formData, { method: 'POST' })
+								}}
+							>
+								<Icon
+									name={isFavorited ? 'star-off' : 'star'}
+									className="mr-2 size-4"
+								/>
+								{isFavorited ? <Trans>Unstar</Trans> : <Trans>Star</Trans>}
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setShareOpen(true)}>
+								<Icon name="share-2" className="mr-2 size-4" />
+								<Trans>Share</Trans>
+							</DropdownMenuItem>
+							{hasIntegrations ? (
+								<DropdownMenuItem onClick={() => setIntegrationsOpen(true)}>
+									<Icon name="link-2" className="mr-2 size-4" />
+									<Trans>Integrations</Trans>
+									{connections.length > 0 ? (
+										<span className="text-muted-foreground ml-auto text-xs tabular-nums">
+											{connections.length}
+										</span>
+									) : null}
+								</DropdownMenuItem>
+							) : null}
 							<CanDeleteNote
 								noteOwnerId={note.createdById}
 								currentUserId={currentUserId}
 							>
-								<DeleteNote id={note.id} />
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									className="text-destructive focus:text-destructive"
+									onClick={() => setDeleteOpen(true)}
+								>
+									<Icon name="trash-2" className="mr-2 size-4" />
+									<Trans>Delete</Trans>
+								</DropdownMenuItem>
 							</CanDeleteNote>
-						</div>
-					</div>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
-			</section>
+			</SheetFooter>
+
+			<ShareNoteButton
+				showTrigger={false}
+				open={shareOpen}
+				onOpenChange={setShareOpen}
+				noteId={note.id}
+				isPublic={note.isPublic}
+				noteAccess={note.noteAccess}
+				organizationMembers={organizationMembers}
+			/>
+			{hasIntegrations ? (
+				<IntegrationControls
+					showTrigger={false}
+					open={integrationsOpen}
+					onOpenChange={setIntegrationsOpen}
+					noteId={note.id}
+					connections={connections}
+					availableIntegrations={availableIntegrations}
+				/>
+			) : null}
+			<CanDeleteNote
+				noteOwnerId={note.createdById}
+				currentUserId={currentUserId}
+			>
+				<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>
+								<Trans>Delete note?</Trans>
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								<Trans>
+									This action cannot be undone. The note and its comments will
+									be permanently removed.
+								</Trans>
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel disabled={isDeletePending}>
+								<Trans>Cancel</Trans>
+							</AlertDialogCancel>
+							<AlertDialogAction
+								variant="destructive"
+								disabled={isDeletePending}
+								onClick={() => {
+									const formData = new FormData()
+									formData.append('intent', 'delete-note')
+									formData.append('noteId', note.id)
+									void deleteFetcher.submit(formData, { method: 'POST' })
+								}}
+							>
+								<Trans>Delete</Trans>
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			</CanDeleteNote>
 		</>
 	)
 }
@@ -880,10 +1108,7 @@ export function FavoriteButton({
 				disabled={isPending}
 				className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 			>
-				<Icon
-					name={isFavorited ? 'star-off' : 'star'}
-					className="h-4 w-4 max-md:scale-125"
-				>
+				<Icon name={isFavorited ? 'star-off' : 'star'} className="size-4">
 					<span className="max-md:hidden">
 						{isFavorited ? 'Unstar' : 'Star'}
 					</span>
@@ -912,7 +1137,7 @@ export function DeleteNote({ id }: { id: string }) {
 				status={isPending ? 'pending' : (form.status ?? 'idle')}
 				disabled={isPending}
 			>
-				<Icon name="trash-2" className="h-4 w-4">
+				<Icon name="trash-2" className="size-4">
 					<span className="max-md:hidden">Delete</span>
 				</Icon>
 			</StatusButton>

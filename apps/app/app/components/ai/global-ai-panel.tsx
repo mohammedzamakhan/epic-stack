@@ -459,7 +459,6 @@ export function GlobalAIToggle() {
 			aria-label={isOpen ? 'Close assistant' : 'Open assistant'}
 			className="h-8 gap-1.5 rounded-lg px-2.5 text-sm font-normal"
 		>
-			<Icon name="sparkles" className="size-4" />
 			<span className="hidden md:inline">
 				<Trans>Ask AI</Trans>
 			</span>

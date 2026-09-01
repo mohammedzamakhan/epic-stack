@@ -109,6 +109,11 @@ import {
 } from 'react-router'
 import { z } from 'zod'
 import {
+	useAIPanel,
+	useAIPanelHotkey,
+} from '#app/components/ai/ai-panel-context.tsx'
+import { GlobalAIToggle } from '#app/components/ai/global-ai-panel.tsx'
+import {
 	deleteSiteIconActionIntent,
 	uploadSiteIconActionIntent,
 } from '#app/components/settings/cards/organization/site-icon-card.tsx'
@@ -118,11 +123,6 @@ import {
 	siteThemeActionIntent,
 	uploadSiteFontActionIntent,
 } from '#app/components/settings/cards/organization/site-theme-card.tsx'
-import { GlobalAIToggle } from '#app/components/ai/global-ai-panel.tsx'
-import {
-	useAIPanel,
-	useAIPanelHotkey,
-} from '#app/components/ai/ai-panel-context.tsx'
 import { BrandingPanel } from '#app/components/website/branding-panel.tsx'
 import { CreatePageDialog } from '#app/components/website/create-page-dialog.tsx'
 import {
@@ -5853,7 +5853,7 @@ export default function PageBuilderRoute() {
 						<div
 							className={cn(
 								'relative flex min-h-0 flex-1',
-								isAIPanelOpen && !isAIPanelExpanded && isLg && 'pr-[420px]',
+								isAIPanelOpen && !isAIPanelExpanded && isLg && 'pr-105',
 							)}
 						>
 							<div className="flex min-h-0 min-w-0 flex-1">

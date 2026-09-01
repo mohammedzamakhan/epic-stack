@@ -39,6 +39,9 @@ type ShareNoteButtonProps = {
 			username: string
 		}
 	}>
+	open?: boolean
+	onOpenChange?: (open: boolean) => void
+	showTrigger?: boolean
 }
 
 export function ShareNoteButton({
@@ -46,8 +49,13 @@ export function ShareNoteButton({
 	isPublic,
 	noteAccess,
 	organizationMembers,
+	open: controlledOpen,
+	onOpenChange,
+	showTrigger = true,
 }: ShareNoteButtonProps) {
-	const [open, setOpen] = useState(false)
+	const [internalOpen, setInternalOpen] = useState(false)
+	const open = controlledOpen ?? internalOpen
+	const setOpen = onOpenChange ?? setInternalOpen
 	const fetcher = useFetcher()
 	const { _ } = useLingui()
 
@@ -72,7 +80,7 @@ export function ShareNoteButton({
 		if (fetcher.data?.result?.status === 'success') {
 			setOpen(false)
 		}
-	}, [fetcher.data])
+	}, [fetcher.data, setOpen])
 
 	const toggleMemberSelection = (userId: string) => {
 		setSelectedMemberIds((prev) =>
@@ -146,21 +154,23 @@ export function ShareNoteButton({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger
-				render={
-					<Button
-						variant="outline"
-						size="sm"
-						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-					>
-						<Icon name="share-2" className="h-4 w-4 max-md:scale-125">
-							<span className="max-md:hidden">
-								<Trans>Share</Trans>
-							</span>
-						</Icon>
-					</Button>
-				}
-			></DialogTrigger>
+			{showTrigger ? (
+				<DialogTrigger
+					render={
+						<Button
+							variant="outline"
+							size="sm"
+							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+						>
+							<Icon name="share-2" className="h-4 w-4 max-md:scale-125">
+								<span className="max-md:hidden">
+									<Trans>Share</Trans>
+								</span>
+							</Icon>
+						</Button>
+					}
+				></DialogTrigger>
+			) : null}
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>

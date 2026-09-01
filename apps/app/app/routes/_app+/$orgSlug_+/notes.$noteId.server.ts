@@ -40,6 +40,7 @@ import {
 	BatchUpdateNoteAccessSchema,
 	AddCommentSchema,
 	DeleteCommentSchema,
+	EditCommentSchema,
 	ToggleFavoriteSchema,
 } from './notes.$noteId'
 
@@ -791,6 +792,52 @@ export async function handleAddCommentIntent({
 	} catch {
 		return data(
 			{ result: { status: 'error', error: 'Failed to add comment' } },
+			{ status: 500 },
+		)
+	}
+}
+
+export async function handleEditCommentIntent({
+	formData,
+	userId,
+}: IntentContext) {
+	const submission = parseWithZod(formData, { schema: EditCommentSchema })
+	if (submission.status !== 'success') {
+		return data(
+			{ result: submission.reply() },
+			{ status: submission.status === 'error' ? 400 : 200 },
+		)
+	}
+
+	const { commentId, content } = submission.value
+	const [comment] = await db
+		.select({
+			userId: NoteComment.userId,
+			noteId: NoteComment.noteId,
+			organizationId: OrganizationNote.organizationId,
+		})
+		.from(NoteComment)
+		.innerJoin(OrganizationNote, eq(NoteComment.noteId, OrganizationNote.id))
+		.where(eq(NoteComment.id, commentId))
+		.limit(1)
+	invariantResponse(comment, 'Comment not found', { status: 404 })
+	await userHasOrgAccess(userId, comment.organizationId)
+
+	if (comment.userId !== userId) {
+		throw new Response('Not authorized', { status: 403 })
+	}
+
+	try {
+		const sanitizedContent = sanitizeCommentContent(content)
+		await db
+			.update(NoteComment)
+			.set({ content: sanitizedContent })
+			.where(eq(NoteComment.id, commentId))
+
+		return data({ result: { status: 'success' } })
+	} catch {
+		return data(
+			{ result: { status: 'error', error: 'Failed to update comment' } },
 			{ status: 500 },
 		)
 	}

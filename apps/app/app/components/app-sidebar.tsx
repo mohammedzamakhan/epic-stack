@@ -404,9 +404,12 @@ function OrganizationSidebar({
 
 	return (
 		<>
-			<SidebarHeader className="px-2 pt-2 pb-0">
+			<SidebarHeader className="gap-1 px-2 pt-3 pb-1">
 				<Link to="/" aria-label={goToHomepageLabel}>
-					<Logo className="text-md m-1 mx-2" aria-hidden="true" />
+					<Logo
+						className="h-10 gap-3 px-2 text-base group-data-[collapsible=icon]:gap-0"
+						aria-hidden="true"
+					/>
 				</Link>
 				<TeamSwitcher />
 			</SidebarHeader>
