@@ -30,7 +30,10 @@
 				"@repo/security#build",
 				"@repo/notifications#build",
 				"@repo/ai#build"
-			]
+			],
+			"env": ["DEPLOY_TARGET"],
+			"outputs": ["build/**", "public/build/**", ".wrangler/**"],
+			"passThroughEnv": ["NODE_OPTIONS"]
 		},
 		"admin#build": {
 			"dependsOn": [
@@ -46,7 +49,10 @@
 				"@repo/security#build",
 				"@repo/notifications#build",
 				"@repo/ai#build"
-			]
+			],
+			"env": ["DEPLOY_TARGET"],
+			"outputs": ["build/**", "public/build/**", ".wrangler/**"],
+			"passThroughEnv": ["NODE_OPTIONS"]
 		},
 		"lint": {
 			"cache": true

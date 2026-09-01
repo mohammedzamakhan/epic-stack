@@ -315,11 +315,12 @@ jobs:
             ${{ steps.meta.outputs.image }}:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
 
   deploy-app:
-    name: 🚀 Deploy App (Cloudflare Workers)
+    name: 🚀 Deploy / validate App (Cloudflare Workers)
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, affected]
     if:
-      ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
+      ${{ needs.affected.outputs.app == 'true' && (github.event_name == 'push'
+      || (github.event_name == 'pull_request' && github.base_ref == 'main')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -334,9 +335,17 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build App
-        run: DEPLOY_TARGET=cloudflare npx turbo run build --filter=app
+        run:
+          NODE_OPTIONS=--max-old-space-size=6144 DEPLOY_TARGET=cloudflare npx
+          turbo run build --filter=app
+
+      - name: 🔎 Validate App deployment
+        if: ${{ github.event_name == 'pull_request' }}
+        working-directory: apps/app
+        run: npx wrangler deploy --dry-run
 
       - name: 🚀 Deploy App
+        if: ${{ github.event_name == 'push' }}
         working-directory: apps/app
         run:
           npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
@@ -346,12 +355,12 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-admin:
-    name: 🚀 Deploy Admin (Cloudflare Workers)
+    name: 🚀 Deploy / validate Admin (Cloudflare Workers)
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, affected]
     if:
-      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true'
-      }}
+      ${{ needs.affected.outputs.admin == 'true' && (github.event_name == 'push'
+      || (github.event_name == 'pull_request' && github.base_ref == 'main')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -366,9 +375,17 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🏗 Build Admin
-        run: DEPLOY_TARGET=cloudflare npx turbo run build --filter=admin
+        run:
+          NODE_OPTIONS=--max-old-space-size=6144 DEPLOY_TARGET=cloudflare npx
+          turbo run build --filter=admin
+
+      - name: 🔎 Validate Admin deployment
+        if: ${{ github.event_name == 'pull_request' }}
+        working-directory: apps/admin
+        run: npx wrangler deploy --dry-run
 
       - name: 🚀 Deploy Admin
+        if: ${{ github.event_name == 'push' }}
         working-directory: apps/admin
         run:
           npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
