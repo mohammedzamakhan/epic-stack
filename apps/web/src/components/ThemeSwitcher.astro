@@ -55,7 +55,7 @@ const initialTheme = getThemeFromCookie(cookieHeader, themeCookieName)
 	}
 
 	// Store cleanup to avoid duplicate listeners
-	let cleanup: (() => void) | null = null
+	let cleanup = null
 
 	function getCurrentTheme() {
 		return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
