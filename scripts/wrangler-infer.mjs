@@ -36,7 +36,11 @@ function tryWrangler(args, cwd) {
 		stdio: ['ignore', 'pipe', 'pipe'],
 	})
 	if (result.status !== 0) {
-		return { ok: false, stdout: result.stdout ?? '', stderr: result.stderr ?? '' }
+		return {
+			ok: false,
+			stdout: result.stdout ?? '',
+			stderr: result.stderr ?? '',
+		}
 	}
 	return { ok: true, stdout: result.stdout ?? '', stderr: result.stderr ?? '' }
 }
@@ -73,7 +77,9 @@ function readTomlValue(configPath, key) {
 function readJsoncBinding(configPath, bindingKey, field) {
 	if (!existsSync(configPath)) return null
 	const content = readFileSync(configPath, 'utf8')
-	const stripped = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+	const stripped = content
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		.replace(/\/\/.*$/gm, '')
 	const withoutTrailingCommas = stripped.replace(/,(\s*[}\]])/g, '$1')
 	try {
 		const config = JSON.parse(withoutTrailingCommas)
@@ -87,9 +93,7 @@ function readJsoncBinding(configPath, bindingKey, field) {
 
 function pickKvNamespace(namespaces, hints) {
 	for (const hint of hints) {
-		const exact = namespaces.find(
-			(ns) => ns.title === hint || ns.name === hint,
-		)
+		const exact = namespaces.find((ns) => ns.title === hint || ns.name === hint)
 		if (exact) return exact.id
 	}
 	const fuzzy = namespaces.find((ns) => {
@@ -163,7 +167,9 @@ function inferRepoUrls(rootDir) {
 function readJsoncEnvName(configPath, envName) {
 	if (!existsSync(configPath)) return null
 	const content = readFileSync(configPath, 'utf8')
-	const stripped = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+	const stripped = content
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		.replace(/\/\/.*$/gm, '')
 	const withoutTrailingCommas = stripped.replace(/,(\s*[}\]])/g, '$1')
 	try {
 		const config = JSON.parse(withoutTrailingCommas)
@@ -176,17 +182,28 @@ function readJsoncEnvName(configPath, envName) {
 function readTomlEnvName(configPath, envName) {
 	if (!existsSync(configPath)) return null
 	const content = readFileSync(configPath, 'utf8')
-	const section = new RegExp(`\\[env\\.${envName}\\][\\s\\S]*?^name\\s*=\\s*"([^"]+)"`, 'm')
+	const section = new RegExp(
+		`\\[env\\.${envName}\\][\\s\\S]*?^name\\s*=\\s*"([^"]+)"`,
+		'm',
+	)
 	const match = content.match(section)
 	return match?.[1] ?? null
 }
 
 function inferWorkerNames(rootDir) {
 	const production = {
-		app: readWorkerNameFromWranglerConfig(join(rootDir, 'apps/app/wrangler.jsonc')),
-		admin: readWorkerNameFromWranglerConfig(join(rootDir, 'apps/admin/wrangler.jsonc')),
-		web: readWorkerNameFromWranglerConfig(join(rootDir, 'apps/web/wrangler.toml')),
-		sites: readWorkerNameFromWranglerConfig(join(rootDir, 'apps/sites/wrangler.toml')),
+		app: readWorkerNameFromWranglerConfig(
+			join(rootDir, 'apps/app/wrangler.jsonc'),
+		),
+		admin: readWorkerNameFromWranglerConfig(
+			join(rootDir, 'apps/admin/wrangler.jsonc'),
+		),
+		web: readWorkerNameFromWranglerConfig(
+			join(rootDir, 'apps/web/wrangler.toml'),
+		),
+		sites: readWorkerNameFromWranglerConfig(
+			join(rootDir, 'apps/sites/wrangler.toml'),
+		),
 		jobs_cron: readWorkerNameFromWranglerConfig(
 			join(rootDir, 'apps/jobs-cron/wrangler.jsonc'),
 		),
@@ -196,10 +213,19 @@ function inferWorkerNames(rootDir) {
 	}
 	const staging = {
 		app: readJsoncEnvName(join(rootDir, 'apps/app/wrangler.jsonc'), 'staging'),
-		admin: readJsoncEnvName(join(rootDir, 'apps/admin/wrangler.jsonc'), 'staging'),
+		admin: readJsoncEnvName(
+			join(rootDir, 'apps/admin/wrangler.jsonc'),
+			'staging',
+		),
 		web: readTomlEnvName(join(rootDir, 'apps/web/wrangler.toml'), 'staging'),
-		sites: readTomlEnvName(join(rootDir, 'apps/sites/wrangler.toml'), 'staging'),
-		jobs_cron: readJsoncEnvName(join(rootDir, 'apps/jobs-cron/wrangler.jsonc'), 'staging'),
+		sites: readTomlEnvName(
+			join(rootDir, 'apps/sites/wrangler.toml'),
+			'staging',
+		),
+		jobs_cron: readJsoncEnvName(
+			join(rootDir, 'apps/jobs-cron/wrangler.jsonc'),
+			'staging',
+		),
 		tenant_api: readJsoncEnvName(
 			join(rootDir, 'apps/tenant-api/wrangler.jsonc'),
 			'staging',
@@ -240,11 +266,15 @@ function tryGitOriginRepo(rootDir) {
 }
 
 function tryGhRepoView(rootDir) {
-	const result = spawnSync('gh', ['repo', 'view', '--json', 'url,nameWithOwner'], {
-		cwd: rootDir,
-		encoding: 'utf8',
-		stdio: ['ignore', 'pipe', 'pipe'],
-	})
+	const result = spawnSync(
+		'gh',
+		['repo', 'view', '--json', 'url,nameWithOwner'],
+		{
+			cwd: rootDir,
+			encoding: 'utf8',
+			stdio: ['ignore', 'pipe', 'pipe'],
+		},
+	)
 	if (result.status !== 0) return null
 	try {
 		const data = JSON.parse(result.stdout)
@@ -256,7 +286,7 @@ function tryGhRepoView(rootDir) {
 }
 
 /** Prefer git `origin` — `gh repo view` alone can target a stale default repo. */
-function resolveGitHubRepo(rootDir) {
+export function resolveGitHubRepo(rootDir) {
 	return tryGitOriginRepo(rootDir) ?? tryGhRepoView(rootDir)
 }
 
@@ -269,8 +299,22 @@ export async function inferLaunchConfig(rootDir) {
 		accountId: null,
 		githubRepo: resolveGitHubRepo(rootDir),
 		bindings: {
-			production: { app: {}, admin: {}, web: {}, sites: {}, jobs_cron: {}, tenant_api: {} },
-			staging: { app: {}, admin: {}, web: {}, sites: {}, jobs_cron: {}, tenant_api: {} },
+			production: {
+				app: {},
+				admin: {},
+				web: {},
+				sites: {},
+				jobs_cron: {},
+				tenant_api: {},
+			},
+			staging: {
+				app: {},
+				admin: {},
+				web: {},
+				sites: {},
+				jobs_cron: {},
+				tenant_api: {},
+			},
 		},
 		urls: inferRepoUrls(rootDir),
 		notes: [],
@@ -278,7 +322,9 @@ export async function inferLaunchConfig(rootDir) {
 
 	const whoami = tryWrangler(['whoami'], join(rootDir, 'apps/app'))
 	if (!whoami.ok) {
-		result.notes.push('wrangler whoami failed — run `npx wrangler login` to auto-detect Cloudflare resources')
+		result.notes.push(
+			'wrangler whoami failed — run `npx wrangler login` to auto-detect Cloudflare resources',
+		)
 		return result
 	}
 
@@ -299,7 +345,9 @@ export async function inferLaunchConfig(rootDir) {
 				}
 			}
 			if (result.bindings.production.app.d1_database_id) {
-				result.notes.push(`D1 ${CF_D1.app}: ${result.bindings.production.app.d1_database_id}`)
+				result.notes.push(
+					`D1 ${CF_D1.app}: ${result.bindings.production.app.d1_database_id}`,
+				)
 			}
 		} catch {
 			result.notes.push('Could not parse `wrangler d1 list --json` output')
@@ -356,8 +404,14 @@ export async function inferLaunchConfig(rootDir) {
 				),
 			},
 			web: {
-				d1_database_id: readTomlValue(join(rootDir, 'apps/web/wrangler.toml'), 'database_id'),
-				r2_bucket_name: readTomlValue(join(rootDir, 'apps/web/wrangler.toml'), 'bucket_name'),
+				d1_database_id: readTomlValue(
+					join(rootDir, 'apps/web/wrangler.toml'),
+					'database_id',
+				),
+				r2_bucket_name: readTomlValue(
+					join(rootDir, 'apps/web/wrangler.toml'),
+					'bucket_name',
+				),
 			},
 		},
 	}
@@ -386,7 +440,9 @@ export async function inferLaunchConfig(rootDir) {
 		result.notes.push(`Jobs cron URL: ${result.urls.jobs_cron_worker_url}`)
 	}
 	if (result.githubRepo?.nameWithOwner) {
-		result.notes.push(`GitHub repo (origin): ${result.githubRepo.nameWithOwner}`)
+		result.notes.push(
+			`GitHub repo (origin): ${result.githubRepo.nameWithOwner}`,
+		)
 	}
 
 	return result
@@ -394,7 +450,10 @@ export async function inferLaunchConfig(rootDir) {
 
 export function printInferredSummary(inferred, log) {
 	if (inferred.notes.length === 0) {
-		log('No Cloudflare resources auto-detected (wrangler login may be required).', 'gray')
+		log(
+			'No Cloudflare resources auto-detected (wrangler login may be required).',
+			'gray',
+		)
 		return
 	}
 	log('\nAuto-detected from wrangler / local .env:', 'bright')

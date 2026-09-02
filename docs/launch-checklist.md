@@ -10,12 +10,12 @@ For day-to-day infrastructure steps, see also
 
 ## How configuration works
 
-| Layer                            | What it controls                      | Where you set it                                      | Survives `wrangler deploy`?   |
-| -------------------------------- | ------------------------------------- | ----------------------------------------------------- | ----------------------------- |
-| **Bindings**                     | D1, KV, R2, Worker name               | GitHub **Variables** → CI patches `wrangler.deploy.*` | Yes (re-applied from CI)      |
-| **Runtime URLs / feature flags** | `BASE_URL`, `LAUNCH_STATUS`, API URLs | Wrangler **secrets** or GitHub Variables              | Secrets yes; vars from CI yes |
-| **Credentials**                  | `SESSION_SECRET`, Stripe, OAuth       | Wrangler **secrets** only                             | Yes                           |
-| **Local dev**                    | Everything                            | `apps/*/.env` + `.dev.vars`                           | N/A                           |
+| Layer                            | What it controls                      | Where you set it                                                                           | Survives `wrangler deploy`?   |
+| -------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------- |
+| **Bindings**                     | D1, KV, R2, Worker name               | Cloudflare **Build variables** (Workers Builds) or GitHub Variables for Lighthouse preview | Yes (re-applied each build)   |
+| **Runtime URLs / feature flags** | `BASE_URL`, `LAUNCH_STATUS`, API URLs | Wrangler **secrets** or GitHub Variables                                                   | Secrets yes; vars from CI yes |
+| **Credentials**                  | `SESSION_SECRET`, Stripe, OAuth       | Wrangler **secrets** only                                                                  | Yes                           |
+| **Local dev**                    | Everything                            | `apps/*/.env` + `.dev.vars`                                                                | N/A                           |
 
 **Do not edit Cloudflare dashboard Variables for keys that CI manages** — the
 next deploy will overwrite them. Change GitHub Variables or Wrangler secrets
@@ -32,7 +32,9 @@ npm run launch:setup
 
 # 3. Set Wrangler secrets on each Worker (see tables below)
 
-# 4. Push to main (production) or dev (staging) — CI runs scripts/patch-wrangler.mjs
+# 4. launch:setup offers to configure Workers Builds after the first deployments.
+#    Push to main (production) or dev (staging) — GHA runs CI, then triggers the
+#    tested commit through the Cloudflare Builds API (see docs/workers-builds.md)
 ```
 
 When logged in via `npx wrangler login`, setup auto-detects D1/KV/R2 IDs (by
@@ -63,12 +65,13 @@ skip the interactive script. Generated secrets land in `launch.secrets.json`
 
 Set under **Settings → Secrets and variables → Actions → Secrets**.
 
-| Secret                  | Used by                    | Purpose                                           |
-| ----------------------- | -------------------------- | ------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`  | All Cloudflare deploy jobs | API token with Workers + D1 + KV + R2 edit        |
-| `CLOUDFLARE_ACCOUNT_ID` | All Cloudflare deploy jobs | Replaces `account_id` in wrangler files           |
-| `OCI_TENANT_SSH_KEY`    | `deploy-tenant-api-oci`    | SSH private key for OCI VMs (KSA / optional US)   |
-| `GHCR_PULL_TOKEN`       | OCI deploy (optional)      | PAT with `packages:read` if GHCR image is private |
+| Secret                        | Used by                                  | Purpose                                            |
+| ----------------------------- | ---------------------------------------- | -------------------------------------------------- |
+| `CLOUDFLARE_BUILDS_API_TOKEN` | `trigger-cf-builds`                      | User token with Workers Builds Configuration: Edit |
+| `CLOUDFLARE_API_TOKEN`        | Lighthouse preview deploy                | API token with Workers deployment permissions      |
+| `CLOUDFLARE_ACCOUNT_ID`       | Lighthouse preview + `trigger-cf-builds` | Cloudflare account ID                              |
+| `OCI_TENANT_SSH_KEY`          | `deploy-tenant-api-oci`                  | SSH private key for OCI VMs (KSA / optional US)    |
+| `GHCR_PULL_TOKEN`             | OCI deploy (optional)                    | PAT with `packages:read` if GHCR image is private  |
 
 Generate API token:
 [Cloudflare Dashboard → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
@@ -342,7 +345,9 @@ Wrangler dev secrets: `apps/app/.dev.vars`, `apps/tenant-api/.dev.vars`
 - [ ] Set GitHub Variables (`APP_*`, `ADMIN_*`, shared URLs)
 - [ ] Set Wrangler secrets on both Workers (staging + production)
 - [ ] Run D1 migrations: `npm run db:migrate:deploy` (or CI on first deploy)
-- [ ] Push to `main` / `dev` — CI patches + deploys
+- [ ] Accept the Workers Builds setup at the end of `npm run launch:setup`
+- [ ] Push to `main` / `dev` — GHA CI, then Cloudflare Workers Builds
+      ([workers-builds.md](./workers-builds.md))
 
 ### 2. Web (marketing Worker)
 

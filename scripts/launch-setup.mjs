@@ -5,6 +5,8 @@
  * - Creates Cloudflare D1 / KV / R2 resources (optional)
  * - Writes launch.config.json for local patching
  * - Generates shared secrets in launch.secrets.json (gitignored)
+ * - Applies generated Wrangler secrets after deploy (optional)
+ * - Configures Cloudflare Workers Builds after the first deploy (optional)
  * - Prints GitHub Variables/Secrets commands
  * - Opens Cloudflare / GitHub setup pages (optional)
  *
@@ -18,8 +20,13 @@ import crypto from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { confirm, input } from '@inquirer/prompts'
-import { CF_D1, CF_KV, CF_R2 } from './cloudflare-resource-names.mjs'
+import { confirm, input, password, select } from '@inquirer/prompts'
+import { CF_D1, CF_KV } from './cloudflare-resource-names.mjs'
+import { getGhVariables } from './launch-github-vars.mjs'
+import {
+	configureWorkersBuilds,
+	workersBuildsSettingsUrl,
+} from './setup-workers-builds.mjs'
 import { stagingHostnames } from './staging-hostnames.mjs'
 import {
 	inferLaunchConfig,
@@ -43,19 +50,283 @@ function log(message, color = 'reset') {
 	console.log(`${colors[color]}${message}${colors.reset}`)
 }
 
+/** Strip values that look like API tokens or secrets from a string. */
+function redactSecrets(message) {
+	return String(message).replace(
+		/[A-Za-z0-9_-]{32,}/g,
+		(match) =>
+			/^[0-9a-f]{8}-/.test(match)
+				? match
+				: `${match.slice(0, 4)}…[REDACTED]`,
+	)
+}
+
 function randomHex(bytes) {
 	return crypto.randomBytes(bytes).toString('hex')
 }
 
-function openUrl(url) {
-	const platform = process.platform
+function isValidUrl(value) {
 	try {
-		if (platform === 'darwin') execSync(`open "${url}"`, { stdio: 'ignore' })
-		else if (platform === 'win32')
-			execSync(`start "" "${url}"`, { stdio: 'ignore', shell: true })
-		else execSync(`xdg-open "${url}"`, { stdio: 'ignore' })
+		new URL(value)
+		return true
 	} catch {
+		return false
+	}
+}
+
+async function promptLaunchStatus() {
+	return select({
+		message: 'Product launch phase (LAUNCH_STATUS on App and Admin)',
+		choices: [
+			{
+				name: 'Closed beta — waitlist; admins grant early access; billing hidden',
+				value: 'CLOSED_BETA',
+				description: 'Typical for first launch',
+			},
+			{
+				name: 'Public beta — full app without Stripe checkout',
+				value: 'PUBLIC_BETA',
+			},
+			{
+				name: 'Launched — full product including subscriptions and billing',
+				value: 'LAUNCHED',
+			},
+		],
+		default: 'CLOSED_BETA',
+	})
+}
+
+async function promptCreditCardRequiredForTrial() {
+	return select({
+		message: 'Trial signup flow (CREDIT_CARD_REQUIRED_FOR_TRIAL on App)',
+		choices: [
+			{
+				name: 'Manual — free trial without credit card upfront',
+				value: 'manual',
+				description: 'Default; only applies when LAUNCH_STATUS=LAUNCHED',
+			},
+			{
+				name: 'Stripe — require credit card via Stripe before trial starts',
+				value: 'stripe',
+			},
+		],
+		default: 'manual',
+	})
+}
+
+async function promptDiscordConfig(appUrl) {
+	log('\nDiscord integration (closed beta waitlist)', 'blue')
+	log('See apps/app/docs/DISCORD_INTEGRATION.md', 'gray')
+
+	const defaultRedirectUri = `${appUrl.replace(/\/$/, '')}/auth/discord/verify`
+
+	const discordInviteUrl = await input({
+		message: 'DISCORD_INVITE_URL (server invite link)',
+		validate: (value) => {
+			const trimmed = value.trim()
+			if (!trimmed) return 'Required for closed beta'
+			return isValidUrl(trimmed) ? true : 'Must be a valid URL'
+		},
+	})
+
+	const discordClientId = await input({
+		message: 'DISCORD_CLIENT_ID (OAuth app client ID)',
+	})
+
+	const discordClientSecret = await password({
+		message: 'DISCORD_CLIENT_SECRET (OAuth app client secret)',
+		mask: '*',
+	})
+
+	const discordRedirectUri = await input({
+		message: 'DISCORD_REDIRECT_URI (must match Discord Developer Portal)',
+		default: defaultRedirectUri,
+		validate: (value) => {
+			const trimmed = value.trim()
+			if (!trimmed) return 'Redirect URI is required for OAuth verification'
+			return isValidUrl(trimmed) ? true : 'Must be a valid URL'
+		},
+	})
+
+	const discordGuildId = await input({
+		message: 'DISCORD_GUILD_ID (Discord server ID)',
+	})
+
+	return {
+		DISCORD_INVITE_URL: discordInviteUrl.trim(),
+		DISCORD_CLIENT_ID: discordClientId.trim(),
+		DISCORD_CLIENT_SECRET: discordClientSecret.trim(),
+		DISCORD_REDIRECT_URI: discordRedirectUri.trim(),
+		DISCORD_GUILD_ID: discordGuildId.trim(),
+	}
+}
+
+function openUrl(url) {
+	let result
+	if (process.platform === 'darwin') {
+		result = spawnSync('open', [url], { stdio: 'ignore' })
+	} else if (process.platform === 'win32') {
+		result = spawnSync('cmd', ['/c', 'start', '', url], { stdio: 'ignore' })
+	} else {
+		result = spawnSync('xdg-open', [url], { stdio: 'ignore' })
+	}
+	if (result.status !== 0) {
 		log(`Could not open browser. Visit: ${url}`, 'yellow')
+	}
+}
+
+function setGhSecret(repo, name, value) {
+	const result = spawnSync(
+		'gh',
+		['secret', 'set', name, '--repo', repo.nameWithOwner],
+		{
+			cwd: rootDir,
+			input: `${value}\n`,
+			encoding: 'utf8',
+			stdio: ['pipe', 'pipe', 'pipe'],
+		},
+	)
+	if (result.status !== 0) {
+		throw new Error(result.stderr || result.stdout || `Could not set ${name}`)
+	}
+}
+
+async function setupWorkersBuildsAfterDeploy(config, inferred, deployedEnvs) {
+	const shouldConfigure = await confirm({
+		message:
+			'Set up Cloudflare Workers Builds for future main/dev deployments now?',
+		default: true,
+	})
+	if (!shouldConfigure) return false
+	if (!inferred.githubRepo?.nameWithOwner) {
+		log(
+			'Could not detect a GitHub repository from git origin; skipping Workers Builds setup.',
+			'yellow',
+		)
+		log('Retry later with: npm run launch:workers-builds', 'gray')
+		return false
+	}
+
+	const accountId =
+		process.env.CLOUDFLARE_ACCOUNT_ID ||
+		inferred.accountId ||
+		(
+			await input({
+				message: 'Cloudflare account ID',
+				validate: (value) => (value.trim() ? true : 'Account ID is required'),
+			})
+		).trim()
+	const setupWorker =
+		config.bindings.production.jobs_cron.worker_name ||
+		config.bindings.production.app.worker_name
+	const buildsSettingsUrl = workersBuildsSettingsUrl(accountId, setupWorker)
+
+	log('\n☁️  Cloudflare Workers Builds (one-time setup)', 'bright')
+	log(
+		'Cloudflare requires one browser step to authorize its GitHub App and create/select a build token.',
+		'gray',
+	)
+	const openBuildSettings = await confirm({
+		message: `Open ${setupWorker} → Settings → Builds now?`,
+		default: true,
+	})
+	if (openBuildSettings) openUrl(buildsSettingsUrl)
+
+	const githubConnected = await confirm({
+		message:
+			'Continue after you connected GitHub and selected/created the Worker build API token?',
+		default: true,
+	})
+	if (!githubConnected) {
+		log(
+			`Finish at ${buildsSettingsUrl}, then run: npm run launch:workers-builds`,
+			'yellow',
+		)
+		return false
+	}
+
+	let apiToken = process.env.CLOUDFLARE_BUILDS_API_TOKEN
+	if (!apiToken) {
+		log(
+			'Create a user API token with Workers Builds Configuration: Edit and Workers Scripts: Read.',
+			'gray',
+		)
+		const openTokenPage = await confirm({
+			message: 'Open the Cloudflare API Tokens page now?',
+			default: true,
+		})
+		if (openTokenPage) openUrl('https://dash.cloudflare.com/profile/api-tokens')
+		apiToken = await password({
+			message: 'Paste the Cloudflare API token (input is hidden)',
+			mask: '*',
+			validate: (value) => (value.trim() ? true : 'API token is required'),
+		})
+		apiToken = apiToken.trim()
+	}
+
+	const canApplyGh = ghAvailable() && inferred.githubRepo?.nameWithOwner
+	const applyBuildsGh = canApplyGh
+		? await confirm({
+				message:
+					'Save Workers Builds trigger IDs and Cloudflare credentials to GitHub Actions now?',
+				default: true,
+			})
+		: false
+	if (!deployedEnvs.includes('staging')) {
+		log(
+			'Staging was not deployed in this run. Existing staging Workers will be configured; missing ones will be reported.',
+			'gray',
+		)
+	}
+
+	try {
+		const result = await configureWorkersBuilds({
+			config,
+			accountId,
+			token: apiToken,
+			githubRepo: inferred.githubRepo,
+			tiers: ['production', 'staging'],
+			applyGh: applyBuildsGh,
+		})
+
+		if (applyBuildsGh) {
+			setGhSecret(inferred.githubRepo, 'CLOUDFLARE_BUILDS_API_TOKEN', apiToken)
+			setGhSecret(inferred.githubRepo, 'CLOUDFLARE_ACCOUNT_ID', accountId)
+			log(
+				'Saved the Builds API token + account ID as GitHub Actions secrets.',
+				'green',
+			)
+		}
+
+		if (result.failures.length > 0) {
+			log('\nWorkers Builds was only partially configured:', 'yellow')
+			for (const failure of result.failures) {
+				log(`  ${failure.app}/${failure.tier}: ${failure.message}`, 'yellow')
+			}
+			log('Retry later with: npm run launch:workers-builds', 'gray')
+			return false
+		}
+
+		log('\n✅ Cloudflare Workers Builds configured.', 'green')
+		log(
+			'Build commands, watch paths, caching, and launch.config.json values were applied automatically.',
+			'gray',
+		)
+
+		const openConfiguredSettings = await confirm({
+			message: 'Open the configured Worker Builds settings page for review?',
+			default: false,
+		})
+		if (openConfiguredSettings) openUrl(buildsSettingsUrl)
+		return true
+	} catch (error) {
+		log(
+			`\nWorkers Builds setup could not finish: ${redactSecrets(error.message)}`,
+			'yellow',
+		)
+		log(`Settings: ${buildsSettingsUrl}`, 'gray')
+		log('Retry with: npm run launch:workers-builds', 'gray')
+		return false
 	}
 }
 
@@ -87,7 +358,7 @@ function generateSharedSecrets() {
 			'SESSION_SECRET, HONEYPOT_SECRET, INTERNAL_COMMAND_TOKEN, TENANT_OPERATOR_TOKEN, SSO_ENCRYPTION_KEY, and AUDIT_LOG_SECRET_KEY must match on App and Admin.',
 			'INTERNAL_COMMAND_TOKEN must also match jobs-cron and tenant-api.',
 			'TENANT_CUSTOMER_JWT_SECRET (App) must equal JWT_SECRET on US tenant-api.',
-			'Set these via wrangler secret put — never commit values to git.',
+			'launch:setup can apply these via wrangler secret put after deploy — never commit values to git.',
 		],
 	}
 }
@@ -121,6 +392,159 @@ function runWrangler(args, cwd) {
 	return result.stdout
 }
 
+function wranglerEnvArgs(deployEnv, { useEmptyEnv = false } = {}) {
+	if (useEmptyEnv) return ['--env', '']
+	if (deployEnv === 'staging') return ['--env', 'staging']
+	return []
+}
+
+function putWranglerSecret(
+	cwd,
+	configFile,
+	deployEnv,
+	name,
+	value,
+	{ useEmptyEnv = false } = {},
+) {
+	const args = [
+		'wrangler',
+		'secret',
+		'put',
+		name,
+		'--config',
+		configFile,
+		...wranglerEnvArgs(deployEnv, { useEmptyEnv }),
+	]
+	const result = spawnSync('npx', args, {
+		cwd,
+		input: value,
+		encoding: 'utf8',
+		stdio: ['pipe', 'pipe', 'pipe'],
+	})
+	if (result.status !== 0) {
+		throw new Error(
+			result.stderr || result.stdout || `wrangler secret put ${name} failed`,
+		)
+	}
+}
+
+function reactRouterWranglerConfig(appKey) {
+	const appDir = join(rootDir, 'apps', appKey)
+	const deployConfig = join(appDir, 'build/server/wrangler.deploy.json')
+	if (existsSync(deployConfig)) {
+		return { cwd: appDir, config: 'build/server/wrangler.deploy.json' }
+	}
+	return { cwd: appDir, config: 'wrangler.jsonc' }
+}
+
+function applyGeneratedWranglerSecrets(
+	secrets,
+	urls,
+	deployEnv,
+	launchStatus,
+	trialCreditCardMode,
+) {
+	const label = deployEnv === 'staging' ? 'staging' : 'production'
+	const appBaseUrl =
+		deployEnv === 'staging' ? urls.app_base_url_staging : urls.app_base_url
+	const adminBaseUrl =
+		deployEnv === 'staging' ? urls.admin_base_url_staging : urls.admin_base_url
+
+	log(`\n🔑 Applying generated Wrangler secrets (${label})…`, 'yellow')
+
+	const appWrangler = reactRouterWranglerConfig('app')
+	const adminWrangler = reactRouterWranglerConfig('admin')
+	const jobsCronDir = join(rootDir, 'apps/jobs-cron')
+	const tenantApiDir = join(rootDir, 'apps/tenant-api')
+
+	const workerBlocks = [
+		{
+			name: 'App',
+			patchApp: 'app',
+			cwd: appWrangler.cwd,
+			config: appWrangler.config,
+			secrets: [
+				['SESSION_SECRET', secrets.shared.SESSION_SECRET],
+				['HONEYPOT_SECRET', secrets.shared.HONEYPOT_SECRET],
+				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+				['TENANT_OPERATOR_TOKEN', secrets.shared.TENANT_OPERATOR_TOKEN],
+				['JWT_SECRET', secrets.app.JWT_SECRET],
+				['TENANT_CUSTOMER_JWT_SECRET', secrets.app.TENANT_CUSTOMER_JWT_SECRET],
+				['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
+				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
+				['LAUNCH_STATUS', launchStatus],
+				['CREDIT_CARD_REQUIRED_FOR_TRIAL', trialCreditCardMode],
+				['BASE_URL', appBaseUrl],
+				...(secrets.discord
+					? Object.entries(secrets.discord).filter(([, value]) => value)
+					: []),
+			],
+		},
+		{
+			name: 'Admin',
+			patchApp: 'admin',
+			cwd: adminWrangler.cwd,
+			config: adminWrangler.config,
+			secrets: [
+				['SESSION_SECRET', secrets.shared.SESSION_SECRET],
+				['HONEYPOT_SECRET', secrets.shared.HONEYPOT_SECRET],
+				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+				['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
+				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
+				['LAUNCH_STATUS', launchStatus],
+				['BASE_URL', adminBaseUrl],
+			],
+		},
+		{
+			name: 'Jobs Cron',
+			patchApp: 'jobs-cron',
+			cwd: jobsCronDir,
+			config: 'wrangler.deploy.jsonc',
+			secrets: [
+				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+			],
+		},
+		{
+			name: 'Tenant API US',
+			patchApp: 'tenant-api',
+			cwd: tenantApiDir,
+			config: 'wrangler.deploy.jsonc',
+			optional: true,
+			secrets: [
+				['JWT_SECRET', secrets.tenant_api.JWT_SECRET],
+				['AUTH_HMAC_SECRET', secrets.tenant_api.AUTH_HMAC_SECRET],
+				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+				['TENANT_OPERATOR_TOKEN', secrets.shared.TENANT_OPERATOR_TOKEN],
+			],
+		},
+	]
+
+	const failures = []
+	for (const block of workerBlocks) {
+		patchWranglerApp(block.patchApp, deployEnv)
+		for (const [secretName, value] of block.secrets) {
+			try {
+				putWranglerSecret(block.cwd, block.config, deployEnv, secretName, value)
+				log(`  ✓ ${block.name}: ${secretName}`, 'gray')
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error)
+				if (block.optional) {
+					log(`  ⚠ ${block.name}: ${secretName} skipped (${message})`, 'yellow')
+				} else {
+					failures.push(`${block.name} ${secretName}: ${message}`)
+					log(`  ✗ ${block.name}: ${secretName} failed`, 'yellow')
+				}
+			}
+		}
+	}
+
+	if (failures.length > 0) {
+		throw new Error(failures.join('; '))
+	}
+
+	log(`✅ Wrangler secrets applied (${label})`, 'green')
+}
+
 function parseD1CreateOutput(output) {
 	const idMatch = output.match(/database_id\s*=\s*"([^"]+)"/i)
 	return idMatch?.[1]
@@ -144,7 +568,10 @@ function applyRemoteD1Migrations(config) {
 	const prodId = config.bindings.production.app.d1_database_id
 	const stagingId = config.bindings.staging.app.d1_database_id
 	if (!prodId && !stagingId) {
-		log('\nSkipping remote D1 migrations (no App/Admin database IDs in config).', 'gray')
+		log(
+			'\nSkipping remote D1 migrations (no App/Admin database IDs in config).',
+			'gray',
+		)
 		return
 	}
 
@@ -223,10 +650,18 @@ function runLaunchCommand(command, cwd, extraEnv = {}) {
 
 function patchWranglerApp(app, deployEnv) {
 	const patchScript = join(rootDir, 'scripts/patch-wrangler.mjs')
-	runLaunchCommand(`node "${patchScript}" --app ${app} --env ${deployEnv}`, rootDir)
+	runLaunchCommand(
+		`node "${patchScript}" --app ${app} --env ${deployEnv}`,
+		rootDir,
+	)
 }
 
-function wranglerDeploy(cwd, configFile, deployEnv, { useEmptyEnv = false } = {}) {
+function wranglerDeploy(
+	cwd,
+	configFile,
+	deployEnv,
+	{ useEmptyEnv = false } = {},
+) {
 	const envFlag = useEmptyEnv
 		? ' --env=""'
 		: deployEnv === 'staging'
@@ -244,7 +679,9 @@ function astroWranglerDeploy(appKey, deployEnv) {
 		})
 		return
 	}
-	wranglerDeploy(appDir, 'wrangler.deploy.toml', deployEnv, { useEmptyEnv: true })
+	wranglerDeploy(appDir, 'wrangler.deploy.toml', deployEnv, {
+		useEmptyEnv: true,
+	})
 }
 
 function deployReactRouterApp(appKey, deployEnv, { build = true } = {}) {
@@ -299,15 +736,18 @@ function deploySites(urls, deployEnv, { build = true } = {}) {
 	astroWranglerDeploy('sites', deployEnv)
 }
 
-async function deployCloudflareWorkers(urls, deployEnv, { skipBuilds = false } = {}) {
+async function deployCloudflareWorkers(
+	urls,
+	deployEnv,
+	{ skipBuilds = false } = {},
+) {
 	const label = deployEnv === 'staging' ? 'staging' : 'production'
 	log(`\n🚀 Building and deploying Cloudflare Workers (${label})…`, 'yellow')
 
 	const steps = [
 		{
 			name: 'App',
-			run: () =>
-				deployReactRouterApp('app', deployEnv, { build: !skipBuilds }),
+			run: () => deployReactRouterApp('app', deployEnv, { build: !skipBuilds }),
 		},
 		{
 			name: 'Admin',
@@ -357,58 +797,152 @@ async function deployCloudflareWorkers(urls, deployEnv, { skipBuilds = false } =
 	log(`\n✅ ${label} deploy complete`, 'green')
 }
 
-function getGhVariables(config) {
-	const prod = config.bindings.production
-	const staging = config.bindings.staging
-	const urls = config.urls
-
-	return [
-		['APP_D1_DATABASE_ID', prod.app.d1_database_id],
-		['APP_KV_NAMESPACE_ID', prod.app.kv_namespace_id],
-		['APP_WORKER_NAME', prod.app.worker_name],
-		['ADMIN_D1_DATABASE_ID', prod.admin.d1_database_id],
-		['ADMIN_KV_NAMESPACE_ID', prod.admin.kv_namespace_id],
-		['ADMIN_WORKER_NAME', prod.admin.worker_name],
-		['WEB_D1_DATABASE_ID', prod.web.d1_database_id],
-		['WEB_R2_BUCKET_NAME', prod.web.r2_bucket_name],
-		['WEB_WORKER_NAME', prod.web.worker_name],
-		['SITES_WORKER_NAME', prod.sites.worker_name],
-		['JOBS_CRON_WORKER_NAME', prod.jobs_cron.worker_name],
-		['TENANT_API_US_WORKER_NAME', prod.tenant_api.worker_name],
-		['APP_BASE_URL', urls.app_base_url],
-		['ADMIN_BASE_URL', urls.admin_base_url],
-		['WEB_BASE_URL', urls.web_base_url],
-		['PUBLIC_APP_URL', urls.public_app_url],
-		['ROOT_APP', urls.root_app],
-		['ROOT_APP_STAGING', urls.root_app_staging],
-		['PUBLIC_SITE_HOST_SUFFIXES', urls.public_site_host_suffixes],
-		['PUBLIC_SITE_HOST_SUFFIXES_STAGING', urls.public_site_host_suffixes_staging],
-		['PUBLIC_APP_URL_STAGING', urls.public_app_url_staging],
-		['TENANT_API_URL', urls.tenant_api_url],
-		['TENANT_API_URL_KSA', urls.tenant_api_url_ksa],
-		['JOBS_CRON_WORKER_URL', urls.jobs_cron_worker_url],
-		['APP_BASE_URL_STAGING', urls.app_base_url_staging],
-		['ADMIN_BASE_URL_STAGING', urls.admin_base_url_staging],
-		['WEB_BASE_URL_STAGING', urls.web_base_url_staging],
-		['TENANT_API_URL_STAGING', urls.tenant_api_url_staging],
-		['JOBS_CRON_WORKER_URL_STAGING', urls.jobs_cron_worker_url_staging],
-		['APP_D1_DATABASE_ID_STAGING', staging.app.d1_database_id],
-		['APP_KV_NAMESPACE_ID_STAGING', staging.app.kv_namespace_id],
-		['APP_WORKER_NAME_STAGING', staging.app.worker_name],
-		['ADMIN_D1_DATABASE_ID_STAGING', staging.admin.d1_database_id],
-		['ADMIN_KV_NAMESPACE_ID_STAGING', staging.admin.kv_namespace_id],
-		['ADMIN_WORKER_NAME_STAGING', staging.admin.worker_name],
-		['WEB_D1_DATABASE_ID_STAGING', staging.web.d1_database_id],
-		['WEB_R2_BUCKET_NAME_STAGING', staging.web.r2_bucket_name],
-		['WEB_WORKER_NAME_STAGING', staging.web.worker_name],
-		['SITES_WORKER_NAME_STAGING', staging.sites.worker_name],
-		['JOBS_CRON_WORKER_NAME_STAGING', staging.jobs_cron.worker_name],
-		['TENANT_API_US_WORKER_NAME_STAGING', staging.tenant_api.worker_name],
-	]
-}
-
 function ghRepoFlag(repo) {
 	return repo?.nameWithOwner ? ` --repo ${repo.nameWithOwner}` : ''
+}
+
+const GH_VARIABLE_MAX_ATTEMPTS = 4
+const GH_VARIABLE_BASE_DELAY_MS = 400
+const GH_VARIABLE_INTER_REQUEST_DELAY_MS = 150
+
+function sleep(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function jitteredDelay(attempt, baseMs) {
+	const exponential = baseMs * 2 ** (attempt - 1)
+	const jitter = Math.floor(Math.random() * (baseMs / 2))
+	return exponential + jitter
+}
+
+function runGh(args) {
+	return spawnSync('gh', args, {
+		cwd: rootDir,
+		encoding: 'utf8',
+		stdio: ['ignore', 'pipe', 'pipe'],
+	})
+}
+
+function parseGhHttpStatus(text) {
+	const combined = String(text)
+	const match =
+		combined.match(/\bHTTP(?:\/[\d.]+)?\s+(\d{3})\b/i) ??
+		combined.match(/\bHTTP (\d{3})\b/)
+	return match ? Number(match[1]) : undefined
+}
+
+function ghApiHttpStatus(result) {
+	return parseGhHttpStatus(`${result.stdout ?? ''}\n${result.stderr ?? ''}`)
+}
+
+function isRetriableGhStatus(status) {
+	return status === undefined || [429, 500, 502, 503, 504].includes(status)
+}
+
+/** @returns {boolean | null} true = exists, false = not found, null = transient lookup error */
+function checkGhRepoVariableExists(nameWithOwner, name) {
+	const result = runGh([
+		'api',
+		`repos/${nameWithOwner}/actions/variables/${encodeURIComponent(name)}`,
+	])
+	if (result.status === 0) return true
+
+	const status = ghApiHttpStatus(result)
+	if (status === 404) return false
+	return null
+}
+
+function createGhRepoVariable(nameWithOwner, name, value) {
+	return runGh([
+		'api',
+		'--method',
+		'POST',
+		`repos/${nameWithOwner}/actions/variables`,
+		'-f',
+		`name=${name}`,
+		'-f',
+		`value=${value}`,
+	])
+}
+
+function patchGhRepoVariable(nameWithOwner, name, value) {
+	return runGh([
+		'api',
+		'--method',
+		'PATCH',
+		`repos/${nameWithOwner}/actions/variables/${encodeURIComponent(name)}`,
+		'-f',
+		`value=${value}`,
+	])
+}
+
+async function setGhRepoVariable(nameWithOwner, name, value) {
+	for (let attempt = 1; attempt <= GH_VARIABLE_MAX_ATTEMPTS; attempt++) {
+		const exists = checkGhRepoVariableExists(nameWithOwner, name)
+		if (exists === null) {
+			if (attempt === GH_VARIABLE_MAX_ATTEMPTS) return false
+			await sleep(jitteredDelay(attempt, GH_VARIABLE_BASE_DELAY_MS))
+			continue
+		}
+
+		let result
+
+		if (exists) {
+			result = patchGhRepoVariable(nameWithOwner, name, value)
+		} else {
+			result = createGhRepoVariable(nameWithOwner, name, value)
+			if (result.status !== 0) {
+				const createStatus = ghApiHttpStatus(result)
+				// GitHub sometimes returns 500 instead of 409 when the variable already exists.
+				if (createStatus === 409 || createStatus === 500) {
+					result = patchGhRepoVariable(nameWithOwner, name, value)
+				}
+			}
+		}
+
+		if (result.status === 0) return true
+
+		const status = ghApiHttpStatus(result)
+		if (!isRetriableGhStatus(status) || attempt === GH_VARIABLE_MAX_ATTEMPTS) {
+			return false
+		}
+
+		await sleep(jitteredDelay(attempt, GH_VARIABLE_BASE_DELAY_MS))
+	}
+
+	return false
+}
+
+async function applyGhVariables(config, repo) {
+	const nameWithOwner = repo.nameWithOwner
+	const variables = getGhVariables(config).filter(([, value]) => value)
+	const failed = []
+
+	for (const [name, value] of variables) {
+		const ok = await setGhRepoVariable(nameWithOwner, name, value)
+		if (ok) {
+			log(`✓ ${name}`, 'green')
+		} else {
+			log(
+				`✗ Failed to set ${name} after ${GH_VARIABLE_MAX_ATTEMPTS} attempts`,
+				'yellow',
+			)
+			failed.push(name)
+		}
+		await sleep(GH_VARIABLE_INTER_REQUEST_DELAY_MS)
+	}
+
+	if (failed.length > 0) {
+		log(`\n${failed.length} variable(s) failed: ${failed.join(', ')}`, 'yellow')
+		log(
+			'Re-run launch:setup or set them manually — see gh commands above.',
+			'gray',
+		)
+	} else {
+		log(`\n✅ All ${variables.length} GitHub Variables applied`, 'green')
+	}
+
+	return failed
 }
 
 function printGhCommands(config, repo) {
@@ -428,61 +962,122 @@ function printGhCommands(config, repo) {
 		console.log(`gh variable set ${name} --body "${value}"${repoFlag}`)
 	}
 
-	log('\n🔐 GitHub repository Secrets (set manually — do not commit values)', 'bright')
+	log(
+		'\n🔐 GitHub repository Secrets (set manually — do not commit values)',
+		'bright',
+	)
 	console.log(`gh secret set CLOUDFLARE_API_TOKEN${repoFlag}`)
+	console.log(`gh secret set CLOUDFLARE_BUILDS_API_TOKEN${repoFlag}`)
 	console.log(`gh secret set CLOUDFLARE_ACCOUNT_ID${repoFlag}`)
-	console.log(`# Optional OCI deploy: gh secret set OCI_TENANT_SSH_KEY${repoFlag}`)
-	console.log(`# Optional private GHCR pulls: gh secret set GHCR_PULL_TOKEN${repoFlag}`)
+	console.log(
+		`# Optional OCI deploy: gh secret set OCI_TENANT_SSH_KEY${repoFlag}`,
+	)
+	console.log(
+		`# Optional private GHCR pulls: gh secret set GHCR_PULL_TOKEN${repoFlag}`,
+	)
 }
 
-function printWranglerSecrets(secrets) {
-	log('\n🔑 Wrangler secrets (run once per Worker; values never go in git)', 'bright')
-	log('Generated values are in launch.secrets.json — paste when wrangler prompts.\n', 'gray')
+function printWranglerSecrets(secrets, { autoApplied = false } = {}) {
+	if (autoApplied) {
+		log(
+			'\n🔑 Generated Wrangler secrets were applied via wrangler secret put.',
+			'green',
+		)
+		log(
+			'Set third-party credentials manually (values never go in git):\n',
+			'bright',
+		)
+	} else {
+		log(
+			'\n🔑 Wrangler secrets (run once per Worker; values never go in git)',
+			'bright',
+		)
+		log(
+			'Generated values are in launch.secrets.json — paste when wrangler prompts.\n',
+			'gray',
+		)
+	}
 
-	const blocks = [
+	const generatedBlocks = autoApplied
+		? []
+		: [
+				{
+					title: 'App (apps/app)',
+					keys: [
+						['SESSION_SECRET', secrets.shared.SESSION_SECRET],
+						['HONEYPOT_SECRET', secrets.shared.HONEYPOT_SECRET],
+						['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+						['TENANT_OPERATOR_TOKEN', secrets.shared.TENANT_OPERATOR_TOKEN],
+						['JWT_SECRET', secrets.app.JWT_SECRET],
+						[
+							'TENANT_CUSTOMER_JWT_SECRET',
+							secrets.app.TENANT_CUSTOMER_JWT_SECRET,
+						],
+						['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
+						['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
+						['LAUNCH_STATUS', 'CLOSED_BETA | PUBLIC_BETA | LAUNCHED'],
+						['BASE_URL', '(your APP_BASE_URL)'],
+						...(secrets.discord
+							? Object.entries(secrets.discord).map(([name, value]) => [
+									name,
+									value,
+								])
+							: []),
+					],
+				},
+				{
+					title: 'Admin (apps/admin)',
+					keys: [
+						['SESSION_SECRET', secrets.shared.SESSION_SECRET],
+						['HONEYPOT_SECRET', secrets.shared.HONEYPOT_SECRET],
+						['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+						['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
+						['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
+						['LAUNCH_STATUS', '(same as App)'],
+						['BASE_URL', '(your ADMIN_BASE_URL)'],
+					],
+				},
+				{
+					title: 'Tenant API US (apps/tenant-api)',
+					keys: [
+						['JWT_SECRET', secrets.tenant_api.JWT_SECRET],
+						['AUTH_HMAC_SECRET', secrets.tenant_api.AUTH_HMAC_SECRET],
+						['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+						['TENANT_OPERATOR_TOKEN', secrets.shared.TENANT_OPERATOR_TOKEN],
+					],
+				},
+				{
+					title: 'Jobs Cron (apps/jobs-cron)',
+					keys: [
+						['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
+					],
+				},
+			]
+
+	const manualBlocks = [
 		{
 			title: 'App (apps/app)',
 			keys: [
-				['SESSION_SECRET', secrets.shared.SESSION_SECRET],
-				['HONEYPOT_SECRET', secrets.shared.HONEYPOT_SECRET],
-				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
-				['TENANT_OPERATOR_TOKEN', secrets.shared.TENANT_OPERATOR_TOKEN],
-				['JWT_SECRET', secrets.app.JWT_SECRET],
-				['TENANT_CUSTOMER_JWT_SECRET', secrets.app.TENANT_CUSTOMER_JWT_SECRET],
-				['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
-				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
-				['LAUNCH_STATUS', 'CLOSED_BETA | PUBLIC_BETA | LAUNCHED'],
-				['BASE_URL', '(your APP_BASE_URL)'],
 				['RESEND_API_KEY', '(from Resend dashboard)'],
 				['AWS_SECRET_ACCESS_KEY', '(R2 API token)'],
 			],
 		},
-		{
-			title: 'Admin (apps/admin)',
-			keys: [
-				['SESSION_SECRET', secrets.shared.SESSION_SECRET],
-				['HONEYPOT_SECRET', secrets.shared.HONEYPOT_SECRET],
-				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
-				['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
-				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
-				['LAUNCH_STATUS', '(same as App)'],
-				['BASE_URL', '(your ADMIN_BASE_URL)'],
-			],
-		},
-		{
-			title: 'Tenant API US (apps/tenant-api)',
-			keys: [
-				['JWT_SECRET', secrets.tenant_api.JWT_SECRET],
-				['AUTH_HMAC_SECRET', secrets.tenant_api.AUTH_HMAC_SECRET],
-				['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN],
-				['TENANT_OPERATOR_TOKEN', secrets.shared.TENANT_OPERATOR_TOKEN],
-			],
-		},
-		{
-			title: 'Jobs Cron (apps/jobs-cron)',
-			keys: [['INTERNAL_COMMAND_TOKEN', secrets.shared.INTERNAL_COMMAND_TOKEN]],
-		},
 	]
+
+	if (secrets.launch_status === 'CLOSED_BETA' && !secrets.discord) {
+		manualBlocks.unshift({
+			title: 'App (apps/app) — Discord (closed beta)',
+			keys: [
+				['DISCORD_INVITE_URL', '(required)'],
+				['DISCORD_CLIENT_ID', '(OAuth app)'],
+				['DISCORD_CLIENT_SECRET', '(OAuth app)'],
+				['DISCORD_REDIRECT_URI', '(must match Discord Developer Portal)'],
+				['DISCORD_GUILD_ID', '(Discord server ID)'],
+			],
+		})
+	}
+
+	const blocks = [...generatedBlocks, ...manualBlocks]
 
 	for (const block of blocks) {
 		log(`\n${block.title}`, 'blue')
@@ -492,19 +1087,27 @@ function printWranglerSecrets(secrets) {
 				log(`    → ${hint}`, 'gray')
 			}
 		}
-		log('  # Repeat with --env staging for the dev branch Worker', 'gray')
+		if (!autoApplied) {
+			log('  # Repeat with --env staging for the dev branch Worker', 'gray')
+		}
 	}
 }
 
-async function setupDeploymentPages(defaultRepoUrl = '') {
+async function setupDeploymentPages(
+	defaultRepoUrl = '',
+	{ includeCloudflareTokenPage = true } = {},
+) {
 	const openPages = await confirm({
-		message:
-			'Open Cloudflare API tokens + GitHub Actions secrets pages in your browser?',
+		message: includeCloudflareTokenPage
+			? 'Open Cloudflare API tokens + GitHub Actions secrets pages in your browser?'
+			: 'Open GitHub Actions secrets and variables pages in your browser?',
 		default: true,
 	})
 	if (!openPages) return
 
-	openUrl('https://dash.cloudflare.com/profile/api-tokens')
+	if (includeCloudflareTokenPage) {
+		openUrl('https://dash.cloudflare.com/profile/api-tokens')
+	}
 
 	const repoUrl = await input({
 		message: 'GitHub repo URL (for secrets page; leave blank to skip)',
@@ -515,13 +1118,19 @@ async function setupDeploymentPages(defaultRepoUrl = '') {
 		openUrl(`${normalized}/settings/secrets/actions`)
 		openUrl(`${normalized}/settings/variables/actions`)
 	} else {
-		log('Set secrets at: GitHub repo → Settings → Secrets and variables → Actions', 'gray')
+		log(
+			'Set secrets at: GitHub repo → Settings → Secrets and variables → Actions',
+			'gray',
+		)
 	}
 }
 
 async function main() {
 	log('\n🚀 Epic Startup — Launch Setup', 'bright')
-	log('Creates launch.config.json + launch.secrets.json and prints CI/CD steps.\n', 'gray')
+	log(
+		'Creates launch.config.json + launch.secrets.json and prints CI/CD steps.\n',
+		'gray',
+	)
 
 	const runMonorepoSetup = await confirm({
 		message: 'Run monorepo setup first (db, brand, SSL, hosts)?',
@@ -571,9 +1180,29 @@ async function main() {
 	const jobsCronUrl = `https://jobs.${apex}`
 
 	const secrets = generateSharedSecrets()
+	secrets.launch_status = await promptLaunchStatus()
+	if (secrets.launch_status === 'CLOSED_BETA') {
+		secrets.discord = await promptDiscordConfig(appUrl)
+	}
+	secrets.credit_card_required_for_trial =
+		await promptCreditCardRequiredForTrial()
 	const secretsPath = join(rootDir, 'launch.secrets.json')
 	writeFileSync(secretsPath, `${JSON.stringify(secrets, null, '\t')}\n`)
 	log(`\n✅ Wrote ${secretsPath} (gitignored)`, 'green')
+	log(`   LAUNCH_STATUS: ${secrets.launch_status}`, 'gray')
+	if (secrets.discord) {
+		log(`   DISCORD_INVITE_URL: ${secrets.discord.DISCORD_INVITE_URL}`, 'gray')
+	}
+	log(
+		`   CREDIT_CARD_REQUIRED_FOR_TRIAL: ${secrets.credit_card_required_for_trial}`,
+		'gray',
+	)
+	if (secrets.launch_status !== 'LAUNCHED') {
+		log(
+			'   (CREDIT_CARD_REQUIRED_FOR_TRIAL is ignored until LAUNCH_STATUS=LAUNCHED)',
+			'gray',
+		)
+	}
 
 	const envPatches = {
 		SESSION_SECRET: secrets.shared.SESSION_SECRET,
@@ -582,17 +1211,23 @@ async function main() {
 		TENANT_OPERATOR_TOKEN: secrets.shared.TENANT_OPERATOR_TOKEN,
 		JWT_SECRET: secrets.app.JWT_SECRET,
 		TENANT_CUSTOMER_JWT_SECRET: secrets.app.TENANT_CUSTOMER_JWT_SECRET,
+		LAUNCH_STATUS: secrets.launch_status,
+		CREDIT_CARD_REQUIRED_FOR_TRIAL: secrets.credit_card_required_for_trial,
 		JOBS_CRON_WORKER_URL: jobsCronUrl,
 		ROOT_APP: apex,
 		BASE_URL: appUrl,
 		TENANT_API_URL: tenantUs,
 		TENANT_API_URL_KSA: tenantKsa,
 	}
+	if (secrets.discord) {
+		Object.assign(envPatches, secrets.discord)
+	}
 	const appEnvPatched = patchEnvFile(join(rootDir, 'apps/app/.env'), envPatches)
 	const adminEnvPatched = patchEnvFile(join(rootDir, 'apps/admin/.env'), {
 		SESSION_SECRET: secrets.shared.SESSION_SECRET,
 		HONEYPOT_SECRET: secrets.shared.HONEYPOT_SECRET,
 		INTERNAL_COMMAND_TOKEN: secrets.shared.INTERNAL_COMMAND_TOKEN,
+		LAUNCH_STATUS: secrets.launch_status,
 		ROOT_APP: apex,
 		BASE_URL: adminUrl,
 	})
@@ -603,7 +1238,10 @@ async function main() {
 		TENANT_API_URL_KSA: tenantKsa,
 	})
 	if (appEnvPatched || adminEnvPatched || sitesEnvPatched) {
-		log('Updated local .env files with generated secrets and platform URLs.', 'green')
+		log(
+			'Updated local .env files with generated secrets and platform URLs.',
+			'green',
+		)
 	}
 
 	/** @type {Record<string, unknown>} */
@@ -672,7 +1310,8 @@ async function main() {
 				['kv', 'namespace', 'create', CF_KV.app],
 				join(rootDir, 'apps/app'),
 			)
-			config.bindings.production.app.kv_namespace_id = parseKvCreateOutput(appKv)
+			config.bindings.production.app.kv_namespace_id =
+				parseKvCreateOutput(appKv)
 			config.bindings.production.admin.kv_namespace_id =
 				config.bindings.production.app.kv_namespace_id
 
@@ -680,7 +1319,8 @@ async function main() {
 				['d1', 'create', CF_D1.appStaging],
 				join(rootDir, 'apps/app'),
 			)
-			config.bindings.staging.app.d1_database_id = parseD1CreateOutput(stagingD1)
+			config.bindings.staging.app.d1_database_id =
+				parseD1CreateOutput(stagingD1)
 			config.bindings.staging.admin.d1_database_id =
 				config.bindings.staging.app.d1_database_id
 
@@ -688,7 +1328,8 @@ async function main() {
 				['kv', 'namespace', 'create', CF_KV.appStaging],
 				join(rootDir, 'apps/app'),
 			)
-			config.bindings.staging.app.kv_namespace_id = parseKvCreateOutput(stagingKv)
+			config.bindings.staging.app.kv_namespace_id =
+				parseKvCreateOutput(stagingKv)
 			config.bindings.staging.admin.kv_namespace_id =
 				config.bindings.staging.app.kv_namespace_id
 
@@ -699,7 +1340,12 @@ async function main() {
 			config.bindings.production.web.d1_database_id = parseD1CreateOutput(webD1)
 
 			runWrangler(
-				['r2', 'bucket', 'create', config.bindings.production.web.r2_bucket_name],
+				[
+					'r2',
+					'bucket',
+					'create',
+					config.bindings.production.web.r2_bucket_name,
+				],
 				join(rootDir, 'apps/web'),
 			)
 
@@ -707,7 +1353,8 @@ async function main() {
 				['d1', 'create', CF_D1.webStaging],
 				join(rootDir, 'apps/web'),
 			)
-			config.bindings.staging.web.d1_database_id = parseD1CreateOutput(webD1Staging)
+			config.bindings.staging.web.d1_database_id =
+				parseD1CreateOutput(webD1Staging)
 			runWrangler(
 				['r2', 'bucket', 'create', config.bindings.staging.web.r2_bucket_name],
 				join(rootDir, 'apps/web'),
@@ -739,7 +1386,7 @@ async function main() {
 
 	const hasD1 = Boolean(
 		config.bindings.production.app.d1_database_id ||
-			config.bindings.staging.app.d1_database_id,
+		config.bindings.staging.app.d1_database_id,
 	)
 	const applyMigrations =
 		hasD1 && inferred.wranglerLoggedIn
@@ -766,55 +1413,109 @@ async function main() {
 				`\nApplying GitHub Variables to ${inferred.githubRepo.nameWithOwner}…`,
 				'yellow',
 			)
-			const repoFlag = ghRepoFlag(inferred.githubRepo)
-			for (const [name, value] of getGhVariables(config)) {
-				if (!value) continue
-				try {
-					execSync(`gh variable set ${name} --body "${value}"${repoFlag}`, {
-						cwd: rootDir,
-						stdio: 'inherit',
-					})
-				} catch {
-					log(`Failed to set ${name}`, 'yellow')
-				}
-			}
+			await applyGhVariables(config, inferred.githubRepo)
 		}
 	}
 
-	const deployWorkers =
-		inferred.wranglerLoggedIn
-			? await confirm({
-					message:
-						'Build and deploy all Cloudflare Workers to production now? (app, admin, jobs-cron, tenant-api, web, sites)',
-					default: true,
-				})
-			: false
+	const deployWorkers = inferred.wranglerLoggedIn
+		? await confirm({
+				message:
+					'Build and deploy all Cloudflare Workers to production now? (app, admin, jobs-cron, tenant-api, web, sites)',
+				default: true,
+			})
+		: false
+	const deployedEnvs = []
 	if (deployWorkers) {
 		try {
 			await deployCloudflareWorkers(config.urls, 'production')
+			deployedEnvs.push('production')
 		} catch (error) {
 			log(`\nProduction deploy had errors: ${error.message}`, 'yellow')
-			log('You can retry individual apps — see docs/launch-checklist.md', 'gray')
+			log(
+				'You can retry individual apps — see docs/launch-checklist.md',
+				'gray',
+			)
 		}
 	}
 
 	const deployStaging =
 		inferred.wranglerLoggedIn && deployWorkers
 			? await confirm({
-					message: 'Also deploy staging Workers? (reuses builds where possible)',
-					default: false,
+					message:
+						'Also deploy staging Workers? (reuses builds where possible)',
+					default: true,
 				})
 			: false
 	if (deployStaging) {
 		try {
-			await deployCloudflareWorkers(config.urls, 'staging', { skipBuilds: true })
+			await deployCloudflareWorkers(config.urls, 'staging', {
+				skipBuilds: true,
+			})
+			deployedEnvs.push('staging')
 		} catch (error) {
 			log(`\nStaging deploy had errors: ${error.message}`, 'yellow')
 		}
 	}
 
-	printWranglerSecrets(secrets)
-	await setupDeploymentPages(inferred.githubRepo?.url ?? '')
+	let secretsApplied = false
+	if (inferred.wranglerLoggedIn) {
+		const applySecrets =
+			deployedEnvs.length > 0
+				? await confirm({
+						message:
+							'Apply generated Wrangler secrets to deployed Workers now? (INTERNAL_COMMAND_TOKEN, SESSION_SECRET, etc.)',
+						default: true,
+					})
+				: await confirm({
+						message:
+							'Workers were not deployed — still apply generated Wrangler secrets? (Workers must already exist)',
+						default: false,
+					})
+		if (applySecrets) {
+			const secretEnvs =
+				deployedEnvs.length > 0
+					? deployedEnvs
+					: (
+							await input({
+								message:
+									'Which Worker environment? (production, staging, or both comma-separated)',
+								default: 'production',
+							})
+						)
+							.split(',')
+							.map((value) => value.trim().toLowerCase())
+							.filter((value) => value === 'production' || value === 'staging')
+
+			for (const deployEnv of secretEnvs) {
+				try {
+					applyGeneratedWranglerSecrets(
+						secrets,
+						config.urls,
+						deployEnv,
+						secrets.launch_status,
+						secrets.credit_card_required_for_trial,
+					)
+					secretsApplied = true
+				} catch (error) {
+					log(
+						`\nWrangler secret apply had errors (${deployEnv}): ${error.message}`,
+						'yellow',
+					)
+					log('Retry manually — values are in launch.secrets.json', 'gray')
+				}
+			}
+		}
+	}
+
+	printWranglerSecrets(secrets, { autoApplied: secretsApplied })
+	const workersBuildsConfigured = await setupWorkersBuildsAfterDeploy(
+		config,
+		inferred,
+		deployedEnvs,
+	)
+	await setupDeploymentPages(inferred.githubRepo?.url ?? '', {
+		includeCloudflareTokenPage: !workersBuildsConfigured,
+	})
 
 	log('\nNext steps:', 'bright')
 	if (inferred.accountId) {
@@ -823,18 +1524,40 @@ async function main() {
 			'gray',
 		)
 	}
-	log('1. Set GitHub Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID', 'gray')
-	log('2. Run wrangler secret put for each Worker (values in launch.secrets.json)', 'gray')
+	log(
+		'1. Set GitHub Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_BUILDS_API_TOKEN, CLOUDFLARE_ACCOUNT_ID',
+		'gray',
+	)
+	if (!secretsApplied) {
+		log(
+			'2. Run wrangler secret put for each Worker (values in launch.secrets.json)',
+			'gray',
+		)
+	} else {
+		log(
+			'2. Set third-party Wrangler secrets (RESEND_API_KEY, AWS_SECRET_ACCESS_KEY, etc.)',
+			'gray',
+		)
+	}
 	if (!deployWorkers) {
 		log(
 			'3. Build + deploy: npm run deploy:cf in apps/app and apps/admin; see docs/launch-checklist.md',
 			'gray',
 		)
 	}
-	log('4. Push to main/dev — CI patches wrangler configs from GitHub Variables', 'gray')
-	log('5. Follow docs/launch-checklist.md for LAUNCH_STATUS and product phases', 'gray')
+	if (!workersBuildsConfigured) {
+		log('4. Configure Workers Builds: npm run launch:workers-builds', 'gray')
+	}
 	log(
-		`6. Route jobs.${apex} to the jobs-cron Worker (custom domain in Cloudflare)`,
+		'5. Push to main/dev — GHA runs CI, then Cloudflare builds and deploys affected Workers',
+		'gray',
+	)
+	log(
+		'6. Follow docs/launch-checklist.md for LAUNCH_STATUS and product phases',
+		'gray',
+	)
+	log(
+		`7. Route jobs.${apex} to the jobs-cron Worker (custom domain in Cloudflare)`,
 		'gray',
 	)
 }
