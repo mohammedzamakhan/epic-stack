@@ -26,8 +26,9 @@ const siteLogo = resolveSiteLogo(settings)
 const currentUrl = Astro.url
 const port = currentUrl.port
 
-const demoUrl = `https://app.${ENV.PUBLIC_ROOT_APP}${port ? `:2999` : ''}/signup`
-const loginUrl = `https://app.${ENV.PUBLIC_ROOT_APP}${port ? `:2999` : ''}/login`
+const appOrigin = ENV.PUBLIC_APP_URL.replace(/\/$/, '')
+const demoUrl = `${appOrigin}${port ? `:2999` : ''}/signup`
+const loginUrl = `${appOrigin}${port ? `:2999` : ''}/login`
 ---
 
 <header class="fixed inset-x-0 top-0 z-50" data-banner-enabled={bannerEnabled}>

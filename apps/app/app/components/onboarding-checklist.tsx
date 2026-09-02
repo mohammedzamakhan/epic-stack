@@ -25,6 +25,21 @@ interface OnboardingChecklistProps {
 	className?: string
 }
 
+function getOnboardingStepHref(
+	step: OnboardingStepWithProgress | undefined,
+	orgSlug: string,
+) {
+	if (!step?.actionConfig) {
+		return `/${orgSlug}`
+	}
+
+	if (step.actionConfig.type === 'navigate') {
+		return `/${orgSlug}${step.actionConfig.target}`
+	}
+
+	return `/${orgSlug}`
+}
+
 export function OnboardingChecklist({
 	progress,
 	orgSlug,
@@ -83,10 +98,20 @@ export function OnboardingChecklist({
 
 	if (variant === 'sidebar') {
 		const nextStep = progress.steps.find((step) => !step.isCompleted)
+		const nextStepHref = getOnboardingStepHref(nextStep, orgSlug)
 
 		return (
 			<Link
-				to={`/${orgSlug}`}
+				to={nextStepHref}
+				onClick={(event) => {
+					if (
+						nextStep?.actionConfig?.type === 'modal' ||
+						nextStep?.actionConfig?.type === 'external'
+					) {
+						event.preventDefault()
+						handleStepAction(nextStep)
+					}
+				}}
 				aria-label={t`Get started: ${completedCount} of ${totalSteps} steps complete`}
 				className={`group/onboarding border-sidebar-border hover:bg-sidebar-accent/60 focus-visible:ring-sidebar-ring bg-background mx-2 mt-2 block rounded-md border px-3 py-3 transition-colors duration-150 ease-out group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none ${className}`}
 			>

@@ -1,7 +1,10 @@
-import { sharedCookieDomain } from '@repo/common/cookie-domain'
+import {
+	operatorThemeCookieName,
+	sharedCookieDomain,
+} from '@repo/common/cookie-domain'
 import * as cookie from 'cookie'
 
-const cookieName = 'en_theme'
+const cookieName = operatorThemeCookieName()
 export type Theme = 'light' | 'dark'
 
 export function getTheme(request: Request): Theme | null {

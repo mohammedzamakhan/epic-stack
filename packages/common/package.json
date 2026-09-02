@@ -96,6 +96,11 @@
       "types": "./src/gdpr-export.server.ts",
       "import": "./src/gdpr-export.server.ts",
       "default": "./src/gdpr-export.server.ts"
+    },
+    "./health": {
+      "types": "./src/health.ts",
+      "import": "./src/health.ts",
+      "default": "./src/health.ts"
     }
   },
   "scripts": {

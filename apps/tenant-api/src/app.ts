@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { type Context, Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { isAllowedAnalyticsOrigin } from './lib/origin.ts'
 import { getNodeRegion } from './lib/region.ts'
@@ -14,6 +14,15 @@ import { operatorRoutes } from './routes/operator.ts'
 import { provisionRoutes } from './routes/provision.ts'
 
 import { rateLimit } from './lib/rate-limit.ts'
+
+function healthHandler(c: Context) {
+	return c.json({
+		status: 'ok',
+		service: 'tenant-api',
+		region: getNodeRegion(),
+		timestamp: new Date().toISOString(),
+	})
+}
 
 /**
  * Shared Hono app for Node (OCI) and Durable Object (Cloudflare) runtimes.
@@ -54,14 +63,8 @@ export function createTenantApiApp() {
 		rateLimit('operator', { windowMs: 60 * 1000, maxRequests: 120 }),
 	)
 
-	app.get('/health', (c) => {
-		return c.json({
-			status: 'ok',
-			service: 'regional-tenant-node',
-			region: getNodeRegion(),
-			timestamp: new Date().toISOString(),
-		})
-	})
+	app.get('/health', healthHandler)
+	app.get('/api/health', healthHandler)
 
 	app.route('/auth', authRoutes)
 	app.route('/shop', shopRoutes)

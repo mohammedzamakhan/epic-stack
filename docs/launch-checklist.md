@@ -1,13 +1,390 @@
 # Launch Checklist
 
-Use this checklist when rolling out Epic Startup in phases: closed beta
-(waitlist), public beta, and full launch. It covers product behavior controlled
-by `LAUNCH_STATUS`, waitlist setup, and Discord verification.
+Complete guide for deploying Epic Startup: infrastructure bindings, GitHub
+configuration, Wrangler secrets, and product launch phases.
 
-For infrastructure (D1, Workers, tenant-api, Pages), use the
-[Deployment Checklist](./deployment-checklist.md) first.
+For day-to-day infrastructure steps, see also
+[Deployment Checklist](./deployment-checklist.md).
 
-## Launch phases
+---
+
+## How configuration works
+
+| Layer                            | What it controls                      | Where you set it                                      | Survives `wrangler deploy`?   |
+| -------------------------------- | ------------------------------------- | ----------------------------------------------------- | ----------------------------- |
+| **Bindings**                     | D1, KV, R2, Worker name               | GitHub **Variables** → CI patches `wrangler.deploy.*` | Yes (re-applied from CI)      |
+| **Runtime URLs / feature flags** | `BASE_URL`, `LAUNCH_STATUS`, API URLs | Wrangler **secrets** or GitHub Variables              | Secrets yes; vars from CI yes |
+| **Credentials**                  | `SESSION_SECRET`, Stripe, OAuth       | Wrangler **secrets** only                             | Yes                           |
+| **Local dev**                    | Everything                            | `apps/*/.env` + `.dev.vars`                           | N/A                           |
+
+**Do not edit Cloudflare dashboard Variables for keys that CI manages** — the
+next deploy will overwrite them. Change GitHub Variables or Wrangler secrets
+instead.
+
+### Quick start
+
+```bash
+# 1. Interactive setup (auto-detects Cloudflare + .env, writes launch.config.json)
+npm run launch:setup
+
+# 2. Set GitHub Secrets (repo → Settings → Secrets and variables → Actions)
+#    CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+
+# 3. Set Wrangler secrets on each Worker (see tables below)
+
+# 4. Push to main (production) or dev (staging) — CI runs scripts/patch-wrangler.mjs
+```
+
+When logged in via `npx wrangler login`, setup auto-detects D1/KV/R2 IDs (by
+`epic-startup-*` resource names), Worker names from wrangler configs, `ROOT_APP`
+from `.env`, and your GitHub repo URL via `gh repo view`.
+
+Cloudflare **resource names** (D1, KV, R2) and **Worker names** use the
+`epic-startup-*` prefix in the template. `npm run setup` replaces `epic-startup`
+with your **short name** slug everywhere (Workers, databases, buckets, docs).
+
+Local deploy test:
+
+```bash
+# Uses launch.config.json when env vars are unset
+DEPLOY_TARGET=cloudflare npm run build:cf --workspace=app
+node scripts/patch-wrangler.mjs --app app --env production
+cd apps/app && npx wrangler deploy --config build/server/wrangler.deploy.json
+```
+
+Copy `launch.config.example.json` → `launch.config.json` (gitignored) if you
+skip the interactive script. Generated secrets land in `launch.secrets.json`
+(also gitignored) with values shared across App, Admin, and tenant-api.
+
+---
+
+## GitHub Actions — Secrets (required)
+
+Set under **Settings → Secrets and variables → Actions → Secrets**.
+
+| Secret                  | Used by                    | Purpose                                           |
+| ----------------------- | -------------------------- | ------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | All Cloudflare deploy jobs | API token with Workers + D1 + KV + R2 edit        |
+| `CLOUDFLARE_ACCOUNT_ID` | All Cloudflare deploy jobs | Replaces `account_id` in wrangler files           |
+| `OCI_TENANT_SSH_KEY`    | `deploy-tenant-api-oci`    | SSH private key for OCI VMs (KSA / optional US)   |
+| `GHCR_PULL_TOKEN`       | OCI deploy (optional)      | PAT with `packages:read` if GHCR image is private |
+
+Generate API token:
+[Cloudflare Dashboard → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
+(Custom token: Account → Workers Scripts, D1, KV, R2 → Edit).
+
+---
+
+## GitHub Actions — Variables (bindings + URLs)
+
+Set under **Settings → Secrets and variables → Actions → Variables**.
+
+CI reads these on every deploy. Use the `_STAGING` suffix for the `dev` branch;
+unsuffixed names are used for `main` (production).
+
+### Shared URLs (all environments)
+
+| Variable                    | Example                             | Used by                                 |
+| --------------------------- | ----------------------------------- | --------------------------------------- |
+| `APP_BASE_URL`              | `https://app.yourdomain.com`        | App, jobs-cron, tenant-api              |
+| `ADMIN_BASE_URL`            | `https://admin.yourdomain.com`      | Admin                                   |
+| `PUBLIC_APP_URL`            | `https://app.yourdomain.com`        | Sites build + Sites Worker              |
+| `ROOT_APP`                  | `yourdomain.com`                    | App, Admin, Sites, tenant-api, Web      |
+| `PUBLIC_SITE_HOST_SUFFIXES` | `yourdomain.com,workers.dev`        | App                                     |
+| `TENANT_API_URL`            | `https://tenant-us.yourdomain.com`  | App, Admin, Sites, jobs-cron, CI health |
+| `TENANT_API_URL_KSA`        | `https://tenant-ksa.yourdomain.com` | App, Admin, Sites, jobs-cron, CI health |
+| `JOBS_CRON_WORKER_URL`      | `https://jobs.yourdomain.com`       | App (custom domain on jobs-cron Worker) |
+| `WEB_BASE_URL`              | `https://yourdomain.com`            | Web marketing Worker (apex + `www`)     |
+
+### Staging URLs (`dev` branch)
+
+Flat single-label subdomains on the production apex (free Universal SSL — no
+`*.stage.yourdomain.com`). See
+[ADR 046](./decisions/046-staging-hostnames-and-cookies.md).
+
+| Variable                            | Example                                    |
+| ----------------------------------- | ------------------------------------------ |
+| `ROOT_APP_STAGING`                  | `yourdomain.com` (same apex as production) |
+| `APP_BASE_URL_STAGING`              | `https://app-staging.yourdomain.com`       |
+| `ADMIN_BASE_URL_STAGING`            | `https://admin-staging.yourdomain.com`     |
+| `WEB_BASE_URL_STAGING`              | `https://staging.yourdomain.com`           |
+| `PUBLIC_APP_URL_STAGING`            | `https://app-staging.yourdomain.com`       |
+| `PUBLIC_SITE_HOST_SUFFIXES_STAGING` | `yourdomain.com,workers.dev`               |
+| `TENANT_API_URL_STAGING`            | `https://tenant-us-staging.yourdomain.com` |
+| `JOBS_CRON_WORKER_URL_STAGING`      | `https://jobs-staging.yourdomain.com`      |
+
+`patch-wrangler.mjs` injects **zone routes** from the URLs above. Production
+Sites uses `*.yourdomain.com/*`. Staging Sites defaults to
+`demo-staging.yourdomain.com/*` (explicit route — prod already owns the apex
+wildcard). Add **Custom Domains** on the staging Sites Worker for additional
+`{slug}-staging.yourdomain.com` tenant hosts.
+
+Staging App/Admin share `Domain=.yourdomain.com` cookies but use suffixed names
+(`en_session_staging`, etc.) so prod sessions are not overwritten in the same
+browser.
+
+### App (`apps/app`)
+
+| Variable (production) | Variable (staging / `dev` branch) |
+| --------------------- | --------------------------------- |
+| `APP_D1_DATABASE_ID`  | `APP_D1_DATABASE_ID_STAGING`      |
+| `APP_KV_NAMESPACE_ID` | `APP_KV_NAMESPACE_ID_STAGING`     |
+| `APP_WORKER_NAME`     | `APP_WORKER_NAME_STAGING`         |
+
+Create resources:
+
+```bash
+cd apps/app
+npx wrangler d1 create epic-startup-db
+npx wrangler kv namespace create epic-startup-cache
+# Staging:
+npx wrangler d1 create epic-startup-db-staging
+npx wrangler kv namespace create epic-startup-cache-staging
+```
+
+### Admin (`apps/admin`)
+
+| Variable (production)   | Variable (staging)              |
+| ----------------------- | ------------------------------- |
+| `ADMIN_D1_DATABASE_ID`  | `ADMIN_D1_DATABASE_ID_STAGING`  |
+| `ADMIN_KV_NAMESPACE_ID` | `ADMIN_KV_NAMESPACE_ID_STAGING` |
+| `ADMIN_WORKER_NAME`     | `ADMIN_WORKER_NAME_STAGING`     |
+
+Admin shares the **same D1 database** as App in most installs — use the same
+`database_id` for both.
+
+### Web / marketing (`apps/web`)
+
+| Variable (production) | Variable (staging)           |
+| --------------------- | ---------------------------- |
+| `WEB_D1_DATABASE_ID`  | `WEB_D1_DATABASE_ID_STAGING` |
+| `WEB_R2_BUCKET_NAME`  | `WEB_R2_BUCKET_NAME_STAGING` |
+| `WEB_WORKER_NAME`     | `WEB_WORKER_NAME_STAGING`    |
+
+`PUBLIC_APP_URL` / `PUBLIC_APP_URL_STAGING` are patched into the Web Worker for
+login links and theme cookie name sync with App/Admin (see ADR 046).
+
+```bash
+cd apps/web
+npx wrangler d1 create epic-startup-web-db
+npx wrangler r2 bucket create epic-startup-media
+```
+
+### Sites (`apps/sites`)
+
+| Variable (production) | Variable (staging)          |
+| --------------------- | --------------------------- |
+| `SITES_WORKER_NAME`   | `SITES_WORKER_NAME_STAGING` |
+
+Sites URLs come from the shared variables (`PUBLIC_APP_URL`, `TENANT_API_URL`,
+`ROOT_APP`). Staging tenant sites use `{slug}-staging.yourdomain.com`. The
+default staging route is `demo-staging.yourdomain.com/*`; add Custom Domains for
+other staging org hosts (see ADR 046).
+
+### Jobs cron (`apps/jobs-cron`)
+
+| Variable (production)   | Variable (staging)              |
+| ----------------------- | ------------------------------- |
+| `JOBS_CRON_WORKER_NAME` | `JOBS_CRON_WORKER_NAME_STAGING` |
+
+URLs patched from `APP_BASE_URL`, `TENANT_API_URL`, `TENANT_API_URL_KSA`.
+
+### Tenant API US (`apps/tenant-api` on Cloudflare)
+
+| Variable (production)       | Variable (staging)                  |
+| --------------------------- | ----------------------------------- |
+| `TENANT_API_US_WORKER_NAME` | `TENANT_API_US_WORKER_NAME_STAGING` |
+
+### OCI tenant-api (optional / KSA)
+
+| Variable              | Purpose                                        |
+| --------------------- | ---------------------------------------------- |
+| `OCI_TENANT_US_HOST`  | Ashburn VM hostname (optional US OCI fallback) |
+| `OCI_TENANT_KSA_HOST` | Riyadh VM hostname                             |
+| `OCI_TENANT_SSH_USER` | SSH user (default `ubuntu`)                    |
+
+---
+
+## Per-application Wrangler secrets
+
+Run from each app directory. Use `--env staging` for the staging Worker when
+deploying the `dev` branch.
+
+Generate values: `openssl rand -hex 32`
+
+### App (`apps/app`) — required for production
+
+| Secret                       | Notes                                            |
+| ---------------------------- | ------------------------------------------------ |
+| `SESSION_SECRET`             | Session cookie signing — **must match Admin**    |
+| `HONEYPOT_SECRET`            | CSRF honeypot                                    |
+| `INTERNAL_COMMAND_TOKEN`     | Shared with Admin, tenant-api, jobs-cron         |
+| `TENANT_OPERATOR_TOKEN`      | Operator JWT for browser → tenant-api            |
+| `JWT_SECRET`                 | App/mobile operator API tokens                   |
+| `TENANT_CUSTOMER_JWT_SECRET` | **Must match US tenant-api `JWT_SECRET`**        |
+| `LAUNCH_STATUS`              | `CLOSED_BETA` \| `PUBLIC_BETA` \| `LAUNCHED`     |
+| `BASE_URL`                   | Public App origin (can also use GitHub Variable) |
+| `AUDIT_LOG_SECRET_KEY`       | Required in production                           |
+
+### App — when billing is live (`LAUNCH_STATUS=LAUNCHED`)
+
+| Secret                   | Notes                   |
+| ------------------------ | ----------------------- |
+| `STRIPE_SECRET_KEY`      |                         |
+| `STRIPE_WEBHOOK_SECRET`  |                         |
+| `STRIPE_PUBLISHABLE_KEY` | Can be var if preferred |
+
+### App — email
+
+| Secret           | When                                                          |
+| ---------------- | ------------------------------------------------------------- |
+| `RESEND_API_KEY` | `EMAIL_PROVIDER=resend` (default)                             |
+| `OCI_*`          | `EMAIL_PROVIDER=oci` — see `docs/platform-marketing-email.md` |
+
+### App — storage (R2 / S3-compatible)
+
+| Secret                  | Notes               |
+| ----------------------- | ------------------- |
+| `AWS_ACCESS_KEY_ID`     | R2 API token ID     |
+| `AWS_SECRET_ACCESS_KEY` | R2 API token secret |
+
+Set non-secret storage config via secrets or GitHub Variables:
+`AWS_ENDPOINT_URL_S3`, `BUCKET_NAME`, `AWS_REGION`.
+
+### App — optional integrations
+
+`INTEGRATION_ENCRYPTION_KEY`, `SSO_ENCRYPTION_KEY`, `GITHUB_CLIENT_SECRET`,
+`GOOGLE_CLIENT_SECRET`, `DISCORD_*`, `JIRA_CLIENT_SECRET`,
+`SLACK_CLIENT_SECRET`, `SENTRY_DSN`, `CLOUDFLARE_API_TOKEN` (custom domains),
+`MEDIA_TRANSFORM_BASE_URL`, `GOOGLE_GENERATIVE_AI_API_KEY`, etc. — see
+`apps/app/.env.schema`.
+
+```bash
+cd apps/app
+npx wrangler secret put SESSION_SECRET
+npx wrangler secret put LAUNCH_STATUS
+# … repeat for each secret
+npx wrangler secret put SESSION_SECRET --env staging
+```
+
+### Admin (`apps/admin`) — required
+
+| Secret                      | Notes                      |
+| --------------------------- | -------------------------- |
+| `SESSION_SECRET`            | **Same value as App**      |
+| `HONEYPOT_SECRET`           |                            |
+| `INTERNAL_COMMAND_TOKEN`    | **Same as App**            |
+| `LAUNCH_STATUS`             | **Same as App**            |
+| `BASE_URL`                  | Public Admin origin        |
+| `SSO_ENCRYPTION_KEY`        | **Same as App**            |
+| `AUDIT_LOG_SECRET_KEY`      | **Same as App**            |
+| `AWS_SECRET_ACCESS_KEY`     | If using R2 for org assets |
+| `RESEND_API_KEY` or `OCI_*` | Platform marketing email   |
+
+### Tenant API US (`apps/tenant-api`)
+
+| Secret                   | Notes                                                          |
+| ------------------------ | -------------------------------------------------------------- |
+| `JWT_SECRET`             | Customer tokens — **matches App `TENANT_CUSTOMER_JWT_SECRET`** |
+| `AUTH_HMAC_SECRET`       | OTP / refresh hashes — unique per region                       |
+| `INTERNAL_COMMAND_TOKEN` | **Same as App**                                                |
+| `TENANT_OPERATOR_TOKEN`  | **Same as App**                                                |
+| `TWILIO_AUTH_TOKEN`      | US SMS only (not KSA production)                               |
+
+### Jobs cron (`apps/jobs-cron`)
+
+| Secret                   | Notes           |
+| ------------------------ | --------------- |
+| `INTERNAL_COMMAND_TOKEN` | **Same as App** |
+
+### Tenant API KSA (OCI VM `.env`, not Wrangler)
+
+On the Riyadh VM at `/opt/tenant-api/.env`:
+
+```
+DATA_REGION=ksa
+TENANT_DB_DIR=/data/tenants
+JWT_SECRET=...          # unique to KSA
+AUTH_HMAC_SECRET=...
+INTERNAL_COMMAND_TOKEN=...   # same as App
+TENANT_OPERATOR_TOKEN=...    # same as App
+APP_URL=https://app.yourdomain.com
+ROOT_APP=yourdomain.com
+```
+
+See [Deployment](./deployment.md#regional-tenant-data-plane).
+
+---
+
+## Per-application local `.env`
+
+After `npm run setup`, edit:
+
+| App        | File                   | Schema                        |
+| ---------- | ---------------------- | ----------------------------- |
+| App        | `apps/app/.env`        | `apps/app/.env.schema`        |
+| Admin      | `apps/admin/.env`      | `apps/admin/.env.schema`      |
+| Sites      | `apps/sites/.env`      | `apps/sites/.env.schema`      |
+| Web        | `apps/web/.env`        | `apps/web/.env.schema`        |
+| Tenant API | `apps/tenant-api/.env` | `apps/tenant-api/.env.schema` |
+
+Wrangler dev secrets: `apps/app/.dev.vars`, `apps/tenant-api/.dev.vars`
+(gitignored).
+
+---
+
+## Deploy checklist by application
+
+### 1. App + Admin (Cloudflare Workers + D1)
+
+- [ ] Create D1 + KV (production + staging)
+- [ ] Set GitHub Variables (`APP_*`, `ADMIN_*`, shared URLs)
+- [ ] Set Wrangler secrets on both Workers (staging + production)
+- [ ] Run D1 migrations: `npm run db:migrate:deploy` (or CI on first deploy)
+- [ ] Push to `main` / `dev` — CI patches + deploys
+
+### 2. Web (marketing Worker)
+
+- [ ] Create D1 + R2 bucket
+- [ ] Set `WEB_*` GitHub Variables + `ROOT_APP`
+- [ ] Deploy via CI or
+      `node scripts/patch-wrangler.mjs --app web && cd apps/web && npx wrangler deploy --config wrangler.deploy.toml`
+
+### 3. Sites (tenant public sites Worker)
+
+- [ ] Set `PUBLIC_APP_URL`, `TENANT_API_URL*`, `ROOT_APP`, `SITES_WORKER_NAME*`
+- [ ] Sites build receives `PUBLIC_APP_URL` / tenant URLs from GitHub Variables
+      in CI
+
+### 4. Jobs cron
+
+- [ ] Set `JOBS_CRON_WORKER_NAME*`, `JOBS_CRON_WORKER_URL`
+      (`https://jobs.<apex>`)
+- [ ] Attach `jobs.<apex>` as a custom domain on the jobs-cron Worker
+- [ ] `wrangler secret put INTERNAL_COMMAND_TOKEN` (same token as App)
+
+### 5. Tenant API US (Cloudflare Worker + Durable Objects)
+
+- [ ] Enable Durable Objects on Cloudflare account
+- [ ] Set `TENANT_API_US_WORKER_NAME*`, `APP_BASE_URL`, `ROOT_APP`
+- [ ] Set tenant-api Wrangler secrets
+- [ ] Verify: `curl $TENANT_API_URL/api/health` → `"region":"us"`
+
+### 6. Tenant API KSA (OCI)
+
+- [ ] Provision OCI VM + block volume at `/data/tenants`
+- [ ] Set `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_KEY`, `TENANT_API_URL_KSA`
+- [ ] Copy `docker-compose.yml` + `.env` to `/opt/tenant-api`
+- [ ] Verify: `curl $TENANT_API_URL_KSA/api/health` → `"region":"ksa"`
+
+### 7. CMS (Vercel — optional)
+
+- [ ] Turso + R2 credentials on Vercel — see CMS docs
+- [ ] Not managed by `patch-wrangler.mjs`
+
+---
+
+## Product launch phases
 
 `LAUNCH_STATUS` is an enum on **both** `apps/app` and `apps/admin`. The two apps
 must use the **same value** in every environment.
@@ -34,20 +411,17 @@ Defined in `apps/app/.env.schema` and `apps/admin/.env.schema`.
 
 ## Shared steps (every phase change)
 
-- [ ] Set `LAUNCH_STATUS` in `apps/app/.env` (local) or App Worker secrets
-      (production/staging)
-- [ ] Set the **same** `LAUNCH_STATUS` in `apps/admin/.env` or Admin Worker
-      secrets
-- [ ] Restart the dev server or redeploy **both** App and Admin
+- [ ] Set `LAUNCH_STATUS` via Wrangler secret on **App and Admin** (not
+      dashboard Variables)
+- [ ] Redeploy **both** App and Admin (or push a commit)
 - [ ] Confirm Admin **Waitlist** shows the expected banner for the current phase
 - [ ] Run a quick signup smoke test in the target environment
 
-Production secrets use `wrangler secret put` — see [Secrets](./secrets.md).
-
 ```bash
-# Example (run from apps/app and apps/admin)
-npx wrangler secret put LAUNCH_STATUS --env production
+cd apps/app && npx wrangler secret put LAUNCH_STATUS
+cd ../admin && npx wrangler secret put LAUNCH_STATUS
 # Enter: CLOSED_BETA | PUBLIC_BETA | LAUNCHED
+# Repeat with --env staging for dev branch Workers
 ```
 
 ---
@@ -56,12 +430,12 @@ npx wrangler secret put LAUNCH_STATUS --env production
 
 ### Required configuration
 
-**App** (`apps/app/.env` or Worker secrets):
+**App** (Wrangler secrets or `apps/app/.env` locally):
 
 - [ ] `LAUNCH_STATUS=CLOSED_BETA`
-- [ ] `BASE_URL` matches the public App origin (emails, OAuth callbacks)
+- [ ] `BASE_URL` matches the public App origin
 
-**Admin** (`apps/admin/.env` or Worker secrets):
+**Admin:**
 
 - [ ] `LAUNCH_STATUS=CLOSED_BETA`
 
@@ -74,147 +448,83 @@ npx wrangler secret put LAUNCH_STATUS --env production
       lets a user create an organization
 - [ ] After grant, the user leaves the waitlist and can use the app normally
 
-**Marketing site (optional):** Use the existing **Hero Section** block with
-variant **Medium Impact (Centered waitlist / signup CTA)** on your public
-landing page. Set **Primary CTA URL** to `/signup` (or your app signup URL). Add
-a **Benefits List** block below it for the numbered “why join early” section
-(eyebrow, headline, and benefit lines). No email field — account signup is
-required for the waitlist.
-
-Headlines and descriptions support markdown (`**bold**`, `==highlight==`,
-`^^brand color^^`). See [Marketing CMS markdown](./marketing-cms-markdown.md).
-
-E2E coverage: `apps/app/tests/e2e/waitlist-referral.test.ts` (requires
-`LAUNCH_STATUS=CLOSED_BETA`).
-
 ### Discord integration (recommended)
 
-Automated Discord verification awards +2 points when a user joins your server
-and completes OAuth. Without OAuth env vars, the waitlist page still shows the
-invite link but displays a **manual verification** note instead of the verify
-button.
+See [Discord Integration](../apps/app/docs/DISCORD_INTEGRATION.md).
 
-**App** env vars (see
-[Discord Integration for Waitlist](../apps/app/docs/DISCORD_INTEGRATION.md)):
+**App** secrets:
 
-- [ ] `DISCORD_INVITE_URL` — permanent invite link for “Join Discord server”
+- [ ] `DISCORD_INVITE_URL`
 - [ ] `DISCORD_CLIENT_ID`
 - [ ] `DISCORD_CLIENT_SECRET`
-- [ ] `DISCORD_GUILD_ID` — your Discord server ID
-- [ ] `DISCORD_REDIRECT_URI` — must **exactly** match a redirect registered in
-      the
-      [Discord Developer Portal](https://discord.com/developers/applications)
-      (OAuth2 → Redirects)
-
-Examples:
-
-```bash
-# Local (default dev:app port)
-DISCORD_REDIRECT_URI=http://localhost:3001/auth/discord/verify
-
-# Custom local hostname
-DISCORD_REDIRECT_URI=https://app.epic-startup.me:2999/auth/discord/verify
-
-# Production
-DISCORD_REDIRECT_URI=https://app.yourdomain.com/auth/discord/verify
-```
-
-Discord Developer Portal checklist:
-
-- [ ] OAuth2 redirect URI added (same string as `DISCORD_REDIRECT_URI`)
-- [ ] Client ID and Client Secret copied into App env / secrets
-
-Verification smoke test:
-
-- [ ] Waitlist shows **Verify Discord membership** (not the manual support note)
-- [ ] Click verify → Discord OAuth → return to `/waitlist` with success toast
-- [ ] Points increase by 2 and “Discord points claimed” appears
-
-Production secrets (App only):
+- [ ] `DISCORD_GUILD_ID`
+- [ ] `DISCORD_REDIRECT_URI` — must match Discord Developer Portal exactly
 
 ```bash
 cd apps/app
-npx wrangler secret put DISCORD_CLIENT_SECRET --env production
-npx wrangler secret put DISCORD_CLIENT_ID --env production
-npx wrangler secret put DISCORD_GUILD_ID --env production
-npx wrangler secret put DISCORD_REDIRECT_URI --env production
-npx wrangler secret put DISCORD_INVITE_URL --env production
+npx wrangler secret put DISCORD_CLIENT_SECRET
+npx wrangler secret put DISCORD_CLIENT_ID
+npx wrangler secret put DISCORD_GUILD_ID
+npx wrangler secret put DISCORD_REDIRECT_URI
+npx wrangler secret put DISCORD_INVITE_URL
 ```
 
 ---
 
 ## Phase 2 — Public beta
 
-- [ ] `LAUNCH_STATUS=PUBLIC_BETA` on App **and** Admin
-- [ ] Redeploy / restart both apps
+- [ ] `LAUNCH_STATUS=PUBLIC_BETA` on App **and** Admin (Wrangler secrets)
+- [ ] Redeploy both apps
 - [ ] New signup goes to `/organizations/create` (not waitlist)
 - [ ] Billing routes and upgrade prompts remain hidden
-- [ ] Organization creation works without Stripe subscription
 
 `TRIAL_DAYS` and `CREDIT_CARD_REQUIRED_FOR_TRIAL` are **ignored** during this
-phase — billing is not shown regardless of those values.
+phase.
 
 ---
 
 ## Phase 3 — Launched
 
 - [ ] `LAUNCH_STATUS=LAUNCHED` on App **and** Admin
-- [ ] Stripe configured (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`,
-      webhooks) — see billing routes under `apps/app`
-- [ ] Redeploy / restart both apps
-- [ ] New users can subscribe / manage billing in organization settings
-- [ ] Waitlist is inactive (`/waitlist` redirects to `/organizations` for users
-      without early-access history)
+- [ ] Stripe secrets configured on App Worker
+- [ ] Redeploy both apps
+- [ ] Billing and subscriptions work end-to-end
 
 ### Trial configuration (App only)
 
-Once billing is live, set these in `apps/app/.env` or App Worker vars/secrets
-(also in `apps/app/wrangler.jsonc` for non-secret defaults):
+Set via Wrangler secrets when billing is live:
 
-| Variable                         | Default  | Purpose                                                                                                                             |
-| -------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `TRIAL_DAYS`                     | `14`     | Length of the free trial (days)                                                                                                     |
-| `CREDIT_CARD_REQUIRED_FOR_TRIAL` | `manual` | `manual` — org created first, trial counted from creation date; `stripe` — Stripe Checkout during org creation with card collection |
-
-Checklist:
-
-- [ ] `TRIAL_DAYS` set to your intended trial length (e.g. `14`, `30`, or `0`
-      for no trial)
-- [ ] `CREDIT_CARD_REQUIRED_FOR_TRIAL` chosen:
-  - **`manual`** — simpler onboarding; users add billing before trial ends
-  - **`stripe`** — card required at org creation; Stripe manages trial period
-- [ ] Org creation flow smoke-tested (`/organizations/create`) for your chosen
-      mode
-- [ ] Billing page (`/{org}/settings/billing`) shows correct trial/subscription
-      state
-
-Implementation details: `@repo/payments` (`packages/payments/README.md`,
-`getTrialConfig()` in `packages/payments/src/trial-config.ts`).
+| Variable                         | Default  | Purpose                  |
+| -------------------------------- | -------- | ------------------------ |
+| `TRIAL_DAYS`                     | `14`     | Free trial length (days) |
+| `CREDIT_CARD_REQUIRED_FOR_TRIAL` | `manual` | `manual` or `stripe`     |
 
 ---
 
 ## Troubleshooting
 
-| Symptom                               | Likely cause                                                                                       |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Manual Discord note on waitlist       | Missing `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, or `DISCORD_GUILD_ID` on App                 |
-| Verify button appears but OAuth fails | `DISCORD_REDIRECT_URI` mismatch with Discord Developer Portal                                      |
-| Waitlist inactive in Admin            | `LAUNCH_STATUS` ≠ `CLOSED_BETA` on Admin                                                           |
-| User stuck on waitlist after grant    | Grant action failed or App still on `CLOSED_BETA` while user session stale — have user sign out/in |
-| Signup skips waitlist in closed beta  | App `LAUNCH_STATUS` not `CLOSED_BETA` or env not reloaded                                          |
-
-Full Discord troubleshooting:
-[apps/app/docs/DISCORD_INTEGRATION.md](../apps/app/docs/DISCORD_INTEGRATION.md)
+| Symptom                                 | Likely cause                                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Dashboard Variable reverts after deploy | Key is in `wrangler.jsonc` `vars` or patched by CI — use secrets or GitHub Variables                      |
+| D1 binding error on deploy              | Missing `APP_D1_DATABASE_ID` (or `_STAGING`) GitHub Variable                                              |
+| App and Admin session mismatch          | Different `SESSION_SECRET` or `BASE_URL` / cookie domain; staging uses `en_session_staging` (see ADR 046) |
+| Tenant provision fails                  | `INTERNAL_COMMAND_TOKEN` mismatch between App and tenant-api                                              |
+| Customer auth fails on Sites            | `TENANT_CUSTOMER_JWT_SECRET` (App) ≠ `JWT_SECRET` (US tenant-api)                                         |
+| Manual Discord note on waitlist         | Missing Discord secrets on App                                                                            |
+| Waitlist inactive in Admin              | `LAUNCH_STATUS` ≠ `CLOSED_BETA` on Admin                                                                  |
 
 ---
 
 ## Related docs
 
-- [Deployment Checklist](./deployment-checklist.md) — Cloudflare, D1,
-  tenant-api, Pages
+- [Deployment Checklist](./deployment-checklist.md) — condensed infra steps
+- [Deployment](./deployment.md) — architecture and tenant-api OCI
 - [Secrets](./secrets.md) — local `.env` vs `wrangler secret put`
-- [Discord Integration for Waitlist](../apps/app/docs/DISCORD_INTEGRATION.md) —
-  OAuth setup and technical flow
-- [Payments package](../packages/payments/README.md) — trial config and provider
-  setup
-- [Waitlist referral E2E tests](../apps/app/tests/e2e/waitlist-referral.README.md)
+- [Discord Integration](../apps/app/docs/DISCORD_INTEGRATION.md)
+- [Payments package](../packages/payments/README.md)
+- `launch.config.example.json` — local / CI variable reference
+- `launch.secrets.json` — generated shared secrets (gitignored; created by
+  `launch:setup`)
+- `scripts/patch-wrangler.mjs` — binding injection implementation
+- `scripts/launch-setup.mjs` — interactive first-time setup
+  (`npm run launch:setup`)

@@ -2,7 +2,6 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "epic-startup-app",
 	"main": "./workers/app.ts",
-	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2026-08-20",
 	"compatibility_flags": [
 		"nodejs_compat",
@@ -13,41 +12,49 @@
 		"enabled": true,
 	},
 	// @cloudflare/vite-plugin injects assets.directory at build time — do not set directory here.
+	// Binding IDs are injected at deploy time by scripts/patch-wrangler.mjs (GitHub Variables or launch.config.json).
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "epic_app_db",
-			"database_id": "ff7f36a4-16c4-488d-bb1d-872cba6b6909",
+			"database_name": "epic-startup-db",
+			"database_id": "00000000-0000-0000-0000-000000000001",
 			"migrations_dir": "../../packages/database/drizzle",
 		},
 	],
 	"kv_namespaces": [
 		{
 			"binding": "CACHE",
-			"id": "109ff22c36e9490d8463b4175e26a354",
+			"id": "00000000000000000000000000000001",
 		},
 	],
-	// Secrets — set via `wrangler secret put <NAME>` (never commit values):
-	// SESSION_SECRET, HONEYPOT_SECRET, RESEND_API_KEY, STRIPE_SECRET_KEY,
-	// STRIPE_WEBHOOK_SECRET, INTERNAL_COMMAND_TOKEN, AWS_ACCESS_KEY_ID,
-	// AWS_SECRET_ACCESS_KEY, JWT_SECRET, INTEGRATION_ENCRYPTION_KEY,
-	// INTEGRATIONS_OAUTH_STATE_SECRET, SSO_ENCRYPTION_KEY, AUDIT_LOG_SECRET_KEY, SENTRY_DSN,
-	// plus integration OAuth secrets (GITHUB_CLIENT_SECRET, JIRA_CLIENT_SECRET, etc.)
+	// Secrets — set via `wrangler secret put <NAME>` (never commit values).
+	// Runtime URLs and LAUNCH_STATUS also belong in secrets, not vars — see docs/launch-checklist.md.
+	// SESSION_SECRET, HONEYPOT_SECRET, RESEND_API_KEY, STRIPE_*, INTERNAL_COMMAND_TOKEN,
+	// TENANT_OPERATOR_TOKEN, JWT_SECRET, TENANT_CUSTOMER_JWT_SECRET, LAUNCH_STATUS, BASE_URL,
+	// AWS_*, INTEGRATION_ENCRYPTION_KEY, SSO_ENCRYPTION_KEY, AUDIT_LOG_SECRET_KEY, SENTRY_DSN, etc.
 	"vars": {
 		"NODE_ENV": "production",
-		"ALLOW_INDEXING": "false",
-		"LAUNCH_STATUS": "LAUNCHED",
-		"CREDIT_CARD_REQUIRED_FOR_TRIAL": "manual",
-		"TRIAL_DAYS": "14",
-		"SSO_ENABLED": "false",
-		"AWS_REGION": "auto",
-		"AWS_ENDPOINT_URL_S3": "https://example.r2.cloudflarestorage.com",
-		"BUCKET_NAME": "mock-bucket",
-		"BASE_URL": "https://epic-startup-app.zama-887.workers.dev",
-		"ROOT_APP": "zama-887.workers.dev",
-		"PUBLIC_SITE_HOST_SUFFIXES": "workers.dev",
-		"TENANT_API_URL": "http://localhost:3007",
-		"TENANT_API_URL_KSA": "http://localhost:3009",
-		"JOBS_CRON_WORKER_URL": "https://epic-startup-jobs-cron.zama-887.workers.dev",
+	},
+	"env": {
+		"staging": {
+			"name": "epic-startup-app-staging",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "epic-startup-db-staging",
+					"database_id": "00000000-0000-0000-0000-000000000003",
+					"migrations_dir": "../../packages/database/drizzle",
+				},
+			],
+			"kv_namespaces": [
+				{
+					"binding": "CACHE",
+					"id": "00000000000000000000000000000002",
+				},
+			],
+			"vars": {
+				"NODE_ENV": "production",
+			},
+		},
 	},
 }

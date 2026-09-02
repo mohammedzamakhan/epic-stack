@@ -44,6 +44,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "setup": "npm run db:setup && node scripts/setup-brand.mjs && node scripts/setup-ssl.mjs && node scripts/setup-hosts.mjs",
+    "launch:setup": "node scripts/launch-setup.mjs",
+    "launch:patch-wrangler": "node scripts/patch-wrangler.mjs",
     "setup:ssl": "node scripts/setup-ssl.mjs",
     "setup:brand": "node scripts/setup-brand.mjs",
     "setup:hosts": "node scripts/setup-hosts.mjs",
@@ -62,6 +64,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
     "@epic-web/config": "^1.20.1",
+    "@inquirer/prompts": "^7.5.3",
     "@storybook/addon-docs": "10.0.6",
     "@storybook/addon-links": "10.0.6",
     "@storybook/react-vite": "10.0.6",

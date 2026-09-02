@@ -1,8 +1,17 @@
 import { cn } from '@repo/ui'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useEffect, useImperativeHandle, forwardRef, useRef } from 'react'
 import { Markdown } from 'tiptap-markdown'
+
+function isEditorReady(editor: Editor): boolean {
+	return !editor.isDestroyed && editor.isInitialized
+}
+
+function getEditorHtml(editor: Editor | null): string {
+	if (!editor || !isEditorReady(editor)) return ''
+	return editor.getHTML()
+}
 
 interface ContentEditorProps {
 	value: string
@@ -31,6 +40,8 @@ export const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
 		},
 		ref,
 	) => {
+		const isInternalUpdate = useRef(false)
+
 		const editor = useEditor({
 			extensions: [StarterKit, Markdown],
 			content: value,
@@ -41,8 +52,9 @@ export const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
 				},
 			},
 			onUpdate: ({ editor }: { editor: Editor }) => {
-				const html = editor.getHTML()
-				onChange(html)
+				if (!isEditorReady(editor)) return
+				isInternalUpdate.current = true
+				onChange(editor.getHTML())
 			},
 			editable: !disabled,
 		})
@@ -51,20 +63,29 @@ export const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
 			ref,
 			() => ({
 				setContent: (content: string) => {
-					if (editor && content !== editor.getHTML()) {
-						editor.commands.setContent(content)
+					if (!editor || !isEditorReady(editor)) return
+					if (content !== getEditorHtml(editor)) {
+						isInternalUpdate.current = true
+						editor.commands.setContent(content, { emitUpdate: false })
 					}
 				},
-				getContent: () => editor?.getHTML() || '',
-				focus: () => editor?.commands.focus(),
+				getContent: () => getEditorHtml(editor),
+				focus: () => {
+					if (editor && isEditorReady(editor)) {
+						editor.commands.focus()
+					}
+				},
 			}),
 			[editor],
 		)
 
 		useEffect(() => {
-			if (editor && value !== editor.getHTML()) {
-				editor.commands.setContent(value)
+			if (!editor || !isEditorReady(editor)) return
+			if (isInternalUpdate.current) {
+				isInternalUpdate.current = false
+				return
 			}
+			editor.commands.setContent(value, { emitUpdate: false })
 		}, [editor, value])
 
 		return (
@@ -78,12 +99,16 @@ export const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
 			>
 				<EditorContent
 					editor={editor}
-					className="max-h-[400px] min-h-[120px] overflow-y-auto"
+					className="max-h-100 min-h-30 overflow-y-auto"
 					placeholder={placeholder}
 				/>
 				{/* Hidden input for form submission */}
 				{name && (
-					<input type="hidden" name={name} value={editor?.getHTML() || value} />
+					<input
+						type="hidden"
+						name={name}
+						value={getEditorHtml(editor) || value}
+					/>
 				)}
 			</div>
 		)

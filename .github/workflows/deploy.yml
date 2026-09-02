@@ -214,11 +214,22 @@ jobs:
       - name: 🏗 Build Web App
         run: npx turbo run build --filter=web
 
+      - name: 🧩 Patch Wrangler config (Web)
+        env:
+          DEPLOY_ENV: ${{ github.ref == 'refs/heads/dev' && 'staging' || 'production' }}
+          WEB_D1_DATABASE_ID: ${{ github.ref == 'refs/heads/dev' && vars.WEB_D1_DATABASE_ID_STAGING || vars.WEB_D1_DATABASE_ID }}
+          WEB_R2_BUCKET_NAME: ${{ github.ref == 'refs/heads/dev' && vars.WEB_R2_BUCKET_NAME_STAGING || vars.WEB_R2_BUCKET_NAME }}
+          WEB_WORKER_NAME: ${{ github.ref == 'refs/heads/dev' && vars.WEB_WORKER_NAME_STAGING || vars.WEB_WORKER_NAME }}
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          ROOT_APP_STAGING: ${{ vars.ROOT_APP_STAGING }}
+          WEB_BASE_URL: ${{ vars.WEB_BASE_URL }}
+          WEB_BASE_URL_STAGING: ${{ vars.WEB_BASE_URL_STAGING }}
+        run: node scripts/patch-wrangler.mjs --app web --env $DEPLOY_ENV
+
       - name: 🚀 Deploy Web App to Cloudflare Workers
         working-directory: apps/web
         run:
-          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
-          staging' || '' }}
+          npx wrangler deploy --config dist/server/wrangler.deploy.json --env=""
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -253,11 +264,23 @@ jobs:
           TENANT_API_URL_KSA:
             ${{ vars.TENANT_API_URL_KSA || 'https://tenant-ksa.example.com' }}
 
+      - name: 🧩 Patch Wrangler config (Sites)
+        env:
+          DEPLOY_ENV: ${{ github.ref == 'refs/heads/dev' && 'staging' || 'production' }}
+          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL }}
+          PUBLIC_APP_URL_STAGING: ${{ vars.PUBLIC_APP_URL_STAGING }}
+          TENANT_API_URL: ${{ vars.TENANT_API_URL }}
+          TENANT_API_URL_STAGING: ${{ vars.TENANT_API_URL_STAGING }}
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          ROOT_APP_STAGING: ${{ vars.ROOT_APP_STAGING }}
+          PUBLIC_SITE_HOST_SUFFIXES_STAGING: ${{ vars.PUBLIC_SITE_HOST_SUFFIXES_STAGING }}
+          SITES_WORKER_NAME: ${{ github.ref == 'refs/heads/dev' && vars.SITES_WORKER_NAME_STAGING || vars.SITES_WORKER_NAME }}
+        run: node scripts/patch-wrangler.mjs --app sites --env $DEPLOY_ENV
+
       - name: 🚀 Deploy Sites to Cloudflare Workers
         working-directory: apps/sites
         run:
-          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
-          staging' || '' }}
+          npx wrangler deploy --config dist/server/wrangler.deploy.json --env=""
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -338,11 +361,31 @@ jobs:
           NODE_OPTIONS=--max-old-space-size=6144 DEPLOY_TARGET=cloudflare npx
           turbo run build --filter=app
 
+      - name: 🧩 Patch Wrangler config (App)
+        if: ${{ github.event_name == 'push' }}
+        env:
+          DEPLOY_ENV: ${{ github.ref == 'refs/heads/dev' && 'staging' || 'production' }}
+          APP_D1_DATABASE_ID: ${{ github.ref == 'refs/heads/dev' && vars.APP_D1_DATABASE_ID_STAGING || vars.APP_D1_DATABASE_ID }}
+          APP_KV_NAMESPACE_ID: ${{ github.ref == 'refs/heads/dev' && vars.APP_KV_NAMESPACE_ID_STAGING || vars.APP_KV_NAMESPACE_ID }}
+          APP_WORKER_NAME: ${{ github.ref == 'refs/heads/dev' && vars.APP_WORKER_NAME_STAGING || vars.APP_WORKER_NAME }}
+          APP_BASE_URL: ${{ vars.APP_BASE_URL }}
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          ROOT_APP_STAGING: ${{ vars.ROOT_APP_STAGING }}
+          APP_BASE_URL_STAGING: ${{ vars.APP_BASE_URL_STAGING }}
+          PUBLIC_SITE_HOST_SUFFIXES: ${{ vars.PUBLIC_SITE_HOST_SUFFIXES }}
+          PUBLIC_SITE_HOST_SUFFIXES_STAGING: ${{ vars.PUBLIC_SITE_HOST_SUFFIXES_STAGING }}
+          TENANT_API_URL: ${{ vars.TENANT_API_URL }}
+          TENANT_API_URL_STAGING: ${{ vars.TENANT_API_URL_STAGING }}
+          TENANT_API_URL_KSA: ${{ vars.TENANT_API_URL_KSA }}
+          JOBS_CRON_WORKER_URL: ${{ vars.JOBS_CRON_WORKER_URL }}
+          JOBS_CRON_WORKER_URL_STAGING: ${{ vars.JOBS_CRON_WORKER_URL_STAGING }}
+        run: node scripts/patch-wrangler.mjs --app app --env $DEPLOY_ENV
+
       - name: 🚀 Deploy App
         if: ${{ github.event_name == 'push' }}
         working-directory: apps/app
         run:
-          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
+          npx wrangler deploy --config build/server/wrangler.deploy.json ${{ github.ref == 'refs/heads/dev' && '--env
           staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -373,11 +416,27 @@ jobs:
           NODE_OPTIONS=--max-old-space-size=6144 DEPLOY_TARGET=cloudflare npx
           turbo run build --filter=admin
 
+      - name: 🧩 Patch Wrangler config (Admin)
+        if: ${{ github.event_name == 'push' }}
+        env:
+          DEPLOY_ENV: ${{ github.ref == 'refs/heads/dev' && 'staging' || 'production' }}
+          ADMIN_D1_DATABASE_ID: ${{ github.ref == 'refs/heads/dev' && vars.ADMIN_D1_DATABASE_ID_STAGING || vars.ADMIN_D1_DATABASE_ID }}
+          ADMIN_KV_NAMESPACE_ID: ${{ github.ref == 'refs/heads/dev' && vars.ADMIN_KV_NAMESPACE_ID_STAGING || vars.ADMIN_KV_NAMESPACE_ID }}
+          ADMIN_WORKER_NAME: ${{ github.ref == 'refs/heads/dev' && vars.ADMIN_WORKER_NAME_STAGING || vars.ADMIN_WORKER_NAME }}
+          ADMIN_BASE_URL: ${{ vars.ADMIN_BASE_URL }}
+          ADMIN_BASE_URL_STAGING: ${{ vars.ADMIN_BASE_URL_STAGING }}
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          ROOT_APP_STAGING: ${{ vars.ROOT_APP_STAGING }}
+          TENANT_API_URL: ${{ vars.TENANT_API_URL }}
+          TENANT_API_URL_STAGING: ${{ vars.TENANT_API_URL_STAGING }}
+          TENANT_API_URL_KSA: ${{ vars.TENANT_API_URL_KSA }}
+        run: node scripts/patch-wrangler.mjs --app admin --env $DEPLOY_ENV
+
       - name: 🚀 Deploy Admin
         if: ${{ github.event_name == 'push' }}
         working-directory: apps/admin
         run:
-          npx wrangler deploy ${{ github.ref == 'refs/heads/dev' && '--env
+          npx wrangler deploy --config build/server/wrangler.deploy.json ${{ github.ref == 'refs/heads/dev' && '--env
           staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -404,9 +463,23 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
+      - name: 🧩 Patch Wrangler config (jobs-cron)
+        env:
+          DEPLOY_ENV: ${{ github.ref == 'refs/heads/dev' && 'staging' || 'production' }}
+          JOBS_CRON_WORKER_NAME: ${{ github.ref == 'refs/heads/dev' && vars.JOBS_CRON_WORKER_NAME_STAGING || vars.JOBS_CRON_WORKER_NAME }}
+          APP_BASE_URL: ${{ vars.APP_BASE_URL }}
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          JOBS_CRON_WORKER_URL: ${{ vars.JOBS_CRON_WORKER_URL }}
+          JOBS_CRON_WORKER_URL_STAGING: ${{ vars.JOBS_CRON_WORKER_URL_STAGING }}
+          TENANT_API_URL: ${{ vars.TENANT_API_URL }}
+          TENANT_API_URL_KSA: ${{ vars.TENANT_API_URL_KSA }}
+        run: node scripts/patch-wrangler.mjs --app jobs-cron --env $DEPLOY_ENV
+
       - name: 🚀 Deploy jobs-cron Worker
         working-directory: apps/jobs-cron
-        run: npx wrangler deploy
+        run:
+          npx wrangler deploy --config wrangler.deploy.jsonc ${{ github.ref == 'refs/heads/dev' && '--env
+          staging' || '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -431,12 +504,24 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
+      - name: 🧩 Patch Wrangler config (tenant-api US)
+        env:
+          DEPLOY_ENV: ${{ github.ref == 'refs/heads/dev' && 'staging' || 'production' }}
+          TENANT_API_US_WORKER_NAME: ${{ github.ref == 'refs/heads/dev' && vars.TENANT_API_US_WORKER_NAME_STAGING || vars.TENANT_API_US_WORKER_NAME }}
+          APP_BASE_URL: ${{ vars.APP_BASE_URL }}
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          TENANT_API_URL: ${{ vars.TENANT_API_URL }}
+          TENANT_API_URL_STAGING: ${{ vars.TENANT_API_URL_STAGING }}
+        run: node scripts/patch-wrangler.mjs --app tenant-api --env $DEPLOY_ENV
+
       - name: 🚀 Deploy US tenant-api (Cloudflare Workers + DO SQLite)
         working-directory: apps/tenant-api
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npm run deploy:cf
+        run:
+          npm run deploy:cf -- --config wrangler.deploy.jsonc ${{ github.ref == 'refs/heads/dev' && '--env
+          staging' || '' }}
 
       - name: 🩺 Health check US (Cloudflare)
         if: ${{ vars.TENANT_API_URL != '' }}

@@ -1,6 +1,9 @@
 import { createCookieSessionStorage } from 'react-router'
 
-import { sharedCookieDomain } from '@repo/common/cookie-domain'
+import {
+	operatorCookieName,
+	sharedCookieDomain,
+} from '@repo/common/cookie-domain'
 
 // Validate SESSION_SECRET environment variable
 if (!process.env.SESSION_SECRET) {
@@ -24,7 +27,7 @@ if (sessionSecrets.length === 0 || sessionSecrets.some((s) => s.length === 0)) {
 
 export const authSessionStorage = createCookieSessionStorage({
 	cookie: {
-		name: 'en_session',
+		name: operatorCookieName('en_session'),
 		sameSite: 'lax', // CSRF protection is advised if changing to 'none'
 		path: '/',
 		httpOnly: true,

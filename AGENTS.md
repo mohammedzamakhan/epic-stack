@@ -389,7 +389,8 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
   chars). Signs and validates operator JWT tokens for tenant-api `/operator/*`
   routes.
 - `JOBS_CRON_WORKER_URL` - App only. Public URL of `apps/jobs-cron` Worker used
-  to start storage migration workflows.
+  to start storage migration workflows (production: `https://jobs.<apex>` custom
+  domain).
 - `MEDIA_TRANSFORM_BASE_URL` - App only. Cloudflare-proxied hostname with Media
   Transformations enabled; powers on-demand video posters/clips via
   `/cdn-cgi/media/`. Empty in dev (falls back to `/resources/videos/source`).

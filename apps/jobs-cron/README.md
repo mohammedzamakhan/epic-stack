@@ -34,7 +34,8 @@ npx wrangler secret put INTERNAL_COMMAND_TOKEN
 ## Configuration
 
 - `APP_BASE_URL` in `wrangler.jsonc` — App URL the worker calls
-- App sets `JOBS_CRON_WORKER_URL` to this Worker's public URL
+- App sets `JOBS_CRON_WORKER_URL` to this Worker's public URL (production:
+  `https://jobs.<your-apex-domain>` via a custom domain on the jobs-cron Worker)
 
 ## Development
 

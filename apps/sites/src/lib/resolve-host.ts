@@ -3,6 +3,8 @@ import { getBrandDomain } from '@repo/config/brand'
 const RESERVED_SUBDOMAINS = new Set([
 	'app',
 	'admin',
+	'app-staging',
+	'admin-staging',
 	'cms',
 	'docs',
 	'studio',
@@ -16,6 +18,13 @@ const RESERVED_SUBDOMAINS = new Set([
 	'cdn',
 	'static',
 	'assets',
+	'staging',
+	'jobs',
+	'jobs-staging',
+	'tenant-us',
+	'tenant-us-staging',
+	'tenant-ksa',
+	'tenant-ksa-staging',
 ])
 
 export type HostResolution =

@@ -3,17 +3,19 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
+# Patched at deploy by scripts/patch-wrangler.mjs
 [vars]
-PUBLIC_ROOT_APP = "zama-887.workers.dev"
+PUBLIC_ROOT_APP = "epic-startup.me"
+PUBLIC_APP_URL = "https://app.epic-startup.me"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "web-cms-db"
-database_id = "3085ac9c-03bd-403c-b6b9-d06efabbace8"
+database_name = "epic-startup-web-db"
+database_id = "00000000-0000-0000-0000-000000000002"
 
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
-bucket_name = "web-media"
+bucket_name = "epic-startup-media"
 
 [env.production]
 name = "epic-startup"
@@ -23,8 +25,3 @@ name = "epic-startup-preview"
 
 [env.staging]
 name = "epic-startup-staging"
-
-# [[kv_namespaces]]
-# binding = "SESSION"
-# id = "your-kv-namespace-id"
-# preview_id = "your-preview-kv-namespace-id"

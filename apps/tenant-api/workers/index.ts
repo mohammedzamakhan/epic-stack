@@ -140,7 +140,7 @@ export default {
 
 		const url = new URL(request.url)
 
-		if (url.pathname === '/health') {
+		if (url.pathname === '/health' || url.pathname === '/api/health') {
 			return edgeApp.fetch(request, env)
 		}
 
