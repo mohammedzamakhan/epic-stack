@@ -125,6 +125,23 @@ export default {
 		const url = new URL(request.url)
 		const pathname = url.pathname
 
+		if (pathname === '/api/health' || pathname === '/health') {
+			return Response.json(
+				{
+					status: 'ok',
+					timestamp: new Date().toISOString(),
+					service: 'jobs-cron',
+				},
+				{
+					status: 200,
+					headers: {
+						'Cache-Control': 'no-cache, no-store, must-revalidate',
+						'Content-Type': 'application/json',
+					},
+				},
+			)
+		}
+
 		// =========================================================================
 		// 1. Storage Migration Workflow Endpoints
 		// =========================================================================

@@ -3,6 +3,7 @@ import { invariant } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
+import { getUserImgSrc } from '@repo/common'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
@@ -181,7 +182,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			email: user?.email || '',
 			notesCount: item.noteCount,
 			rank: index + 1,
-			image: user?.objectKey || null,
+			image: user?.objectKey ? getUserImgSrc(user.objectKey) : null,
 		}
 	})
 

@@ -108,6 +108,7 @@ app.use(
 		serviceName: 'admin',
 		serviceVersion: process.env.npm_package_version,
 		skipPaths: [
+			'/api/health',
 			'/resources/healthcheck',
 			'/resources/images/*',
 			'/assets/*',

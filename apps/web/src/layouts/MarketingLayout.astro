@@ -4,7 +4,7 @@ import Header from '~/components/Header.astro'
 import Banner from '~/components/Banner.astro'
 import Frame from '~/components/site/Frame.astro'
 import '../styles/tailwind.css'
-import { getThemeFromCookie } from '~/utils/theme'
+import { getThemeFromCookie, resolveThemeCookieName } from '~/utils/theme'
 import {
 	getBanner,
 	getFooterMenuColumns,
@@ -13,12 +13,14 @@ import {
 } from '~/lib/emdash'
 
 import { getDirection } from '@repo/i18n'
+import { ENV } from 'varlock/env'
 
 const currentLocale = Astro.currentLocale ?? 'en'
 const dir = getDirection(currentLocale)
 
+const themeCookieName = resolveThemeCookieName(ENV.PUBLIC_APP_URL)
 const cookieHeader = Astro.request.headers.get('cookie')
-const theme = getThemeFromCookie(cookieHeader)
+const theme = getThemeFromCookie(cookieHeader, themeCookieName)
 
 const [settings, primaryMenu, footerColumns, banner] = await Promise.all([
 	getSiteSettings(),

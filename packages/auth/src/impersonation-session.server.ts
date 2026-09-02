@@ -1,7 +1,10 @@
 import crypto from 'node:crypto'
 import { createCookieSessionStorage } from 'react-router'
 
-import { sharedCookieDomain } from '@repo/common/cookie-domain'
+import {
+	operatorCookieName,
+	sharedCookieDomain,
+} from '@repo/common/cookie-domain'
 
 const IMPERSONATION_SESSION_TTL = 15 * 60 * 1000 // 15 minutes in milliseconds
 export const IMPERSONATION_COOKIE_MAX_AGE = 15 * 60 // 15 minutes in seconds
@@ -30,7 +33,7 @@ if (impersonationSecrets.length === 0) {
 
 export const impersonationSessionStorage = createCookieSessionStorage({
 	cookie: {
-		name: 'en_imp_session',
+		name: operatorCookieName('en_imp_session'),
 		sameSite: 'lax',
 		path: '/',
 		httpOnly: true,

@@ -29,6 +29,12 @@ uniwind-env.d.ts
 # Easy way to create temporary files/folders that won't accidentally be added to git
 *.local.*
 
+# Launch / deploy-generated Wrangler configs (never commit)
+launch.config.json
+launch.secrets.json
+**/wrangler.deploy.jsonc
+**/wrangler.deploy.toml
+
 # generated files
 /app/components/ui/icons
 packages/ui/components/icons/

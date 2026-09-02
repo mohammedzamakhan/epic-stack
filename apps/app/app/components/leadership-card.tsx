@@ -1,7 +1,5 @@
 import { Trans } from '@lingui/macro'
-import { getUserImgSrc } from '@repo/common'
 import { cn } from '@repo/ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import {
 	Card,
 	CardContent,
@@ -11,13 +9,15 @@ import {
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 
+import { UserAvatar } from './user-avatar'
+
 interface LeadershipUser {
 	id: string
 	name: string
 	email: string
 	notesCount: number
 	rank: number
-	image?: { objectKey: string } | null
+	image?: string | null
 }
 
 interface LeadershipCardProps {
@@ -36,18 +36,6 @@ const getRankIcon = (rank: number) => {
 		default:
 			return null
 	}
-}
-
-const getAvatarColor = (index: number) => {
-	const colors = [
-		'bg-blue-500',
-		'bg-green-500',
-		'bg-cyan-500',
-		'bg-gray-400',
-		'bg-gray-600',
-		'bg-purple-500',
-	]
-	return colors[index % colors.length]
 }
 
 const rankStyles: Record<number, string> = {
@@ -75,7 +63,7 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 					</div>
 				) : (
 					<div className="divide-y">
-						{leaders.map((leader, index) => (
+						{leaders.map((leader) => (
 							<div
 								key={leader.id}
 								className={cn(
@@ -91,15 +79,15 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 									{leader.rank}
 								</div>
 
-								<Avatar className="h-8 w-8 shrink-0">
-									<AvatarImage
-										src={getUserImgSrc(leader.image?.objectKey)}
-										alt={leader.name}
-									/>
-									<AvatarFallback className={getAvatarColor(index)}>
-										{leader.name.charAt(0).toUpperCase()}
-									</AvatarFallback>
-								</Avatar>
+								<UserAvatar
+									user={{
+										name: leader.name,
+										email: leader.email,
+										image: leader.image,
+									}}
+									className="h-8 w-8 shrink-0"
+									alt={leader.name}
+								/>
 
 								<div className="min-w-0 flex-1">
 									<div className="truncate text-sm font-medium">

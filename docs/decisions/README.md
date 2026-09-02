@@ -8,6 +8,9 @@ way for someone to come up to speed on why certain decisions were made.
 
 Recent additions:
 
+- [046 - Staging hostnames and cookies](./046-staging-hostnames-and-cookies.md)
+  — flat `app-staging.{apex}` URLs for free Universal SSL and staging-suffixed
+  operator cookie names.
 - [045 - Tenant data residency](./045-tenant-data-residency.md) — why customer
   PII is on a regional tenant-api, why the browser calls it directly, and why
   changing region deletes tenant data.

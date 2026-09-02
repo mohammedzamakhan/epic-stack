@@ -9,11 +9,12 @@ run_worker_first = ["/*"]
 html_handling = "none"
 not_found_handling = "none"
 
+# Patched at deploy by scripts/patch-wrangler.mjs
 [vars]
-PUBLIC_APP_URL = "https://epic-startup-app.zama-887.workers.dev"
-ROOT_APP = "workers.dev"
-PUBLIC_SITE_HOST_SUFFIXES = "workers.dev"
-TENANT_API_URL = "https://epic-startup-tenant-api-us.zama-887.workers.dev"
+PUBLIC_APP_URL = "https://app.epic-startup.me"
+ROOT_APP = "epic-startup.me"
+PUBLIC_SITE_HOST_SUFFIXES = "epic-startup.me,workers.dev"
+TENANT_API_URL = "https://tenant-us.epic-startup.me"
 
 [env.production]
 name = "epic-startup-sites"

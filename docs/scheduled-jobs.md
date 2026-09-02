@@ -94,8 +94,8 @@ can be copied in the background:
 Secrets stay on the App (Cloudflare D1/Workers); the Worker never stores org
 credentials.
 
-**App env:** `JOBS_CRON_WORKER_URL` (Worker public URL, e.g.
-`http://localhost:8787` in dev).
+**App env:** `JOBS_CRON_WORKER_URL` (Worker public URL — `http://localhost:8787`
+in dev; production: `https://jobs.<your-apex-domain>` on a custom domain).
 
 ## Video note media (no background jobs)
 

@@ -61,6 +61,7 @@ export function wideEventMiddleware(
 ): (req: Request, res: Response, next: NextFunction) => void {
 	const {
 		skipPaths = [
+			'/api/health',
 			'/resources/healthcheck',
 			'/health',
 			'/assets/*',

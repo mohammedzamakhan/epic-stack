@@ -2,7 +2,6 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "epic-startup-jobs-cron",
 	"main": "src/index.ts",
-	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2025-08-15",
 	"workers_dev": true,
 	"observability": {
@@ -23,9 +22,12 @@
 			"class_name": "MarketingJourneyWorkflow",
 		},
 	],
-	"vars": {
-		"APP_BASE_URL": "https://app.epic-startup.me",
-		"TENANT_API_URL": "https://tenant-us.epic-startup.me",
-		"TENANT_API_URL_KSA": "https://tenant-ksa.epic-startup.me",
+	// APP_BASE_URL / TENANT_API_URL* patched at deploy — set INTERNAL_COMMAND_TOKEN via wrangler secret put.
+	"vars": {},
+	"env": {
+		"staging": {
+			"name": "epic-startup-jobs-cron-staging",
+			"vars": {},
+		},
 	},
 }

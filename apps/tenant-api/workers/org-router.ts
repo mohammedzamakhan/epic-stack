@@ -96,7 +96,7 @@ export async function resolveOrgId(
 	const url = new URL(request.url)
 	const { pathname } = url
 
-	if (pathname === '/health') return null
+	if (pathname === '/health' || pathname === '/api/health') return null
 
 	if (pathname === '/api/provision' || pathname === '/api/deprovision') {
 		return orgIdFromJsonBody(request)

@@ -57,11 +57,20 @@ jobs:
           cd apps/web
           npm run build
 
+      - name: 🧩 Patch Wrangler config (Web preview)
+        run: node scripts/patch-wrangler.mjs --app web --env preview --require-bindings
+        env:
+          WEB_D1_DATABASE_ID: ${{ vars.WEB_D1_DATABASE_ID }}
+          WEB_R2_BUCKET_NAME: ${{ vars.WEB_R2_BUCKET_NAME }}
+          WEB_WORKER_NAME_PREVIEW: epic-startup-preview
+          ROOT_APP: ${{ vars.ROOT_APP }}
+          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL }}
+
       - name: 🚀 Deploy Preview to Cloudflare Workers
         id: deploy
         working-directory: apps/web
         run: |
-          deploy_output=$(npx wrangler deploy --env preview)
+          deploy_output=$(npx wrangler deploy --config dist/server/wrangler.deploy.json --env="")
           echo "$deploy_output"
           url=$(echo "$deploy_output" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | head -n 1)
           echo "url=$url" >> $GITHUB_OUTPUT

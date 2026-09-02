@@ -62,7 +62,7 @@ async function promptBrandInfo() {
 	const shortName =
 		(await question(
 			rl,
-			`${colors.bright}Short Name${colors.reset} (for mobile/app manifests, default: ${name}): `,
+			`${colors.bright}Short Name${colors.reset} (Workers, D1, KV, R2 prefix; default: ${name}): `,
 		)) || name
 
 	const defaultDomain = `${toBrandSlug(name)}.me`
@@ -102,7 +102,7 @@ async function promptBrandInfo() {
 	return {
 		name,
 		shortName,
-		slug: toBrandSlug(name),
+		slug: toBrandSlug(shortName),
 		domain,
 		tagline: tagline || 'Build your next startup even faster',
 		description:
@@ -199,7 +199,6 @@ const SKIP_DIR_NAMES = new Set([
 	'test-results',
 	'.output',
 	'.vercel',
-	'remix.init',
 	'fixtures',
 ])
 

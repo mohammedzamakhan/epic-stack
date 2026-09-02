@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { getBrandDomain } from '@repo/config/brand'
 
 import {
+	isStagingOperatorHost,
+	operatorCookieName,
+	operatorThemeCookieName,
 	sharedCookieDomain,
 	sharedCookieDomainFromHost,
 } from './cookie-domain.server.ts'
@@ -20,6 +23,15 @@ describe('sharedCookieDomainFromHost', () => {
 		)
 	})
 
+	it('shares cookies across flat staging operator hosts on the production apex', () => {
+		expect(sharedCookieDomainFromHost('app-staging.lighteninggroup.com')).toBe(
+			'.lighteninggroup.com',
+		)
+		expect(
+			sharedCookieDomainFromHost('admin-staging.lighteninggroup.com'),
+		).toBe('.lighteninggroup.com')
+	})
+
 	it('omits domain on localhost and opaque Workers hosts', () => {
 		expect(sharedCookieDomainFromHost('localhost:3001')).toBeUndefined()
 		expect(sharedCookieDomainFromHost('127.0.0.1')).toBeUndefined()
@@ -33,10 +45,42 @@ describe('sharedCookieDomainFromHost', () => {
 	})
 })
 
+describe('operatorCookieName', () => {
+	it('suffixes cookie names for flat staging operator origins', () => {
+		expect(
+			operatorCookieName('en_session', 'https://app-staging.example.com'),
+		).toBe('en_session_staging')
+		expect(
+			operatorCookieName('en_theme', 'https://admin-staging.example.com'),
+		).toBe('en_theme_staging')
+		expect(operatorCookieName('en_session', 'https://app.example.com')).toBe(
+			'en_session',
+		)
+	})
+
+	it('derives the theme cookie name from the operator app URL', () => {
+		expect(operatorThemeCookieName('https://app-staging.example.com')).toBe(
+			'en_theme_staging',
+		)
+		expect(operatorThemeCookieName('https://app.example.com')).toBe('en_theme')
+	})
+})
+
+describe('isStagingOperatorHost', () => {
+	it('detects flat staging operator hosts', () => {
+		expect(isStagingOperatorHost('app-staging.example.com')).toBe(true)
+		expect(isStagingOperatorHost('admin-staging.example.com')).toBe(true)
+		expect(isStagingOperatorHost('app.example.com')).toBe(false)
+	})
+})
+
 describe('sharedCookieDomain', () => {
 	it('reads the apex from BASE_URL', () => {
 		expect(sharedCookieDomain('https://app.epic-startup.dev')).toBe(
 			'.epic-startup.dev',
+		)
+		expect(sharedCookieDomain('https://app-staging.lighteninggroup.com')).toBe(
+			'.lighteninggroup.com',
 		)
 		expect(sharedCookieDomain('http://localhost:3001')).toBeUndefined()
 	})

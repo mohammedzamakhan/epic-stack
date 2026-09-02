@@ -1,101 +1,163 @@
 # Deployment Checklist
 
-This document outlines the steps for deploying the Epic Stack using its
-Cloudflare-based architecture.
-
-For product launch phases (closed beta waitlist, public beta, full launch), see
-the [Launch Checklist](./launch-checklist.md).
+Infrastructure steps for deploying Epic Startup. For the full per-app variable
+tables, Wrangler secrets, and product launch phases, see
+[Launch Checklist](./launch-checklist.md).
 
 ## Overview
 
 - **Main App & Admin App**: Cloudflare Workers with Cloudflare D1
-- **Marketing Site & Tenant Sites**: Cloudflare Pages
-- **CMS**: Vercel (using Turso + R2 S3)
-- **Tenant-API**: US on Cloudflare Containers; KSA on OCI Ampere VMs with
-  per-org SQLite
+- **Marketing Site & Tenant Sites**: Cloudflare Workers (static assets)
+- **CMS**: Vercel (Turso + R2 S3)
+- **Tenant-API**: US on Cloudflare Workers + Durable Objects; KSA on OCI
 - **Jobs Cron**: Cloudflare Workers
 
 ## Prerequisites
 
-- [ ] Node.js 22.15.0+ and npm 10.9.0+ installed
-- [ ] Cloudflare Account with Workers, Pages, D1, and R2 enabled
-- [ ] Wrangler CLI installed and authenticated (`npx wrangler login`)
-- [ ] OCI (Oracle Cloud) account for tenant-api
-- [ ] Vercel account for CMS
+- [ ] Node.js 22.18.0+ and npm 10.9.0+ installed
+- [ ] Cloudflare account with Workers, D1, KV, and R2 enabled
+- [ ] Wrangler CLI authenticated (`npx wrangler login`)
+- [ ] GitHub repo with Actions enabled
 
-## Step 1: Create Cloudflare D1 Databases
-
-- [ ] Create the control plane database for production and staging
-  ```bash
-  npx wrangler d1 create epic-startup-db
-  npx wrangler d1 create epic-startup-staging-db
-  ```
-- [ ] Update `wrangler.jsonc` files with the generated database IDs.
-
-## Step 2: Set Environment Secrets
-
-Use `wrangler secret put` to configure necessary secrets for your workers (e.g.,
-`SESSION_SECRET`, `INTERNAL_COMMAND_TOKEN`).
+## Step 1 — Run launch setup
 
 ```bash
+npm run launch:setup
+```
+
+This writes `launch.config.json` (gitignored), optionally creates Cloudflare
+resources, and prints `gh variable set` / `wrangler secret put` commands.
+
+Or copy `launch.config.example.json` → `launch.config.json` and fill in IDs
+manually.
+
+## Step 2 — GitHub Actions configuration
+
+**Secrets** (required):
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+**Variables** — binding IDs and public URLs. See
+[Launch Checklist → GitHub Variables](./launch-checklist.md#github-actions--variables-bindings--urls).
+
+Minimum to deploy App:
+
+```
+APP_D1_DATABASE_ID
+APP_KV_NAMESPACE_ID
+APP_BASE_URL
+ADMIN_BASE_URL
+ADMIN_D1_DATABASE_ID
+ADMIN_KV_NAMESPACE_ID
+```
+
+Repeat with `_STAGING` suffixes for the `dev` branch.
+
+Apply with the `gh` CLI or the GitHub UI:
+
+```bash
+gh variable set APP_D1_DATABASE_ID --body "<uuid-from-wrangler-d1-create>"
+```
+
+## Step 3 — Create Cloudflare resources
+
+If you skipped resource creation in `launch:setup`:
+
+```bash
+cd apps/app
+npx wrangler d1 create epic-startup-db
+npx wrangler kv namespace create epic-startup-cache
+
+cd ../web
+npx wrangler d1 create epic-startup-web-db
+npx wrangler r2 bucket create epic-startup-media
+```
+
+Copy the generated IDs into GitHub Variables (not into committed wrangler
+files).
+
+## Step 4 — Wrangler secrets
+
+Set secrets on each Worker once. Never commit values.
+
+```bash
+cd apps/app
 npx wrangler secret put SESSION_SECRET
+npx wrangler secret put INTERNAL_COMMAND_TOKEN
+npx wrangler secret put LAUNCH_STATUS
+# See docs/launch-checklist.md for the full list per app
 ```
 
-## Step 3: Deploy Cloudflare Workers & Pages
+## Step 5 — Deploy
 
-Deploy the App and Admin using Wrangler:
+Push to `main` (production) or `dev` (staging). CI:
 
-```bash
-npm run build
-cd apps/app && npx wrangler deploy
-cd ../admin && npx wrangler deploy
-```
-
-Deploy the Marketing and Tenant Sites to Cloudflare Pages:
-
-```bash
-cd apps/web && npx wrangler pages deploy ./dist
-cd ../sites && npx wrangler pages deploy ./dist
-```
-
-## Step 4: Deploy Tenant-API (dual region)
-
-### US — Cloudflare Worker + Durable Objects
-
-- [ ] Enable Durable Objects on your Cloudflare account.
-- [ ] Set Wrangler secrets on `epic-startup-tenant-api-us` (see
-      `apps/tenant-api/wrangler.jsonc` comments).
-- [ ] Set `TENANT_API_URL` GitHub variable for CI health checks.
-- [ ] Push to `main`/`dev` — CI runs `deploy-tenant-api-us-cf` automatically.
+1. Runs `scripts/patch-wrangler.mjs` — injects GitHub Variables into
+   `wrangler.deploy.jsonc` / `wrangler.deploy.toml`
+2. Runs `wrangler deploy --config wrangler.deploy.*`
 
 Manual deploy:
 
 ```bash
-cd apps/tenant-api
-npm run deploy:cf
+node scripts/patch-wrangler.mjs --app app --env production
+cd apps/app && npx wrangler deploy --config wrangler.deploy.jsonc
 ```
 
-### KSA — OCI (required for Saudi residency)
+## Step 6 — Tenant API
 
-- [ ] Build the `linux/arm64` image for tenant-api (CI does this on push).
-- [ ] SSH into your OCI VM in Riyadh and pull/run the image mapping the
-      `/data/tenants` volume.
-- [ ] Set `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_KEY`, and `TENANT_API_URL_KSA`
-      for CI deploy + health checks.
+### US (Cloudflare)
 
-### Verify both regions
+- [ ] Enable Durable Objects
+- [ ] Set `TENANT_API_US_WORKER_NAME` GitHub Variable
+- [ ] Set tenant-api Wrangler secrets (`JWT_SECRET`, `AUTH_HMAC_SECRET`, etc.)
+- [ ] Set `TENANT_API_URL` for CI health checks
 
-- [ ] `curl $TENANT_API_URL/health` → `"region":"us"`
-- [ ] `curl $TENANT_API_URL_KSA/health` → `"region":"ksa"`
+### KSA (OCI)
 
-## Step 5: Test & Verify
+- [ ] OCI VM + `/data/tenants` volume
+- [ ] `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_KEY`, `TENANT_API_URL_KSA`
 
-- [ ] Ensure all health checks return 200 OK.
-- [ ] Verify D1 migrations have run successfully.
-- [ ] Check Cloudflare Workers logs using `npx wrangler tail`.
+## Step 7 — Verify
+
+Health endpoints (liveness — expect HTTP 200 and `"status":"ok"`):
+
+| App        | Endpoint                           |
+| ---------- | ---------------------------------- |
+| App        | `GET /api/health`                  |
+| Admin      | `GET /api/health`                  |
+| Web        | `GET /api/health`                  |
+| Sites      | `GET /api/health`                  |
+| Jobs cron  | `GET /api/health`                  |
+| Tenant API | `GET /api/health` or `GET /health` |
+
+Deep checks (App/Admin only — D1 + self-reachability):
+`GET /resources/healthcheck`
+
+- [ ] `curl -fsS $APP_BASE_URL/api/health`
+- [ ] `curl -fsS $ADMIN_BASE_URL/api/health`
+- [ ] `curl -fsS https://<marketing-host>/api/health`
+- [ ] `curl -fsS https://<tenant-site-host>/api/health`
+- [ ] `curl -fsS https://jobs.<apex>/api/health`
+- [ ] `curl -fsS $TENANT_API_URL/api/health` → `"region":"us"`
+- [ ] `curl -fsS $TENANT_API_URL_KSA/api/health` → `"region":"ksa"` (if KSA
+      deployed)
+- [ ] Staging (flat hostnames): `curl -fsS $APP_BASE_URL_STAGING/api/health`,
+      etc. — see [ADR 046](./decisions/046-staging-hostnames-and-cookies.md)
+- [ ] App signup smoke test
+- [ ] D1 migrations applied (`npm run db:migrate:deploy`)
 
 ## Troubleshooting
 
-- **Database Errors**: Verify D1 binding IDs match your `wrangler.jsonc`.
-- **Tenant-API Issues**: Check OCI block volume permissions and `DATA_REGION`
-  environment variables.
+- **Binding errors**: Check GitHub Variables match `wrangler d1 list` /
+  `wrangler kv namespace list`
+- **Dashboard values revert**: Expected — CI is source of truth for patched keys
+- **Database errors**: `APP_D1_DATABASE_ID` must match the D1 database in your
+  account
+
+## Related
+
+- [Launch Checklist](./launch-checklist.md) — complete reference
+- [ADR 046 — Staging hostnames and cookies](./decisions/046-staging-hostnames-and-cookies.md)
+- [Deployment](./deployment.md) — architecture details
+- [Secrets](./secrets.md)
