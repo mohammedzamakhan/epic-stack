@@ -41,7 +41,9 @@ function parseArgs(argv) {
 		else if (arg === '--env') args.env = argv[++i]
 		else if (arg === '--require-bindings') args.requireBindings = true
 		else if (arg === '--help' || arg === '-h') {
-			console.log(`Usage: node scripts/patch-wrangler.mjs --app <${Object.keys(APPS).join('|')}> [--env production|staging] [--require-bindings]`)
+			console.log(
+				`Usage: node scripts/patch-wrangler.mjs --app <${Object.keys(APPS).join('|')}> [--env production|staging|preview] [--require-bindings]`,
+			)
 			process.exit(0)
 		}
 	}
@@ -49,8 +51,8 @@ function parseArgs(argv) {
 		console.error(`--app is required (${Object.keys(APPS).join(', ')})`)
 		process.exit(1)
 	}
-	if (!['production', 'staging'].includes(args.env)) {
-		console.error('--env must be production or staging')
+	if (!['production', 'staging', 'preview'].includes(args.env)) {
+		console.error('--env must be production, staging, or preview')
 		process.exit(1)
 	}
 	return args
@@ -69,6 +71,18 @@ function loadLaunchConfig() {
 
 function envSuffix(deployEnv) {
 	return deployEnv === 'staging' ? '_STAGING' : ''
+}
+
+/** Preview PR deploys reuse production bindings (D1/R2) on a separate worker name. */
+function bindingEnvKey(deployEnv) {
+	return deployEnv === 'staging' ? 'staging' : 'production'
+}
+
+function previewWebWorkerName(launchConfig) {
+	return (
+		readEnv('WEB_WORKER_NAME_PREVIEW', launchConfig, 'bindings.preview.web.worker_name') ||
+		'epic-startup-preview'
+	)
 }
 
 function hostnameFromUrl(url) {
@@ -133,12 +147,15 @@ function applyZoneRoutes(target, routes, patches, label) {
 
 /**
  * @param {string} appKey
- * @param {'production' | 'staging'} deployEnv
+ * @param {'production' | 'staging' | 'preview'} deployEnv
  * @param {Record<string, unknown>} target
  * @param {Record<string, unknown> | null} launchConfig
  * @param {string[]} patches
  */
 function patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches) {
+	// PR preview workers deploy to *.workers.dev only — no zone routes.
+	if (deployEnv === 'preview') return
+
 	const suffix = envSuffix(deployEnv)
 	const rootApp = readRootApp(suffix, launchConfig)
 	if (!rootApp) return
@@ -568,7 +585,7 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 	const outputPath = join(rootDir, meta.dir, 'wrangler.deploy.toml')
 	const suffix = envSuffix(deployEnv)
 	let content = readFileSync(sourcePath, 'utf8')
-	const bindingEnv = deployEnv === 'staging' ? 'staging' : 'production'
+	const bindingEnv = bindingEnvKey(deployEnv)
 	const patches = []
 	const missing = []
 
@@ -633,13 +650,25 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			)
 		}
 
-		const workerName = readEnv(
-			`WEB_WORKER_NAME${suffix}`,
-			launchConfig,
-			`bindings.${bindingEnv}.web.worker_name`,
-		)
-		if (workerName) {
-			applyToml(/^name\s*=\s*"[^"]+"/m, `name = "${workerName}"`, `name ← WEB_WORKER_NAME${suffix}`)
+		if (deployEnv === 'preview') {
+			applyToml(
+				/^name\s*=\s*"[^"]+"/m,
+				`name = "${previewWebWorkerName(launchConfig)}"`,
+				'name ← WEB_WORKER_NAME_PREVIEW',
+			)
+		} else {
+			const workerName = readEnv(
+				`WEB_WORKER_NAME${suffix}`,
+				launchConfig,
+				`bindings.${bindingEnv}.web.worker_name`,
+			)
+			if (workerName) {
+				applyToml(
+					/^name\s*=\s*"[^"]+"/m,
+					`name = "${workerName}"`,
+					`name ← WEB_WORKER_NAME${suffix}`,
+				)
+			}
 		}
 	}
 
@@ -744,7 +773,7 @@ function patchAstroTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 	const config = JSON.parse(readFileSync(astroBuiltWranglerPath(appKey), 'utf8'))
 	const outputPath = join(rootDir, meta.dir, 'dist/server/wrangler.deploy.json')
 	const suffix = envSuffix(deployEnv)
-	const bindingEnv = deployEnv === 'staging' ? 'staging' : 'production'
+	const bindingEnv = bindingEnvKey(deployEnv)
 	const patches = []
 	const missing = []
 
@@ -788,11 +817,16 @@ function patchAstroTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 		)
 		patchUrlVar('vars.PUBLIC_ROOT_APP', 'ROOT_APP', 'root_app')
 		patchUrlVar('vars.PUBLIC_APP_URL', 'PUBLIC_APP_URL', 'public_app_url')
-		patch(
-			'name',
-			[`WEB_WORKER_NAME${suffix}`, 'WEB_WORKER_NAME'],
-			`bindings.${bindingEnv}.web.worker_name`,
-		)
+		if (deployEnv === 'preview') {
+			setPath(config, 'name', previewWebWorkerName(launchConfig))
+			patches.push('name ← WEB_WORKER_NAME_PREVIEW')
+		} else {
+			patch(
+				'name',
+				[`WEB_WORKER_NAME${suffix}`, 'WEB_WORKER_NAME'],
+				`bindings.${bindingEnv}.web.worker_name`,
+			)
+		}
 	}
 
 	if (appKey === 'sites') {

@@ -27,6 +27,11 @@
 				"worker_name": "epic-startup-tenant-api-us"
 			}
 		},
+		"preview": {
+			"web": {
+				"worker_name": "epic-startup-preview"
+			}
+		},
 		"staging": {
 			"app": {
 				"worker_name": "epic-startup-app-staging",
