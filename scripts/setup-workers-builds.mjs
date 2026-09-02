@@ -36,6 +36,19 @@ function log(message) {
 	console.log(message)
 }
 
+/** Strip values that look like API tokens or secrets from a string. */
+function redactSecrets(message) {
+	// Cloudflare API tokens are 40-char alphanumeric; redact any long hex-ish runs.
+	return String(message).replace(
+		/[A-Za-z0-9_-]{32,}/g,
+		(match) =>
+			// Keep UUIDs (contain dashes) and known safe patterns; redact the rest.
+			/^[0-9a-f]{8}-/.test(match)
+				? match
+				: `${match.slice(0, 4)}…[REDACTED]`,
+	)
+}
+
 function parseArgs(argv) {
 	const args = {
 		app: null,
@@ -557,7 +570,7 @@ const isMain =
 
 if (isMain) {
 	main().catch((error) => {
-		console.error(error.message)
+		console.error(redactSecrets(error.message))
 		process.exit(1)
 	})
 }

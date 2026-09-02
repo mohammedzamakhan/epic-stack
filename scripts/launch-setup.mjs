@@ -50,6 +50,17 @@ function log(message, color = 'reset') {
 	console.log(`${colors[color]}${message}${colors.reset}`)
 }
 
+/** Strip values that look like API tokens or secrets from a string. */
+function redactSecrets(message) {
+	return String(message).replace(
+		/[A-Za-z0-9_-]{32,}/g,
+		(match) =>
+			/^[0-9a-f]{8}-/.test(match)
+				? match
+				: `${match.slice(0, 4)}…[REDACTED]`,
+	)
+}
+
 function randomHex(bytes) {
 	return crypto.randomBytes(bytes).toString('hex')
 }
@@ -309,7 +320,10 @@ async function setupWorkersBuildsAfterDeploy(config, inferred, deployedEnvs) {
 		if (openConfiguredSettings) openUrl(buildsSettingsUrl)
 		return true
 	} catch (error) {
-		log(`\nWorkers Builds setup could not finish: ${error.message}`, 'yellow')
+		log(
+			`\nWorkers Builds setup could not finish: ${redactSecrets(error.message)}`,
+			'yellow',
+		)
 		log(`Settings: ${buildsSettingsUrl}`, 'gray')
 		log('Retry with: npm run launch:workers-builds', 'gray')
 		return false
