@@ -407,8 +407,17 @@ function getGhVariables(config) {
 	]
 }
 
-function printGhCommands(config) {
+function ghRepoFlag(repo) {
+	return repo?.nameWithOwner ? ` --repo ${repo.nameWithOwner}` : ''
+}
+
+function printGhCommands(config, repo) {
 	const variables = getGhVariables(config)
+	const repoFlag = ghRepoFlag(repo)
+
+	if (repo?.nameWithOwner) {
+		log(`\nTarget GitHub repository: ${repo.nameWithOwner}`, 'gray')
+	}
 
 	log(
 		'\n📦 GitHub repository Variables (Settings → Secrets and variables → Actions → Variables)',
@@ -416,14 +425,14 @@ function printGhCommands(config) {
 	)
 	for (const [name, value] of variables) {
 		if (!value) continue
-		console.log(`gh variable set ${name} --body "${value}"`)
+		console.log(`gh variable set ${name} --body "${value}"${repoFlag}`)
 	}
 
 	log('\n🔐 GitHub repository Secrets (set manually — do not commit values)', 'bright')
-	console.log('gh secret set CLOUDFLARE_API_TOKEN')
-	console.log('gh secret set CLOUDFLARE_ACCOUNT_ID')
-	console.log('# Optional OCI deploy: gh secret set OCI_TENANT_SSH_KEY')
-	console.log('# Optional private GHCR pulls: gh secret set GHCR_PULL_TOKEN')
+	console.log(`gh secret set CLOUDFLARE_API_TOKEN${repoFlag}`)
+	console.log(`gh secret set CLOUDFLARE_ACCOUNT_ID${repoFlag}`)
+	console.log(`# Optional OCI deploy: gh secret set OCI_TENANT_SSH_KEY${repoFlag}`)
+	console.log(`# Optional private GHCR pulls: gh secret set GHCR_PULL_TOKEN${repoFlag}`)
 }
 
 function printWranglerSecrets(secrets) {
@@ -744,19 +753,30 @@ async function main() {
 		applyRemoteD1Migrations(config)
 	}
 
-	printGhCommands(config)
+	printGhCommands(config, inferred.githubRepo)
 
 	if (applyGh) {
-		log('\nApplying GitHub Variables…', 'yellow')
-		for (const [name, value] of getGhVariables(config)) {
-			if (!value) continue
-			try {
-				execSync(`gh variable set ${name} --body "${value}"`, {
-					cwd: rootDir,
-					stdio: 'inherit',
-				})
-			} catch {
-				log(`Failed to set ${name}`, 'yellow')
+		if (!inferred.githubRepo?.nameWithOwner) {
+			log(
+				'\nSkipping GitHub Variables — could not detect repository from git origin.',
+				'yellow',
+			)
+		} else {
+			log(
+				`\nApplying GitHub Variables to ${inferred.githubRepo.nameWithOwner}…`,
+				'yellow',
+			)
+			const repoFlag = ghRepoFlag(inferred.githubRepo)
+			for (const [name, value] of getGhVariables(config)) {
+				if (!value) continue
+				try {
+					execSync(`gh variable set ${name} --body "${value}"${repoFlag}`, {
+						cwd: rootDir,
+						stdio: 'inherit',
+					})
+				} catch {
+					log(`Failed to set ${name}`, 'yellow')
+				}
 			}
 		}
 	}
@@ -794,7 +814,7 @@ async function main() {
 	}
 
 	printWranglerSecrets(secrets)
-	await setupDeploymentPages(inferred.githubRepoUrl ?? '')
+	await setupDeploymentPages(inferred.githubRepo?.url ?? '')
 
 	log('\nNext steps:', 'bright')
 	if (inferred.accountId) {

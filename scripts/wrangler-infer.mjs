@@ -208,14 +208,56 @@ function inferWorkerNames(rootDir) {
 	return { production, staging }
 }
 
-function tryGhRepoUrl(rootDir) {
-	const result = spawnSync('gh', ['repo', 'view', '--json', 'url', '-q', '.url'], {
+function parseGitHubRemoteUrl(remoteUrl) {
+	const trimmed = remoteUrl.trim()
+	const patterns = [
+		/^git@github\.com:([^/]+)\/(.+?)(?:\.git)?$/,
+		/^https:\/\/github\.com\/([^/]+)\/(.+?)(?:\.git)?$/,
+		/^ssh:\/\/git@github\.com\/([^/]+)\/(.+?)(?:\.git)?$/,
+	]
+	for (const pattern of patterns) {
+		const match = trimmed.match(pattern)
+		if (match) {
+			return `${match[1]}/${match[2]}`
+		}
+	}
+	return null
+}
+
+function tryGitOriginRepo(rootDir) {
+	const result = spawnSync('git', ['remote', 'get-url', 'origin'], {
 		cwd: rootDir,
 		encoding: 'utf8',
 		stdio: ['ignore', 'pipe', 'pipe'],
 	})
 	if (result.status !== 0) return null
-	return result.stdout.trim() || null
+	const nameWithOwner = parseGitHubRemoteUrl(result.stdout)
+	if (!nameWithOwner) return null
+	return {
+		nameWithOwner,
+		url: `https://github.com/${nameWithOwner}`,
+	}
+}
+
+function tryGhRepoView(rootDir) {
+	const result = spawnSync('gh', ['repo', 'view', '--json', 'url,nameWithOwner'], {
+		cwd: rootDir,
+		encoding: 'utf8',
+		stdio: ['ignore', 'pipe', 'pipe'],
+	})
+	if (result.status !== 0) return null
+	try {
+		const data = JSON.parse(result.stdout)
+		if (!data.nameWithOwner || !data.url) return null
+		return { nameWithOwner: data.nameWithOwner, url: data.url }
+	} catch {
+		return null
+	}
+}
+
+/** Prefer git `origin` — `gh repo view` alone can target a stale default repo. */
+function resolveGitHubRepo(rootDir) {
+	return tryGitOriginRepo(rootDir) ?? tryGhRepoView(rootDir)
 }
 
 /**
@@ -225,7 +267,7 @@ export async function inferLaunchConfig(rootDir) {
 	const result = {
 		wranglerLoggedIn: false,
 		accountId: null,
-		githubRepoUrl: tryGhRepoUrl(rootDir),
+		githubRepo: resolveGitHubRepo(rootDir),
 		bindings: {
 			production: { app: {}, admin: {}, web: {}, sites: {}, jobs_cron: {}, tenant_api: {} },
 			staging: { app: {}, admin: {}, web: {}, sites: {}, jobs_cron: {}, tenant_api: {} },
@@ -342,6 +384,9 @@ export async function inferLaunchConfig(rootDir) {
 	}
 	if (result.urls.jobs_cron_worker_url) {
 		result.notes.push(`Jobs cron URL: ${result.urls.jobs_cron_worker_url}`)
+	}
+	if (result.githubRepo?.nameWithOwner) {
+		result.notes.push(`GitHub repo (origin): ${result.githubRepo.nameWithOwner}`)
 	}
 
 	return result

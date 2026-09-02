@@ -37,7 +37,8 @@ npm run launch:setup
 
 When logged in via `npx wrangler login`, setup auto-detects D1/KV/R2 IDs (by
 `epic-startup-*` resource names), Worker names from wrangler configs, `ROOT_APP`
-from `.env`, and your GitHub repo URL via `gh repo view`.
+from `.env`, and your GitHub repo from `git remote get-url origin` (falls back
+to `gh repo view` when origin is not GitHub).
 
 Cloudflare **resource names** (D1, KV, R2) and **Worker names** use the
 `epic-startup-*` prefix in the template. `npm run setup` replaces `epic-startup`
