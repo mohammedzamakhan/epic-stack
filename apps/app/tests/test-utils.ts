@@ -10,6 +10,7 @@ import {
 	Session,
 	User,
 	UserOrganization,
+	Verification,
 	_RoleToUser,
 } from '@repo/database'
 import { getSessionExpirationDate } from '#app/utils/auth.server.ts'
@@ -200,4 +201,38 @@ export async function createTestNote(
 		.returning()
 	if (!note) throw new Error('Failed to create test note')
 	return note
+}
+
+export async function enableTwoFactor(userId: string) {
+	const [verification] = await db
+		.insert(Verification)
+		.values({
+			type: '2fa',
+			target: userId,
+			secret: 'two-factor-otp-secret',
+			algorithm: 'SHA-1',
+			digits: 6,
+			period: 30,
+			charSet: '0123456789',
+			expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+		})
+		.returning()
+	return verification
+}
+
+export async function addOrganizationMember(
+	userId: string,
+	organizationId: string,
+	roleId: string = 'org_role_member',
+) {
+	const [member] = await db
+		.insert(UserOrganization)
+		.values({
+			userId,
+			organizationId,
+			organizationRoleId: roleId,
+			active: true,
+		})
+		.returning()
+	return member
 }

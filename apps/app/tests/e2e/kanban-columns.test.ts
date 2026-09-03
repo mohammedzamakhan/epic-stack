@@ -1,4 +1,5 @@
 import {
+	and,
 	db,
 	eq,
 	OrganizationNote,
@@ -67,7 +68,12 @@ test.describe('Kanban Status Columns Lifecycle & Customization', () => {
 		const [dbStatus] = await db
 			.select()
 			.from(OrganizationNoteStatus)
-			.where(eq(OrganizationNoteStatus.organizationId, org.id))
+			.where(
+				and(
+					eq(OrganizationNoteStatus.organizationId, org.id),
+					eq(OrganizationNoteStatus.name, columnName),
+				),
+			)
 			.limit(1)
 
 		expect(dbStatus).toBeTruthy()

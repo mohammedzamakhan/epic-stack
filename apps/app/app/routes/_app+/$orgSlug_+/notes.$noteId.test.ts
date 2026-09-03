@@ -94,7 +94,7 @@ describe('notes.$noteId route integration', () => {
 				expect.fail('Expected loader to deny outsider')
 			} catch (error: any) {
 				expect(error).toBeInstanceOf(Response)
-				expect([401, 403, 404]).toContain(error.status)
+				expect([403, 404]).toContain(error.status)
 			}
 		})
 
@@ -130,7 +130,7 @@ describe('notes.$noteId route integration', () => {
 				expect.fail('Expected loader to deny guest access to private note')
 			} catch (error: any) {
 				expect(error).toBeInstanceOf(Response)
-				expect([401, 403]).toContain(error.status)
+				expect(error.status).toBe(403)
 			}
 		})
 	})
@@ -229,7 +229,11 @@ describe('notes.$noteId route integration', () => {
 					context: {},
 				} as any)) as Response
 			} catch (thrown: any) {
-				response = thrown
+				if (thrown instanceof Response) {
+					response = thrown
+				} else {
+					throw thrown
+				}
 			}
 
 			expect(response.status).toBe(302)

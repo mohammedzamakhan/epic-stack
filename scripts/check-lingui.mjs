@@ -66,14 +66,29 @@ function checkUnstagedCatalogFiles(appRelativeDir) {
 			return [] // Not in a git commit context or nothing staged
 		}
 
-		// Check if any .po files in this app have unstaged changes
-		const unstagedDiff = execSync('git diff --name-only', {
+		// Check if any .po files in this app have unstaged or untracked changes
+		const unstagedModified = execSync('git diff --name-only', {
 			cwd: rootDir,
 			encoding: 'utf8',
 			stdio: ['ignore', 'pipe', 'ignore'],
 		})
 			.split('\n')
 			.filter(Boolean)
+
+		const untrackedFiles = execSync(
+			'git ls-files --others --exclude-standard',
+			{
+				cwd: rootDir,
+				encoding: 'utf8',
+				stdio: ['ignore', 'pipe', 'ignore'],
+			},
+		)
+			.split('\n')
+			.filter(Boolean)
+
+		const unstagedDiff = Array.from(
+			new Set([...unstagedModified, ...untrackedFiles]),
+		)
 
 		const unstagedCatalogs = unstagedDiff.filter(
 			(file) => file.startsWith(appRelativeDir) && file.endsWith('.po'),

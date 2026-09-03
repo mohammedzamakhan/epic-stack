@@ -1,6 +1,9 @@
-import { db, Verification } from '@repo/database'
 import { describe, expect, it } from 'vitest'
-import { createTestUser, getResponseStatus } from '#tests/test-utils.ts'
+import {
+	createTestUser,
+	enableTwoFactor,
+	getResponseStatus,
+} from '#tests/test-utils.ts'
 import { action } from './auth.login.ts'
 
 describe('api/auth/login integration', () => {
@@ -80,17 +83,8 @@ describe('api/auth/login integration', () => {
 		const password = 'TwoFactorPass123!'
 		const user = await createTestUser({ password })
 
-		// Enable 2FA in Verification table
-		await db.insert(Verification).values({
-			type: '2fa',
-			target: user.id,
-			secret: 'two-factor-otp-secret',
-			algorithm: 'SHA-1',
-			digits: 6,
-			period: 30,
-			charSet: '0123456789',
-			expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-		})
+		// Enable 2FA via test helper
+		await enableTwoFactor(user.id)
 
 		const formData = new FormData()
 		formData.append('username', user.username)

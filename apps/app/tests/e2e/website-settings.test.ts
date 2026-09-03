@@ -93,6 +93,14 @@ test.describe('Website General Settings & Site Locales', () => {
 		})
 		await expect(saveLanguagesBtn).toBeVisible()
 
+		// Select Arabic as an additional supported language
+		const languagesDropdownTrigger = page
+			.locator('button[aria-labelledby*="locales-label"]')
+			.first()
+		await languagesDropdownTrigger.click()
+		await page.getByRole('menuitemcheckbox', { name: /Arabic/i }).click()
+		await page.keyboard.press('Escape')
+
 		// Click save languages
 		await Promise.all([
 			page.waitForResponse(
@@ -102,7 +110,10 @@ test.describe('Website General Settings & Site Locales', () => {
 			saveLanguagesBtn.click(),
 		])
 
-		// Verify database contains defaultLocale set
+		await page.reload()
+		await page.waitForLoadState('networkidle')
+
+		// Verify database contains exact persisted language values
 		const [dbOrg] = await db
 			.select({
 				siteDefaultLocale: Organization.siteDefaultLocale,
@@ -113,6 +124,7 @@ test.describe('Website General Settings & Site Locales', () => {
 			.limit(1)
 
 		expect(dbOrg).toBeTruthy()
-		expect(dbOrg?.siteDefaultLocale).toBeTruthy()
+		expect(dbOrg?.siteDefaultLocale).toBe('en')
+		expect(JSON.parse(dbOrg?.siteLocales ?? '[]')).toEqual(['en', 'ar'])
 	})
 })

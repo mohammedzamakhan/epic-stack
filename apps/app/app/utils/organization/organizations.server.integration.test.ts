@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { db, eq, Organization, UserOrganization } from '@repo/database'
 import { describe, expect, it } from 'vitest'
 import {
+	addOrganizationMember,
 	createAuthenticatedRequest,
 	createTestOrganization,
 	createTestSession,
@@ -169,12 +170,7 @@ describe('organizations.server integration', () => {
 
 		// Create a guest user (level 1)
 		const guest = await createTestUser()
-		await db.insert(UserOrganization).values({
-			userId: guest.id,
-			organizationId: organization.id,
-			organizationRoleId: 'org_role_guest',
-			active: true,
-		})
+		await addOrganizationMember(guest.id, organization.id, 'org_role_guest')
 
 		expect(
 			await userHasOrganizationRole(guest.id, organization.id, 'guest'),

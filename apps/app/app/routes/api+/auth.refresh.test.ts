@@ -104,6 +104,60 @@ describe('api/auth/refresh integration', () => {
 		expect(body.error).toBe('invalid_refresh_token')
 	})
 
+	it('returns 401 when a refresh token is reused after rotation', async () => {
+		const user = await createTestUser()
+		const tokens = await createTokenPair(
+			{
+				id: user.id,
+				email: user.email,
+				username: user.username,
+			},
+			{ userAgent: 'test-agent', ip: '127.0.0.1' },
+		)
+
+		// First use: successfully rotates
+		const firstRequest = new Request('http://localhost:3000/api/auth/refresh', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				refreshToken: tokens.refreshToken,
+				userId: user.id,
+			}),
+		})
+
+		const firstResponse = await action({
+			request: firstRequest,
+			params: {},
+			context: {},
+		} as any)
+
+		expect(getResponseStatus(firstResponse)).toBe(200)
+
+		// Second use: reusing the same original refreshToken should fail
+		const secondRequest = new Request(
+			'http://localhost:3000/api/auth/refresh',
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					refreshToken: tokens.refreshToken,
+					userId: user.id,
+				}),
+			},
+		)
+
+		const secondResponse = await action({
+			request: secondRequest,
+			params: {},
+			context: {},
+		} as any)
+
+		expect(getResponseStatus(secondResponse)).toBe(401)
+		const secondBody = (secondResponse as any).data
+		expect(secondBody.success).toBe(false)
+		expect(secondBody.error).toBe('invalid_refresh_token')
+	})
+
 	it('returns 405 on GET request', async () => {
 		const { loader } = await import('./auth.refresh.ts')
 		const response = await loader()

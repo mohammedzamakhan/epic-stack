@@ -32,11 +32,12 @@ describe('api/auth/verify integration', () => {
 			context: {},
 		} as any)
 
-		const status = getResponseStatus(response)
-		expect([400, 200]).toContain(status)
+		expect(getResponseStatus(response)).toBe(400)
 		const body = (response as any).data
-		// Either verification_failed or form error reply
-		expect(body.data?.verified).not.toBe(true)
+		expect(body.result).toBeDefined()
+		expect(body.result.status).toBe('error')
+		expect(body.result.error?.code).toBeDefined()
+		expect(body.result.error.code).toContain('Invalid code')
 	})
 
 	it('successfully verifies a valid reset-password OTP code', async () => {

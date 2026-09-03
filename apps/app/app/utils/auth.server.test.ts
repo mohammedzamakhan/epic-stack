@@ -245,10 +245,11 @@ describe('auth.server integration', () => {
 
 	describe('signupWithConnection()', () => {
 		it('creates user with provider connection and returns active session', async () => {
-			const email = faker.internet.email().toLowerCase()
-			const username = faker.internet.username().toLowerCase()
+			const uniqueId = `${Date.now()}_${faker.string.alphanumeric(6)}`
+			const email = `test_${uniqueId}@example.com`.toLowerCase()
+			const username = `user_${uniqueId}`.toLowerCase()
 			const name = faker.person.fullName()
-			const providerId = `google-oauth-${Date.now()}-${faker.string.alphanumeric(6)}`
+			const providerId = `google-oauth-${uniqueId}`
 
 			const session = await signupWithConnection({
 				email,

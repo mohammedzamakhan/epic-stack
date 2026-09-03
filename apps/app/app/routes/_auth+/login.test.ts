@@ -4,6 +4,7 @@ import {
 	createAuthenticatedRequest,
 	createTestOrganization,
 	createTestUser,
+	enableTwoFactor,
 	getResponseStatus,
 } from '#tests/test-utils.ts'
 import { action, loader } from './login.tsx'
@@ -230,17 +231,8 @@ describe('login route integration', () => {
 			const password = 'TwoFactorPass123!'
 			const user = await createTestUser({ password })
 
-			// Enable 2FA for this user in Verification table
-			await db.insert(Verification).values({
-				type: '2fa',
-				target: user.id,
-				secret: 'test-otp-secret',
-				algorithm: 'SHA-1',
-				digits: 6,
-				period: 30,
-				charSet: '0123456789',
-				expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-			})
+			// Enable 2FA for this user via test helper
+			await enableTwoFactor(user.id)
 
 			const formData = new FormData()
 			formData.append('username', user.username)

@@ -102,7 +102,7 @@ describe('forgot-password route integration', () => {
 		expect(verification?.type).toBe('reset-password')
 	})
 
-	it('returns fake redirect for non-existent user without creating DB verification', async () => {
+	it('returns fake redirect for non-existent user while still creating a reset-password verification record for non-disclosure', async () => {
 		const nonexistentEmail = `nobody_${Date.now()}@example.com`
 
 		const formData = new FormData()

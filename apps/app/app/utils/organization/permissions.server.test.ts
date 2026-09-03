@@ -1,6 +1,6 @@
-import { db, UserOrganization } from '@repo/database'
 import { describe, expect, it } from 'vitest'
 import {
+	addOrganizationMember,
 	createAuthenticatedRequest,
 	createTestSession,
 	createTestUser,
@@ -50,12 +50,7 @@ describe('organization permissions.server integration', () => {
 		const { organization } = await setupTestOrgWithUser('admin')
 
 		const guest = await createTestUser()
-		await db.insert(UserOrganization).values({
-			userId: guest.id,
-			organizationId: organization.id,
-			organizationRoleId: 'org_role_guest',
-			active: true,
-		})
+		await addOrganizationMember(guest.id, organization.id, 'org_role_guest')
 		const { cookie } = await createTestSession(guest.id)
 
 		const request = createAuthenticatedRequest(

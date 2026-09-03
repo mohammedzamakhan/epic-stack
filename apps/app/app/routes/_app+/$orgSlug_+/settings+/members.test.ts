@@ -6,7 +6,7 @@ import {
 	OrganizationInvitation,
 	UserOrganization,
 } from '@repo/database'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
 	createAuthenticatedRequest,
 	createTestOrganization,
@@ -16,6 +16,22 @@ import {
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
 import { action, loader } from './members.tsx'
+
+vi.mock(
+	'#app/utils/organization/invitation.server.ts',
+	async (importOriginal) => {
+		const actual =
+			await importOriginal<
+				typeof import('#app/utils/organization/invitation.server.ts')
+			>()
+		return {
+			...actual,
+			sendOrganizationInvitationEmail: vi
+				.fn()
+				.mockResolvedValue({ status: 'success' }),
+		}
+	},
+)
 
 describe('settings/members route integration', () => {
 	describe('loader', () => {
@@ -159,17 +175,28 @@ describe('settings/members route integration', () => {
 				memberCookie,
 			)
 
+			let response: Response | undefined
+			let caughtError: any
 			try {
-				const response = (await action({
+				response = (await action({
 					request,
 					params: { orgSlug: organization.slug },
 					context: {},
 				} as any)) as Response
-
-				expect(getResponseStatus(response)).toBe(400)
 			} catch (error: any) {
+				if (error instanceof Response) {
+					caughtError = error
+				} else {
+					throw error
+				}
+			}
+
+			if (caughtError) {
 				// Member might lack DELETE_MEMBER_ANY permission, which is also correct
-				expect([400, 403]).toContain(error.status)
+				expect([400, 403]).toContain(caughtError.status)
+			} else {
+				expect(response).toBeDefined()
+				expect(getResponseStatus(response)).toBe(400)
 			}
 		})
 

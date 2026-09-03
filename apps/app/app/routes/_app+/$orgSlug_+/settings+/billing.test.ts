@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { __setMockLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createAuthenticatedRequest,
@@ -9,6 +9,30 @@ import {
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
 import { action, loader } from './billing.tsx'
+
+vi.mock('#app/utils/payments.server.ts', async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import('#app/utils/payments.server.ts')>()
+	return {
+		...actual,
+		getPlansAndPrices: vi.fn().mockResolvedValue({
+			plans: {
+				base: { id: 'prod_base', name: 'Base' },
+				plus: { id: 'prod_plus', name: 'Plus' },
+			},
+			prices: {
+				base: {
+					monthly: { id: 'price_base_m', unitAmount: 1000, currency: 'usd' },
+					yearly: { id: 'price_base_y', unitAmount: 10000, currency: 'usd' },
+				},
+				plus: {
+					monthly: { id: 'price_plus_m', unitAmount: 2000, currency: 'usd' },
+					yearly: { id: 'price_plus_y', unitAmount: 20000, currency: 'usd' },
+				},
+			},
+		}),
+	}
+})
 
 describe('settings/billing route integration', () => {
 	beforeEach(() => {

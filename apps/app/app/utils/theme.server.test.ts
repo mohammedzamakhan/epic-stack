@@ -36,19 +36,20 @@ describe('theme.server', () => {
 	describe('setTheme', () => {
 		it('serializes light theme with 1 year max-age', () => {
 			const cookie = setTheme('light')
-			expect(cookie).toContain('light')
+			expect(cookie).toContain(`${cookieName}=light`)
 			expect(cookie).toContain('Max-Age=31536000')
 			expect(cookie).toContain('Path=/')
 		})
 
 		it('serializes dark theme with 1 year max-age', () => {
 			const cookie = setTheme('dark')
-			expect(cookie).toContain('dark')
+			expect(cookie).toContain(`${cookieName}=dark`)
 			expect(cookie).toContain('Max-Age=31536000')
 		})
 
 		it('serializes system theme with max-age -1 to clear cookie', () => {
 			const cookie = setTheme('system')
+			expect(cookie).toContain(`${cookieName}=`)
 			expect(cookie).toContain('Max-Age=-1')
 		})
 	})
