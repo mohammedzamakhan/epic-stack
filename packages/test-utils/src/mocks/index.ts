@@ -5,10 +5,12 @@ import { handlers as pwnedPasswordApiHandlers } from './pwned-passwords.ts'
 import { handlers as ociEmailHandlers } from './oci-email.ts'
 import { handlers as resendHandlers } from './resend.ts'
 import { handlers as stripeHandlers } from './stripe.ts'
+import { handlers as tenantApiHandlers } from './tenant-api.ts'
 import { handlers as tigrisHandlers } from './tigris.ts'
 
 export const server = setupServer(
 	...stripeHandlers, // Put Stripe handlers first so they take precedence
+	...tenantApiHandlers,
 	...resendHandlers,
 	...ociEmailHandlers,
 	...githubHandlers,

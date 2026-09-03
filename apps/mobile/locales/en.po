@@ -18,197 +18,197 @@ msgid "{orgName} is now your default organization"
 msgstr "{orgName} is now your default organization"
 
 #. placeholder {0}: organizations.length - 3
-#: app/(dashboard)/index.tsx:167
+#: app/(dashboard)/index.tsx:172
 msgid "+{0} more organizations"
 msgstr "+{0} more organizations"
 
-#: app/(auth)/verify-code.tsx:196
+#: app/(auth)/verify-code.tsx:194
 msgid "ABC123"
 msgstr "ABC123"
 
-#: app/(dashboard)/settings/index.tsx:126
+#: app/(dashboard)/settings/index.tsx:125
 msgid "About"
 msgstr "About"
 
-#: app/(dashboard)/settings/index.tsx:98
+#: app/(dashboard)/settings/index.tsx:97
 msgid "Account"
 msgstr "Account"
 
-#: app/(auth)/sign-up.tsx:294
+#: app/(auth)/sign-up.tsx:293
 msgid "Account created!"
 msgstr "Account created!"
 
-#: app/(auth)/sign-in.tsx:170
+#: app/(auth)/sign-in.tsx:169
 msgid "Account Suspended"
 msgstr "Account Suspended"
 
-#: app/(dashboard)/settings/security.tsx:51
-#: app/(dashboard)/settings/security.tsx:92
+#: app/(dashboard)/settings/security.tsx:55
+#: app/(dashboard)/settings/security.tsx:96
 msgid "Active Sessions"
 msgstr "Active Sessions"
 
-#: app/(dashboard)/settings/security.tsx:77
+#: app/(dashboard)/settings/security.tsx:81
 msgid "Add an extra layer of security"
 msgstr "Add an extra layer of security"
 
-#: components/organization-switcher.tsx:187
+#: components/organization-switcher.tsx:188
 msgid "Add organization"
 msgstr "Add organization"
 
-#: app/(dashboard)/organizations.tsx:99
+#: app/(dashboard)/organizations.tsx:102
 msgid "Add Organization"
 msgstr "Add Organization"
 
-#: app/(auth)/sign-up.tsx:272
-#: app/(auth)/verify-code.tsx:267
+#: app/(auth)/sign-up.tsx:271
+#: app/(auth)/verify-code.tsx:265
 msgid "Already have an account?"
 msgstr "Already have an account?"
 
-#: app/(auth)/sign-up.tsx:258
+#: app/(auth)/sign-up.tsx:257
 msgid "and"
 msgstr "and"
 
-#: app/(dashboard)/settings/index.tsx:120
+#: app/(dashboard)/settings/index.tsx:119
 msgid "App"
 msgstr "App"
 
-#: app/(dashboard)/settings/index.tsx:52
+#: app/(dashboard)/settings/index.tsx:51
 msgid "Are you sure you want to sign out?"
 msgstr "Are you sure you want to sign out?"
 
-#: app/(dashboard)/settings/security.tsx:63
+#: app/(dashboard)/settings/security.tsx:67
 msgid "Authentication"
 msgstr "Authentication"
 
-#: app/(auth)/sign-in.tsx:127
-#: app/(auth)/sign-up.tsx:130
+#: app/(auth)/sign-in.tsx:126
+#: app/(auth)/sign-up.tsx:129
 msgid "Authentication Error"
 msgstr "Authentication Error"
 
-#: app/(auth)/verify-code.tsx:259
+#: app/(auth)/verify-code.tsx:257
 msgid "Back to sign up"
 msgstr "Back to sign up"
 
-#: app/(dashboard)/create-organization.tsx:174
+#: app/(dashboard)/create-organization.tsx:176
 msgid "Brief description of your organization"
 msgstr "Brief description of your organization"
 
-#: app/(auth)/landing.tsx:41
+#: app/(auth)/landing.tsx:40
 msgid "Build amazing apps ⚡"
 msgstr "Build amazing apps ⚡"
 
-#: app/(auth)/sign-up.tsx:251
+#: app/(auth)/sign-up.tsx:250
 msgid "By signing up, you agree to our"
 msgstr "By signing up, you agree to our"
 
-#: app/(dashboard)/create-organization.tsx:220
+#: app/(dashboard)/create-organization.tsx:222
 #: app/(dashboard)/organizations.tsx:35
-#: app/(dashboard)/settings/index.tsx:53
+#: app/(dashboard)/settings/index.tsx:52
 msgid "Cancel"
 msgstr "Cancel"
 
-#: app/(dashboard)/settings/security.tsx:35
-#: app/(dashboard)/settings/security.tsx:69
+#: app/(dashboard)/settings/security.tsx:39
+#: app/(dashboard)/settings/security.tsx:73
 msgid "Change Password"
 msgstr "Change Password"
 
-#: app/(auth)/sign-up.tsx:81
+#: app/(auth)/sign-up.tsx:80
 msgid "Check your email"
 msgstr "Check your email"
 
-#: app/(auth)/verify-code.tsx:128
+#: app/(auth)/verify-code.tsx:126
 msgid "Code Sent"
 msgstr "Code Sent"
 
-#: app/(auth)/sign-up.tsx:161
+#: app/(auth)/sign-up.tsx:160
 msgid "Complete your signup to join the organization"
 msgstr "Complete your signup to join the organization"
 
-#: app/(auth)/sign-in.tsx:183
-#: app/(auth)/sign-in.tsx:188
-#: app/(auth)/sign-in.tsx:191
+#: app/(auth)/sign-in.tsx:182
+#: app/(auth)/sign-in.tsx:187
+#: app/(auth)/sign-in.tsx:190
 msgid "Contact Support"
 msgstr "Contact Support"
 
-#: components/ui/social-button.tsx:50
+#: components/ui/social-button.tsx:52
 msgid "Continue with GitHub"
 msgstr "Continue with GitHub"
 
-#: components/ui/social-button.tsx:52
+#: components/ui/social-button.tsx:54
 msgid "Continue with Google"
 msgstr "Continue with Google"
 
-#: app/(auth)/sign-in.tsx:336
+#: app/(auth)/sign-in.tsx:335
 msgid "Create account"
 msgstr "Create account"
 
-#: app/(auth)/sign-up.tsx:156
+#: app/(auth)/sign-up.tsx:155
 msgid "Create an account"
 msgstr "Create an account"
 
-#: app/(dashboard)/create-organization.tsx:125
-#: app/(dashboard)/create-organization.tsx:213
+#: app/(dashboard)/create-organization.tsx:124
+#: app/(dashboard)/create-organization.tsx:215
 msgid "Create Organization"
 msgstr "Create Organization"
 
-#: app/(dashboard)/organizations.tsx:114
+#: app/(dashboard)/organizations.tsx:118
 msgid "Create Your First Organization"
 msgstr "Create Your First Organization"
 
-#: app/(auth)/sign-up.tsx:288
+#: app/(auth)/sign-up.tsx:287
 msgid "Creating your account..."
 msgstr "Creating your account..."
 
-#: app/(dashboard)/index.tsx:150
+#: app/(dashboard)/index.tsx:155
 msgid "Current"
 msgstr "Current"
 
-#: app/(dashboard)/organizations.tsx:139
+#: app/(dashboard)/organizations.tsx:143
 msgid "Default"
 msgstr "Default"
 
-#: app/(dashboard)/create-organization.tsx:171
+#: app/(dashboard)/create-organization.tsx:173
 msgid "Description (optional)"
 msgstr "Description (optional)"
 
-#: app/(auth)/verify-code.tsx:234
+#: app/(auth)/verify-code.tsx:232
 msgid "Didn't receive the code? Check your spam folder or request a new one."
 msgstr "Didn't receive the code? Check your spam folder or request a new one."
 
-#: app/(auth)/sign-in.tsx:329
+#: app/(auth)/sign-in.tsx:328
 msgid "Don't have an account?"
 msgstr "Don't have an account?"
 
-#: app/(dashboard)/index.tsx:96
-#: app/(dashboard)/settings/index.tsx:104
+#: app/(dashboard)/index.tsx:99
+#: app/(dashboard)/settings/index.tsx:103
 msgid "Edit Profile"
 msgstr "Edit Profile"
 
-#: app/(auth)/sign-up.tsx:215
+#: app/(auth)/sign-up.tsx:214
 msgid "Email"
 msgstr "Email"
 
-#: app/(auth)/verify-code.tsx:177
+#: app/(auth)/verify-code.tsx:175
 msgid "Enter 6-character code:"
 msgstr "Enter 6-character code:"
 
-#: app/(dashboard)/create-organization.tsx:145
+#: app/(dashboard)/create-organization.tsx:144
 msgid "Enter organization name"
 msgstr "Enter organization name"
 
-#: app/(auth)/verify-code.tsx:164
+#: app/(auth)/verify-code.tsx:162
 msgid "Enter the 6-character verification code sent to your email."
 msgstr "Enter the 6-character verification code sent to your email."
 
-#: app/(auth)/verify-code.tsx:159
+#: app/(auth)/verify-code.tsx:157
 msgid "Enter verification code"
 msgstr "Enter verification code"
 
-#: app/(auth)/sign-in.tsx:268
+#: app/(auth)/sign-in.tsx:267
 msgid "Enter your password"
 msgstr "Enter your password"
 
-#: app/(auth)/sign-in.tsx:232
+#: app/(auth)/sign-in.tsx:231
 msgid "Enter your username"
 msgstr "Enter your username"
 
@@ -216,28 +216,28 @@ msgstr "Enter your username"
 msgid "Epic Stack Mobile"
 msgstr "Epic Stack Mobile"
 
-#: app/(dashboard)/index.tsx:186
+#: app/(dashboard)/index.tsx:191
 msgid "Epic Stack Mobile v1.0.0"
 msgstr "Epic Stack Mobile v1.0.0"
 
-#: app/(auth)/verify-code.tsx:75
-#: app/(auth)/verify-code.tsx:110
-#: app/(auth)/verify-code.tsx:134
-#: app/(dashboard)/create-organization.tsx:68
-#: app/(dashboard)/create-organization.tsx:75
-#: app/(dashboard)/create-organization.tsx:100
+#: app/(auth)/verify-code.tsx:74
+#: app/(auth)/verify-code.tsx:109
+#: app/(auth)/verify-code.tsx:132
+#: app/(dashboard)/create-organization.tsx:67
+#: app/(dashboard)/create-organization.tsx:74
+#: app/(dashboard)/create-organization.tsx:99
 #: app/(dashboard)/organizations.tsx:48
-#: app/(dashboard)/settings/profile.tsx:44
-#: app/(dashboard)/settings/profile.tsx:65
-#: components/organization-switcher.tsx:40
+#: app/(dashboard)/settings/profile.tsx:43
+#: app/(dashboard)/settings/profile.tsx:64
+#: components/organization-switcher.tsx:41
 msgid "Error"
 msgstr "Error"
 
-#: app/(dashboard)/create-organization.tsx:100
+#: app/(dashboard)/create-organization.tsx:99
 msgid "Failed to create organization"
 msgstr "Failed to create organization"
 
-#: app/(auth)/verify-code.tsx:135
+#: app/(auth)/verify-code.tsx:133
 msgid "Failed to resend verification code. Please try again later."
 msgstr "Failed to resend verification code. Please try again later."
 
@@ -245,40 +245,40 @@ msgstr "Failed to resend verification code. Please try again later."
 msgid "Failed to set default organization"
 msgstr "Failed to set default organization"
 
-#: components/organization-switcher.tsx:40
+#: components/organization-switcher.tsx:41
 msgid "Failed to switch organization"
 msgstr "Failed to switch organization"
 
-#: app/(dashboard)/settings/profile.tsx:65
+#: app/(dashboard)/settings/profile.tsx:64
 msgid "Failed to update profile"
 msgstr "Failed to update profile"
 
-#: app/(auth)/sign-in.tsx:132
+#: app/(auth)/sign-in.tsx:131
 msgid "Forgot Password"
 msgstr "Forgot Password"
 
-#: app/(auth)/sign-in.tsx:133
+#: app/(auth)/sign-in.tsx:132
 msgid "Forgot password functionality will be available soon. Please contact support for assistance."
 msgstr "Forgot password functionality will be available soon. Please contact support for assistance."
 
-#: app/(auth)/sign-in.tsx:258
+#: app/(auth)/sign-in.tsx:257
 msgid "Forgot password?"
 msgstr "Forgot password?"
 
-#: app/(auth)/landing.tsx:169
-#: app/(auth)/landing.tsx:172
+#: app/(auth)/landing.tsx:171
+#: app/(auth)/landing.tsx:174
 msgid "Get Started"
 msgstr "Get Started"
 
-#: app/(auth)/sign-in.tsx:282
+#: app/(auth)/sign-in.tsx:281
 msgid "Hide password"
 msgstr "Hide password"
 
-#: app/(auth)/forgot-password.tsx:41
+#: app/(auth)/forgot-password.tsx:40
 msgid "If an account with that email exists, we've sent you a password reset link."
 msgstr "If an account with that email exists, we've sent you a password reset link."
 
-#: app/(auth)/sign-up.tsx:154
+#: app/(auth)/sign-up.tsx:153
 msgid "Join organization"
 msgstr "Join organization"
 
@@ -286,145 +286,145 @@ msgstr "Join organization"
 msgid "Loading"
 msgstr "Loading"
 
-#: app/(dashboard)/index.tsx:120
+#: app/(dashboard)/index.tsx:125
 msgid "Loading organizations..."
 msgstr "Loading organizations..."
 
-#: app/(dashboard)/index.tsx:40
+#: app/(dashboard)/index.tsx:43
 #: app/index.tsx:25
 #: components/ui/loading-overlay.tsx:18
 msgid "Loading..."
 msgstr "Loading..."
 
-#: app/(auth)/sign-up.tsx:223
+#: app/(auth)/sign-up.tsx:222
 msgid "m@example.com"
 msgstr "m@example.com"
 
-#: app/(dashboard)/settings/security.tsx:93
+#: app/(dashboard)/settings/security.tsx:97
 msgid "Manage your logged-in devices"
 msgstr "Manage your logged-in devices"
 
-#: app/(auth)/verify-code.tsx:110
+#: app/(auth)/verify-code.tsx:109
 msgid "No email address provided for resending code."
 msgstr "No email address provided for resending code."
 
-#: app/(auth)/verify-code.tsx:75
+#: app/(auth)/verify-code.tsx:74
 msgid "No email address provided for verification."
 msgstr "No email address provided for verification."
 
-#: app/(dashboard)/index.tsx:124
-#: app/(dashboard)/organizations.tsx:108
+#: app/(dashboard)/index.tsx:129
+#: app/(dashboard)/organizations.tsx:112
 msgid "No organizations found"
 msgstr "No organizations found"
 
-#: app/(auth)/sign-in.tsx:134
-#: app/(auth)/sign-up.tsx:85
-#: app/(auth)/verify-code.tsx:130
-#: app/(dashboard)/create-organization.tsx:94
-#: app/(dashboard)/settings/profile.tsx:57
-#: app/(dashboard)/settings/security.tsx:37
-#: app/(dashboard)/settings/security.tsx:45
-#: app/(dashboard)/settings/security.tsx:53
+#: app/(auth)/sign-in.tsx:133
+#: app/(auth)/sign-up.tsx:84
+#: app/(auth)/verify-code.tsx:128
+#: app/(dashboard)/create-organization.tsx:93
+#: app/(dashboard)/settings/profile.tsx:56
+#: app/(dashboard)/settings/security.tsx:41
+#: app/(dashboard)/settings/security.tsx:49
+#: app/(dashboard)/settings/security.tsx:57
 msgid "OK"
 msgstr "OK"
 
-#: components/organization-switcher.tsx:67
+#: components/organization-switcher.tsx:68
 msgid "Opens organization switcher"
 msgstr "Opens organization switcher"
 
-#: app/(auth)/sign-up.tsx:204
+#: app/(auth)/sign-up.tsx:203
 msgid "Or continue with email"
 msgstr "Or continue with email"
 
-#: app/(auth)/sign-in.tsx:213
+#: app/(auth)/sign-in.tsx:212
 msgid "Or continue with username"
 msgstr "Or continue with username"
 
 #. placeholder {0}: result.organization?.name
-#: app/(dashboard)/create-organization.tsx:91
+#: app/(dashboard)/create-organization.tsx:90
 msgid "Organization \"{0}\" created successfully!"
 msgstr "Organization \"{0}\" created successfully!"
 
-#: app/(dashboard)/create-organization.tsx:136
+#: app/(dashboard)/create-organization.tsx:135
 msgid "Organization Details"
 msgstr "Organization Details"
 
-#: app/(auth)/sign-up.tsx:176
+#: app/(auth)/sign-up.tsx:175
 msgid "Organization Invite"
 msgstr "Organization Invite"
 
-#: app/(dashboard)/create-organization.tsx:142
+#: app/(dashboard)/create-organization.tsx:141
 msgid "Organization Name *"
 msgstr "Organization Name *"
 
-#: app/(dashboard)/create-organization.tsx:68
+#: app/(dashboard)/create-organization.tsx:67
 msgid "Organization name must be at least 2 characters"
 msgstr "Organization name must be at least 2 characters"
 
-#: app/(dashboard)/create-organization.tsx:196
+#: app/(dashboard)/create-organization.tsx:198
 msgid "Organization URL Preview"
 msgstr "Organization URL Preview"
 
-#: app/(dashboard)/create-organization.tsx:157
+#: app/(dashboard)/create-organization.tsx:156
 msgid "organization-slug"
 msgstr "organization-slug"
 
-#: app/(dashboard)/index.tsx:87
-#: components/organization-switcher.tsx:125
+#: app/(dashboard)/index.tsx:90
+#: components/organization-switcher.tsx:126
 msgid "Organizations"
 msgstr "Organizations"
 
 #. placeholder {0}: currentIndex + 1
 #. placeholder {1}: slides.length
-#: app/(auth)/landing.tsx:152
+#: app/(auth)/landing.tsx:154
 msgid "Page {0} of {1}"
 msgstr "Page {0} of {1}"
 
-#: app/(auth)/sign-in.tsx:251
+#: app/(auth)/sign-in.tsx:250
 msgid "Password"
 msgstr "Password"
 
-#: app/(dashboard)/settings/security.tsx:36
+#: app/(dashboard)/settings/security.tsx:40
 msgid "Password change functionality will be available soon."
 msgstr "Password change functionality will be available soon."
 
-#: app/(auth)/sign-in.tsx:184
+#: app/(auth)/sign-in.tsx:183
 msgid "Please email support@example.com for assistance."
 msgstr "Please email support@example.com for assistance."
 
-#: app/(auth)/sign-up.tsx:263
+#: app/(auth)/sign-up.tsx:262
 msgid "Privacy Policy"
 msgstr "Privacy Policy"
 
-#: app/(dashboard)/settings/profile.tsx:55
+#: app/(dashboard)/settings/profile.tsx:54
 msgid "Profile updated successfully"
 msgstr "Profile updated successfully"
 
-#: app/(dashboard)/index.tsx:76
+#: app/(dashboard)/index.tsx:79
 msgid "Quick Actions"
 msgstr "Quick Actions"
 
-#: app/(auth)/sign-in.tsx:307
+#: app/(auth)/sign-in.tsx:306
 msgid "Remember me"
 msgstr "Remember me"
 
-#: app/(auth)/verify-code.tsx:246
+#: app/(auth)/verify-code.tsx:244
 msgid "Resend code"
 msgstr "Resend code"
 
-#: app/(dashboard)/settings/index.tsx:110
+#: app/(dashboard)/settings/index.tsx:109
 msgid "Security"
 msgstr "Security"
 
-#: app/(auth)/verify-code.tsx:246
+#: app/(auth)/verify-code.tsx:244
 msgid "Sending..."
 msgstr "Sending..."
 
-#: app/(dashboard)/settings/security.tsx:52
+#: app/(dashboard)/settings/security.tsx:56
 msgid "Session management will be available soon."
 msgstr "Session management will be available soon."
 
-#: app/(dashboard)/settings/security.tsx:86
+#: app/(dashboard)/settings/security.tsx:90
 msgid "Sessions"
 msgstr "Sessions"
 
@@ -440,73 +440,73 @@ msgstr "Set Default"
 msgid "Set Default Organization"
 msgstr "Set Default Organization"
 
-#: app/(dashboard)/create-organization.tsx:128
+#: app/(dashboard)/create-organization.tsx:127
 msgid "Set up a new organization for your team"
 msgstr "Set up a new organization for your team"
 
-#: app/(auth)/landing.tsx:48
+#: app/(auth)/landing.tsx:47
 msgid "Ship faster 🚀"
 msgstr "Ship faster 🚀"
 
-#: app/(auth)/sign-in.tsx:282
+#: app/(auth)/sign-in.tsx:281
 msgid "Show password"
 msgstr "Show password"
 
-#: app/(auth)/landing.tsx:92
-#: app/(auth)/landing.tsx:95
-#: app/(auth)/sign-up.tsx:279
+#: app/(auth)/landing.tsx:94
+#: app/(auth)/landing.tsx:97
+#: app/(auth)/sign-up.tsx:278
 msgid "Sign in"
 msgstr "Sign in"
 
-#: app/(auth)/sign-in.tsx:321
+#: app/(auth)/sign-in.tsx:320
 msgid "Sign In"
 msgstr "Sign In"
 
-#: app/(auth)/sign-in.tsx:158
+#: app/(auth)/sign-in.tsx:157
 msgid "Sign in with your social account or username"
 msgstr "Sign in with your social account or username"
 
-#: app/(dashboard)/settings/index.tsx:52
-#: app/(dashboard)/settings/index.tsx:55
-#: app/(dashboard)/settings/index.tsx:138
+#: app/(dashboard)/settings/index.tsx:51
+#: app/(dashboard)/settings/index.tsx:54
+#: app/(dashboard)/settings/index.tsx:139
 msgid "Sign Out"
 msgstr "Sign Out"
 
-#: app/(auth)/sign-up.tsx:245
+#: app/(auth)/sign-up.tsx:244
 msgid "Sign up"
 msgstr "Sign up"
 
-#: components/ui/social-button.tsx:50
+#: components/ui/social-button.tsx:51
 msgid "Sign up with GitHub"
 msgstr "Sign up with GitHub"
 
-#: components/ui/social-button.tsx:52
+#: components/ui/social-button.tsx:54
 msgid "Sign up with Google"
 msgstr "Sign up with Google"
 
-#: app/(auth)/sign-up.tsx:163
+#: app/(auth)/sign-up.tsx:162
 msgid "Sign up with your social account or email"
 msgstr "Sign up with your social account or email"
 
-#: app/(auth)/sign-in.tsx:343
+#: app/(auth)/sign-in.tsx:342
 msgid "Signing you in..."
 msgstr "Signing you in..."
 
-#: app/(dashboard)/create-organization.tsx:154
+#: app/(dashboard)/create-organization.tsx:153
 msgid "Slug *"
 msgstr "Slug *"
 
-#: app/(dashboard)/create-organization.tsx:60
+#: app/(dashboard)/create-organization.tsx:59
 msgid "Slug can only contain lowercase letters, numbers, and hyphens"
 msgstr "Slug can only contain lowercase letters, numbers, and hyphens"
 
-#: app/(dashboard)/create-organization.tsx:57
+#: app/(dashboard)/create-organization.tsx:56
 msgid "Slug must be at least 2 characters"
 msgstr "Slug must be at least 2 characters"
 
-#: app/(dashboard)/create-organization.tsx:90
+#: app/(dashboard)/create-organization.tsx:89
 #: app/(dashboard)/organizations.tsx:42
-#: app/(dashboard)/settings/profile.tsx:55
+#: app/(dashboard)/settings/profile.tsx:54
 #: components/ui/success-animation.tsx:59
 msgid "Success"
 msgstr "Success"
@@ -515,66 +515,66 @@ msgstr "Success"
 msgid "Success!"
 msgstr "Success!"
 
-#: components/organization-switcher.tsx:66
+#: components/organization-switcher.tsx:67
 msgid "Switch organization"
 msgstr "Switch organization"
 
-#: app/(dashboard)/organizations.tsx:74
+#: app/(dashboard)/organizations.tsx:75
 msgid "Tap to retry"
 msgstr "Tap to retry"
 
-#: app/(auth)/sign-up.tsx:256
+#: app/(auth)/sign-up.tsx:255
 msgid "Terms of Service"
 msgstr "Terms of Service"
 
-#: app/(auth)/landing.tsx:33
-#: app/(auth)/landing.tsx:40
-#: app/(auth)/landing.tsx:47
+#: app/(auth)/landing.tsx:32
+#: app/(auth)/landing.tsx:39
+#: app/(auth)/landing.tsx:46
 msgid "The easiest way to..."
 msgstr "The easiest way to..."
 
-#: app/(auth)/landing.tsx:34
+#: app/(auth)/landing.tsx:33
 msgid "Track what you eat 🍎"
 msgstr "Track what you eat 🍎"
 
-#: app/(dashboard)/settings/security.tsx:43
-#: app/(dashboard)/settings/security.tsx:76
+#: app/(dashboard)/settings/security.tsx:47
+#: app/(dashboard)/settings/security.tsx:80
 msgid "Two-Factor Authentication"
 msgstr "Two-Factor Authentication"
 
-#: app/(dashboard)/settings/security.tsx:44
+#: app/(dashboard)/settings/security.tsx:48
 msgid "Two-factor authentication setup will be available soon."
 msgstr "Two-factor authentication setup will be available soon."
 
-#: app/(dashboard)/settings/security.tsx:70
+#: app/(dashboard)/settings/security.tsx:74
 msgid "Update your account password"
 msgstr "Update your account password"
 
-#: app/(dashboard)/create-organization.tsx:164
+#: app/(dashboard)/create-organization.tsx:163
 msgid "URL-friendly identifier (lowercase letters, numbers, hyphens only)"
 msgstr "URL-friendly identifier (lowercase letters, numbers, hyphens only)"
 
-#: app/(auth)/sign-in.tsx:224
+#: app/(auth)/sign-in.tsx:223
 msgid "Username"
 msgstr "Username"
 
-#: app/(dashboard)/settings/profile.tsx:44
+#: app/(dashboard)/settings/profile.tsx:43
 msgid "Username is required"
 msgstr "Username is required"
 
-#: app/(auth)/verify-code.tsx:203
+#: app/(auth)/verify-code.tsx:201
 msgid "Verification code"
 msgstr "Verification code"
 
-#: app/(auth)/verify-code.tsx:230
+#: app/(auth)/verify-code.tsx:228
 msgid "Verify Code"
 msgstr "Verify Code"
 
-#: app/(auth)/verify-code.tsx:274
+#: app/(auth)/verify-code.tsx:272
 msgid "Verifying code..."
 msgstr "Verifying code..."
 
-#: app/(auth)/verify-code.tsx:230
+#: app/(auth)/verify-code.tsx:228
 msgid "Verifying..."
 msgstr "Verifying..."
 
@@ -582,47 +582,47 @@ msgstr "Verifying..."
 msgid "Version 1.0.0"
 msgstr "Version 1.0.0"
 
-#: app/(dashboard)/index.tsx:113
+#: app/(dashboard)/index.tsx:117
 msgid "View All"
 msgstr "View All"
 
-#: app/(auth)/verify-code.tsx:163
+#: app/(auth)/verify-code.tsx:161
 msgid "We've sent a 6-character code to {email}. Enter it below to verify your account."
 msgstr "We've sent a 6-character code to {email}. Enter it below to verify your account."
 
-#: app/(auth)/verify-code.tsx:129
+#: app/(auth)/verify-code.tsx:127
 msgid "We've sent a new verification code to your email address."
 msgstr "We've sent a new verification code to your email address."
 
-#: app/(auth)/sign-up.tsx:82
+#: app/(auth)/sign-up.tsx:81
 msgid "We've sent you a verification link to complete your signup."
 msgstr "We've sent you a verification link to complete your signup."
 
-#: app/(auth)/sign-in.tsx:155
+#: app/(auth)/sign-in.tsx:154
 msgid "Welcome back"
 msgstr "Welcome back"
 
-#: app/(dashboard)/index.tsx:60
+#: app/(dashboard)/index.tsx:63
 msgid "Welcome back,"
 msgstr "Welcome back,"
 
-#: app/(auth)/sign-in.tsx:348
+#: app/(auth)/sign-in.tsx:347
 msgid "Welcome back!"
 msgstr "Welcome back!"
 
 #. placeholder {0}: defaultOrg.name
-#: app/(dashboard)/index.tsx:67
+#: app/(dashboard)/index.tsx:70
 msgid "Working in {0}"
 msgstr "Working in {0}"
 
-#: app/(auth)/sign-up.tsx:180
+#: app/(auth)/sign-up.tsx:179
 msgid "You've been invited to join an organization. Complete your signup to get started."
 msgstr "You've been invited to join an organization. Complete your signup to get started."
 
-#: app/(auth)/sign-in.tsx:174
+#: app/(auth)/sign-in.tsx:173
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr "Your account has been suspended. Please contact support if you believe this is an error."
 
-#: app/(dashboard)/index.tsx:108
+#: app/(dashboard)/index.tsx:111
 msgid "Your Organizations"
 msgstr "Your Organizations"

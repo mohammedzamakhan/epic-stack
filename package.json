@@ -43,6 +43,8 @@
     "test:e2e:install": "npx playwright install --with-deps",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "lingui:check": "node scripts/check-lingui.mjs",
+    "lingui:extract": "turbo run lingui:extract",
     "setup": "npm run db:setup && node scripts/setup-brand.mjs && node scripts/setup-ssl.mjs && node scripts/setup-hosts.mjs",
     "launch:setup": "node scripts/launch-setup.mjs",
     "launch:patch-wrangler": "node scripts/patch-wrangler.mjs",

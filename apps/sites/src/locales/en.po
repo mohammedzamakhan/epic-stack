@@ -13,11 +13,20 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/AccountShell.astro.ts:3
+msgid "Account"
+msgstr "Account"
+
+#: src/components/AccountShell.astro.ts:3
+msgid "Account settings"
+msgstr "Account settings"
+
 #: src/pages/shop/success.astro.ts:3
 msgid "Back to shop"
 msgstr "Back to shop"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Browse the shop"
 msgstr "Browse the shop"
 
@@ -93,6 +102,7 @@ msgid "Network error. Please try again."
 msgstr "Network error. Please try again."
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "No orders yet."
 msgstr "No orders yet."
 
@@ -109,8 +119,14 @@ msgid "Order confirmed"
 msgstr "Order confirmed"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Order history"
 msgstr "Order history"
+
+#: src/components/AccountShell.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
+msgid "Orders"
+msgstr "Orders"
 
 #: src/pages/shop.astro.ts:3
 msgid "Pay now"
@@ -149,9 +165,17 @@ msgstr "Profile"
 msgid "Profile updated successfully!"
 msgstr "Profile updated successfully!"
 
+#: src/pages/profile/orders.astro.ts:3
+msgid "Purchases from the shop while signed in to this account."
+msgstr "Purchases from the shop while signed in to this account."
+
 #: src/pages/profile.astro.ts:3
 msgid "Purchases from the shop while signed in."
 msgstr "Purchases from the shop while signed in."
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "Receipts for completed purchases appear here with status and amount."
+msgstr "Receipts for completed purchases appear here with status and amount."
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -232,6 +256,10 @@ msgstr "We've sent a 6-digit code to"
 #: src/pages/complete-name.astro.ts:3
 msgid "What's your name?"
 msgstr "What's your name?"
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "When you buy something from the shop, your receipts will show up here."
+msgstr "When you buy something from the shop, your receipts will show up here."
 
 #: src/pages/profile.astro.ts:3
 msgid "Your Profile"

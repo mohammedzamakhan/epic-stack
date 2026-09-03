@@ -13,6 +13,27 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. js-lingui-explicit-id
+#: app/components/ai/global-ai-panel.tsx:98
+msgid "Close assistant"
+msgstr "Close assistant"
+
+#. js-lingui-explicit-id
+#: app/components/ai/global-ai-panel.tsx:109
+#: app/components/ai/global-ai-panel.tsx:407
+msgid "Exit full screen"
+msgstr "Exit full screen"
+
+#. js-lingui-explicit-id
+#: app/components/ai/global-ai-panel.tsx:110
+msgid "Open full screen"
+msgstr "Open full screen"
+
+#. js-lingui-explicit-id
+#: app/components/ai/global-ai-panel.tsx:419
+msgid "AI assistant"
+msgstr "AI assistant"
+
 #: app/components/settings/cards/organization/billing-card.tsx:438
 msgid "(${annualPrice} billed annually per user)"
 msgstr ""
@@ -23,19 +44,18 @@ msgid "{0, plural, one {# active member} other {# active members}}"
 msgstr ""
 
 #. placeholder {0}: selectedMemberIds.length
-#: app/components/note/share-note-button.tsx:317
+#: app/components/note/share-note-button.tsx:327
 msgid "{0, plural, one {Share with 1 member} other {Share with # members}}"
 msgstr ""
 
 #. placeholder {0}: data.messageText?.length || 0
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:403
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:381
 msgid "{0} / 1600 chars"
 msgstr ""
 
-#. placeholder {0}: input.length
 #: ../../packages/ai/src/components/ai-chat.tsx:284
-msgid "{0} characters"
-msgstr ""
+#~ msgid "{0} characters"
+#~ msgstr ""
 
 #. placeholder {0}: campaign.recipients.length
 #. placeholder {1}: campaign.targetAudienceCount
@@ -56,7 +76,11 @@ msgstr ""
 #~ msgid "{0} steps"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:308
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:628
+msgid "{announcementCount} announcements"
+msgstr "{announcementCount} announcements"
+
+#: app/routes/_app+/$orgSlug_+/index.tsx:309
 msgid "{avgPerDay} avg per day"
 msgstr ""
 
@@ -64,7 +88,7 @@ msgstr ""
 msgid "{backupCodesRemaining} unused codes remaining"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1356
+#: app/routes/organizations+/create.tsx:1392
 msgid "{basePriceLabel} billed annually"
 msgstr ""
 
@@ -88,7 +112,7 @@ msgstr ""
 msgid "{errorCount, plural, one {# validation error} other {# validation errors}}"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:336
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:321
 msgid "{field}"
 msgstr ""
 
@@ -112,6 +136,10 @@ msgstr ""
 msgid "{minutes}m ago"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:638
+msgid "{pageCount} pages"
+msgstr "{pageCount} pages"
+
 #: app/components/settings/cards/organization/s3-storage-card.tsx:355
 msgid "{processedObjects} of {totalObjects} files copied{failedObjectsText}"
 msgstr ""
@@ -121,7 +149,7 @@ msgstr ""
 msgid "{recipientCount} recipients"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:210
+#: app/routes/_auth+/waitlist.tsx:331
 msgid "{referralCount, plural, one {# person joined using your link!} other {# people joined using your link!}}"
 msgstr ""
 
@@ -137,7 +165,7 @@ msgstr ""
 msgid "{seconds}s ago"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:334
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:319
 msgid "{status}"
 msgstr ""
 
@@ -145,30 +173,30 @@ msgstr ""
 msgid "{stepCount} steps"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:304
+#: app/routes/_app+/$orgSlug_+/index.tsx:305
 msgid "{totalNotes} total notes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:324
+#: app/routes/_app+/$orgSlug_+/index.tsx:325
 msgid "{trend}%"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:332
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:317
 msgid "{unit}"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:640
+#: app/routes/organizations+/create.tsx:676
 msgid "*.png, *.jpeg files up to 5 MB"
 msgstr ""
 
 #. placeholder {0}: data.field === 'phoneVerified' ? 'Verification Status' : conditionFieldLabel(data.field || 'email')
 #. placeholder {1}: data.field === 'phoneVerified' ? ' is ' : data.operator === 'equals' ? ' equals ' : data.operator === 'not_equals' ? ' does not equal ' : ' contains '
 #. placeholder {2}: data.field === 'phoneVerified' ? data.value === 'true' ? 'Verified' : 'Not Verified' : data.value || '...'
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:537
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:515
 msgid "• If Customer {0}{1}<0>{2}</0> → <1>True branch</1>"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:563
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:541
 msgid "• Otherwise → <0>False branch</0>"
 msgstr ""
 
@@ -176,44 +204,52 @@ msgstr ""
 msgid "← Back to SSO login"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:315
+#: app/routes/_app+/$orgSlug_+/index.tsx:316
 msgid "+{trend}%"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:232
+#: app/routes/_auth+/waitlist.tsx:344
 msgid "+2 points"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:183
+#: app/routes/_auth+/waitlist.tsx:284
 msgid "+5 points/referral"
 msgstr ""
 
 #. placeholder {0}: conditionFieldLabel(data.field || 'email')
 #. placeholder {1}: data.operator === 'equals' ? 'is' : data.operator === 'not_equals' ? 'is not' : 'contains'
 #. placeholder {2}: data.value
-#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:52
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:50
 msgid "<0>{0}</0> {1} <1>\"{2}\"</1>"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:106
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:91
 msgid "<p>Hi {{name}},</p><p>Check out our latest update.</p>"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:336
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:314
 msgid "<p>Hi {{name}},</p><p>Welcome to our service!</p>"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:115
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:100
 msgid "<p>Hi {{name}},</p><p>Your organization {{organizationName}} is ready.</p>"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:237
+#: app/routes/_auth+/waitlist.tsx:350
 msgid "✓ Discord points claimed"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:423
 msgid "${basePriceValue} billed annually"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:626
+msgid "1 announcement"
+msgstr "1 announcement"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:636
+msgid "1 page"
+msgstr "1 page"
 
 #: app/components/settings/cards/organization/team-size-card.tsx:53
 msgid "1-10 people"
@@ -240,12 +276,12 @@ msgstr ""
 msgid "A user already exists with this username"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:425
+#: app/components/settings/cards/organization/site-theme-card.tsx:856
 msgid "Accent color"
 msgstr ""
 
 #: app/components/privacy-banner.tsx:59
-#: app/routes/_app+/organizations.tsx:352
+#: app/routes/_app+/organizations.tsx:302
 msgid "Accept"
 msgstr ""
 
@@ -269,22 +305,22 @@ msgstr ""
 msgid "Account Suspended"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:698
+#: app/routes/organizations+/create.tsx:734
 msgid "acme"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:663
+#: app/routes/organizations+/create.tsx:699
 msgid "Acme Inc."
 msgstr ""
 
 #: app/components/command-menu.tsx:115
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:953
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:541
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:611
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:606
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:622
 msgid "Actions"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:313
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:298
 msgid "active"
 msgstr ""
 
@@ -297,16 +333,17 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:674
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:659
 msgid "Activity"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1612
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1644
 msgid "Add"
 msgstr ""
 
 #. placeholder {0}: item.label
-#: ../../packages/marketing-workflow/src/node-palette.tsx:96
+#: ../../packages/marketing-workflow/src/node-palette.tsx:98
+#: ../../packages/marketing-workflow/src/node-palette.tsx:104
 msgid "Add {0}"
 msgstr ""
 
@@ -314,12 +351,12 @@ msgstr ""
 msgid "Add a CNAME record for your domain (or subdomain) pointing to:"
 msgstr ""
 
-#: app/components/note/comment-input.tsx:126
-#: app/components/note/comments-section.tsx:157
+#: app/components/note/comment-input.tsx:64
+#: app/components/note/comments-section.tsx:178
 msgid "Add a comment..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5395
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5429
 msgid "Add a hero, gallery, or any block between the header and footer."
 msgstr ""
 
@@ -327,34 +364,34 @@ msgstr ""
 msgid "Add a link"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5543
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5537
 msgid "Add a section from the left to see a live preview."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:516
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:581
 msgid "Add an announcement to share updates, maintenance notices, or promotions on your public site."
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:525
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:508
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:573
 msgid "Add announcement"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:283
-#: app/routes/organizations+/create.tsx:1126
+#: app/components/organization-invitations.tsx:288
+#: app/routes/organizations+/create.tsx:1162
 msgid "Add another invitation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3842
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3874
 msgid "Add card"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:913
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4152
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:928
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4184
 msgid "Add column"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3532
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3564
 msgid "Add feature"
 msgstr ""
 
@@ -363,16 +400,16 @@ msgstr ""
 msgid "Add images"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3036
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4215
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3068
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4247
 msgid "Add link"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:373
+#: app/components/app-sidebar.tsx:388
 msgid "Add members"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:243
+#: app/components/note/share-note-button.tsx:253
 msgid "Add Members"
 msgstr ""
 
@@ -380,29 +417,33 @@ msgstr ""
 msgid "Add more connections"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5683
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5695
 msgid "Add new page"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:109
+#: ../../packages/ai/src/components/ai-chat.tsx:437
 msgid "Add next steps"
 msgstr ""
 
-#: app/components/team-switcher.tsx:217
-#: app/routes/_app+/organizations.tsx:267
-#: app/routes/_app+/organizations.tsx:441
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:819
+msgid "Add notes, links, or media to capture what matters."
+msgstr "Add notes, links, or media to capture what matters."
+
+#: app/components/team-switcher.tsx:222
+#: app/routes/_app+/organizations.tsx:217
+#: app/routes/_app+/organizations.tsx:391
 msgid "Add organization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3700
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3732
 msgid "Add photo or video"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3463
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3495
 msgid "Add question"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4080
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4112
 msgid "Add review"
 msgstr ""
 
@@ -410,8 +451,8 @@ msgstr ""
 msgid "Add reviewer"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1537
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1543
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1569
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1575
 msgid "Add section"
 msgstr ""
 
@@ -419,7 +460,7 @@ msgstr ""
 msgid "Add Section"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4249
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4281
 msgid "Add social link"
 msgstr ""
 
@@ -431,19 +472,27 @@ msgstr ""
 msgid "Add this configuration to your .kiro/settings/mcp.json:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2487
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2519
 msgid "Add URL"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:917
+#: app/routes/organizations+/create.tsx:953
 msgid "Add your team members to get started. You can always invite more people later."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1375
+#: ../../packages/ai/src/components/ai-chat.tsx:149
+msgid "Added section"
+msgstr "Added section"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:148
+msgid "Adding section"
+msgstr "Adding section"
+
+#: app/routes/organizations+/create.tsx:1411
 msgid "Additional users: {monthlyPriceLabel}/user/month"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1368
+#: app/routes/organizations+/create.tsx:1404
 msgid "Additional users: {monthlyPriceLabel}/user/month<0>({annualPriceLabel} billed annually per user)</0>"
 msgstr ""
 
@@ -451,11 +500,11 @@ msgstr ""
 msgid "Additional users: ${monthlyPrice}/user/month"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2525
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2557
 msgid "Adds a noindex tag so this page stays off Google and Bing."
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:436
+#: app/routes/_app+/organizations.tsx:386
 msgid "Adjust your search query to show more."
 msgstr ""
 
@@ -468,22 +517,23 @@ msgid "Admin Impersonation Active"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:181
-msgid "AI"
-msgstr ""
+#~ msgid "AI"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:680
+#: app/components/ai/global-ai-panel.tsx:335
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:660
 msgid "AI Assistant"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:192
-msgid "AI Assistant ready to help with this note"
-msgstr ""
+#~ msgid "AI Assistant ready to help with this note"
+#~ msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:228
-msgid "AI is thinking..."
-msgstr ""
+#~ msgid "AI is thinking..."
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2384
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2416
 msgid "Aim for one or two sentences that make someone click."
 msgstr ""
 
@@ -500,7 +550,7 @@ msgstr ""
 msgid "All checks passed. This workflow is ready to publish."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1380
+#: app/routes/organizations+/create.tsx:1416
 msgid "All core features included"
 msgstr ""
 
@@ -513,7 +563,7 @@ msgstr ""
 msgid "All Notifications"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:183
+#: app/components/note/share-note-button.tsx:193
 msgid "All organization members can view this note"
 msgstr ""
 
@@ -521,7 +571,7 @@ msgstr ""
 msgid "All recipients"
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:104
+#: app/components/onboarding-checklist.tsx:129
 msgid "All steps complete"
 msgstr ""
 
@@ -533,21 +583,25 @@ msgstr ""
 msgid "Already read"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3773
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3805
 msgid "Alt text"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:564
+#: app/routes/organizations+/create.tsx:600
 msgid "An organization is a workspace where teams collect, organize, and work together."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:298
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:448
+msgid "Announcement actions"
+msgstr "Announcement actions"
+
+#: app/components/app-sidebar.tsx:313
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:27
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:488
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:553
 msgid "Announcements"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3479
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3511
 msgid "Answer"
 msgstr ""
 
@@ -563,7 +617,7 @@ msgstr ""
 msgid "API Keys"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:463
+#: app/components/settings/cards/organization/site-theme-card.tsx:894
 msgid "Appearance"
 msgstr ""
 
@@ -571,7 +625,7 @@ msgstr ""
 msgid "Arabic"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:315
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:300
 msgid "archived"
 msgstr ""
 
@@ -588,7 +642,7 @@ msgstr ""
 msgid "Are you sure you want to delete \"{journeyName}\"?"
 msgstr ""
 
-#: app/components/note/comment-item.tsx:78
+#: app/components/note/comment-item.tsx:121
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
@@ -601,23 +655,39 @@ msgstr ""
 msgid "Are you sure?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3318
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3350
 msgid "Arrangement"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:679
+msgid "Ask about this note, or tell me where you'd like to go."
+msgstr "Ask about this note, or tell me where you'd like to go."
+
 #: ../../packages/ai/src/components/ai-chat.tsx:273
-msgid "Ask about this note..."
-msgstr ""
+#~ msgid "Ask about this note..."
+#~ msgstr ""
+
+#: app/components/ai/global-ai-panel.tsx:484
+msgid "Ask AI"
+msgstr "Ask AI"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:681
+msgid "Ask anything…"
+msgstr "Ask anything…"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:257
+msgid "Ask me to try again or choose a different destination."
+msgstr "Ask me to try again or choose a different destination."
 
 #: ../../packages/ai/src/components/ai-chat.tsx:196
-msgid "Ask questions, request summaries, get suggestions, or discuss the content of this note."
-msgstr ""
+#~ msgid "Ask questions, request summaries, get suggestions, or discuss the content of this note."
+#~ msgstr ""
 
 #: app/components/website/link-inspector.tsx:510
 msgid "Asset"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:120
+#: ../../packages/ai/src/components/ai-chat.tsx:448
 msgid "Assign responsibilities"
 msgstr ""
 
@@ -625,7 +695,7 @@ msgstr ""
 #~ msgid "Attempt: {0} • Executed: {1}"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:422
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:423
 msgid "Attempt: {attempt} • Executed: {executedAtLabel}"
 msgstr ""
 
@@ -687,13 +757,13 @@ msgstr ""
 msgid "Automation saved successfully"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:273
+#: app/components/app-sidebar.tsx:277
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:90
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:260
 msgid "Automations"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3915
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3947
 msgid "Autoplay"
 msgstr ""
 
@@ -727,8 +797,8 @@ msgstr ""
 msgid "Back to nodes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3158
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4576
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3190
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4608
 msgid "Background"
 msgstr ""
 
@@ -749,7 +819,7 @@ msgstr ""
 msgid "Billed monthly"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:349
+#: app/components/app-sidebar.tsx:364
 #: app/components/command-menu.tsx:181
 msgid "Billing"
 msgstr ""
@@ -758,17 +828,18 @@ msgstr ""
 msgid "Billing & Subscription"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:397
+#: app/components/settings/cards/organization/site-theme-card.tsx:828
 msgid "Body"
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:241
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4879
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5676
+#: app/components/app-sidebar.tsx:304
+#: app/components/website/branding-panel.tsx:244
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4911
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5688
 msgid "Branding"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:121
+#: ../../packages/ai/src/components/ai-chat.tsx:449
 msgid "Break down complex tasks"
 msgstr ""
 
@@ -776,7 +847,7 @@ msgstr ""
 msgid "Broadcast not found"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:266
+#: app/components/app-sidebar.tsx:270
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:84
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns._index.tsx:74
 msgid "Broadcasts"
@@ -786,7 +857,7 @@ msgstr ""
 msgid "Broadcasts, automations, and performance at a glance."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3281
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3313
 msgid "Browsers only autoplay video when it is muted."
 msgstr ""
 
@@ -794,16 +865,16 @@ msgstr ""
 msgid "Bucket Name"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5711
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5730
 msgid "Build"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3413
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3445
 msgid "Button"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3121
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4010
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3153
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4042
 msgid "Buttons"
 msgstr ""
 
@@ -832,8 +903,9 @@ msgstr ""
 #: ../../packages/marketing/src/components/campaign-form.tsx:134
 #: app/components/core/feedback-modal.tsx:109
 #: app/components/form-actions.tsx:28
-#: app/components/note/comment-input.tsx:165
-#: app/components/note/share-note-button.tsx:307
+#: app/components/note/comment-input.tsx:209
+#: app/components/note/comment-item.tsx:276
+#: app/components/note/share-note-button.tsx:317
 #: app/components/settings/cards/organization/announcement-sheet.tsx:519
 #: app/components/settings/cards/organization/danger-zone-card.tsx:131
 #: app/components/settings/cards/organization/site-icon-card.tsx:184
@@ -846,12 +918,14 @@ msgstr ""
 #: app/components/website/translate-provider.tsx:258
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:462
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:1075
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:846
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:902
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:488
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1607
-#: app/routes/organizations+/create.tsx:760
-#: app/routes/organizations+/create.tsx:896
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:861
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:917
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1064
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:484
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:497
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1639
+#: app/routes/organizations+/create.tsx:796
+#: app/routes/organizations+/create.tsx:932
 msgid "Cancel"
 msgstr ""
 
@@ -859,39 +933,43 @@ msgstr ""
 msgid "Cancel deletion"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:425
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:424
 msgid "Cancel editing"
 msgstr ""
+
+#: app/components/note/comment-input.tsx:237
+msgid "Cancel reply"
+msgstr "Cancel reply"
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:123
 msgid "Cancelled"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3783
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3815
 msgid "Caption"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3985
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4017
 msgid "Card position"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:307
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3826
+#: app/routes/_app+/$orgSlug_+/notes.tsx:312
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3858
 msgid "Cards"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:297
+#: app/routes/_app+/$orgSlug_+/notes.tsx:302
 msgid "Cards view"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3182
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3996
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3214
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4028
 msgid "Center"
 msgstr ""
 
 #: app/components/settings/cards/organization/site-icon-card.tsx:215
 #: app/components/settings/cards/profile-card.tsx:152
-#: app/components/website/branding-panel.tsx:301
+#: app/components/website/branding-panel.tsx:304
 msgid "Change"
 msgstr ""
 
@@ -906,16 +984,24 @@ msgstr ""
 msgid "Change Password"
 msgstr ""
 
+#: app/components/settings/cards/organization/site-theme-card.tsx:697
+msgid "Change specific colors here. They start from Accent, Gray, and Appearance above, and work in both light and dark."
+msgstr "Change specific colors here. They start from Accent, Gray, and Appearance above, and work in both light and dark."
+
 #: app/components/settings/cards/security-card.tsx:107
 msgid "Change your password to something new"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2287
+#: app/components/note/activity-log.tsx:209
+msgid "Changes to this note will show up here as your team works on it."
+msgstr "Changes to this note will show up here as your team works on it."
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2319
 msgid "Changing this URL will break existing links to the page."
 msgstr ""
 
 #: ../../packages/marketing/src/components/campaign-form.tsx:53
-#: app/components/note/integration-controls.tsx:315
+#: app/components/note/integration-controls.tsx:323
 msgid "Channel"
 msgstr ""
 
@@ -931,6 +1017,14 @@ msgstr ""
 #: app/routes/_auth+/verify.tsx:64
 msgid "Check your email"
 msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:101
+msgid "Checkout payout not connected"
+msgstr "Checkout payout not connected"
+
+#: app/components/settings/cards/organization/shop-card.tsx:228
+msgid "Checkout processor"
+msgstr "Checkout processor"
 
 #: app/components/website/link-inspector.tsx:434
 msgid "Choose a page..."
@@ -948,12 +1042,12 @@ msgstr ""
 msgid "Choose which languages your public website supports, and which one visitors see by default."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:813
+#: app/routes/organizations+/create.tsx:849
 msgid "Choose your plan"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3400
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3640
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3432
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3672
 msgid "Circle"
 msgstr ""
 
@@ -969,7 +1063,7 @@ msgstr ""
 msgid "Click \"Edit Config\" to open claude_desktop_config.json"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:260
+#: app/routes/_auth+/waitlist.tsx:378
 msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
 msgstr ""
 
@@ -991,7 +1085,7 @@ msgid "Client"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:359
-#: app/components/onboarding-checklist.tsx:152
+#: app/components/onboarding-checklist.tsx:177
 msgid "Close"
 msgstr ""
 
@@ -999,31 +1093,34 @@ msgstr ""
 msgid "Cloudflare is not configured in this environment. Domain is stored for local testing; SSL automation requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:837
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:880
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:883
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:852
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:895
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:898
 msgid "Column name"
 msgstr ""
 
 #: app/components/data-table.tsx:512
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3607
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3639
 msgid "Columns"
 msgstr ""
 
-#: app/components/note/comment-input.tsx:175
+#: app/components/note/comment-input.tsx:166
 msgid "Comment"
 msgstr ""
 
-#: app/components/note/comments-section.tsx:141
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:663
+#: app/components/note/comment-item.tsx:200
+msgid "Comment actions"
+msgstr "Comment actions"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:658
 msgid "Comments"
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:144
+#: app/components/onboarding-checklist.tsx:169
 msgid "complete"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1056
+#: app/routes/organizations+/create.tsx:1092
 msgid "Complete Setup"
 msgstr ""
 
@@ -1036,7 +1133,7 @@ msgstr ""
 msgid "Complete the OAuth flow when prompted"
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:132
+#: app/components/onboarding-checklist.tsx:157
 msgid "Complete these steps to get the most from your workspace."
 msgstr ""
 
@@ -1055,13 +1152,13 @@ msgstr ""
 
 #: ../../packages/ai/src/components/ai-elements/tool.tsx:46
 #: ../../packages/marketing/src/i18n/campaign-labels.ts:9
-#: app/components/onboarding-checklist.tsx:224
+#: app/components/onboarding-checklist.tsx:249
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:120
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns._index.tsx:53
 msgid "Completed"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:99
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:84
 msgid "Condition Branch"
 msgstr ""
 
@@ -1069,7 +1166,7 @@ msgstr ""
 msgid "Condition comparison field is required."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:492
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:470
 msgid "Condition Logic"
 msgstr ""
 
@@ -1124,9 +1221,13 @@ msgstr ""
 msgid "Connect domain"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:130
+msgid "Connect payout account"
+msgstr "Connect payout account"
+
 #: app/components/settings/cards/organization/shop-card.tsx:93
-msgid "Connect Stripe"
-msgstr ""
+#~ msgid "Connect Stripe"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:1342
 msgid "Connect your AI assistants to {organizationName} data using the Model Context Protocol"
@@ -1140,7 +1241,7 @@ msgstr ""
 msgid "Connected Accounts"
 msgstr ""
 
-#: app/components/note/integration-controls.tsx:121
+#: app/components/note/integration-controls.tsx:129
 msgid "Connected Channels"
 msgstr ""
 
@@ -1156,7 +1257,7 @@ msgstr ""
 msgid "Connections"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1318
+#: app/routes/organizations+/create.tsx:1354
 msgid "Contact support"
 msgstr ""
 
@@ -1164,29 +1265,33 @@ msgstr ""
 msgid "Contact support for pricing"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:511
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:489
 msgid "Contains (Partial Match)"
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:425
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:528
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3106
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3296
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3592
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3932
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:593
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3138
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3328
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3624
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3964
 msgid "Content"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:670
-#: app/routes/organizations+/create.tsx:765
+#: app/routes/organizations+/create.tsx:801
 msgid "Continue"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:91
-msgid "Continue Stripe setup"
-msgstr ""
+#: app/components/settings/cards/organization/shop-card.tsx:128
+msgid "Continue payout setup"
+msgstr "Continue payout setup"
 
-#: app/routes/organizations+/create.tsx:900
+#: app/components/settings/cards/organization/shop-card.tsx:91
+#~ msgid "Continue Stripe setup"
+#~ msgstr ""
+
+#: app/routes/organizations+/create.tsx:936
 msgid "Continue to Payment"
 msgstr ""
 
@@ -1198,24 +1303,24 @@ msgstr ""
 msgid "Continue with your password"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:170
+#: app/components/note/share-note-button.tsx:180
 msgid "Control who can access this note"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:201
+#: app/components/organization-invitations.tsx:206
 msgid "Copied"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:311
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:559
-#: app/routes/_auth+/waitlist.tsx:202
+#: app/routes/_auth+/waitlist.tsx:318
 msgid "Copied!"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:206
+#: app/components/organization-invitations.tsx:211
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:316
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:559
-#: app/routes/_auth+/waitlist.tsx:202
+#: app/routes/_auth+/waitlist.tsx:320
 msgid "Copy"
 msgstr ""
 
@@ -1231,17 +1336,25 @@ msgstr ""
 msgid "Copy code"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:364
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:375
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:363
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:374
 msgid "Copy link"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:492
+#: app/components/settings/cards/organization/site-theme-card.tsx:923
 msgid "Corners"
 msgstr ""
 
+#: app/components/ai/global-ai-panel.tsx:77
+msgid "Couldn't load the assistant."
+msgstr "Couldn't load the assistant."
+
+#: ../../packages/ai/src/components/ai-chat.tsx:255
+msgid "Couldn't open {routeTitle}"
+msgstr "Couldn't open {routeTitle}"
+
 #: app/components/website/create-page-dialog.tsx:207
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:894
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:909
 msgid "Create"
 msgstr ""
 
@@ -1249,7 +1362,7 @@ msgstr ""
 msgid "Create a new API key to connect your AI assistants to {orgName} data."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:559
+#: app/routes/organizations+/create.tsx:595
 msgid "Create a new organization"
 msgstr ""
 
@@ -1261,7 +1374,7 @@ msgstr ""
 msgid "Create a password to secure your account"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:132
+#: ../../packages/ai/src/components/ai-chat.tsx:460
 msgid "Create a plan"
 msgstr ""
 
@@ -1271,7 +1384,7 @@ msgstr ""
 msgid "Create account"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:80
+#: ../../packages/ai/src/components/ai-chat.tsx:408
 msgid "Create action items"
 msgstr ""
 
@@ -1287,7 +1400,7 @@ msgstr ""
 msgid "Create and manage API keys to authenticate your MCP clients"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:541
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:552
 msgid "Create and manage pages for your organization's website."
 msgstr ""
 
@@ -1301,7 +1414,7 @@ msgstr ""
 msgid "Create automation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:491
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:556
 msgid "Create banner announcements for your public organization site. Enabled banners appear at the top of the site for visitors."
 msgstr ""
 
@@ -1309,11 +1422,11 @@ msgstr ""
 msgid "Create broadcast"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:107
+#: ../../packages/ai/src/components/ai-chat.tsx:435
 msgid "Create bullet points"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:218
+#: app/components/organization-invitations.tsx:223
 msgid "Create Link"
 msgstr ""
 
@@ -1325,8 +1438,8 @@ msgstr ""
 msgid "Create New Note"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:381
-#: app/routes/_app+/$orgSlug_+/notes.tsx:393
+#: app/routes/_app+/$orgSlug_+/notes.tsx:386
+#: app/routes/_app+/$orgSlug_+/notes.tsx:398
 msgid "Create Note"
 msgstr ""
 
@@ -1353,7 +1466,7 @@ msgstr ""
 msgid "Create your first one-time email or SMS campaign."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:562
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:573
 msgid "Create your first page to start building your website."
 msgstr ""
 
@@ -1361,9 +1474,17 @@ msgstr ""
 msgid "Created {createdDate}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:601
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:612
 msgid "Created By"
 msgstr ""
+
+#: ../../packages/ai/src/components/ai-chat.tsx:145
+msgid "Created page"
+msgstr "Created page"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:144
+msgid "Creating page"
+msgstr "Creating page"
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:472
 msgid "Creating..."
@@ -1386,7 +1507,7 @@ msgstr ""
 msgid "Current icon"
 msgstr ""
 
-#: app/components/team-switcher.tsx:174
+#: app/components/team-switcher.tsx:179
 msgid "Current organization"
 msgstr ""
 
@@ -1406,33 +1527,37 @@ msgstr ""
 msgid "Cursor Setup"
 msgstr ""
 
+#: app/components/settings/cards/organization/site-theme-card.tsx:663
+msgid "Custom colors"
+msgstr "Custom colors"
+
 #: app/components/settings/cards/organization/site-card.tsx:291
 msgid "Custom domain"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:24
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:36
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:51
 msgid "Custom Event"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:186
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:164
 msgid "Custom Event Name"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:16
+#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:17
 msgid "Custom trigger event"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:269
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:254
 msgid "customer"
 msgstr ""
 
 #. placeholder {0}: data.value === 'true' ? '' : 'not '
-#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:45
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:43
 msgid "Customer <0>Phone</0> is {0}<1>Verified</1>"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:431
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:409
 msgid "Customer Attribute"
 msgstr ""
 
@@ -1445,12 +1570,12 @@ msgid "Customer ID"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:16
-msgid "Customer Signup"
-msgstr ""
+#~ msgid "Customer Signup"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:46
-msgid "Customer Signup (Registration)"
-msgstr ""
+#~ msgid "Customer Signup (Registration)"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:278
 msgid "Customer UUID"
@@ -1460,11 +1585,11 @@ msgstr ""
 msgid "customerId is required"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:247
+#: app/components/app-sidebar.tsx:251
 msgid "Customers"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:155
+#: app/components/settings/cards/organization/shop-card.tsx:295
 msgid "Customers pay this amount. You receive {orgSharePercent}% after the platform fee."
 msgstr ""
 
@@ -1485,8 +1610,8 @@ msgstr ""
 msgid "Danger"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:344
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3200
+#: app/components/settings/cards/organization/site-theme-card.tsx:777
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3232
 msgid "Dark"
 msgstr ""
 
@@ -1494,8 +1619,8 @@ msgstr ""
 msgid "Dark mode"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:115
-#: app/components/app-sidebar.tsx:229
+#: app/components/app-sidebar.tsx:117
+#: app/components/app-sidebar.tsx:233
 #: app/components/user-dropdown.tsx:61
 msgid "Dashboard"
 msgstr ""
@@ -1512,15 +1637,15 @@ msgstr ""
 msgid "Database connection error"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:307
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:292
 msgid "days"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:245
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:223
 msgid "Days"
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:375
+#: app/routes/_app+/organizations.tsx:325
 msgid "Decline"
 msgstr ""
 
@@ -1545,10 +1670,15 @@ msgid "Delay unit is required."
 msgstr ""
 
 #: app/components/data-table.tsx:386
+#: app/components/note/comment-item.tsx:216
 #: app/components/settings/passkey-manager.tsx:220
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:438
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:463
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:502
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1018
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1076
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:464
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:498
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:472
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:511
 msgid "Delete"
 msgstr ""
 
@@ -1557,20 +1687,24 @@ msgid "Delete account"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:433
-msgid "Delete announcement"
-msgstr ""
+#~ msgid "Delete announcement"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3843
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:473
+msgid "Delete announcement?"
+msgstr "Delete announcement?"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3875
 msgid "Delete card"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4153
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4185
 msgid "Delete column"
 msgstr ""
 
 #: app/components/note/comment-item.tsx:176
-msgid "Delete comment"
-msgstr ""
+#~ msgid "Delete comment"
+#~ msgstr ""
 
 #: app/components/settings/cards/organization/site-card.tsx:226
 msgid "Delete customer data and switch region?"
@@ -1580,19 +1714,19 @@ msgstr ""
 msgid "Delete data and switch"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3533
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3565
 msgid "Delete feature"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:343
+#: app/components/organization-invitations.tsx:348
 msgid "Delete invitation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3701
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3733
 msgid "Delete item"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3037
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3069
 msgid "Delete link"
 msgstr ""
 
@@ -1600,6 +1734,10 @@ msgstr ""
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:99
 msgid "Delete node"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1053
+msgid "Delete note?"
+msgstr "Delete note?"
 
 #: app/components/settings/cards/organization/danger-zone-card.tsx:62
 #: app/components/settings/cards/organization/danger-zone-card.tsx:77
@@ -1610,19 +1748,19 @@ msgstr ""
 msgid "Delete organization?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:477
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:486
 msgid "Delete page?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3464
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3496
 msgid "Delete question"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4081
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4113
 msgid "Delete review"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4250
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4282
 msgid "Delete social link"
 msgstr ""
 
@@ -1630,14 +1768,14 @@ msgstr ""
 msgid "Deny"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:128
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3548
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3858
-#: app/routes/organizations+/create.tsx:737
+#: app/components/settings/cards/organization/shop-card.tsx:268
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3580
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3890
+#: app/routes/organizations+/create.tsx:773
 msgid "Description"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5456
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5478
 msgid "Desktop"
 msgstr ""
 
@@ -1663,7 +1801,7 @@ msgstr ""
 msgid "Didn't receive the email? Check your spam folder, or try again with a different email address."
 msgstr ""
 
-#: app/components/organization-invitations.tsx:240
+#: app/components/organization-invitations.tsx:245
 msgid "Disable"
 msgstr ""
 
@@ -1686,11 +1824,11 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:92
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:77
 msgid "Dispatch personalized email with merge tags"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:96
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:81
 msgid "Dispatch text message with merge tags"
 msgstr ""
 
@@ -1698,7 +1836,7 @@ msgstr ""
 msgid "DNS setup"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:508
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:486
 msgid "Does Not Equal"
 msgstr ""
 
@@ -1710,14 +1848,16 @@ msgstr ""
 msgid "Don't have an account?"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:163
+#: ../../packages/ai/src/components/ai-chat.tsx:210
 #: app/components/data-table.tsx:237
 #: app/components/data-table.tsx:268
-#: app/components/data-table.tsx:947
+#: app/components/data-table.tsx:955
 #: app/components/settings/backup-codes-display.tsx:108
 msgid "Done"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1603
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1635
 msgid "Double-click a block to add it instantly"
 msgstr ""
 
@@ -1737,26 +1877,28 @@ msgstr ""
 msgid "Download your data"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:312
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:297
 msgid "draft"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:57
-#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:52
 #: ../../packages/marketing/src/i18n/campaign-labels.ts:6
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:53
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:239
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:113
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:394
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5743
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:403
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5762
 msgid "Draft"
 msgstr ""
+
+#: ../../packages/ai/src/components/ai-chat.tsx:415
+msgid "Draft something for me"
+msgstr "Draft something for me"
 
 #: app/components/data-table.tsx:148
 msgid "Drag to reorder"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:630
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:643
 msgid "Drag to reorder column"
 msgstr ""
 
@@ -1764,12 +1906,12 @@ msgstr ""
 msgid "Duplicate"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:207
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:185
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:281
 msgid "Duration"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:523
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:501
 msgid "e.g. @gmail.com"
 msgstr ""
 
@@ -1789,19 +1931,19 @@ msgstr ""
 msgid "e.g. bob@gmail.com"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:190
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:168
 msgid "e.g. checkout_abandoned, tier_upgraded"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:173
-msgid "e.g. contact-us, demo-request"
-msgstr ""
+#~ msgid "e.g. contact-us, demo-request"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:388
 msgid "e.g. cust_123"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:286
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:264
 msgid "e.g. Sarah from Marketing"
 msgstr ""
 
@@ -1810,10 +1952,10 @@ msgid "e.g. urgent, meeting, project"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:158
-msgid "e.g. VIP, lead-hot, subscriber"
-msgstr ""
+#~ msgid "e.g. VIP, lead-hot, subscriber"
+#~ msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:273
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:251
 msgid "e.g. Welcome {{name}}!"
 msgstr ""
 
@@ -1827,27 +1969,38 @@ msgstr ""
 
 #: app/components/data-table.tsx:376
 #: app/components/favorite-notes.tsx:110
-#: app/routes/_app+/$orgSlug_+/notes-table.tsx:81
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:420
+#: app/components/note/comment-item.tsx:209
+#: app/routes/_app+/$orgSlug_+/notes-table.tsx:92
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:961
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:457
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:429
 msgid "Edit"
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:325
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:416
 msgid "Edit announcement"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:658
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:671
 msgid "Edit column"
 msgstr ""
+
+#: app/components/note/comment-input.tsx:63
+#: app/components/note/comment-item.tsx:233
+msgid "Edit comment..."
+msgstr "Edit comment..."
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:833
+msgid "Edit note"
+msgstr "Edit note"
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:98
 msgid "Edit Note"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:37
+#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:36
 #: ../../packages/marketing/src/i18n/campaign-labels.ts:14
-#: app/components/organization-invitations.tsx:419
+#: app/components/organization-invitations.tsx:424
 #: app/components/settings/cards/notification-preferences-card.tsx:25
 #: app/components/settings/cards/profile-card.tsx:132
 #: app/components/website/link-inspector.tsx:368
@@ -1857,8 +2010,8 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:451
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:319
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:429
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:304
 msgid "Email Address"
 msgstr ""
 
@@ -1866,7 +2019,7 @@ msgstr ""
 msgid "Email body content is required."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:330
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:308
 msgid "Email HTML Body"
 msgstr ""
 
@@ -1883,17 +2036,21 @@ msgstr ""
 msgid "Emails sent"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:45
+#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:42
 msgid "Empty message"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:45
+#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:42
 msgid "Empty subject"
 msgstr ""
 
 #: app/components/settings/cards/organization/s3-storage-card.tsx:200
 msgid "Enable Custom S3 Storage"
 msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:194
+msgid "Enable hosted checkout"
+msgstr "Enable hosted checkout"
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:373
 msgid "Enabled"
@@ -1911,8 +2068,8 @@ msgstr ""
 msgid "Enter backup code"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:418
-#: app/routes/organizations+/create.tsx:1167
+#: app/components/organization-invitations.tsx:423
+#: app/routes/organizations+/create.tsx:1203
 msgid "Enter email address"
 msgstr ""
 
@@ -1959,7 +2116,7 @@ msgstr ""
 msgid "Enterprise Plan"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:117
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:102
 msgid "Epic Startup Team"
 msgstr ""
 
@@ -1968,7 +2125,7 @@ msgstr ""
 #: app/components/data-table.tsx:238
 #: app/components/data-table.tsx:269
 #: app/components/settings/cards/organization/announcement-sheet.tsx:271
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:325
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:344
 msgid "Error"
 msgstr ""
 
@@ -1984,7 +2141,7 @@ msgstr ""
 msgid "Event-driven workflows with triggers, delays, and actions."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:505
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:483
 msgid "Exactly Equals"
 msgstr ""
 
@@ -2022,14 +2179,14 @@ msgid "Expires {expireDate}"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:86
-msgid "Explain this platform"
-msgstr ""
+#~ msgid "Explain this platform"
+#~ msgstr ""
 
 #: app/components/settings/cards/privacy-card.tsx:67
 msgid "Export data"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3205
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3237
 msgid "Fade up"
 msgstr ""
 
@@ -2079,7 +2236,7 @@ msgstr ""
 msgid "Failed to format graph for validation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:782
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:870
 msgid "Failed to load AI Assistant"
 msgstr ""
 
@@ -2124,7 +2281,7 @@ msgstr ""
 msgid "Failed to save automation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:441
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:440
 msgid "Failed to save:"
 msgstr ""
 
@@ -2152,7 +2309,7 @@ msgstr ""
 msgid "Feature Preview"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3521
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3553
 msgid "Features"
 msgstr ""
 
@@ -2160,7 +2317,7 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:81
+#: ../../packages/ai/src/components/ai-chat.tsx:409
 msgid "Find potential issues"
 msgstr ""
 
@@ -2181,23 +2338,23 @@ msgid "Forgot your password?"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:169
-msgid "Form Identifier / Slug"
-msgstr ""
+#~ msgid "Form Identifier / Slug"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:32
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:50
-msgid "Form Submitted"
-msgstr ""
+#~ msgid "Form Submitted"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3623
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3655
 msgid "Four"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:282
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:260
 msgid "From Name (Optional)"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:360
+#: app/components/settings/cards/organization/site-theme-card.tsx:791
 msgid "Full"
 msgstr ""
 
@@ -2206,11 +2363,11 @@ msgstr ""
 msgid "Full Name"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:315
+#: app/components/app-sidebar.tsx:330
 msgid "General"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:288
+#: app/components/app-sidebar.tsx:292
 #: app/components/settings/cards/organization/general-settings-card.tsx:58
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:15
 msgid "General Settings"
@@ -2228,7 +2385,7 @@ msgstr ""
 msgid "Generating Authentication Options"
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:346
+#: app/components/website/branding-panel.tsx:349
 msgid "Generating favicon variants…"
 msgstr ""
 
@@ -2242,41 +2399,45 @@ msgstr ""
 msgid "Generating..."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:365
+#: app/components/app-sidebar.tsx:380
 msgid "Get chrome extension"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:142
-#: app/components/app-sidebar.tsx:378
+#: app/components/app-sidebar.tsx:144
+#: app/components/app-sidebar.tsx:393
 msgid "Get help"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:89
+#: app/components/app-sidebar.tsx:91
 #: app/components/settings/cards/organization/billing-card.tsx:303
 msgid "Get in touch"
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:95
-#: app/components/onboarding-checklist.tsx:129
+#: app/components/onboarding-checklist.tsx:120
+#: app/components/onboarding-checklist.tsx:154
 #: app/components/ui/header.tsx:130
 msgid "Get Started"
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:90
+#: app/components/onboarding-checklist.tsx:115
 msgid "Get started: {completedCount} of {totalSteps} steps complete"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:147
-#: app/components/app-sidebar.tsx:384
+#: app/components/app-sidebar.tsx:149
+#: app/components/app-sidebar.tsx:399
 #: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:140
+#: ../../packages/ai/src/components/ai-chat.tsx:468
 msgid "Give me examples"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:195
+#: ../../packages/ai/src/components/ai-chat.tsx:278
+msgid "Go there"
+msgstr "Go there"
+
+#: app/components/app-sidebar.tsx:199
 msgid "Go to homepage"
 msgstr ""
 
@@ -2288,24 +2449,24 @@ msgstr ""
 msgid "Graph data missing"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:444
+#: app/components/settings/cards/organization/site-theme-card.tsx:875
 msgid "Gray color"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:224
+#: app/components/settings/cards/organization/shop-card.tsx:367
 msgid "Guest checkout"
 msgstr ""
 
 #: app/components/data-table.tsx:188
-#: app/components/data-table.tsx:805
+#: app/components/data-table.tsx:813
 msgid "Header"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:369
+#: app/components/settings/cards/organization/site-theme-card.tsx:800
 msgid "Headings"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:84
+#: ../../packages/ai/src/components/ai-chat.tsx:414
 msgid "Help me get started"
 msgstr ""
 
@@ -2313,7 +2474,7 @@ msgstr ""
 msgid "Help us tailor recommendations to your organization."
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:150
+#: app/routes/_auth+/waitlist.tsx:259
 msgid "Here's how to do it:"
 msgstr ""
 
@@ -2321,27 +2482,27 @@ msgstr ""
 msgid "Hi"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:107
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:92
 msgid "Hi {{name}}, Check out our latest update."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:351
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:329
 msgid "Hi {{name}}, Welcome to our service!"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:111
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:96
 msgid "Hi {{name}}, your account update is ready!"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:120
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:105
 msgid "Hi {{name}}, your Epic Startup account is ready."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:410
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:388
 msgid "Hi {{name}}, your order has been confirmed!"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:116
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:101
 msgid "Hi {{name}}, Your organization {{organizationName}} is ready."
 msgstr ""
 
@@ -2357,26 +2518,46 @@ msgstr ""
 msgid "Hi {email}, please complete your profile."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2522
+#: ../../packages/ai/src/components/ai-chat.tsx:675
+msgid "Hi, {userName}"
+msgstr "Hi, {userName}"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2554
 msgid "Hide from search engines"
 msgstr ""
 
+#: app/components/note/comment-item.tsx:291
+msgid "Hide replies ({replyCount})"
+msgstr "Hide replies ({replyCount})"
+
 #: app/components/website/link-inspector.tsx:455
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:379
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5659
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5692
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:381
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5671
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5704
 msgid "Home"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:306
+#: app/components/settings/cards/organization/shop-card.tsx:211
+msgid "Hosted checkout becomes available once the platform configures a merchant-of-record processor."
+msgstr "Hosted checkout becomes available once the platform configures a merchant-of-record processor."
+
+#: app/components/settings/cards/organization/shop-card.tsx:95
+msgid "Hosted checkout not connected"
+msgstr "Hosted checkout not connected"
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:291
 msgid "hours"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:242
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:220
 msgid "Hours"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:142
+#: ../../packages/ai/src/components/ai-chat.tsx:675
+msgid "How can I help?"
+msgstr "How can I help?"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:470
 msgid "How can I implement this?"
 msgstr ""
 
@@ -2393,7 +2574,7 @@ msgstr ""
 msgid "I've Copied the Key"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:133
+#: ../../packages/ai/src/components/ai-chat.tsx:461
 msgid "Identify risks"
 msgstr ""
 
@@ -2413,7 +2594,7 @@ msgstr ""
 msgid "Image to crop"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3869
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3901
 msgid "Image URL"
 msgstr ""
 
@@ -2441,22 +2622,23 @@ msgstr ""
 msgid "Includes {includesSeatsValue} user seats"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1363
+#: app/routes/organizations+/create.tsx:1399
 msgid "Includes {seats} user seats"
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:269
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:323
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:342
 msgid "Info"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:295
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:364
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:273
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:342
 msgid "Insert Merge Tags:"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:325
+#: app/components/app-sidebar.tsx:340
 #: app/components/settings/cards/organization/integrations-card.tsx:58
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1000
 msgid "Integrations"
 msgstr ""
 
@@ -2473,15 +2655,19 @@ msgstr ""
 msgid "Invalid Verification Type"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4592
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4624
 msgid "Inverted"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:252
+#: app/components/organization-invitations.tsx:257
 msgid "Invite by email"
 msgstr ""
 
-#: app/components/team-switcher.tsx:199
+#: app/components/settings/cards/organization/shop-card.tsx:163
+msgid "Invite Checkout payout contact"
+msgstr "Invite Checkout payout contact"
+
+#: app/components/team-switcher.tsx:204
 msgid "Invite members"
 msgstr ""
 
@@ -2489,15 +2675,15 @@ msgstr ""
 msgid "Invite new members"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:914
+#: app/routes/organizations+/create.tsx:950
 msgid "Invite team members"
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:327
+#: app/routes/_app+/organizations.tsx:277
 msgid "Invited by {invitedBy}"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:323
+#: app/components/organization-invitations.tsx:328
 msgid "Invited by {inviterName}"
 msgstr ""
 
@@ -2513,11 +2699,11 @@ msgstr ""
 msgid "IP Address"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:480
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:458
 msgid "Is Verified (True)"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:248
+#: app/routes/_auth+/waitlist.tsx:365
 msgid "Join Discord server"
 msgstr ""
 
@@ -2525,7 +2711,7 @@ msgstr ""
 msgid "Join organization"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:229
+#: app/routes/_auth+/waitlist.tsx:343
 msgid "Join our Discord"
 msgstr ""
 
@@ -2537,15 +2723,15 @@ msgstr ""
 msgid "journeyId is required"
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:244
+#: app/routes/_app+/organizations.tsx:194
 msgid "Jump into an existing organization, accept pending invitations, or add a new one."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:321
+#: app/routes/_app+/$orgSlug_+/notes.tsx:326
 msgid "Kanban"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:311
+#: app/routes/_app+/$orgSlug_+/notes.tsx:316
 msgid "Kanban board"
 msgstr ""
 
@@ -2570,7 +2756,7 @@ msgstr ""
 msgid "Languages"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:359
+#: app/components/settings/cards/organization/site-theme-card.tsx:790
 msgid "Large"
 msgstr ""
 
@@ -2608,9 +2794,9 @@ msgstr ""
 msgid "Launch Test Run in Builder"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3156
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3316
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3605
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3188
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3348
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3637
 msgid "Layout"
 msgstr ""
 
@@ -2619,21 +2805,26 @@ msgstr ""
 msgid "Learn more"
 msgstr ""
 
+#: app/components/note/comment-input.tsx:61
+#: app/components/note/comment-item.tsx:314
+msgid "Leave a reply..."
+msgstr "Leave a reply..."
+
 #: app/components/settings/cards/organization/s3-storage-card.tsx:308
 msgid "Leave empty to keep existing secret key, or enter a new one to update."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2283
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2315
 msgid "Leave empty to keep this page at the root of your site."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3177
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3373
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3991
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3209
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3405
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4023
 msgid "Left"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:343
+#: app/components/settings/cards/organization/site-theme-card.tsx:776
 msgid "Light"
 msgstr ""
 
@@ -2643,21 +2834,21 @@ msgstr ""
 
 #: app/components/data-table.tsx:257
 #: app/components/data-table.tsx:274
-#: app/components/data-table.tsx:863
+#: app/components/data-table.tsx:871
 msgid "Limit"
 msgstr ""
 
 #: app/components/website/link-inspector.tsx:642
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:534
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:599
 msgid "Link"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4138
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4170
 msgid "Link columns"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:364
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:375
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:363
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:374
 msgid "Link copied!"
 msgstr ""
 
@@ -2669,7 +2860,7 @@ msgstr ""
 msgid "Link URL"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:525
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:590
 msgid "Live"
 msgstr ""
 
@@ -2677,11 +2868,15 @@ msgstr ""
 msgid "Loading"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:798
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:894
 msgid "Loading AI Assistant..."
 msgstr ""
 
-#: app/components/note/integration-controls.tsx:339
+#: app/components/ai/global-ai-panel.tsx:68
+msgid "Loading assistant…"
+msgstr "Loading assistant…"
+
+#: app/components/note/integration-controls.tsx:347
 msgid "Loading channels..."
 msgstr ""
 
@@ -2706,20 +2901,20 @@ msgstr ""
 msgid "Login with a passkey"
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:259
-#: app/routes/organizations+/create.tsx:587
+#: app/components/website/branding-panel.tsx:262
+#: app/routes/organizations+/create.tsx:623
 msgid "Logo"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2997
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3029
 msgid "Logo & colors"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3334
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3366
 msgid "Logo panel"
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:251
+#: app/components/website/branding-panel.tsx:254
 msgid "Logo, fonts, colors, and corners apply to every page. The preview updates as you change them."
 msgstr ""
 
@@ -2727,11 +2922,11 @@ msgstr ""
 msgid "Logout"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3948
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3980
 msgid "Look"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3672
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3704
 msgid "Loose"
 msgstr ""
 
@@ -2743,11 +2938,11 @@ msgstr ""
 msgid "Make a copy"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:106
+#: ../../packages/ai/src/components/ai-chat.tsx:434
 msgid "Make it more detailed"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:315
+#: app/components/note/share-note-button.tsx:325
 msgid "Make Public"
 msgstr ""
 
@@ -2812,9 +3007,9 @@ msgstr ""
 msgid "Manage your public organization website and appearance."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:40
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:52
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:76
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:28
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:37
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:61
 msgid "Manual Trigger"
 msgstr ""
 
@@ -2826,7 +3021,7 @@ msgstr ""
 msgid "Mark as read"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:253
+#: app/components/app-sidebar.tsx:257
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:147
 msgid "Marketing"
 msgstr ""
@@ -2839,26 +3034,26 @@ msgstr ""
 msgid "MCP OAuth Setup Instructions"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:335
+#: app/components/app-sidebar.tsx:350
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:1341
 msgid "MCP Server"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3224
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3256
 msgid "Media"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3730
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3762
 msgid "Media URL"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:355
-#: app/components/settings/cards/organization/site-theme-card.tsx:358
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4701
+#: app/components/settings/cards/organization/site-theme-card.tsx:786
+#: app/components/settings/cards/organization/site-theme-card.tsx:789
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4733
 msgid "Medium"
 msgstr ""
 
-#: app/components/team-switcher.tsx:127
+#: app/components/team-switcher.tsx:132
 msgid "member"
 msgstr ""
 
@@ -2866,11 +3061,11 @@ msgstr ""
 msgid "Member"
 msgstr ""
 
-#: app/components/team-switcher.tsx:129
+#: app/components/team-switcher.tsx:134
 msgid "members"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:320
+#: app/components/app-sidebar.tsx:335
 #: app/components/organization-members.tsx:141
 msgid "Members"
 msgstr ""
@@ -2880,7 +3075,7 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2356
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2388
 msgid "Meta description"
 msgstr ""
 
@@ -2892,24 +3087,24 @@ msgstr ""
 msgid "Migrate existing org media after saving"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:305
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:290
 msgid "minutes"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:239
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:217
 msgid "Minutes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5479
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5501
 msgid "Mobile"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:221
+#: app/components/settings/cards/organization/site-theme-card.tsx:257
 msgid "Mono"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:200
-#: app/routes/organizations+/create.tsx:844
+#: app/routes/organizations+/create.tsx:880
 msgid "Monthly"
 msgstr ""
 
@@ -2926,16 +3121,16 @@ msgstr ""
 msgid "Multi-factor authentication"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4587
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4619
 msgid "Muted"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:460
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:322
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:438
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:307
 #: app/components/settings/cards/organization/general-settings-card.tsx:82
 #: app/components/settings/cards/profile-card.tsx:97
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4097
-#: app/routes/organizations+/create.tsx:654
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4129
+#: app/routes/organizations+/create.tsx:690
 msgid "Name"
 msgstr ""
 
@@ -2947,7 +3142,7 @@ msgstr ""
 msgid "Navigate to MCP Servers configuration"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3025
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3057
 msgid "Navigation links"
 msgstr ""
 
@@ -2997,7 +3192,7 @@ msgstr ""
 msgid "New icon preview"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:329
+#: app/routes/_app+/$orgSlug_+/notes.tsx:334
 msgid "New Note"
 msgstr ""
 
@@ -3005,7 +3200,7 @@ msgstr ""
 msgid "New page"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:552
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:563
 msgid "New Page"
 msgstr ""
 
@@ -3022,11 +3217,11 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:88
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:86
 msgid "No"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:181
+#: app/components/organization-invitations.tsx:186
 msgid "No active invite link"
 msgstr ""
 
@@ -3038,11 +3233,11 @@ msgstr ""
 msgid "No active subscription"
 msgstr ""
 
-#: app/components/note/activity-log.tsx:286
+#: app/components/note/activity-log.tsx:206
 msgid "No activity yet"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:515
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:580
 msgid "No announcements yet"
 msgstr ""
 
@@ -3066,7 +3261,7 @@ msgstr ""
 msgid "No campaigns yet."
 msgstr ""
 
-#: app/components/note/integration-controls.tsx:348
+#: app/components/note/integration-controls.tsx:356
 msgid "No channels available"
 msgstr ""
 
@@ -3074,13 +3269,17 @@ msgstr ""
 msgid "No clients have been authorized yet"
 msgstr ""
 
-#: app/components/note/comments-section.tsx:184
+#: app/components/note/comments-section.tsx:211
 msgid "No comments yet"
 msgstr ""
 
 #: ../../packages/marketing/src/components/campaign-detail.tsx:41
 msgid "No contact on file"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:816
+msgid "No content yet"
+msgstr "No content yet"
 
 #: ../../packages/marketing/src/components/campaign-detail.tsx:120
 msgid "No delivery records yet."
@@ -3090,7 +3289,7 @@ msgstr ""
 msgid "No discrete action step dispatches recorded for this run."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2658
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2690
 msgid "No editor available for this block type."
 msgstr ""
 
@@ -3112,15 +3311,15 @@ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/__org-note-editor.tsx:381
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:134
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:937
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1162
 msgid "No note with the id \"{noteId}\" exists"
 msgstr ""
 
-#: app/components/leadership-card.tsx:74
+#: app/components/leadership-card.tsx:62
 msgid "No notes created yet"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:375
+#: app/routes/_app+/$orgSlug_+/notes.tsx:380
 msgid "No notes found"
 msgstr ""
 
@@ -3128,24 +3327,24 @@ msgstr ""
 msgid "No notes found."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:377
+#: app/routes/_app+/$orgSlug_+/notes.tsx:382
 msgid "No notes match your search for \"{searchValue}\". Try a different search term or create a new note."
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:433
+#: app/routes/_app+/organizations.tsx:383
 msgid "No organization found"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:429
+#: app/routes/_app+/$orgSlug_+/notes.tsx:434
 msgid "No organization with the slug \"{orgSlug}\" exists"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:586
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:597
 msgid "No pages match that search"
 msgstr ""
 
 #: app/components/website/link-inspector.tsx:447
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:560
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:571
 msgid "No pages yet"
 msgstr ""
 
@@ -3161,7 +3360,7 @@ msgstr ""
 msgid "No results."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5392
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5426
 msgid "No sections yet"
 msgstr ""
 
@@ -3173,57 +3372,69 @@ msgstr ""
 msgid "No worries, we'll send you reset instructions."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-palette.tsx:49
+#: ../../packages/marketing-workflow/src/node-palette.tsx:58
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:282
 msgid "Nodes"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:311
-#: app/components/settings/cards/organization/site-theme-card.tsx:356
+#: app/components/settings/cards/organization/site-theme-card.tsx:787
 #: app/components/website/link-inspector.tsx:628
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3165
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3195
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3657
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3197
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3227
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3689
 msgid "None"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:76
+#: app/components/settings/cards/organization/shop-card.tsx:106
 msgid "Not connected"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:483
+#: ../../packages/ai/src/components/ai-chat.tsx:287
+msgid "Not now"
+msgstr "Not now"
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:461
 msgid "Not Verified (False)"
 msgstr ""
 
-#: app/components/leadership-card.tsx:118
+#: app/components/leadership-card.tsx:106
 msgid "note"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:435
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:971
+msgid "Note actions"
+msgstr "Note actions"
+
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:434
 msgid "Note content..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:408
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:407
 msgid "Note title..."
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:268
+#: app/routes/_auth+/waitlist.tsx:386
 msgid "Note: Discord verification is currently manual. Contact support after joining to claim your points."
 msgstr ""
 
-#: app/components/leadership-card.tsx:116
+#: app/components/leadership-card.tsx:104
 msgid "notes"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:241
+#: app/components/app-sidebar.tsx:245
 #: app/components/command-menu.tsx:137
-#: app/routes/_app+/$orgSlug_+/notes.tsx:284
+#: app/routes/_app+/$orgSlug_+/notes.tsx:289
 msgid "Notes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:389
+#: app/routes/_app+/$orgSlug_+/notes.tsx:394
 msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
 msgstr ""
+
+#: ../../packages/ai/src/components/ai-chat.tsx:680
+msgid "Notes, navigation, and your site — just ask."
+msgstr "Notes, navigation, and your site — just ask."
 
 #: app/components/ui/notification-bell.tsx:225
 msgid "Nothing here yet!"
@@ -3233,7 +3444,7 @@ msgstr ""
 msgid "Notification Preferences"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:340
+#: app/components/app-sidebar.tsx:355
 msgid "Notifications"
 msgstr ""
 
@@ -3249,18 +3460,22 @@ msgstr ""
 msgid "OAuth tokens are scoped to your organization ({orgSlug})"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:165
+#: app/routes/_auth+/waitlist.tsx:271
 msgid "of {totalUsers} people"
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:114
-#: app/components/onboarding-checklist.tsx:174
+#: app/components/onboarding-checklist.tsx:139
+#: app/components/onboarding-checklist.tsx:199
 msgid "Onboarding progress"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:935
 msgid "Once you connect an AI client using the setup instructions below, it will appear here."
 msgstr ""
+
+#: ../../packages/ai/src/components/ai-chat.tsx:815
+msgid "One moment…"
+msgstr "One moment…"
 
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:85
 msgid "One-time email and SMS"
@@ -3274,7 +3489,7 @@ msgstr ""
 msgid "One-time Password URI"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:185
+#: app/components/note/share-note-button.tsx:195
 msgid "Only selected members can access this note"
 msgstr ""
 
@@ -3286,6 +3501,14 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:268
+msgid "Open {routeTitle}?"
+msgstr "Open {routeTitle}?"
+
+#: app/components/settings/cards/organization/shop-card.tsx:174
+msgid "Open Checkout dashboard"
+msgstr "Open Checkout dashboard"
+
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:779
 msgid "Open Claude Desktop and go to Settings → Developer"
 msgstr ""
@@ -3294,9 +3517,13 @@ msgstr ""
 msgid "Open Cursor Settings (Cmd/Ctrl + ,)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2393
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2425
 msgid "Open Graph image"
 msgstr ""
+
+#: app/components/settings/cards/organization/shop-card.tsx:205
+msgid "Open hosted dashboard"
+msgstr "Open hosted dashboard"
 
 #: app/components/website/link-inspector.tsx:591
 #: app/components/website/link-inspector.tsx:593
@@ -3316,7 +3543,11 @@ msgstr ""
 msgid "Open menu"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5780
+#: app/components/settings/cards/organization/shop-card.tsx:142
+msgid "Open payout dashboard"
+msgstr "Open payout dashboard"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5806
 msgid "Open preview"
 msgstr ""
 
@@ -3325,8 +3556,8 @@ msgid "Open rate"
 msgstr ""
 
 #: app/components/settings/cards/organization/shop-card.tsx:105
-msgid "Open Stripe dashboard"
-msgstr ""
+#~ msgid "Open Stripe dashboard"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:237
 msgid "Open Visual Builder"
@@ -3337,15 +3568,19 @@ msgstr ""
 msgid "Opened {0}"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:244
+msgid "Opened {routeTitle}"
+msgstr "Opened {routeTitle}"
+
 #: app/components/settings/cards/sessions-card.tsx:277
 msgid "Operating System"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:290
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:275
 msgid "operator"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:64
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:49
 msgid "Operator Invited"
 msgstr ""
 
@@ -3357,15 +3592,15 @@ msgstr ""
 msgid "Or continue with email or username"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:204
+#: app/components/settings/cards/organization/shop-card.tsx:345
 msgid "Orders placed on your public site."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:60
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:45
 msgid "Organization Created"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:595
+#: app/routes/organizations+/create.tsx:631
 msgid "Organization logo preview"
 msgstr ""
 
@@ -3373,7 +3608,7 @@ msgstr ""
 msgid "Organization site"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:982
+#: app/routes/organizations+/create.tsx:1018
 msgid "Organization size"
 msgstr ""
 
@@ -3381,10 +3616,10 @@ msgstr ""
 msgid "Organization Size"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:133
+#: app/components/app-sidebar.tsx:135
 #: app/components/nav-user.tsx:189
-#: app/components/team-switcher.tsx:150
-#: app/routes/_app+/organizations.tsx:242
+#: app/components/team-switcher.tsx:155
+#: app/routes/_app+/organizations.tsx:192
 msgid "Organizations"
 msgstr ""
 
@@ -3392,27 +3627,27 @@ msgstr ""
 msgid "Organizations are used to group your projects."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:259
+#: app/components/app-sidebar.tsx:263
 #: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:657
 msgid "Overview"
 msgstr ""
 
 #: app/components/website/link-inspector.tsx:366
 #: app/components/website/link-inspector.tsx:419
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:598
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:609
 msgid "Page"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:409
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:418
 msgid "Page actions"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5670
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5682
 msgid "Page settings"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2238
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4885
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2270
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4917
 msgid "Page Settings"
 msgstr ""
 
@@ -3421,17 +3656,17 @@ msgid "Page Title"
 msgstr ""
 
 #: app/components/website/create-page-dialog.tsx:171
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2249
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2281
 msgid "Page URL"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:293
+#: app/components/app-sidebar.tsx:297
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:22
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:538
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:549
 msgid "Pages"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:420
+#: app/components/settings/cards/organization/site-theme-card.tsx:851
 msgid "Paragraphs, navigation, and other text."
 msgstr ""
 
@@ -3472,7 +3707,7 @@ msgstr ""
 msgid "Pause"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:314
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:299
 msgid "paused"
 msgstr ""
 
@@ -3482,15 +3717,15 @@ msgstr ""
 msgid "Paused"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:260
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:258
 msgid "Pausing automation..."
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:72
+#: app/components/settings/cards/organization/shop-card.tsx:90
 msgid "Payments enabled"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:81
+#: app/components/settings/cards/organization/shop-card.tsx:115
 msgid "Payouts enabled"
 msgstr ""
 
@@ -3499,13 +3734,13 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:305
-#: app/routes/_app+/organizations.tsx:283
+#: app/components/organization-invitations.tsx:310
+#: app/routes/_app+/organizations.tsx:233
 msgid "Pending Invitations"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:418
-#: app/routes/organizations+/create.tsx:1351
+#: app/routes/organizations+/create.tsx:1387
 msgid "per month"
 msgstr ""
 
@@ -3513,7 +3748,7 @@ msgstr ""
 msgid "Performance metrics"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:159
+#: app/components/organization-invitations.tsx:164
 msgid "Personal invite link"
 msgstr ""
 
@@ -3526,80 +3761,80 @@ msgstr ""
 msgid "Phone links only work on devices that can place phone calls."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:454
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:320
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:432
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:305
 msgid "Phone Number"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:457
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:321
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:435
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:306
 msgid "Phone Verification Status"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:20
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:16
 msgid "Phone Verified"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:47
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:34
 msgid "Phone Verified (OTP Success)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3166
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3346
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3748
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3198
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3378
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3780
 msgid "Photo"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3954
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3986
 msgid "Photo + card"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3329
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3361
 msgid "Photo + text"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3189
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3221
 msgid "Photo overlay"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3389
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3629
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3421
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3661
 msgid "Photo shape"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3367
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3399
 msgid "Photo side"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3683
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3715
 msgid "Photos and videos"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1546
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1578
 msgid "Pick a block to insert into your page."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4582
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4614
 msgid "Plain"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:346
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:324
 msgid "Plaintext Fallback (Optional)"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:324
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:309
 msgid "Plan Name"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1278
+#: app/routes/organizations+/create.tsx:1314
 msgid "Plan not available"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4255
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4287
 msgid "Platform"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1281
+#: app/routes/organizations+/create.tsx:1317
 msgid "Please check configuration"
 msgstr ""
 
@@ -3632,11 +3867,11 @@ msgstr ""
 msgid "PNG only, up to 5 MB. Recommended size: 512×512."
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:338
+#: app/components/website/branding-panel.tsx:341
 msgid "PNG, up to 5 MB. Recommended 512×512."
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:315
+#: app/components/website/branding-panel.tsx:318
 msgid "PNG, up to 5 MB. Used as logo and favicon."
 msgstr ""
 
@@ -3661,19 +3896,19 @@ msgid "Prerender"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:280
-msgid "Press Enter to send, Shift+Enter for new line"
-msgstr ""
+#~ msgid "Press Enter to send, Shift+Enter for new line"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5726
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5745
 msgid "Preview"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:143
+#: app/components/settings/cards/organization/shop-card.tsx:283
 msgid "Price (USD)"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:389
-#: app/routes/organizations+/create.tsx:1315
+#: app/routes/organizations+/create.tsx:1351
 msgid "Price not configured"
 msgstr ""
 
@@ -3685,16 +3920,16 @@ msgstr ""
 msgid "Primary"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3124
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4013
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3156
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4045
 msgid "Primary button"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:118
+#: ../../packages/ai/src/components/ai-chat.tsx:446
 msgid "Prioritize these tasks"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1384
+#: app/routes/organizations+/create.tsx:1420
 msgid "Priority support"
 msgstr ""
 
@@ -3702,11 +3937,11 @@ msgstr ""
 msgid "Privacy & Data Rights"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:635
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:682
 msgid "Private"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-palette.tsx:77
+#: ../../packages/marketing-workflow/src/node-palette.tsx:86
 #: ../../packages/marketing/src/components/campaign-form.tsx:72
 msgid "Pro"
 msgstr ""
@@ -3716,21 +3951,21 @@ msgstr ""
 msgid "Processing"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:116
+#: app/components/settings/cards/organization/shop-card.tsx:254
 msgid "Product name"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:121
+#: app/components/app-sidebar.tsx:123
 #: app/components/user-dropdown.tsx:54
 #: app/routes/_auth+/onboarding_.$provider.tsx:250
 msgid "Profile"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:24
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:20
 msgid "Profile Completed"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:48
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:35
 msgid "Profile Completed (Name/Email)"
 msgstr ""
 
@@ -3739,14 +3974,14 @@ msgstr ""
 msgid "Profile Settings"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:179
+#: app/components/note/share-note-button.tsx:189
 msgid "Public Access"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:208
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:395
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:438
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5755
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:447
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5776
 msgid "Publish"
 msgstr ""
 
@@ -3758,20 +3993,20 @@ msgstr ""
 msgid "Publish and activate automation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5757
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5778
 msgid "Publish updates"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:187
+#: app/components/settings/cards/organization/shop-card.tsx:327
 msgid "Publish your site before sharing the shop link with customers."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:392
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5741
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:401
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5760
 msgid "Published"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:250
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:248
 msgid "Publishing and activating automation..."
 msgstr ""
 
@@ -3791,11 +4026,11 @@ msgstr ""
 msgid "QR code for two-factor authentication setup. Scan this code with your authenticator app."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3469
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3501
 msgid "Question"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3452
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3484
 msgid "Questions"
 msgstr ""
 
@@ -3803,16 +4038,15 @@ msgstr ""
 msgid "Questions about billing?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:343
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:351
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:350
 msgid "Quick edit"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4086
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4118
 msgid "Quote"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4106
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4138
 msgid "Rating"
 msgstr ""
 
@@ -3820,11 +4054,19 @@ msgstr ""
 msgid "Read documentation"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:141
+msgid "Read page details"
+msgstr "Read page details"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:140
+msgid "Reading page details"
+msgstr "Reading page details"
+
 #: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:204
 msgid "Recent campaigns"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:201
+#: app/components/settings/cards/organization/shop-card.tsx:342
 msgid "Recent orders"
 msgstr ""
 
@@ -3840,7 +4082,11 @@ msgstr ""
 msgid "Recommended for"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5502
+#: app/components/settings/cards/organization/shop-card.tsx:161
+msgid "Refresh Checkout setup"
+msgstr "Refresh Checkout setup"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5797
 msgid "Refresh preview"
 msgstr ""
 
@@ -3872,7 +4118,7 @@ msgstr ""
 msgid "Registered {timeAgo} ago"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3667
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3699
 msgid "Regular"
 msgstr ""
 
@@ -3880,7 +4126,7 @@ msgstr ""
 msgid "Reject"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:788
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:878
 msgid "Reload page"
 msgstr ""
 
@@ -3895,11 +4141,11 @@ msgstr ""
 msgid "Remember your password?"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:230
+#: app/components/note/share-note-button.tsx:240
 #: app/components/settings/cards/organization/site-icon-card.tsx:224
-#: app/components/settings/cards/organization/site-theme-card.tsx:302
-#: app/components/website/branding-panel.tsx:311
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2462
+#: app/components/settings/cards/organization/site-theme-card.tsx:338
+#: app/components/website/branding-panel.tsx:314
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2494
 msgid "Remove"
 msgstr ""
 
@@ -3916,11 +4162,11 @@ msgstr ""
 msgid "Remove image"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1226
+#: app/routes/organizations+/create.tsx:1262
 msgid "Remove invite"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4202
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4234
 msgid "Remove link"
 msgstr ""
 
@@ -3932,8 +4178,16 @@ msgstr ""
 msgid "Remove member"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:292
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2436
+#: ../../packages/ai/src/components/ai-chat.tsx:157
+msgid "Removed section"
+msgstr "Removed section"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:156
+msgid "Removing section"
+msgstr "Removing section"
+
+#: app/components/settings/cards/organization/site-theme-card.tsx:328
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2468
 msgid "Replace"
 msgstr ""
 
@@ -3941,16 +4195,17 @@ msgstr ""
 msgid "Replace Asset..."
 msgstr ""
 
-#: app/components/note/comment-input.tsx:175
-#: app/components/note/comment-item.tsx:243
+#: app/components/note/comment-input.tsx:164
+#: app/components/note/comment-input.tsx:285
+#: app/components/note/comment-item.tsx:278
 msgid "Reply"
 msgstr ""
 
 #: app/components/note/comment-input.tsx:150
-msgid "Replying to comment"
-msgstr ""
+#~ msgid "Replying to comment"
+#~ msgstr ""
 
-#: app/components/app-sidebar.tsx:235
+#: app/components/app-sidebar.tsx:239
 msgid "Reports"
 msgstr ""
 
@@ -3978,9 +4233,13 @@ msgstr ""
 msgid "required"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:229
+#: app/components/organization-invitations.tsx:234
 msgid "Reset"
 msgstr ""
+
+#: app/components/settings/cards/organization/site-theme-card.tsx:709
+msgid "Reset all"
+msgstr "Reset all"
 
 #: app/routes/_auth+/reset-password.tsx:191
 msgid "Reset password"
@@ -3990,9 +4249,13 @@ msgstr ""
 msgid "Reset Password"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:721
+#: app/routes/organizations+/create.tsx:757
 msgid "Reset to auto-generated"
 msgstr ""
+
+#: app/components/settings/cards/organization/site-theme-card.tsx:575
+msgid "Reset to preset"
+msgstr "Reset to preset"
 
 #: ../../packages/ai/src/components/ai-elements/tool.tsx:149
 msgid "Result"
@@ -4003,11 +4266,11 @@ msgid "Retry"
 msgstr ""
 
 #: app/components/data-table.tsx:286
-#: app/components/data-table.tsx:870
+#: app/components/data-table.tsx:878
 msgid "Reviewers"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4068
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4100
 msgid "Reviews"
 msgstr ""
 
@@ -4036,17 +4299,17 @@ msgstr ""
 msgid "Revoking..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3378
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4001
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3410
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4033
 msgid "Right"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3395
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3635
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3427
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3667
 msgid "Rounded"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:534
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:512
 msgid "Routing Logic:"
 msgstr ""
 
@@ -4080,42 +4343,42 @@ msgid "Running"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:33
-msgid "Runs on website form submission"
-msgstr ""
+#~ msgid "Runs on website form submission"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:17
-msgid "Runs when a new customer registers"
-msgstr ""
+#~ msgid "Runs when a new customer registers"
+#~ msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:61
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:46
 msgid "Runs when a new tenant organization is created"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:29
-msgid "Runs when a tag is applied to customer"
-msgstr ""
+#~ msgid "Runs when a tag is applied to customer"
+#~ msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:73
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:58
 msgid "Runs when a tenant cancels their subscription"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:69
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:54
 msgid "Runs when a tenant starts a paid subscription"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:65
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:50
 msgid "Runs when an operator is invited to an organization"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:37
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:25
 msgid "Runs when custom event triggers"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:25
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:21
 msgid "Runs when customer updates name/email"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:21
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:17
 msgid "Runs when customer verifies phone OTP"
 msgstr ""
 
@@ -4127,7 +4390,7 @@ msgstr ""
 msgid "S3 Storage Configuration"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:193
+#: app/components/settings/cards/organization/site-theme-card.tsx:229
 msgid "Sans"
 msgstr ""
 
@@ -4135,28 +4398,29 @@ msgstr ""
 msgid "Saudi Arabia (KSA)"
 msgstr ""
 
+#: app/components/note/comment-input.tsx:162
 #: app/components/organization-members.tsx:112
 #: app/components/settings/cards/organization/s3-storage-card.tsx:441
 #: app/components/settings/cards/organization/verified-domain-card.tsx:124
 #: app/components/settings/email-form.tsx:90
 #: app/components/ui/photo-crop-form.tsx:226
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:843
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:858
 msgid "Save"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:213
-#: app/routes/organizations+/create.tsx:860
+#: app/routes/organizations+/create.tsx:896
 msgid "Save 20%"
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:375
+#: app/components/website/branding-panel.tsx:378
 msgid "Save Branding"
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:523
 #: app/components/settings/cards/organization/general-settings-card.tsx:112
 #: app/components/settings/cards/profile-card.tsx:192
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:415
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:414
 msgid "Save changes"
 msgstr ""
 
@@ -4168,7 +4432,7 @@ msgstr ""
 msgid "Save languages"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:173
+#: app/components/settings/cards/organization/shop-card.tsx:313
 msgid "Save product"
 msgstr ""
 
@@ -4193,7 +4457,7 @@ msgstr ""
 msgid "Saving {headerValue}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:238
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:236
 msgid "Saving automation draft..."
 msgstr ""
 
@@ -4220,8 +4484,8 @@ msgstr ""
 #: app/components/search-bar.tsx:42
 #: app/components/search-bar.tsx:49
 #: app/components/search-bar.tsx:62
-msgid "Search"
-msgstr ""
+#~ msgid "Search"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:282
 msgid "Search automations..."
@@ -4239,32 +4503,32 @@ msgstr ""
 msgid "Search for users in your organization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:342
+#: app/routes/_app+/$orgSlug_+/notes.tsx:347
 msgid "Search notes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:343
+#: app/routes/_app+/$orgSlug_+/notes.tsx:348
 msgid "Search notes by title or content..."
 msgstr ""
 
 #: app/components/command-menu.tsx:102
-#: app/components/site-header.tsx:47
+#: app/components/site-header.tsx:51
 msgid "Search notes..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:576
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:587
 msgid "Search pages..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2297
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2329
 msgid "Search preview"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:251
+#: app/components/note/share-note-button.tsx:261
 msgid "Search team members..."
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:256
+#: app/routes/_app+/organizations.tsx:206
 msgid "Search..."
 msgstr ""
 
@@ -4272,8 +4536,8 @@ msgstr ""
 msgid "Secondary"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3140
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4026
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3172
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4058
 msgid "Secondary button"
 msgstr ""
 
@@ -4281,7 +4545,7 @@ msgstr ""
 msgid "Secret Access Key"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3212
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3244
 msgid "Section height"
 msgstr ""
 
@@ -4289,8 +4553,8 @@ msgstr ""
 msgid "Section Type"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4873
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5375
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4905
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5409
 msgid "Sections"
 msgstr ""
 
@@ -4298,7 +4562,7 @@ msgstr ""
 msgid "Secure your account with an extra verification step"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:127
+#: app/components/app-sidebar.tsx:129
 #: app/routes/mcp+/authorize.tsx:405
 msgid "Security"
 msgstr ""
@@ -4316,11 +4580,11 @@ msgstr ""
 msgid "Select a starting layout for your new page."
 msgstr ""
 
-#: app/components/data-table.tsx:844
+#: app/components/data-table.tsx:852
 msgid "Select a status"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:816
+#: app/routes/organizations+/create.tsx:852
 msgid "Select a subscription plan to get started with your organization. Your trial will begin after payment setup."
 msgstr ""
 
@@ -4328,7 +4592,7 @@ msgstr ""
 msgid "Select all"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:447
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:425
 msgid "Select attribute"
 msgstr ""
 
@@ -4336,7 +4600,7 @@ msgstr ""
 msgid "Select default language"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2479
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2511
 msgid "Select image"
 msgstr ""
 
@@ -4344,7 +4608,7 @@ msgstr ""
 msgid "Select languages"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:501
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:479
 msgid "Select operator"
 msgstr ""
 
@@ -4356,7 +4620,7 @@ msgstr ""
 msgid "Select row"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:476
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:454
 msgid "Select status"
 msgstr ""
 
@@ -4372,32 +4636,40 @@ msgstr ""
 msgid "Select type"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:145
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:155
 msgid "Select which event initiates this automated journey."
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:290
+#: app/components/note/share-note-button.tsx:300
 msgid "Selected"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:206
+#: app/components/note/share-note-button.tsx:216
 msgid "Selected Members"
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:71
+msgid "Sell one product on your public site. The platform keeps {SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to you."
+msgstr "Sell one product on your public site. The platform keeps {SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to you."
+
 #: app/components/settings/cards/organization/shop-card.tsx:52
-msgid "Sell one product on your public site. The platform keeps {SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to your connected Stripe account."
-msgstr ""
+#~ msgid "Sell one product on your public site. The platform keeps {SHOP_PLATFORM_FEE_PERCENT}% and the rest is paid out to your connected Stripe account."
+#~ msgstr ""
+
+#: ../../packages/ai/src/components/ai-chat.tsx:899
+msgid "Send"
+msgstr "Send"
 
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns.new.tsx:73
 msgid "Send a one-time email or SMS to your audience."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:91
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:76
 msgid "Send Email"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:290
-#: app/routes/organizations+/create.tsx:1133
+#: app/components/organization-invitations.tsx:295
+#: app/routes/organizations+/create.tsx:1169
 msgid "Send Invitations"
 msgstr ""
 
@@ -4413,7 +4685,7 @@ msgstr ""
 msgid "Send reset instructions"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:95
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:80
 msgid "Send SMS"
 msgstr ""
 
@@ -4432,15 +4704,15 @@ msgstr ""
 msgid "Sent {0}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2316
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2348
 msgid "SEO title"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:207
+#: app/components/settings/cards/organization/site-theme-card.tsx:243
 msgid "Serif"
 msgstr ""
 
-#: app/components/note/integration-controls.tsx:288
+#: app/components/note/integration-controls.tsx:296
 msgid "Service"
 msgstr ""
 
@@ -4457,7 +4729,7 @@ msgstr ""
 msgid "Sessions"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:119
+#: ../../packages/ai/src/components/ai-chat.tsx:447
 msgid "Set deadlines"
 msgstr ""
 
@@ -4473,14 +4745,16 @@ msgstr ""
 msgid "Set up authenticator app"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:307
+#: app/components/app-sidebar.tsx:322
 #: app/components/command-menu.tsx:160
 #: app/components/command-menu.tsx:193
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:14
 msgid "Settings"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:74
+#: app/components/settings/cards/organization/shop-card.tsx:93
+#: app/components/settings/cards/organization/shop-card.tsx:99
+#: app/components/settings/cards/organization/shop-card.tsx:104
 msgid "Setup incomplete"
 msgstr ""
 
@@ -4488,7 +4762,8 @@ msgstr ""
 msgid "Setup key"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:158
+#: app/components/note/share-note-button.tsx:167
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:995
 msgid "Share"
 msgstr ""
 
@@ -4496,43 +4771,47 @@ msgstr ""
 msgid "Share an update, maintenance notice, or promotion…"
 msgstr ""
 
-#: app/components/note/share-note-button.tsx:167
+#: app/components/note/share-note-button.tsx:177
 msgid "Share Note"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:162
+#: app/components/organization-invitations.tsx:167
 msgid "Share this link to let people join your organization as a Member. They'll see you invited them."
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:180
+#: app/routes/_auth+/waitlist.tsx:283
 msgid "Share with others"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3000
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3032
 msgid "Shared across every page"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:330
+#: app/components/app-sidebar.tsx:345
 msgid "Shop"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:62
+#: app/components/settings/cards/organization/shop-card.tsx:80
 msgid "Shop payouts are available for US organizations only. KSA checkout will be supported separately."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4700
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4732
 msgid "Short"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:87
-msgid "Show me features"
-msgstr ""
+#~ msgid "Show me features"
+#~ msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:169
+#: app/components/settings/cards/organization/shop-card.tsx:309
 msgid "Show product on your public site"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:130
+#: app/components/note/comment-item.tsx:289
+msgid "Show replies ({replyCount})"
+msgstr "Show replies ({replyCount})"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:458
 msgid "Show specific examples"
 msgstr ""
 
@@ -4540,11 +4819,11 @@ msgstr ""
 msgid "Show this banner on your public site"
 msgstr ""
 
-#: app/components/data-table.tsx:741
+#: app/components/data-table.tsx:749
 msgid "Showing total visitors for the last 6 months"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2346
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2378
 msgid "Shown in browser tabs and search results. Falls back to the page title when empty."
 msgstr ""
 
@@ -4605,24 +4884,24 @@ msgstr ""
 msgid "Site icon"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:49
+#: app/components/settings/cards/organization/shop-card.tsx:68
 msgid "Site shop"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:937
+#: app/routes/organizations+/create.tsx:973
 msgid "Skip for now"
 msgstr ""
 
 #: app/components/settings/cards/organization/general-settings-card.tsx:90
-#: app/routes/organizations+/create.tsx:675
+#: app/routes/organizations+/create.tsx:711
 msgid "Slug"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:357
+#: app/components/settings/cards/organization/site-theme-card.tsx:788
 msgid "Small"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:37
+#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:36
 #: ../../packages/marketing/src/i18n/campaign-labels.ts:15
 msgid "SMS"
 msgstr ""
@@ -4631,7 +4910,7 @@ msgstr ""
 msgid "SMS message exceeds 1600 characters maximum."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:391
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:369
 msgid "SMS Message Text"
 msgstr ""
 
@@ -4639,15 +4918,15 @@ msgstr ""
 msgid "SMS message text is required."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:418
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:396
 msgid "SMS messages over 160 characters will be segmented according to standard GSM telecommunication protocols."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4237
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4269
 msgid "Social links"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3959
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3991
 msgid "Solid banner"
 msgstr ""
 
@@ -4659,24 +4938,32 @@ msgstr ""
 msgid "Some fields are already translated"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3651
+#: ../../packages/ai/src/components/ai-chat.tsx:205
+msgid "Something went wrong. Try again."
+msgstr "Something went wrong. Try again."
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3683
 msgid "Spacing"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:100
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:85
 msgid "Split path based on rules (True / False)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3405
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3645
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3437
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3677
 msgid "Square"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:84
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:991
+msgid "Star"
+msgstr "Star"
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:69
 msgid "Start journey on lifecycle event"
 msgstr ""
 
-#: app/components/note/comments-section.tsx:187
+#: app/components/note/comments-section.tsx:214
 msgid "Start the conversation by adding the first comment."
 msgstr ""
 
@@ -4685,15 +4972,19 @@ msgid "Started At"
 msgstr ""
 
 #: app/components/data-table.tsx:207
-#: app/components/data-table.tsx:840
+#: app/components/data-table.tsx:848
 #: app/components/settings/cards/sessions-card.tsx:239
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:279
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:950
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:604
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:615
 msgid "Status"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:478
+#: ../../packages/ai/src/components/ai-chat.tsx:243
+msgid "Stayed on current page"
+msgstr "Stayed on current page"
+
+#: app/routes/organizations+/create.tsx:514
 msgid "Step {currentStep} of {totalSteps}"
 msgstr ""
 
@@ -4705,11 +4996,15 @@ msgstr ""
 msgid "Step Executions ({timelineCount})"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:899
+msgid "Stop"
+msgstr "Stop"
+
 #: ../../packages/ai/src/components/ai-elements/prompt-input.tsx:168
 msgid "Stop generation"
 msgstr ""
 
-#: app/components/impersonation-banner.tsx:61
+#: app/components/impersonation-banner.tsx:60
 msgid "Stop Impersonation"
 msgstr ""
 
@@ -4723,12 +5018,12 @@ msgstr ""
 
 #: app/components/website/link-inspector.tsx:381
 #: app/components/website/link-inspector.tsx:383
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3444
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3513
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3818
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3907
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3946
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4060
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3476
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3545
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3850
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3939
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3978
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4092
 msgid "Style"
 msgstr ""
 
@@ -4741,12 +5036,12 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:269
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:247
 msgid "Subject Line"
 msgstr ""
 
 #: app/components/core/feedback-modal.tsx:112
-#: app/components/data-table.tsx:943
+#: app/components/data-table.tsx:951
 msgid "Submit"
 msgstr ""
 
@@ -4754,7 +5049,7 @@ msgstr ""
 msgid "Subscribe"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:72
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:57
 msgid "Subscription Cancelled"
 msgstr ""
 
@@ -4762,24 +5057,24 @@ msgstr ""
 msgid "Subscription inactive"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:68
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:53
 msgid "Subscription Started"
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:272
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:326
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:345
 msgid "Success"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:79
+#: ../../packages/ai/src/components/ai-chat.tsx:407
 msgid "Suggest improvements"
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:246
-msgid "Suggested questions"
-msgstr ""
+#~ msgid "Suggested questions"
+#~ msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:77
+#: ../../packages/ai/src/components/ai-chat.tsx:405
 msgid "Summarize this note"
 msgstr ""
 
@@ -4803,9 +5098,13 @@ msgstr ""
 msgid "Switching from {currentRegionLabel} to {pendingRegionLabel} permanently deletes every visitor account in the current region — names, phone numbers, emails, and login sessions. This cannot be undone. New sign-ins will start from an empty database in the new region."
 msgstr ""
 
+#: app/components/settings/cards/organization/shop-card.tsx:192
+msgid "Sync hosted product"
+msgstr "Sync hosted product"
+
 #: app/components/settings/cards/organization/site-theme-card.tsx:345
-msgid "System"
-msgstr ""
+#~ msgid "System"
+#~ msgstr ""
 
 #: app/components/nav-user.tsx:91
 msgid "System theme"
@@ -4813,36 +5112,40 @@ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:28
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:49
-msgid "Tag Added"
-msgstr ""
+#~ msgid "Tag Added"
+#~ msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:323
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:308
 msgid "Tags"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4702
+#: ../../packages/ai/src/components/ai-chat.tsx:413
+msgid "Take me to settings"
+msgstr "Take me to settings"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4734
 msgid "Tall"
 msgstr ""
 
 #: app/components/data-table.tsx:226
 #: app/components/data-table.tsx:243
-#: app/components/data-table.tsx:857
+#: app/components/data-table.tsx:865
 msgid "Target"
 msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:154
-msgid "Target Tag Name"
-msgstr ""
+#~ msgid "Target Tag Name"
+#~ msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:519
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:497
 msgid "Target Value"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:108
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:93
 msgid "Team"
 msgstr ""
 
-#: app/components/leadership-card.tsx:67
+#: app/components/leadership-card.tsx:55
 msgid "Team members who have created the most notes"
 msgstr ""
 
@@ -4850,15 +5153,15 @@ msgstr ""
 msgid "Team Size"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:139
+#: ../../packages/ai/src/components/ai-chat.tsx:467
 msgid "Tell me more"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:742
+#: app/routes/organizations+/create.tsx:778
 msgid "Tell us about your organization..."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:961
+#: app/routes/organizations+/create.tsx:997
 msgid "Tell us more about your organization"
 msgstr ""
 
@@ -4871,7 +5174,7 @@ msgstr ""
 #~ msgid "Test run triggered successfully (Run ID: {0})"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:204
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:203
 msgid "Test run triggered successfully (Run ID: {runId})"
 msgstr ""
 
@@ -4879,15 +5182,15 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3324
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3356
 msgid "Text only"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3171
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3203
 msgid "Text position"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:215
+#: app/routes/_auth+/waitlist.tsx:336
 msgid "Thanks for referring."
 msgstr ""
 
@@ -4922,15 +5225,15 @@ msgstr ""
 
 #. placeholder {0}: data.duration || 1
 #. placeholder {1}: delayUnitLabel(data.unit || 'hours')
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:256
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:234
 msgid "The execution engine will durably sleep for {0} {1} before continuing to the next node."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4131
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4163
 msgid "The footer is shared across every page. Leave copyright blank to use the organization name and current year."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3010
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3042
 msgid "The header is shared across every page."
 msgstr ""
 
@@ -4966,9 +5269,17 @@ msgstr ""
 msgid "Thinking..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:480
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:489
 msgid "This action cannot be undone. Are you sure you want to delete \"{pageTitle}\"?"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:476
+msgid "This action cannot be undone. Are you sure you want to delete this announcement?"
+msgstr "This action cannot be undone. Are you sure you want to delete this announcement?"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1056
+msgid "This action cannot be undone. The note and its comments will be permanently removed."
+msgstr "This action cannot be undone. The note and its comments will be permanently removed."
 
 #: app/routes/mcp+/authorize.tsx:374
 msgid "This client will have access to:"
@@ -4978,7 +5289,7 @@ msgstr ""
 msgid "This device"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:964
+#: app/routes/organizations+/create.tsx:1000
 msgid "This helps us customize your experience and provide better insights."
 msgstr ""
 
@@ -5010,11 +5321,11 @@ msgstr ""
 msgid "Thought for {duration} seconds"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3618
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3650
 msgid "Three"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3662
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3694
 msgid "Tight"
 msgstr ""
 
@@ -5022,21 +5333,21 @@ msgstr ""
 msgid "Time delay"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:87
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:72
 msgid "Time Delay"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3538
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3848
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4158
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3570
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3880
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4190
 msgid "Title"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:392
+#: app/components/settings/cards/organization/site-theme-card.tsx:823
 msgid "Titles and section headings."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:373
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:403
 msgid "Toggle announcement visibility"
 msgstr ""
 
@@ -5048,7 +5359,7 @@ msgstr ""
 msgid "Tokens automatically expire after 30 days of inactivity"
 msgstr ""
 
-#: app/components/leadership-card.tsx:64
+#: app/components/leadership-card.tsx:52
 msgid "Top Contributors"
 msgstr ""
 
@@ -5056,7 +5367,7 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2040
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2072
 msgid "Translate"
 msgstr ""
 
@@ -5069,8 +5380,8 @@ msgstr ""
 msgid "Translate All"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:318
-#: app/routes/_app+/$orgSlug_+/index.tsx:327
+#: app/routes/_app+/$orgSlug_+/index.tsx:319
+#: app/routes/_app+/$orgSlug_+/index.tsx:328
 msgid "trending"
 msgstr ""
 
@@ -5090,7 +5401,7 @@ msgstr ""
 msgid "Trigger a test execution for a specific customer ID."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:83
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:68
 msgid "Trigger Event"
 msgstr ""
 
@@ -5102,19 +5413,19 @@ msgstr ""
 msgid "Trigger event type is required."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:77
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:62
 msgid "Triggered via admin test or API"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:41
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:29
 msgid "Triggered via operator test or API"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:271
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:269
 msgid "Triggering test run for customer \"{customerId}\"..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:588
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:599
 msgid "Try a different search term or clear the search."
 msgstr ""
 
@@ -5123,7 +5434,16 @@ msgstr ""
 msgid "Try adjusting your search or filter."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3613
+#: app/components/ai/global-ai-panel.tsx:80
+msgid "Try again"
+msgstr "Try again"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:888
+#: ../../packages/ai/src/components/ai-chat.tsx:889
+msgid "Try another answer"
+msgstr "Try another answer"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3645
 msgid "Two"
 msgstr ""
 
@@ -5131,11 +5451,11 @@ msgstr ""
 msgid "Two-factor authentication is currently enabled. Disabling it will make your account less secure. Please enter your authenticator code or a backup code to confirm."
 msgstr ""
 
-#: app/components/data-table.tsx:812
+#: app/components/data-table.tsx:820
 #: app/components/settings/cards/organization/announcement-sheet.tsx:388
 #: app/components/website/link-inspector.tsx:341
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:531
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3744
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:596
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3776
 msgid "Type"
 msgstr ""
 
@@ -5151,8 +5471,8 @@ msgstr ""
 msgid "Unedited boilerplate text detected in email body."
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:226
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:235
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:204
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:213
 msgid "Unit"
 msgstr ""
 
@@ -5160,12 +5480,12 @@ msgstr ""
 msgid "United States"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:443
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:442
 msgid "Unknown error"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:226
-#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:210
+#: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:208
 msgid "Unknown intent"
 msgstr ""
 
@@ -5173,8 +5493,8 @@ msgstr ""
 msgid "Unnamed recipient"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:453
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5800
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:462
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5826
 msgid "Unpublish"
 msgstr ""
 
@@ -5184,10 +5504,11 @@ msgid "Unread Notifications"
 msgstr ""
 
 #: app/components/favorite-notes.tsx:136
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:991
 msgid "Unstar"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:623
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:670
 msgid "Untitled Note"
 msgstr ""
 
@@ -5211,25 +5532,33 @@ msgstr ""
 msgid "Update your photo and personal details here."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:537
-#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:607
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:602
+#: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:618
 msgid "Updated"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:628
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:675
 msgid "Updated {timeAgo} ago"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:82
+#: ../../packages/ai/src/components/ai-chat.tsx:153
+msgid "Updated section"
+msgstr "Updated section"
+
+#: ../../packages/ai/src/components/ai-chat.tsx:152
+msgid "Updating section"
+msgstr "Updating section"
+
+#: app/components/app-sidebar.tsx:84
 #: app/components/settings/cards/organization/billing-card.tsx:460
 msgid "Upgrade"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:316
+#: app/components/settings/cards/organization/site-theme-card.tsx:352
 msgid "Upload a font"
 msgstr ""
 
-#: app/components/website/branding-panel.tsx:335
+#: app/components/website/branding-panel.tsx:338
 msgid "Upload a logo"
 msgstr ""
 
@@ -5241,7 +5570,7 @@ msgstr ""
 msgid "Upload a site icon"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4848
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4880
 msgid "Upload file"
 msgstr ""
 
@@ -5249,11 +5578,11 @@ msgstr ""
 msgid "Upload photo"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:636
+#: app/routes/organizations+/create.tsx:672
 msgid "Upload your logo"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-theme-card.tsx:186
+#: app/components/settings/cards/organization/site-theme-card.tsx:222
 msgid "Uploaded"
 msgstr ""
 
@@ -5263,20 +5592,20 @@ msgstr ""
 
 #: app/components/website/link-inspector.tsx:364
 #: app/components/website/link-inspector.tsx:406
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2444
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2476
 msgid "URL"
 msgstr ""
 
 #: app/components/note/comment-input.tsx:152
-msgid "Use @ to mention someone • Cmd+Enter to submit"
-msgstr ""
+#~ msgid "Use @ to mention someone • Cmd+Enter to submit"
+#~ msgstr ""
 
 #: app/components/settings/two-factor-form.tsx:113
 #: app/routes/_auth+/verify.tsx:193
 msgid "Use a backup code instead"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2396
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2428
 msgid "Use an image that's at least 1200px by 630px (1.91:1) for the best results."
 msgstr ""
 
@@ -5325,7 +5654,7 @@ msgstr ""
 msgid "Verification Code"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:469
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:447
 msgid "Verification Status"
 msgstr ""
 
@@ -5342,7 +5671,7 @@ msgstr ""
 msgid "Verify"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:257
+#: app/routes/_auth+/waitlist.tsx:375
 msgid "Verify Discord membership"
 msgstr ""
 
@@ -5350,13 +5679,13 @@ msgstr ""
 msgid "Verifying your passkey"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3167
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3749
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3199
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3781
 msgid "Video"
 msgstr ""
 
 #: app/components/settings/cards/organization/invoices-card.tsx:137
-#: app/routes/_app+/$orgSlug_+/notes-table.tsx:76
+#: app/routes/_app+/$orgSlug_+/notes-table.tsx:79
 msgid "View"
 msgstr ""
 
@@ -5372,7 +5701,7 @@ msgstr ""
 msgid "View and manage this session"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5789
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5815
 msgid "View live site"
 msgstr ""
 
@@ -5394,20 +5723,20 @@ msgstr ""
 
 #. placeholder {0}: data.duration
 #. placeholder {1}: delayUnitLabel(data.unit)
-#: ../../packages/marketing-workflow/src/nodes/delay-node.tsx:41
+#: ../../packages/marketing-workflow/src/nodes/delay-node.tsx:39
 msgid "Wait {0} {1}"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:88
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:73
 msgid "Wait for a specified duration before next step"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:147
+#: app/routes/_auth+/waitlist.tsx:256
 msgid "Want to go to the top of the waitlist?"
 msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:270
-#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:324
+#: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:343
 msgid "Warning"
 msgstr ""
 
@@ -5427,11 +5756,11 @@ msgstr ""
 msgid "We'd love to hear what went well or how we can improve the product experience."
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:138
+#: app/routes/_auth+/waitlist.tsx:246
 msgid "We'll notify you by email as soon as the waitlist opens."
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:283
+#: app/routes/_auth+/waitlist.tsx:400
 msgid "We'll send you an email at <0>{userEmail}</0> when we're ready to welcome you."
 msgstr ""
 
@@ -5439,16 +5768,16 @@ msgstr ""
 msgid "We've sent you a code to verify your email address."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:282
+#: app/components/app-sidebar.tsx:286
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:44
 msgid "Website"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:308
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:293
 msgid "weeks"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/node-inspector.tsx:248
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:226
 msgid "Weeks"
 msgstr ""
 
@@ -5458,7 +5787,7 @@ msgstr ""
 msgid "Welcome"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:298
+#: app/routes/_app+/$orgSlug_+/index.tsx:299
 msgid "Welcome {userName}!"
 msgstr ""
 
@@ -5470,7 +5799,7 @@ msgstr ""
 msgid "Welcome back"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:114
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:99
 msgid "Welcome to Epic Startup, {{organizationName}}"
 msgstr ""
 
@@ -5480,19 +5809,19 @@ msgstr ""
 msgid "Welcome!"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:78
+#: ../../packages/ai/src/components/ai-chat.tsx:406
 msgid "What are the key points?"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:85
+#: ../../packages/ai/src/components/ai-chat.tsx:412
 msgid "What can you help me with?"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:141
+#: ../../packages/ai/src/components/ai-chat.tsx:469
 msgid "What else should I know?"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:131
+#: ../../packages/ai/src/components/ai-chat.tsx:459
 msgid "What tools can help?"
 msgstr ""
 
@@ -5500,7 +5829,7 @@ msgstr ""
 msgid "What would you like to know?"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:108
+#: ../../packages/ai/src/components/ai-chat.tsx:436
 msgid "What's missing?"
 msgstr ""
 
@@ -5509,7 +5838,7 @@ msgid "When prompted, authorize the connection in your browser"
 msgstr ""
 
 #. placeholder {0}: info.label
-#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:41
+#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:39
 msgid "When someone does <0>{0}</0>"
 msgstr ""
 
@@ -5533,9 +5862,13 @@ msgstr ""
 msgid "Workflow validation"
 msgstr ""
 
+#: ../../packages/ai/src/components/ai-chat.tsx:163
+msgid "Working on it"
+msgstr "Working on it"
+
 #: app/components/note/comment-item.tsx:267
-msgid "Write a reply..."
-msgstr ""
+#~ msgid "Write a reply..."
+#~ msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:331
 msgid "Write the banner in the default language, then switch locales to translate. Enabled banners appear at the top of your public site."
@@ -5554,15 +5887,14 @@ msgid "Write your text message. Max 160 characters."
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:211
-#: app/routes/organizations+/create.tsx:858
+#: app/routes/organizations+/create.tsx:894
 msgid "Yearly"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:77
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:75
 msgid "Yes"
 msgstr ""
 
-#: ../../packages/ai/src/components/ai-chat.tsx:180
 #: app/components/organization-members.tsx:169
 msgid "You"
 msgstr ""
@@ -5583,7 +5915,7 @@ msgstr ""
 msgid "You can change your photo later"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:285
+#: app/routes/_app+/$orgSlug_+/notes.tsx:290
 msgid "You can create notes for your organization here."
 msgstr ""
 
@@ -5595,19 +5927,19 @@ msgstr ""
 msgid "You can revoke this access at any time from your MCP settings page. The access token will expire in 1 hour."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:930
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1155
 msgid "You do not have permission to view this note"
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:287
+#: app/routes/_app+/organizations.tsx:237
 msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.tsx:387
+#: app/routes/_app+/$orgSlug_+/notes.tsx:392
 msgid "You haven't created any notes yet!"
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:437
+#: app/routes/_app+/organizations.tsx:387
 msgid "You haven't joined any organizations yet."
 msgstr ""
 
@@ -5618,7 +5950,7 @@ msgstr ""
 msgid "You must agree to the terms of service and privacy policy"
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:237
+#: app/components/settings/cards/organization/shop-card.tsx:384
 msgid "You receive"
 msgstr ""
 
@@ -5626,7 +5958,7 @@ msgstr ""
 msgid "You're logged in! Navigating..."
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:135
+#: app/routes/_auth+/waitlist.tsx:243
 msgid "You're on the Waitlist!"
 msgstr ""
 
@@ -5650,15 +5982,15 @@ msgstr ""
 msgid "Your API key has been created successfully. Copy it now - you won't be able to see it again."
 msgstr ""
 
-#: app/components/settings/cards/organization/shop-card.tsx:179
+#: app/components/settings/cards/organization/shop-card.tsx:319
 msgid "Your customers can buy at <0>/shop</0> on your published site once payments are enabled."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1019
+#: app/routes/organizations+/create.tsx:1055
 msgid "Your department"
 msgstr ""
 
-#: ../../packages/marketing-workflow/src/workflow-labels.ts:105
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:90
 msgid "Your Exclusive Update"
 msgstr ""
 
@@ -5670,7 +6002,7 @@ msgstr ""
 msgid "Your MCP Server URL"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:299
+#: app/routes/_app+/$orgSlug_+/index.tsx:300
 msgid "Your organization dashboard"
 msgstr ""
 
@@ -5678,23 +6010,23 @@ msgstr ""
 msgid "Your organization's current plan and billing status"
 msgstr ""
 
-#: app/routes/_app+/organizations.tsx:387
+#: app/routes/_app+/organizations.tsx:337
 msgid "Your organizations"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5540
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5534
 msgid "Your page will appear here"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:155
+#: app/routes/_auth+/waitlist.tsx:263
 msgid "Your points"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:161
+#: app/routes/_auth+/waitlist.tsx:269
 msgid "Your rank"
 msgstr ""
 
-#: app/routes/_auth+/waitlist.tsx:193
+#: app/routes/_auth+/waitlist.tsx:295
 msgid "Your referral link"
 msgstr ""
 
@@ -5702,6 +6034,6 @@ msgstr ""
 msgid "Your S3 credentials will be encrypted and stored securely. However, we recommend using IAM credentials with minimal required permissions (read/write access to the specific bucket only)."
 msgstr ""
 
-#: app/components/onboarding-checklist.tsx:166
+#: app/components/onboarding-checklist.tsx:191
 msgid "Your setup progress"
 msgstr ""
