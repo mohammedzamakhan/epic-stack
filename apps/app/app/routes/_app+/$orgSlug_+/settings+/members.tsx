@@ -198,22 +198,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.where(eq(User.id, userId))
 				.limit(1)
 
-			await Promise.all(
-				invites.map(async (invite) => {
-					const { invitation } = await createOrganizationInvitation({
-						organizationId: organization.id,
-						email: invite.email,
-						role: invite.role,
-						inviterId: userId,
-					})
+			for (const invite of invites) {
+				const { invitation } = await createOrganizationInvitation({
+					organizationId: organization.id,
+					email: invite.email,
+					role: invite.role,
+					inviterId: userId,
+				})
 
-					await sendOrganizationInvitationEmail({
-						invitation,
-						organizationName: organization.name,
-						inviterName: currentUser?.name || currentUser?.email || 'Someone',
-					})
-				}),
-			)
+				await sendOrganizationInvitationEmail({
+					invitation,
+					organizationName: organization.name,
+					inviterName: currentUser?.name || currentUser?.email || 'Someone',
+				})
+			}
 
 			return Response.json({ result: submission.reply({ resetForm: true }) })
 		} catch (error) {
