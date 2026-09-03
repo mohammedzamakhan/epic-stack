@@ -5,6 +5,7 @@ import {
 	eq,
 	OrganizationInvitation,
 	UserOrganization,
+	_OrganizationPermissionToRole,
 } from '@repo/database'
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -16,6 +17,10 @@ import {
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
 import { action, loader } from './members.tsx'
+
+vi.mock('@repo/common/onboarding', () => ({
+	markStepCompleted: vi.fn().mockResolvedValue(undefined),
+}))
 
 vi.mock(
 	'#app/utils/organization/invitation.server.ts',
@@ -162,41 +167,47 @@ describe('settings/members route integration', () => {
 				organizationRoleId: 'org_role_member',
 			})
 
-			const { cookie: memberCookie } = await createTestSession(memberUser.id)
+			// Grant DELETE_MEMBER_ANY to the member role for this test
+			await db
+				.insert(_OrganizationPermissionToRole)
+				.values({
+					A: 'org_role_member',
+					B: 'org_perm_delete_member_any',
+				})
+				.onConflictDoNothing()
 
-			// Attempt to remove admin1 (who is the sole admin)
-			const formData = new FormData()
-			formData.append('intent', 'remove-member')
-			formData.append('userId', admin1.id)
-
-			const request = createAuthenticatedRequest(
-				`http://localhost:3000/${organization.slug}/settings/members`,
-				{ method: 'POST', body: formData },
-				memberCookie,
-			)
-
-			let response: Response | undefined
-			let caughtError: any
 			try {
-				response = (await action({
+				const { cookie: memberCookie } = await createTestSession(memberUser.id)
+
+				// Attempt to remove admin1 (who is the sole admin)
+				const formData = new FormData()
+				formData.append('intent', 'remove-member')
+				formData.append('userId', admin1.id)
+
+				const request = createAuthenticatedRequest(
+					`http://localhost:3000/${organization.slug}/settings/members`,
+					{ method: 'POST', body: formData },
+					memberCookie,
+				)
+
+				const response = (await action({
 					request,
 					params: { orgSlug: organization.slug },
 					context: {},
 				} as any)) as Response
-			} catch (error: any) {
-				if (error instanceof Response) {
-					caughtError = error
-				} else {
-					throw error
-				}
-			}
 
-			if (caughtError) {
-				// Member might lack DELETE_MEMBER_ANY permission, which is also correct
-				expect([400, 403]).toContain(caughtError.status)
-			} else {
-				expect(response).toBeDefined()
 				expect(getResponseStatus(response)).toBe(400)
+				const body = (await response.json()) as { error?: string }
+				expect(body.error).toContain('Cannot remove the last admin')
+			} finally {
+				await db
+					.delete(_OrganizationPermissionToRole)
+					.where(
+						and(
+							eq(_OrganizationPermissionToRole.A, 'org_role_member'),
+							eq(_OrganizationPermissionToRole.B, 'org_perm_delete_member_any'),
+						),
+					)
 			}
 		})
 

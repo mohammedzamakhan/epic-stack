@@ -134,6 +134,21 @@ describe('settings/billing route integration', () => {
 			expect(result.organization).toBeDefined()
 			expect(result.organization.id).toBe(organization.id)
 			expect(result.invoices).toEqual([])
+			expect(result.plansAndPrices).toBeDefined()
+			expect(result.plansAndPrices?.plans?.base?.name).toBe('Base')
+			expect(result.plansAndPrices?.plans?.plus?.name).toBe('Plus')
+			expect(result.plansAndPrices?.prices?.base?.monthly?.id).toBe(
+				'price_base_m',
+			)
+			expect(result.plansAndPrices?.prices?.base?.yearly?.id).toBe(
+				'price_base_y',
+			)
+			expect(result.plansAndPrices?.prices?.plus?.monthly?.id).toBe(
+				'price_plus_m',
+			)
+			expect(result.plansAndPrices?.prices?.plus?.yearly?.id).toBe(
+				'price_plus_y',
+			)
 		})
 	})
 

@@ -16,10 +16,32 @@ describe('api/auth/verify integration', () => {
 	it('returns error when verification code is invalid', async () => {
 		const user = await createTestUser()
 
+		// Create an unexpired reset-password verification record
+		const secret = 'JBSWY3DPEHPK3PXP'
+		const { otp } = await generateTOTP({
+			secret,
+			algorithm: 'SHA-1',
+			period: 600,
+			digits: 6,
+		})
+
+		await db.insert(Verification).values({
+			type: 'reset-password',
+			target: user.email.toLowerCase(),
+			secret,
+			algorithm: 'SHA-1',
+			digits: 6,
+			period: 600,
+			charSet: '0123456789',
+			expiresAt: new Date(Date.now() + 600 * 1000),
+		})
+
+		const wrongCode = otp === '999999' ? '000000' : '999999'
+
 		const formData = new FormData()
 		formData.append('type', 'reset-password')
 		formData.append('target', user.email)
-		formData.append('code', '999999')
+		formData.append('code', wrongCode)
 
 		const request = new Request('http://localhost:3000/api/auth/verify', {
 			method: 'POST',
