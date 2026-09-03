@@ -168,13 +168,14 @@ describe('settings/members route integration', () => {
 			})
 
 			// Grant DELETE_MEMBER_ANY to the member role for this test
-			await db
+			const [insertedPermission] = await db
 				.insert(_OrganizationPermissionToRole)
 				.values({
 					A: 'org_role_member',
 					B: 'org_perm_delete_member_any',
 				})
 				.onConflictDoNothing()
+				.returning()
 
 			try {
 				const { cookie: memberCookie } = await createTestSession(memberUser.id)
@@ -200,14 +201,19 @@ describe('settings/members route integration', () => {
 				const body = (await response.json()) as { error?: string }
 				expect(body.error).toContain('Cannot remove the last admin')
 			} finally {
-				await db
-					.delete(_OrganizationPermissionToRole)
-					.where(
-						and(
-							eq(_OrganizationPermissionToRole.A, 'org_role_member'),
-							eq(_OrganizationPermissionToRole.B, 'org_perm_delete_member_any'),
-						),
-					)
+				if (insertedPermission) {
+					await db
+						.delete(_OrganizationPermissionToRole)
+						.where(
+							and(
+								eq(_OrganizationPermissionToRole.A, 'org_role_member'),
+								eq(
+									_OrganizationPermissionToRole.B,
+									'org_perm_delete_member_any',
+								),
+							),
+						)
+				}
 			}
 		})
 
