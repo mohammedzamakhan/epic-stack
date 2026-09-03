@@ -83,5 +83,9 @@ graph.html
 data.db-wal
 data.db-shm
 base.db
+base.db-wal
+base.db-shm
+base.*.db-wal
+base.*.db-shm
 data.*.db-wal
 data.*.db-shm

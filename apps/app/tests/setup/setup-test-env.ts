@@ -3,6 +3,8 @@ import './db-setup.ts'
 import '#app/utils/env.server.ts'
 // we need these to be imported first 👆
 
+process.env.BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
+
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi, type MockInstance } from 'vitest'
 import { server } from '#tests/mocks/index.ts'

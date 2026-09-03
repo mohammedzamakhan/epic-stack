@@ -13,11 +13,20 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/AccountShell.astro.ts:3
+msgid "Account"
+msgstr "账户"
+
+#: src/components/AccountShell.astro.ts:3
+msgid "Account settings"
+msgstr "账户设置"
+
 #: src/pages/shop/success.astro.ts:3
 msgid "Back to shop"
 msgstr "返回商店"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Browse the shop"
 msgstr "浏览商店"
 
@@ -93,6 +102,7 @@ msgid "Network error. Please try again."
 msgstr "网络错误，请重试。"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "No orders yet."
 msgstr "暂无订单。"
 
@@ -109,8 +119,14 @@ msgid "Order confirmed"
 msgstr "订单已确认"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Order history"
 msgstr "订单历史"
+
+#: src/components/AccountShell.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
+msgid "Orders"
+msgstr "订单"
 
 #: src/pages/shop.astro.ts:3
 msgid "Pay now"
@@ -149,9 +165,17 @@ msgstr "个人资料"
 msgid "Profile updated successfully!"
 msgstr "资料已更新。"
 
+#: src/pages/profile/orders.astro.ts:3
+msgid "Purchases from the shop while signed in to this account."
+msgstr "登录此账户后在商店的购买记录。"
+
 #: src/pages/profile.astro.ts:3
 msgid "Purchases from the shop while signed in."
 msgstr "登录后在商店的购买记录。"
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "Receipts for completed purchases appear here with status and amount."
+msgstr "已完成购买的收据将在此显示状态和金额。"
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -232,6 +256,10 @@ msgstr "我们已将6位验证码发送至"
 #: src/pages/complete-name.astro.ts:3
 msgid "What's your name?"
 msgstr "您叫什么名字？"
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "When you buy something from the shop, your receipts will show up here."
+msgstr "当您在商店购买商品时，您的收据将显示在这里。"
 
 #: src/pages/profile.astro.ts:3
 msgid "Your Profile"

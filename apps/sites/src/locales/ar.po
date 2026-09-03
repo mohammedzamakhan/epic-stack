@@ -13,11 +13,20 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/AccountShell.astro.ts:3
+msgid "Account"
+msgstr "الحساب"
+
+#: src/components/AccountShell.astro.ts:3
+msgid "Account settings"
+msgstr "إعدادات الحساب"
+
 #: src/pages/shop/success.astro.ts:3
 msgid "Back to shop"
 msgstr "العودة إلى المتجر"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Browse the shop"
 msgstr "تصفح المتجر"
 
@@ -93,6 +102,7 @@ msgid "Network error. Please try again."
 msgstr "خطأ في الشبكة. حاول مرة أخرى."
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "No orders yet."
 msgstr "لا توجد طلبات بعد."
 
@@ -109,8 +119,14 @@ msgid "Order confirmed"
 msgstr "تم تأكيد الطلب"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Order history"
 msgstr "سجل الطلبات"
+
+#: src/components/AccountShell.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
+msgid "Orders"
+msgstr "الطلبات"
 
 #: src/pages/shop.astro.ts:3
 msgid "Pay now"
@@ -149,9 +165,17 @@ msgstr "الملف الشخصي"
 msgid "Profile updated successfully!"
 msgstr "تم تحديث الملف الشخصي بنجاح."
 
+#: src/pages/profile/orders.astro.ts:3
+msgid "Purchases from the shop while signed in to this account."
+msgstr "المشتريات من المتجر أثناء تسجيل الدخول إلى هذا الحساب."
+
 #: src/pages/profile.astro.ts:3
 msgid "Purchases from the shop while signed in."
 msgstr "المشتريات من المتجر أثناء تسجيل الدخول."
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "Receipts for completed purchases appear here with status and amount."
+msgstr "تظهر إيصالات المشتريات المكتملة هنا مع الحالة والمبلغ."
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -232,6 +256,10 @@ msgstr "أرسلنا رمزاً من 6 أرقام إلى"
 #: src/pages/complete-name.astro.ts:3
 msgid "What's your name?"
 msgstr "ما اسمك؟"
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "When you buy something from the shop, your receipts will show up here."
+msgstr "عندما تشتري شيئاً من المتجر، ستظهر إيصالاتك هنا."
 
 #: src/pages/profile.astro.ts:3
 msgid "Your Profile"

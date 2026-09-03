@@ -79,6 +79,11 @@ function stubCacheServerPlugin(): Plugin {
 						getEndpoints: () => null,
 						setEndpoints: () => {}
 					};
+					export const invalidateUserOrganizationsCache = () => Promise.resolve();
+					export const invalidateUserCache = () => Promise.resolve();
+					export const invalidateUserSecurityCache = () => Promise.resolve();
+					export const deleteCacheKeys = () => Promise.resolve();
+					export const clearCacheByType = () => Promise.resolve();
 					export default {};
 				`
 			}
@@ -234,6 +239,13 @@ export default defineConfig((config) => ({
 		maxWorkers: process.env.CI ? 2 : undefined,
 		coverage: {
 			include: ['app/**/*.{ts,tsx}'],
+			exclude: [
+				'app/components/ui/**',
+				'app/assets/**',
+				'app/locales/**',
+				'**/*.d.ts',
+				'**/+types/**',
+			],
 			all: true,
 		},
 	},

@@ -13,11 +13,20 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/AccountShell.astro.ts:3
+msgid "Account"
+msgstr "Cuenta"
+
+#: src/components/AccountShell.astro.ts:3
+msgid "Account settings"
+msgstr "Configuración de la cuenta"
+
 #: src/pages/shop/success.astro.ts:3
 msgid "Back to shop"
 msgstr "Volver a la tienda"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Browse the shop"
 msgstr "Explorar la tienda"
 
@@ -93,6 +102,7 @@ msgid "Network error. Please try again."
 msgstr "Error de red. Inténtalo de nuevo."
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "No orders yet."
 msgstr "Aún no hay pedidos."
 
@@ -109,8 +119,14 @@ msgid "Order confirmed"
 msgstr "Pedido confirmado"
 
 #: src/pages/profile.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
 msgid "Order history"
 msgstr "Historial de pedidos"
+
+#: src/components/AccountShell.astro.ts:3
+#: src/pages/profile/orders.astro.ts:3
+msgid "Orders"
+msgstr "Pedidos"
 
 #: src/pages/shop.astro.ts:3
 msgid "Pay now"
@@ -149,9 +165,17 @@ msgstr "Perfil"
 msgid "Profile updated successfully!"
 msgstr "Perfil actualizado correctamente."
 
+#: src/pages/profile/orders.astro.ts:3
+msgid "Purchases from the shop while signed in to this account."
+msgstr "Compras en la tienda mientras ha iniciado sesión en esta cuenta."
+
 #: src/pages/profile.astro.ts:3
 msgid "Purchases from the shop while signed in."
 msgstr "Compras de la tienda mientras iniciaste sesión."
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "Receipts for completed purchases appear here with status and amount."
+msgstr "Los recibos de las compras completadas aparecen aquí con el estado y el importe."
 
 #: src/pages/profile.astro.ts:3
 msgid "Save Changes"
@@ -232,6 +256,10 @@ msgstr "Hemos enviado un código de 6 dígitos a"
 #: src/pages/complete-name.astro.ts:3
 msgid "What's your name?"
 msgstr "¿Cómo te llamas?"
+
+#: src/pages/profile/orders.astro.ts:3
+msgid "When you buy something from the shop, your receipts will show up here."
+msgstr "Cuando compres algo en la tienda, tus recibos aparecerán aquí."
 
 #: src/pages/profile.astro.ts:3
 msgid "Your Profile"

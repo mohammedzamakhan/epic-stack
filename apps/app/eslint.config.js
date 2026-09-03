@@ -19,6 +19,11 @@ export default [
 		},
 	},
 	{
-		ignores: ['.react-router/*', 'env.d.ts'],
+		ignores: [
+			'.react-router/*',
+			'env.d.ts',
+			'test-results/**',
+			'playwright-report/**',
+		],
 	},
 ]
