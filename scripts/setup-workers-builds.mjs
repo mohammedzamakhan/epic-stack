@@ -254,12 +254,13 @@ function buildTriggerPayload({
 	buildTokenUuid,
 	entry,
 	tier,
+	workerName,
 }) {
 	return {
 		external_script_id: workerTag,
 		repo_connection_uuid: repoConnectionUuid,
 		build_token_uuid: buildTokenUuid,
-		trigger_name: `epic-startup-${entry.app}-${tier}-ci`,
+		trigger_name: `${workerName || `epic-startup-${entry.app}-${tier}`}-ci`,
 		build_command: `${BUILD_COMMAND_PREFIX} ${entry.app}`,
 		deploy_command: `${DEPLOY_COMMAND_PREFIX} ${entry.app}`,
 		root_directory: '/',
@@ -277,6 +278,7 @@ function buildTriggerPayload({
 function reusableTrigger(triggers, triggerName, repoConnectionUuid) {
 	return (
 		triggers.find((trigger) => trigger.trigger_name === triggerName) ??
+		triggers.find((trigger) => trigger.trigger_name?.includes('-ci')) ??
 		triggers.find(
 			(trigger) =>
 				trigger.repo_connection?.repo_connection_uuid === repoConnectionUuid &&
@@ -295,6 +297,7 @@ async function ensureTrigger({
 	buildTokenUuid,
 	entry,
 	tier,
+	workerName,
 }) {
 	const payload = buildTriggerPayload({
 		workerTag,
@@ -302,6 +305,7 @@ async function ensureTrigger({
 		buildTokenUuid,
 		entry,
 		tier,
+		workerName,
 	})
 	const triggers = await listTriggers(accountId, token, workerTag)
 	const existing = reusableTrigger(
@@ -501,6 +505,7 @@ export async function configureWorkersBuilds({
 				buildTokenUuid: buildToken.build_token_uuid,
 				entry,
 				tier,
+				workerName,
 			})
 			await patchTriggerEnv(
 				resolvedAccountId,
