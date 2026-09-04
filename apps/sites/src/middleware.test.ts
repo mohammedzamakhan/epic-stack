@@ -22,7 +22,7 @@ import { onRequest } from './middleware.ts'
 describe('Sites middleware onRequest', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks()
-		process.env.PUBLIC_SITE_HOST_SUFFIXES = 'sites.localhost,epic-startup.me'
+		process.env.PUBLIC_SITE_HOST_SUFFIXES = 'sites.localhost,epic-startup.com'
 	})
 
 	it('applies security headers and processes static asset requests', async () => {

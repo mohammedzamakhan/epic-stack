@@ -1,6 +1,6 @@
 {
 	"expo": {
-		"name": "Epic Stack Mobile",
+		"name": "Epic Startup Mobile",
 		"slug": "epic-startup-mobile",
 		"version": "1.0.0",
 		"orientation": "portrait",
@@ -15,7 +15,7 @@
 		},
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.epic-startup.mobile"
+			"bundleIdentifier": "com.epicstartup.mobile"
 		},
 		"android": {
 			"adaptiveIcon": {
@@ -24,7 +24,7 @@
 			},
 			"edgeToEdgeEnabled": true,
 			"predictiveBackGestureEnabled": false,
-			"package": "com.epic-startup.mobile"
+			"package": "com.epicstartup.mobile"
 		},
 		"web": {
 			"favicon": "./assets/favicon.png",
@@ -36,7 +36,7 @@
 			"reactCanary": true
 		},
 		"linking": {
-			"prefixes": ["epic-startup://", "https://epic-startup.me"],
+			"prefixes": ["epic-startup://", "https://epic-startup.com"],
 			"config": {
 				"screens": {
 					"index": "",

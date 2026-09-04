@@ -1,6 +1,6 @@
 import { type SiteFontSelection } from '@repo/common/site-fonts'
 import { edgeCache } from '~/lib/site-headers'
-import { getPublicAppUrl } from '~/lib/worker-env'
+import { getAppServiceBinding, getPublicAppUrl } from '~/lib/worker-env'
 
 export type PublicSiteCustomFont = {
 	url: string
@@ -69,7 +69,9 @@ async function fetchAppJson<T>(
 	}
 
 	try {
-		const response = await fetch(url, {
+		const appFetcher = getAppServiceBinding()
+		const fetchImpl = appFetcher ? appFetcher.fetch.bind(appFetcher) : fetch
+		const response = await fetchImpl(url, {
 			headers: { Accept: 'application/json' },
 			signal: AbortSignal.timeout(6_000),
 		})

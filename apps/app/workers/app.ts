@@ -9,9 +9,9 @@ import {
 	createRequestHandler,
 	RouterContextProvider,
 } from 'react-router'
-import { ensureLinguiRequestLocale } from '../app/modules/lingui/lingui.server.ts'
-
 import { initVarlockEnv } from 'varlock/env'
+import { ensureLinguiRequestLocale } from '../app/modules/lingui/lingui.server.ts'
+import { bindTenantApiService } from '../app/utils/tenant-api-service.server.ts'
 
 const cloudflareContext = createContext<{
 	env: Env
@@ -62,6 +62,9 @@ export default Sentry.withSentry(sentryOptions, {
 		applyWorkerEnv(env)
 		bindCloudflareD1(env.DB)
 		bindCacheKV(env.CACHE)
+		if ((env as any).TENANT_API) {
+			bindTenantApiService((env as any).TENANT_API)
+		}
 		await ensureLinguiRequestLocale(request)
 
 		const loadContext = new RouterContextProvider()

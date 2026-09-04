@@ -22,8 +22,8 @@ import {
 // Use brand name
 console.log(brand.name) // "Epic Startup"
 console.log(brand.slug) // "epic-startup"
-console.log(brand.domain) // "epic-startup.me"
-console.log(getBrandDomain()) // "epic-startup.me"
+console.log(brand.domain) // "epic-startup.com"
+console.log(getBrandDomain()) // "epic-startup.com"
 
 // Generate page titles
 const title = getPageTitle('Login') // "Login | Epic Startup"

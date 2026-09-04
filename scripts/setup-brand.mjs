@@ -504,14 +504,6 @@ function updateEnvFiles(brandInfo) {
 				/CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET=sites\.epic-startup\.me/g,
 				`CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET=sites.${domain}`,
 			)
-			content = content.replace(
-				/^PUBLIC_TENANT_API_URL=.*$/m,
-				`PUBLIC_TENANT_API_URL=https://api.${localDomain}:2999`,
-			)
-			content = content.replace(
-				/^PUBLIC_TENANT_API_URL_KSA=.*$/m,
-				`PUBLIC_TENANT_API_URL_KSA=https://api-ksa.${localDomain}:2999`,
-			)
 			if (envFile.startsWith('apps/app/')) {
 				content = content.replace(
 					/^BASE_URL=.*$/m,

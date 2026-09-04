@@ -45,7 +45,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		})),
 		hasProvisionedDb: organization.hasProvisionedDb,
 		tenantApiUrl: resolveRegionalTenantApiUrls(organization.dataRegion)
-			.publicTenantApiUrl,
+			.tenantApiUrl,
 	}
 }
 

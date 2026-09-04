@@ -40,12 +40,14 @@ export function createTenantApiApp() {
 			if (!origin || !allowed) {
 				return c.body(null, 403)
 			}
+			const reqHeaders = c.req.header('Access-Control-Request-Headers')
 			return c.body(null, 204, {
 				'Access-Control-Allow-Origin': origin,
 				Vary: 'Origin',
 				'Access-Control-Allow-Methods':
 					'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+				'Access-Control-Allow-Headers':
+					reqHeaders || 'Content-Type, Authorization',
 				'Access-Control-Max-Age': '600',
 			})
 		}

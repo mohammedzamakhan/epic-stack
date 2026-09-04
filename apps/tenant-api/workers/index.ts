@@ -136,6 +136,10 @@ export default {
 
 		const url = new URL(request.url)
 
+		if (request.method === 'OPTIONS') {
+			return edgeApp.fetch(request, env)
+		}
+
 		if (url.pathname === '/health' || url.pathname === '/api/health') {
 			return edgeApp.fetch(request, env)
 		}

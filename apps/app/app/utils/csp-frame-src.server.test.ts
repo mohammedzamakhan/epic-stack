@@ -43,19 +43,18 @@ describe('tenant API connect-src', () => {
 	it('allows browser-facing US and KSA tenant-api origins', () => {
 		expect(
 			tenantApiConnectSrc({
-				PUBLIC_TENANT_API_URL: 'https://api.epic-startup.me:2999',
-				PUBLIC_TENANT_API_URL_KSA: 'https://api-ksa.epic-startup.me:2999',
+				TENANT_API_URL: 'https://api.epic-startup.com:2999',
+				TENANT_API_URL_KSA: 'https://api-ksa.epic-startup.com:2999',
 			}),
 		).toEqual([
-			'https://api.epic-startup.me:2999',
-			'https://api-ksa.epic-startup.me:2999',
+			'https://api.epic-startup.com:2999',
+			'https://api-ksa.epic-startup.com:2999',
 		])
 	})
 
 	it('dedupes public and internal URLs that share an origin', () => {
 		expect(
 			tenantApiConnectSrc({
-				PUBLIC_TENANT_API_URL: 'https://api.example.com/analytics',
 				TENANT_API_URL: 'https://api.example.com',
 			}),
 		).toEqual(['https://api.example.com'])

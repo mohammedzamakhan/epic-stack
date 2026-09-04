@@ -71,6 +71,13 @@ export function applyVarlockEnv(env: Record<string, unknown> | object) {
 	ensureVarlockInit()
 	const existingConfig = (globalThis as any).__varlockLoadedEnv?.config ?? {}
 	const newConfig: Record<string, { value: unknown }> = { ...existingConfig }
+	if (typeof process !== 'undefined' && process.env) {
+		for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+			if (typeof value === 'string' && process.env[key] === undefined) {
+				process.env[key] = value
+			}
+		}
+	}
 	for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
 		if (
 			typeof value === 'string' ||

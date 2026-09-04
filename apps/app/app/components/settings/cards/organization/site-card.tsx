@@ -32,8 +32,9 @@ import {
 	SelectValue,
 } from '@repo/ui/select'
 import { Switch } from '@repo/ui/switch'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Form, useFetcher } from 'react-router'
+import { toast } from 'sonner'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 
@@ -79,7 +80,19 @@ export function SiteCard({
 	actionData?: { result?: unknown }
 }) {
 	const [isPublished, setIsPublished] = useState(organization.sitePublished)
-	const publishFetcher = useFetcher()
+	const publishFetcher = useFetcher<{ error?: string; status?: string }>()
+
+	useEffect(() => {
+		setIsPublished(Boolean(organization.sitePublished))
+	}, [organization.sitePublished])
+
+	useEffect(() => {
+		const data = publishFetcher.data
+		if (data?.error) {
+			setIsPublished(Boolean(organization.sitePublished))
+			toast.error(data.error)
+		}
+	}, [publishFetcher.data, organization.sitePublished])
 	const domainFetcher = useFetcher()
 	const DomainForm = domainFetcher.Form
 	const siteUrl = getOrgSiteUrl(organization.slug)

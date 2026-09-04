@@ -11,10 +11,10 @@ not_found_handling = "none"
 
 # Patched at deploy by scripts/patch-wrangler.mjs
 [vars]
-PUBLIC_APP_URL = "https://app.epic-startup.me"
-ROOT_APP = "epic-startup.me"
-PUBLIC_SITE_HOST_SUFFIXES = "epic-startup.me,workers.dev"
-TENANT_API_URL = "https://tenant-us.epic-startup.me"
+PUBLIC_APP_URL = "https://app.epic-startup.com"
+ROOT_APP = "epic-startup.com"
+PUBLIC_SITE_HOST_SUFFIXES = "epic-startup.com,workers.dev"
+TENANT_API_URL = "https://tenant-us.epic-startup.com"
 
 [env.production]
 name = "epic-startup-sites"
