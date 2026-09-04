@@ -1,7 +1,7 @@
 import { getLocalDomain } from '@repo/config/brand'
 
 function defaultDevUrl(targetSubdomain: string, path = '') {
-	return `http://${targetSubdomain}.${getLocalDomain()}:2999${path}`
+	return `https://${targetSubdomain}.${getLocalDomain()}:2999${path}`
 }
 
 function defaultOrgSiteUrl(orgSlug: string) {

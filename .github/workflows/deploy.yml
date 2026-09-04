@@ -353,7 +353,7 @@ jobs:
              TENANT_API_IMAGE='${IMAGE}' docker compose up -d"
 
       - name: 🚀 Deploy KSA (Riyadh)
-        if: ${{ vars.OCI_TENANT_KSA_HOST != '' }}
+        if: false # Disabled: deployment to KSA delayed (${{ vars.OCI_TENANT_KSA_HOST != '' }})
         env:
           HOST: ${{ vars.OCI_TENANT_KSA_HOST }}
           SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
@@ -375,7 +375,7 @@ jobs:
              TENANT_API_IMAGE='${IMAGE}' docker compose up -d"
 
       - name: 🩺 Health check KSA (OCI)
-        if: ${{ vars.TENANT_API_URL_KSA != '' }}
+        if: false # Disabled: deployment to KSA delayed (${{ vars.TENANT_API_URL_KSA != '' }})
         env:
           TENANT_API_URL_KSA: ${{ vars.TENANT_API_URL_KSA }}
         run: |

@@ -206,7 +206,13 @@ function removeLegacyHostsEntries(domain, orgSlugs, customDomains) {
 	const legacyHostnames = new Set([
 		...PRODUCT_SUBDOMAINS.map((subdomain) => `${subdomain}${domain}`),
 		...orgSlugs.map((slug) => `${slug}.${domain}`),
-		...customDomains,
+		...customDomains.filter(
+			(d) =>
+				d &&
+				!d.endsWith('.localhost') &&
+				d !== 'localhost' &&
+				!d.endsWith('.test'),
+		),
 	])
 	const hostsContent = readFileSync('/etc/hosts', 'utf-8')
 	let changed = false
@@ -276,7 +282,7 @@ async function main() {
 	log(`Using local domain: ${domain}`, 'blue')
 
 	const { orgSlugs, customDomains, entries } = await getHostsEntries(domain)
-	removeLegacyHostsEntries(getBrandDomain(), orgSlugs, customDomains)
+	removeLegacyHostsEntries(`${domain.split('.')[0]}.me`, orgSlugs, customDomains)
 
 	log(
 		'\nThis script will add entries to your /etc/hosts file for local development.',

@@ -186,7 +186,10 @@ export default function ForgotPasswordRoute() {
 			</CardHeader>
 			<CardContent>
 				{rateLimitError && (
-					<div className="border-destructive/50 bg-destructive/10 mb-4 rounded-lg border p-4">
+					<div
+						role="alert"
+						className="border-destructive/50 bg-destructive/10 mb-4 rounded-lg border p-4"
+					>
 						<div className="text-destructive flex items-center gap-2">
 							<Icon name="alert-triangle" className="h-5 w-5" />
 							<h3 className="font-semibold">

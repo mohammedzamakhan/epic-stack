@@ -73,25 +73,25 @@ async function callTenantCommand(options: {
 		error?: string
 		message?: string
 		region?: string
-	}
+	} | null
 
 	if (!response.ok) {
 		const detail =
-			payload.message ||
-			payload.error ||
-			(typeof payload === 'object' && Object.keys(payload).length > 0
+			payload?.message ||
+			payload?.error ||
+			(payload && typeof payload === 'object' && Object.keys(payload).length > 0
 				? JSON.stringify(payload)
 				: `HTTP ${response.status} ${response.statusText || ''}`.trim())
 		throw new Error(`Tenant API error: ${detail}`)
 	}
 
-	if (payload.region && payload.region !== expectedRegion) {
+	if (payload?.region && payload.region !== expectedRegion) {
 		throw new Error(
 			`Tenant API responded from "${payload.region}" but org dataRegion is "${expectedRegion}"`,
 		)
 	}
 
-	return { region: payload.region || expectedRegion }
+	return { region: payload?.region || expectedRegion }
 }
 
 export async function provisionTenantDatabase(options: {

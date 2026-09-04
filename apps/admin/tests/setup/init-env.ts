@@ -4,7 +4,7 @@
 if (
 	!process.env.BASE_URL ||
 	process.env.BASE_URL === '/' ||
-	!process.env.BASE_URL.startsWith('http')
+	!/^https?:\/\//i.test(process.env.BASE_URL)
 ) {
 	process.env.BASE_URL = 'http://localhost:3004'
 }

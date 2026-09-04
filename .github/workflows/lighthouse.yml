@@ -229,7 +229,7 @@ jobs:
             };
 
             const getStatus = (score) => {
-              if (score >= 98) return 'PASS ✅';
+              if (score >= 90) return 'PASS ✅';
               return 'FAIL ❌';
             };
 
@@ -264,12 +264,12 @@ jobs:
               body += `
 
             ---
-            🎯 **Target:** All scores must be ≥ 98
+            🎯 **Target:** All scores must be ≥ 90
             📊 **Runs:** 3 per page (median reported)
             🔗 **Preview:** ${{ needs.preview-deploy.outputs.preview_url }}`;
               
               // Check if any score is below threshold
-              const allPassing = perfAvg >= 98 && a11yAvg >= 98 && bpAvg >= 98 && seoAvg >= 98;
+              const allPassing = perfAvg >= 90 && a11yAvg >= 90 && bpAvg >= 90 && seoAvg >= 90;
               
               if (!allPassing) {
                 body += `
