@@ -1,3 +1,4 @@
+import './init-env.ts'
 import 'varlock/auto-load'
 import './db-setup.ts'
 import '#app/utils/env.server.ts'

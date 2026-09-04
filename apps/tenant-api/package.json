@@ -22,12 +22,13 @@
     "@repo/reports": "*",
     "@repo/sms": "*",
     "@repo/tenant-db": "*",
+    "@varlock/cloudflare-integration": "^1.5.1",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.0",
     "jose": "^6.2.9",
     "lru-cache": "^11.5.2",
     "tsx": "^4.19.3",
-    "varlock": "^0.1.6",
+    "varlock": "^1.18.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

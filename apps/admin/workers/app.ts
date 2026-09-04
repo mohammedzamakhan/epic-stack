@@ -1,3 +1,4 @@
+import '@varlock/cloudflare-integration/init'
 /// <reference types="@cloudflare/workers-types" />
 
 import './polyfill-crypto.ts'

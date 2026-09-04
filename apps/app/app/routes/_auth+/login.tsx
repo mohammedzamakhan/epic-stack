@@ -211,7 +211,11 @@ export async function action({ request }: Route.ActionArgs) {
 		)
 
 		return data(
-			{ result: submission.reply({ hideFields: ['password'] }) },
+			{
+				result: submission.reply({ hideFields: ['password'] }),
+				username,
+				ssoAvailable: false,
+			},
 			{ status: submission.status === 'error' ? 400 : 200 },
 		)
 	}

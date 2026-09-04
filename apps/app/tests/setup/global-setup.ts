@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { execaCommand } from 'execa'
 import fsExtra from 'fs-extra'
+import './init-env.ts'
 import 'varlock/auto-load'
 
 import '#app/utils/cache.server.ts'
