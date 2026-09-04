@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { ENV } from 'varlock/env'
+import { ENV, initVarlockEnv } from 'varlock/env'
 
 const INSECURE_SECRET_MARKERS = [
 	'your-jwt-secret',
@@ -22,17 +22,95 @@ export function timingSafeEqualString(left: string, right: string) {
 	return crypto.timingSafeEqual(leftHash, rightHash)
 }
 
+function ensureVarlockInit() {
+	if (!(globalThis as any).__varlockLoadedEnv) {
+		const config: Record<string, { value: unknown }> = {}
+		if (typeof process !== 'undefined' && process.env) {
+			for (const [key, value] of Object.entries(process.env)) {
+				if (value !== undefined) {
+					config[key] = { value }
+				}
+			}
+		}
+		;(globalThis as any).__varlockLoadedEnv = {
+			config,
+			settings: { disableProcessEnvInjection: true },
+		}
+		initVarlockEnv({ allowFail: true })
+	}
+}
+
+ensureVarlockInit()
+
+export function syncEnvFromProcess() {
+	if (typeof process !== 'undefined' && process.env) {
+		const existingConfig = (globalThis as any).__varlockLoadedEnv?.config ?? {}
+		const newConfig: Record<string, { value: unknown }> = { ...existingConfig }
+		let changed = false
+		for (const [key, value] of Object.entries(process.env)) {
+			if (value !== undefined && newConfig[key]?.value !== value) {
+				newConfig[key] = { value }
+				changed = true
+			}
+		}
+		if (changed || !(globalThis as any).__varlockLoadedEnv) {
+			;(globalThis as any).__varlockLoadedEnv = {
+				...(globalThis as any).__varlockLoadedEnv,
+				config: newConfig,
+				settings: {
+					disableProcessEnvInjection: true,
+					...(globalThis as any).__varlockLoadedEnv?.settings,
+				},
+			}
+			initVarlockEnv({ allowFail: true })
+		}
+	}
+}
+
+export function applyVarlockEnv(env: Record<string, unknown> | object) {
+	ensureVarlockInit()
+	const existingConfig = (globalThis as any).__varlockLoadedEnv?.config ?? {}
+	const newConfig: Record<string, { value: unknown }> = { ...existingConfig }
+	if (typeof process !== 'undefined' && process.env) {
+		for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+			if (typeof value === 'string' && process.env[key] === undefined) {
+				process.env[key] = value
+			}
+		}
+	}
+	for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+		if (
+			typeof value === 'string' ||
+			typeof value === 'number' ||
+			typeof value === 'boolean'
+		) {
+			newConfig[key] = { value: String(value) }
+		}
+	}
+	;(globalThis as any).__varlockLoadedEnv = {
+		...(globalThis as any).__varlockLoadedEnv,
+		config: newConfig,
+	}
+	initVarlockEnv({ allowFail: true })
+}
+
 export function getOperatorToken() {
-	return process.env.TENANT_OPERATOR_TOKEN || ENV.TENANT_OPERATOR_TOKEN || ''
+	syncEnvFromProcess()
+	return ENV.TENANT_OPERATOR_TOKEN || ''
+}
+
+export function getInternalCommandToken() {
+	syncEnvFromProcess()
+	return ENV.INTERNAL_COMMAND_TOKEN || ''
 }
 
 export function assertTenantApiSecrets() {
-	const internalToken =
-		process.env.INTERNAL_COMMAND_TOKEN || ENV.INTERNAL_COMMAND_TOKEN || ''
+	syncEnvFromProcess()
+	const internalToken = getInternalCommandToken()
 	const operatorToken = getOperatorToken()
-	const jwtSecret = process.env.JWT_SECRET || ENV.JWT_SECRET || ''
-	const hmacSecret = process.env.AUTH_HMAC_SECRET || ENV.AUTH_HMAC_SECRET || ''
-	const isProd = process.env.NODE_ENV === 'production'
+	const jwtSecret = ENV.JWT_SECRET || ''
+	const hmacSecret = ENV.AUTH_HMAC_SECRET || ''
+	const isProd = (ENV as any).NODE_ENV === 'production'
 
 	if (internalToken.length < 16) {
 		throw new Error(
@@ -63,7 +141,8 @@ export function assertTenantApiSecrets() {
 }
 
 export function hmacHash(value: string) {
-	const hmacSecret = process.env.AUTH_HMAC_SECRET || ''
+	syncEnvFromProcess()
+	const hmacSecret = ENV.AUTH_HMAC_SECRET || ''
 	if (hmacSecret.length < 16) {
 		throw new Error('AUTH_HMAC_SECRET is not configured')
 	}

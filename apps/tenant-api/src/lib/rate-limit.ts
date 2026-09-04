@@ -1,5 +1,6 @@
 import { LRUCache } from 'lru-cache'
 import type { Context, Next } from 'hono'
+import { ENV } from 'varlock/env'
 
 interface RateLimitConfig {
 	windowMs: number
@@ -34,7 +35,7 @@ export function rateLimit(name: string, config: RateLimitConfig) {
 
 	return async (c: Context, next: Next) => {
 		// Bypass rate limiting in development mode
-		if (process.env.NODE_ENV !== 'production') {
+		if ((ENV as any).NODE_ENV !== 'production') {
 			return await next()
 		}
 
@@ -93,7 +94,7 @@ export function rateLimitByKey(
 	config: RateLimitConfig,
 ): { limited: true; retryAfter: number } | { limited: false } {
 	// Bypass in development mode
-	if (process.env.NODE_ENV !== 'production') {
+	if ((ENV as any).NODE_ENV !== 'production') {
 		return { limited: false }
 	}
 
@@ -120,13 +121,15 @@ export function rateLimitByKey(
  * to prevent runaway Twilio costs. Defaults to 500/hour.
  */
 const GLOBAL_SEND_WINDOW_MS = 60 * 60 * 1000 // 1 hour
-const GLOBAL_SEND_MAX = parseInt(process.env.GLOBAL_SMS_CAP || '500', 10)
+function getGlobalSendMax() {
+	return parseInt(ENV.GLOBAL_SMS_CAP || '500', 10)
+}
 let globalSendTimestamps: number[] = []
 
 export function checkGlobalSendCap():
 	{ limited: true; retryAfter: number } | { limited: false } {
 	// Bypass in development mode
-	if (process.env.NODE_ENV !== 'production') {
+	if ((ENV as any).NODE_ENV !== 'production') {
 		return { limited: false }
 	}
 
@@ -135,7 +138,7 @@ export function checkGlobalSendCap():
 
 	globalSendTimestamps = globalSendTimestamps.filter((t) => t > windowStart)
 
-	if (globalSendTimestamps.length >= GLOBAL_SEND_MAX) {
+	if (globalSendTimestamps.length >= getGlobalSendMax()) {
 		const resetTime = globalSendTimestamps[0]! + GLOBAL_SEND_WINDOW_MS
 		const retryAfter = Math.ceil((resetTime - now) / 1000)
 		return { limited: true, retryAfter }

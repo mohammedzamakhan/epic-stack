@@ -182,8 +182,8 @@ TENANT_DB_DIR=/data/tenants
 JWT_SECRET=...   # unique per region
 AUTH_HMAC_SECRET=...
 INTERNAL_COMMAND_TOKEN=...   # same value as US App
-APP_URL=https://epic-startup.me
-ROOT_APP=epic-startup.me
+APP_URL=https://epic-startup.com
+ROOT_APP=epic-startup.com
 ```
 
 On US App:

@@ -1,4 +1,4 @@
-# robots.txt for epic-startup.me
+# robots.txt for epic-startup.com
 User-agent: *
 Allow: /
 
@@ -7,4 +7,4 @@ Disallow: /preview/
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://epic-startup.me/sitemap-index.xml
+Sitemap: https://epic-startup.com/sitemap-index.xml

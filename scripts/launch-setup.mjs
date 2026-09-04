@@ -399,11 +399,13 @@ function patchEnvFile(envPath, replacements) {
 	return changed
 }
 
-function runWrangler(args, cwd) {
+function runWrangler(args, cwd, { env, input } = {}) {
 	const result = spawnSync('npx', ['wrangler', ...args], {
 		cwd,
 		encoding: 'utf8',
-		stdio: ['inherit', 'pipe', 'pipe'],
+		input,
+		env: env ? { ...process.env, ...env } : process.env,
+		stdio: input !== undefined ? ['pipe', 'pipe', 'pipe'] : ['inherit', 'pipe', 'pipe'],
 	})
 	if (result.status !== 0) {
 		throw new Error(
@@ -466,10 +468,6 @@ function applyGeneratedWranglerSecrets(
 	trialCreditCardMode,
 ) {
 	const label = deployEnv === 'staging' ? 'staging' : 'production'
-	const appBaseUrl =
-		deployEnv === 'staging' ? urls.app_base_url_staging : urls.app_base_url
-	const adminBaseUrl =
-		deployEnv === 'staging' ? urls.admin_base_url_staging : urls.admin_base_url
 
 	log(`\n🔑 Applying generated Wrangler secrets (${label})…`, 'yellow')
 
@@ -495,7 +493,6 @@ function applyGeneratedWranglerSecrets(
 				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 				['LAUNCH_STATUS', launchStatus],
 				['CREDIT_CARD_REQUIRED_FOR_TRIAL', trialCreditCardMode],
-				['BASE_URL', appBaseUrl],
 				...(secrets.discord
 					? Object.entries(secrets.discord).filter(([, value]) => value)
 					: []),
@@ -513,7 +510,6 @@ function applyGeneratedWranglerSecrets(
 				['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
 				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 				['LAUNCH_STATUS', launchStatus],
-				['BASE_URL', adminBaseUrl],
 			],
 		},
 		{
@@ -619,6 +615,7 @@ function applyRemoteD1Migrations(config) {
 					wranglerConfig,
 				],
 				appDir,
+				{ env: { CI: 'true' }, input: 'y\n' },
 			)
 			log(`✅ Migrations applied to ${CF_D1.app} (production)`, 'green')
 		}
@@ -641,11 +638,12 @@ function applyRemoteD1Migrations(config) {
 					'staging',
 				],
 				appDir,
+				{ env: { CI: 'true' }, input: 'y\n' },
 			)
 			log(`✅ Migrations applied to ${CF_D1.appStaging} (staging)`, 'green')
 		}
 	} catch (error) {
-		log(`\nRemote D1 migration failed: ${error.message}`, 'yellow')
+		log(`\n❌ Remote D1 migration failed: ${error.message}`, 'red')
 		log(
 			'Apply manually after patching: node scripts/patch-wrangler.mjs --app app --env production',
 			'gray',
@@ -654,6 +652,7 @@ function applyRemoteD1Migrations(config) {
 			`  cd apps/app && npx wrangler d1 migrations apply ${CF_D1.app} --remote --config ${wranglerConfig}`,
 			'gray',
 		)
+		throw error
 	}
 }
 
@@ -1037,7 +1036,6 @@ function printWranglerSecrets(secrets, { autoApplied = false } = {}) {
 						['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
 						['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 						['LAUNCH_STATUS', 'CLOSED_BETA | PUBLIC_BETA | LAUNCHED'],
-						['BASE_URL', '(your APP_BASE_URL)'],
 						...(secrets.discord
 							? Object.entries(secrets.discord).map(([name, value]) => [
 									name,
@@ -1055,7 +1053,6 @@ function printWranglerSecrets(secrets, { autoApplied = false } = {}) {
 						['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
 						['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 						['LAUNCH_STATUS', '(same as App)'],
-						['BASE_URL', '(your ADMIN_BASE_URL)'],
 					],
 				},
 				{
@@ -1167,7 +1164,7 @@ async function main() {
 	printInferredSummary(inferred, log)
 
 	const apex = await input({
-		message: 'Platform apex domain (e.g. epic-startup.me)',
+		message: 'Platform apex domain (e.g. epic-startup.com)',
 		default:
 			inferred.urls.apex && !inferred.urls.apex.endsWith('.test')
 				? inferred.urls.apex
@@ -1245,10 +1242,8 @@ async function main() {
 		JOBS_CRON_WORKER_URL: jobsCronUrl,
 		ROOT_APP: localDomain,
 		BASE_URL: localAppUrl,
-		TENANT_API_URL: 'http://localhost:3007',
-		TENANT_API_URL_KSA: 'http://localhost:3009',
-		PUBLIC_TENANT_API_URL: localTenantUs,
-		PUBLIC_TENANT_API_URL_KSA: localTenantKsa,
+		TENANT_API_URL: localTenantUs,
+		TENANT_API_URL_KSA: localTenantKsa,
 	}
 	if (secrets.discord) {
 		Object.assign(envPatches, secrets.discord)
@@ -1430,7 +1425,18 @@ async function main() {
 				})
 			: false
 	if (applyMigrations) {
-		applyRemoteD1Migrations(config)
+		try {
+			applyRemoteD1Migrations(config)
+		} catch {
+			const continueAnyway = await confirm({
+				message:
+					'D1 migrations failed. Continue with deployment anyway? (Workers may fail without database tables)',
+				default: false,
+			})
+			if (!continueAnyway) {
+				process.exit(1)
+			}
+		}
 	}
 
 	printGhCommands(config, inferred.githubRepo)

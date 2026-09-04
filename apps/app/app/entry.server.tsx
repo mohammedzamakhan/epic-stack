@@ -15,6 +15,7 @@ import {
 	type ActionFunctionArgs,
 	type HandleDocumentRequestFunction,
 } from 'react-router'
+import { ENV } from 'varlock/env'
 import { auditSensitiveRoutes } from '#app/utils/audit/audit-middleware.server.ts'
 import {
 	sitePreviewFrameSrc,
@@ -25,7 +26,7 @@ import { linguiServer } from './modules/lingui/lingui.server'
 
 export const streamTimeout = 5000
 
-const MODE = process.env.NODE_ENV ?? 'development'
+const MODE = ENV.NODE_ENV ?? 'development'
 
 function createNonce() {
 	const bytes = new Uint8Array(16)
@@ -42,12 +43,12 @@ function applySecurityHeaders(responseHeaders: Headers) {
 	responseHeaders.set('X-Frame-Options', 'SAMEORIGIN')
 	responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin')
 
-	if (process.env.NODE_ENV === 'production') {
+	if (ENV.NODE_ENV === 'production') {
 		responseHeaders.set(
 			'Strict-Transport-Security',
 			'max-age=31536000; includeSubDomains; preload',
 		)
-		if (process.env.SENTRY_DSN) {
+		if (ENV.SENTRY_DSN) {
 			responseHeaders.append('Document-Policy', 'js-profiling')
 		}
 	}
@@ -57,7 +58,10 @@ function applyRuntimeHeaders(responseHeaders: Headers) {
 	if (isCloudflareWorkerRuntime()) {
 		responseHeaders.set('cf-worker', 'epic-startup-app')
 		// Cloudflare Workers deployment info
-		responseHeaders.set('cf-datacenter', process.env.CF_DATACENTER ?? 'unknown')
+		responseHeaders.set(
+			'cf-datacenter',
+			(ENV as any).CF_DATACENTER || (ENV as any).REGION || 'unknown',
+		)
 		return
 	}
 }
@@ -93,19 +97,19 @@ function applyContentSecurity(
 						MODE === 'development' ? 'ws:' : undefined,
 						MODE === 'development' ? 'http://localhost:3007' : undefined,
 						MODE === 'development' ? 'http://localhost:3009' : undefined,
-						process.env.TENANT_API_URL
-							? process.env.TENANT_API_URL.replace(/\/$/, '')
+						ENV.TENANT_API_URL
+							? ENV.TENANT_API_URL.replace(/\/$/, '')
 							: undefined,
-						process.env.TENANT_API_URL_KSA
-							? process.env.TENANT_API_URL_KSA.replace(/\/$/, '')
+						ENV.TENANT_API_URL_KSA
+							? ENV.TENANT_API_URL_KSA.replace(/\/$/, '')
 							: undefined,
-						process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
+						ENV.SENTRY_DSN ? '*.sentry.io' : undefined,
 						'https://cdn.jsdelivr.net',
 						"'self'",
-						...tenantApiConnectSrc(process.env),
+						...tenantApiConnectSrc(ENV),
 					],
 					'font-src': ["'self'"],
-					'frame-src': sitePreviewFrameSrc(process.env, requestHost),
+					'frame-src': sitePreviewFrameSrc(ENV, requestHost),
 					'img-src': ["'self'", 'data:'],
 					'script-src': builderMode
 						? [

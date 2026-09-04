@@ -1,6 +1,5 @@
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
-import { ENV } from 'varlock/env'
 import { z } from 'zod'
 import {
 	getTenantDb,
@@ -18,7 +17,7 @@ import {
 import { verifyOperatorAnalyticsToken } from '@repo/reports/token'
 import { findActiveOrganizationById } from '../lib/origin.ts'
 import { getNodeRegion, orgMatchesNodeRegion } from '../lib/region.ts'
-import { getBearerToken } from '../lib/secrets.ts'
+import { getBearerToken, getInternalCommandToken } from '../lib/secrets.ts'
 
 export const analyticsRoutes = new Hono()
 
@@ -87,7 +86,7 @@ analyticsRoutes.post('/query', async (c) => {
 	}
 
 	const claims = await verifyOperatorAnalyticsToken({
-		internalCommandToken: ENV.INTERNAL_COMMAND_TOKEN || '',
+		internalCommandToken: getInternalCommandToken(),
 		token,
 	})
 	if (!claims) {

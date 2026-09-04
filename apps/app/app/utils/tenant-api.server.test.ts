@@ -7,11 +7,9 @@ describe('resolveRegionalTenantApiUrls', () => {
 		expect(
 			resolveRegionalTenantApiUrls('us', {
 				TENANT_API_URL: 'http://localhost:3007',
-				PUBLIC_TENANT_API_URL: 'https://api.epic-startup.me:2999',
 			}),
 		).toEqual({
 			tenantApiUrl: 'http://localhost:3007',
-			publicTenantApiUrl: 'https://api.epic-startup.me:2999',
 		})
 	})
 
@@ -19,11 +17,9 @@ describe('resolveRegionalTenantApiUrls', () => {
 		expect(
 			resolveRegionalTenantApiUrls('ksa', {
 				TENANT_API_URL_KSA: 'http://localhost:3009',
-				PUBLIC_TENANT_API_URL_KSA: 'https://api-ksa.epic-startup.me:2999',
 			}),
 		).toEqual({
 			tenantApiUrl: 'http://localhost:3009',
-			publicTenantApiUrl: 'https://api-ksa.epic-startup.me:2999',
 		})
 	})
 
@@ -34,7 +30,6 @@ describe('resolveRegionalTenantApiUrls', () => {
 			}),
 		).toEqual({
 			tenantApiUrl: 'https://tenant-api.example.com',
-			publicTenantApiUrl: 'https://tenant-api.example.com',
 		})
 	})
 })

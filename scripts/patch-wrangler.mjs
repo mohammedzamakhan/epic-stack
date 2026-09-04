@@ -20,8 +20,7 @@ import { stagingHostnames } from './staging-hostnames.mjs'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
-const PLACEHOLDER_D1_ID = '00000000-0000-0000-0000-000000000001'
-const PLACEHOLDER_KV_ID = '00000000000000000000000000000001'
+
 
 /** @type {Record<string, { dir: string, format: 'jsonc' | 'toml' }>} */
 const APPS = {
@@ -80,8 +79,11 @@ function bindingEnvKey(deployEnv) {
 
 function previewWebWorkerName(launchConfig) {
 	return (
-		readEnv('WEB_WORKER_NAME_PREVIEW', launchConfig, 'bindings.preview.web.worker_name') ||
-		'epic-startup-preview'
+		readEnv(
+			'WEB_WORKER_NAME_PREVIEW',
+			launchConfig,
+			'bindings.preview.web.worker_name',
+		) || 'epic-startup-preview'
 	)
 }
 
@@ -218,10 +220,7 @@ function patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches) {
 	if (appKey === 'tenant-api') {
 		const url = readPlatformUrl(
 			[`TENANT_API_URL${suffix}`, 'TENANT_API_URL'],
-			[
-				isStaging ? 'urls.tenant_api_url_staging' : null,
-				'urls.tenant_api_url',
-			],
+			[isStaging ? 'urls.tenant_api_url_staging' : null, 'urls.tenant_api_url'],
 			launchConfig,
 			isStaging ? stagingDefaults.tenant_api_url_staging : undefined,
 		)
@@ -246,7 +245,16 @@ function patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches) {
 		if (!apex.startsWith('www.')) {
 			hosts.push(`www.${apex}`)
 		}
-		applyZoneRoutes(target, buildZoneRoutes(hosts, rootApp), patches, 'web')
+		const routes = isStaging
+			? buildZoneRoutes(hosts, rootApp)
+			: [
+					{ pattern: apex, custom_domain: true },
+					...buildZoneRoutes(
+						hosts.filter((h) => h !== apex),
+						rootApp,
+					),
+				]
+		applyZoneRoutes(target, routes, patches, 'web')
 		return
 	}
 
@@ -291,7 +299,9 @@ function injectTomlRoutes(content, deployEnv, routes) {
 	const lines = routes.flatMap((route) => [
 		`[[${tablePrefix}routes]]`,
 		`pattern = "${route.pattern}"`,
-		`zone_name = "${route.zone_name}"`,
+		route.custom_domain
+			? 'custom_domain = true'
+			: `zone_name = "${route.zone_name}"`,
 		'',
 	])
 
@@ -303,7 +313,9 @@ function collectRoutesForApp(appKey, deployEnv, launchConfig) {
 	const target = {}
 	const patches = []
 	patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches)
-	return /** @type {{ pattern: string, zone_name: string }[]} */ (target.routes ?? [])
+	return /** @type {{ pattern: string, zone_name: string }[]} */ (
+		target.routes ?? []
+	)
 }
 
 function readEnv(name, launchConfig, launchPath) {
@@ -330,8 +342,7 @@ function readEnv(name, launchConfig, launchPath) {
  */
 function readUrlSetting(envBase, urlKey, deployEnv, launchConfig) {
 	const suffix = envSuffix(deployEnv)
-	const envNames =
-		deployEnv === 'staging' ? [`${envBase}${suffix}`] : [envBase]
+	const envNames = deployEnv === 'staging' ? [`${envBase}${suffix}`] : [envBase]
 	for (const name of envNames) {
 		if (process.env[name]) return process.env[name]
 	}
@@ -356,6 +367,14 @@ function readUrlSetting(envBase, urlKey, deployEnv, launchConfig) {
 					'urls.app_base_url_staging',
 				)
 				if (appStaging) return appStaging
+			}
+			if (urlKey === 'tenant_api_url_ksa') {
+				const ksaVal = readEnv(
+					'__launch__',
+					launchConfig,
+					'urls.tenant_api_url_ksa',
+				)
+				if (ksaVal) return ksaVal
 			}
 		}
 	}
@@ -426,39 +445,24 @@ function usesViteWorkerBuild(appKey) {
 	)
 }
 
-function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
-	const meta = APPS[appKey]
-	const sourcePath = join(rootDir, meta.dir, 'wrangler.jsonc')
-	const useViteBuild = usesViteWorkerBuild(appKey)
-	const config = useViteBuild
-		? JSON.parse(readFileSync(viteBuiltWranglerPath(appKey), 'utf8'))
-		: parseJsonc(sourcePath)
-	const outputPath = useViteBuild
-		? join(rootDir, meta.dir, 'build/server/wrangler.deploy.json')
-		: join(rootDir, meta.dir, 'wrangler.deploy.jsonc')
-
-	if (useViteBuild && deployEnv === 'staging') {
-		const source = parseJsonc(sourcePath)
-		if (source.env?.staging) {
-			config.env = { staging: structuredClone(source.env.staging) }
-		} else {
-			ensureEnvSection(config, deployEnv)
-		}
-	}
-
-	const suffix = envSuffix(deployEnv)
-	const target =
-		deployEnv === 'staging' ? ensureEnvSection(config, deployEnv) : config
-
-	const patches = []
-	const missing = []
+function applyTargetPatches(
+	target,
+	appKey,
+	targetEnv,
+	launchConfig,
+	patches,
+	missing,
+) {
+	const suffix = envSuffix(targetEnv)
+	const prefix = appKey === 'app' ? 'APP' : 'ADMIN'
+	const bindingEnv = targetEnv === 'staging' ? 'staging' : 'production'
 
 	function patch(path, envNames, launchPath) {
 		for (const envName of envNames) {
 			const value = readEnv(envName, launchConfig, launchPath)
 			if (value) {
 				setPath(target, path, value)
-				patches.push(`${path} ← ${envName}`)
+				patches.push(`${path} [${targetEnv}] ← ${envName}`)
 				return true
 			}
 		}
@@ -467,16 +471,14 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 
 	function patchVar(key, envBase, urlKey) {
 		if (!target.vars) target.vars = {}
-		const value = readUrlSetting(envBase, urlKey, deployEnv, launchConfig)
+		const value = readUrlSetting(envBase, urlKey, targetEnv, launchConfig)
 		if (value) {
 			target.vars[key] = value
-			patches.push(`vars.${key} ← ${envBase}${suffix || ''}`)
+			patches.push(`vars.${key} [${targetEnv}] ← ${envBase}${suffix || ''}`)
 		}
 	}
 
 	if (appKey === 'app' || appKey === 'admin') {
-		const prefix = appKey === 'app' ? 'APP' : 'ADMIN'
-		const bindingEnv = deployEnv === 'staging' ? 'staging' : 'production'
 		if (
 			!patch(
 				'd1_databases[0].database_id',
@@ -484,7 +486,7 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 				`bindings.${bindingEnv}.${appKey}.d1_database_id`,
 			)
 		) {
-			missing.push(`${prefix}_D1_DATABASE_ID${suffix}`)
+			if (missing) missing.push(`${prefix}_D1_DATABASE_ID${suffix}`)
 		}
 		if (
 			!patch(
@@ -493,7 +495,7 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 				`bindings.${bindingEnv}.${appKey}.kv_namespace_id`,
 			)
 		) {
-			missing.push(`${prefix}_KV_NAMESPACE_ID${suffix}`)
+			if (missing) missing.push(`${prefix}_KV_NAMESPACE_ID${suffix}`)
 		}
 		patch(
 			'name',
@@ -508,20 +510,41 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 				'PUBLIC_SITE_HOST_SUFFIXES',
 				'public_site_host_suffixes',
 			)
-			patchVar('JOBS_CRON_WORKER_URL', 'JOBS_CRON_WORKER_URL', 'jobs_cron_worker_url')
+			patchVar(
+				'JOBS_CRON_WORKER_URL',
+				'JOBS_CRON_WORKER_URL',
+				'jobs_cron_worker_url',
+			)
 		} else {
 			patchVar('BASE_URL', 'ADMIN_BASE_URL', 'admin_base_url')
 		}
 		patchVar('ROOT_APP', 'ROOT_APP', 'root_app')
 		patchVar('TENANT_API_URL', 'TENANT_API_URL', 'tenant_api_url')
 		patchVar('TENANT_API_URL_KSA', 'TENANT_API_URL_KSA', 'tenant_api_url_ksa')
+
+		if (appKey === 'app') {
+			const tenantApiWorkerName = readEnv(
+				`TENANT_API_US_WORKER_NAME${suffix}`,
+				launchConfig,
+				`bindings.${bindingEnv}.tenant_api.worker_name`,
+			)
+			if (tenantApiWorkerName) {
+				target.services = [
+					{
+						binding: 'TENANT_API',
+						service: tenantApiWorkerName,
+					},
+				]
+				patches.push(`services.TENANT_API [${targetEnv}] ← ${tenantApiWorkerName}`)
+			}
+		}
 	}
 
 	if (appKey === 'jobs-cron') {
 		patch(
 			'name',
 			[`JOBS_CRON_WORKER_NAME${suffix}`, 'JOBS_CRON_WORKER_NAME'],
-			`bindings.${deployEnv === 'staging' ? 'staging' : 'production'}.jobs_cron.worker_name`,
+			`bindings.${targetEnv === 'staging' ? 'staging' : 'production'}.jobs_cron.worker_name`,
 		)
 		patchVar('APP_BASE_URL', 'APP_BASE_URL', 'app_base_url')
 		patchVar('TENANT_API_URL', 'TENANT_API_URL', 'tenant_api_url')
@@ -531,17 +554,111 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 	if (appKey === 'tenant-api') {
 		patch(
 			'name',
-			[
-				`TENANT_API_US_WORKER_NAME${suffix}`,
-				'TENANT_API_US_WORKER_NAME',
-			],
-			`bindings.${deployEnv === 'staging' ? 'staging' : 'production'}.tenant_api.worker_name`,
+			[`TENANT_API_US_WORKER_NAME${suffix}`, 'TENANT_API_US_WORKER_NAME'],
+			`bindings.${targetEnv === 'staging' ? 'staging' : 'production'}.tenant_api.worker_name`,
 		)
 		patchVar('APP_URL', 'APP_BASE_URL', 'app_base_url')
 		patchVar('ROOT_APP', 'ROOT_APP', 'root_app')
 	}
 
-	patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches)
+	patchRoutesForApp(appKey, targetEnv, target, launchConfig, patches)
+}
+
+function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
+	const meta = APPS[appKey]
+	const sourcePath = join(rootDir, meta.dir, 'wrangler.jsonc')
+	const isAppOrAdmin = appKey === 'app' || appKey === 'admin'
+	const useViteBuild = usesViteWorkerBuild(appKey)
+
+	const patches = []
+	const missing = []
+
+	// For app/admin, always generate/update wrangler.deploy.jsonc from source wrangler.jsonc.
+	// This ensures migrations and wrangler commands always have valid database IDs and bindings.
+	if (isAppOrAdmin) {
+		const deployJsoncPath = join(rootDir, meta.dir, 'wrangler.deploy.jsonc')
+		const deployJsoncConfig = parseJsonc(sourcePath)
+
+		// Patch production on top-level
+		applyTargetPatches(
+			deployJsoncConfig,
+			appKey,
+			'production',
+			launchConfig,
+			patches,
+			deployEnv === 'production' ? missing : null,
+		)
+
+		// Patch staging on env.staging
+		ensureEnvSection(deployJsoncConfig, 'staging')
+		applyTargetPatches(
+			deployJsoncConfig.env.staging,
+			appKey,
+			'staging',
+			launchConfig,
+			patches,
+			deployEnv === 'staging' ? missing : null,
+		)
+
+		delete deployJsoncConfig.account_id
+		if (deployJsoncConfig.env?.staging) delete deployJsoncConfig.env.staging.account_id
+
+		writeJsonc(deployJsoncPath, deployJsoncConfig)
+		console.log(`Wrote ${deployJsoncPath}`)
+	}
+
+	// Deploy output config: build/server/wrangler.deploy.json for Vite apps,
+	// or wrangler.deploy.jsonc for other apps like jobs-cron and tenant-api.
+	if (useViteBuild) {
+		const viteOutputPath = join(rootDir, meta.dir, 'build/server/wrangler.deploy.json')
+		const viteConfig = JSON.parse(readFileSync(viteBuiltWranglerPath(appKey), 'utf8'))
+
+		// Patch production on top-level
+		applyTargetPatches(
+			viteConfig,
+			appKey,
+			'production',
+			launchConfig,
+			patches,
+			deployEnv === 'production' ? missing : null,
+		)
+
+		// Patch staging on env.staging
+		const source = parseJsonc(sourcePath)
+		if (source.env?.staging) {
+			viteConfig.env = { staging: structuredClone(source.env.staging) }
+		} else {
+			ensureEnvSection(viteConfig, 'staging')
+		}
+		applyTargetPatches(
+			viteConfig.env.staging,
+			appKey,
+			'staging',
+			launchConfig,
+			patches,
+			deployEnv === 'staging' ? missing : null,
+		)
+
+		delete viteConfig.account_id
+		if (viteConfig.env?.staging) delete viteConfig.env.staging.account_id
+
+		writeJsonc(viteOutputPath, viteConfig)
+		console.log(`Wrote ${viteOutputPath}`)
+		console.log(
+			'  Deploy: npx wrangler deploy --config build/server/wrangler.deploy.json',
+		)
+	} else if (!isAppOrAdmin) {
+		const outputPath = join(rootDir, meta.dir, 'wrangler.deploy.jsonc')
+		const config = parseJsonc(sourcePath)
+		const target = deployEnv === 'staging' ? ensureEnvSection(config, deployEnv) : config
+		applyTargetPatches(target, appKey, deployEnv, launchConfig, patches, missing)
+
+		delete config.account_id
+		if (config.env?.staging) delete config.env.staging.account_id
+
+		writeJsonc(outputPath, config)
+		console.log(`Wrote ${outputPath}`)
+	}
 
 	if (requireBindings && missing.length > 0) {
 		console.error(
@@ -551,33 +668,14 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 		process.exit(1)
 	}
 
-	delete config.account_id
-	if (config.env?.staging) delete config.env.staging.account_id
-
-	writeJsonc(outputPath, config)
-	console.log(`Wrote ${outputPath}`)
-	if (useViteBuild) {
-		console.log('  Deploy: npx wrangler deploy --config build/server/wrangler.deploy.json')
-	}
 	if (patches.length > 0) {
 		console.log(patches.map((line) => `  • ${line}`).join('\n'))
 	} else {
 		console.log('  (no env overrides applied — using committed defaults)')
 	}
-	return outputPath
-}
-
-function patchTomlValue(content, key, value) {
-	const patterns = [
-		new RegExp(`^(${key}\\s*=\\s*")[^"]*(")`, 'm'),
-		new RegExp(`^(${key}\\s*=\\s*)[^\\n]+`, 'm'),
-	]
-	for (const pattern of patterns) {
-		if (pattern.test(content)) {
-			return content.replace(pattern, `$1${value}$2`)
-		}
-	}
-	return `${content.trimEnd()}\n${key} = "${value}"\n`
+	return useViteBuild
+		? join(rootDir, meta.dir, 'build/server/wrangler.deploy.json')
+		: join(rootDir, meta.dir, 'wrangler.deploy.jsonc')
 }
 
 function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
@@ -628,7 +726,12 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			)
 		}
 
-		const rootApp = readUrlSetting('ROOT_APP', 'root_app', deployEnv, launchConfig)
+		const rootApp = readUrlSetting(
+			'ROOT_APP',
+			'root_app',
+			deployEnv,
+			launchConfig,
+		)
 		if (rootApp) {
 			applyToml(
 				/(PUBLIC_ROOT_APP\s*=\s*")[^"]+(")/,
@@ -702,7 +805,12 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			)
 		}
 
-		const rootApp = readUrlSetting('ROOT_APP', 'root_app', deployEnv, launchConfig)
+		const rootApp = readUrlSetting(
+			'ROOT_APP',
+			'root_app',
+			deployEnv,
+			launchConfig,
+		)
 		if (rootApp) {
 			applyToml(
 				/(ROOT_APP\s*=\s*")[^"]+(")/,
@@ -731,7 +839,24 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			`bindings.${bindingEnv}.sites.worker_name`,
 		)
 		if (workerName) {
-			applyToml(/^name\s*=\s*"[^"]+"/m, `name = "${workerName}"`, `name ← SITES_WORKER_NAME${suffix}`)
+			applyToml(
+				/^name\s*=\s*"[^"]+"/m,
+				`name = "${workerName}"`,
+				`name ← SITES_WORKER_NAME${suffix}`,
+			)
+		}
+
+		const appWorkerName = readEnv(
+			`APP_WORKER_NAME${suffix}`,
+			launchConfig,
+			`bindings.${bindingEnv}.app.worker_name`,
+		)
+		if (appWorkerName) {
+			const serviceTable = deployEnv === 'staging' ? '[[env.staging.services]]' : '[[services]]'
+			if (!content.includes(`service = "${appWorkerName}"`)) {
+				content += `\n${serviceTable}\nbinding = "APP"\nservice = "${appWorkerName}"\n`
+				patches.push(`services.APP ← ${appWorkerName}`)
+			}
 		}
 	}
 
@@ -771,7 +896,9 @@ function usesAstroWorkerBuild(appKey) {
 
 function patchAstroTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 	const meta = APPS[appKey]
-	const config = JSON.parse(readFileSync(astroBuiltWranglerPath(appKey), 'utf8'))
+	const config = JSON.parse(
+		readFileSync(astroBuiltWranglerPath(appKey), 'utf8'),
+	)
 	const outputPath = join(rootDir, meta.dir, 'dist/server/wrangler.deploy.json')
 	const suffix = envSuffix(deployEnv)
 	const bindingEnv = bindingEnvKey(deployEnv)
@@ -844,6 +971,21 @@ function patchAstroTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			[`SITES_WORKER_NAME${suffix}`, 'SITES_WORKER_NAME'],
 			`bindings.${bindingEnv}.sites.worker_name`,
 		)
+
+		const appWorkerName = readEnv(
+			`APP_WORKER_NAME${suffix}`,
+			launchConfig,
+			`bindings.${bindingEnv}.app.worker_name`,
+		)
+		if (appWorkerName) {
+			config.services = [
+				{
+					binding: 'APP',
+					service: appWorkerName,
+				},
+			]
+			patches.push(`services.APP ← ${appWorkerName}`)
+		}
 	}
 
 	patchRoutesForApp(appKey, deployEnv, config, launchConfig, patches)

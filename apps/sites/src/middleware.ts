@@ -143,14 +143,21 @@ function withSecurityHeaders(
 }
 
 function waitUntil(context: { locals: App.Locals }, task: Promise<unknown>) {
-	const runtime = (
-		context.locals as App.Locals & {
-			runtime?: { ctx?: { waitUntil?: (promise: Promise<unknown>) => void } }
-		}
-	).runtime
-	if (runtime?.ctx?.waitUntil) {
-		runtime.ctx.waitUntil(task)
+	const locals = context.locals as App.Locals & {
+		cfContext?: { waitUntil?: (promise: Promise<unknown>) => void }
+		runtime?: { ctx?: { waitUntil?: (promise: Promise<unknown>) => void } }
+	}
+	if (typeof locals.cfContext?.waitUntil === 'function') {
+		locals.cfContext.waitUntil(task)
 		return
+	}
+	try {
+		if (typeof locals.runtime?.ctx?.waitUntil === 'function') {
+			locals.runtime.ctx.waitUntil(task)
+			return
+		}
+	} catch {
+		// Ignore if runtime.ctx getter throws in newer Astro versions
 	}
 	void task
 }

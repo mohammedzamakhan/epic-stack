@@ -1,17 +1,21 @@
 import { Hono, type Context } from 'hono'
 import { z } from 'zod'
-import { ENV } from 'varlock/env'
 import {
-	destroyTenantDb,
-	provisionTenantDb,
 	TENANT_ORG_ID_PATTERN,
+	provisionTenantDb,
+	destroyTenantDb,
 } from '@repo/tenant-db'
+
 import {
 	findActiveOrganizationById,
 	organizationFromProvisionPayload,
 } from '../lib/origin.ts'
 import { getNodeRegion, orgMatchesNodeRegion } from '../lib/region.ts'
-import { getBearerToken, timingSafeEqualString } from '../lib/secrets.ts'
+import {
+	getBearerToken,
+	getInternalCommandToken,
+	timingSafeEqualString,
+} from '../lib/secrets.ts'
 
 export const provisionRoutes = new Hono()
 
@@ -26,7 +30,7 @@ const orgIdSchema = z.object({
 })
 
 function unauthorized(c: Context) {
-	const internalToken = ENV.INTERNAL_COMMAND_TOKEN || ''
+	const internalToken = getInternalCommandToken()
 	if (internalToken.length < 16) {
 		return c.json({ error: 'Provisioning is not configured' }, 503)
 	}
