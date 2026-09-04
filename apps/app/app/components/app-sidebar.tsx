@@ -1,8 +1,6 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
-import { getCrossAppUrl } from '@repo/common/url'
-import { getBrandDomain } from '@repo/config/brand'
 import { useDirection } from '@repo/ui'
 import { ArrowLeftIcon } from '@repo/ui/arrow-left-icon'
 import { BuildingIcon } from '@repo/ui/building-icon'
@@ -100,11 +98,13 @@ function AccountSidebar({
 	user,
 	location,
 	orgSlug,
+	docsUrl,
 	onFeedbackClick,
 }: {
 	user: any
 	location: any
 	orgSlug: string | undefined
+	docsUrl?: string | null
 	onFeedbackClick: () => void
 }) {
 	const { _ } = useLingui()
@@ -140,11 +140,16 @@ function AccountSidebar({
 	]
 
 	const navSecondary = [
-		{
-			title: _(msg`Get help`),
-			url: '#',
-			icon: CircleHelpIcon,
-		},
+		...(docsUrl
+			? [
+					{
+						title: _(msg`Get help`),
+						url: docsUrl,
+						icon: CircleHelpIcon,
+						target: '_blank',
+					},
+				]
+			: []),
 		{
 			title: _(msg`Give feedback`),
 			icon: MessageSquareMoreIcon,
@@ -181,6 +186,7 @@ function OrganizationSidebar({
 	rootData,
 	onFeedbackClick,
 	extensionId,
+	docsUrl,
 }: {
 	user: any
 	location: any
@@ -194,16 +200,11 @@ function OrganizationSidebar({
 	rootData: any
 	onFeedbackClick: () => void
 	extensionId?: string
+	docsUrl?: string | null
 }) {
 	const { _ } = useLingui()
 	const goToHomepageLabel = _(msg`Go to homepage`)
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
-	const docsFallback = `https://docs.${getBrandDomain()}:2999`
-	const [helpUrl, setHelpUrl] = useState(docsFallback)
-
-	useEffect(() => {
-		setHelpUrl(getCrossAppUrl('docs', '', docsFallback))
-	}, [docsFallback])
 
 	useEffect(() => {
 		if (!extensionId) return
@@ -389,12 +390,16 @@ function OrganizationSidebar({
 			url: `/${orgSlug}/settings/members`,
 			icon: UserRoundPlusIcon,
 		},
-		{
-			title: _(msg`Get help`),
-			url: helpUrl,
-			icon: CircleHelpIcon,
-			target: '_blank',
-		},
+		...(docsUrl
+			? [
+					{
+						title: _(msg`Get help`),
+						url: docsUrl,
+						icon: CircleHelpIcon,
+						target: '_blank',
+					},
+				]
+			: []),
 		{
 			title: _(msg`Give feedback`),
 			icon: MessageSquareMoreIcon,
@@ -544,6 +549,7 @@ export function AppSidebar({
 						user={userData}
 						location={location}
 						orgSlug={orgSlug}
+						docsUrl={rootData?.docsUrl}
 						onFeedbackClick={() => setIsFeedbackModalOpen(true)}
 					/>
 				</motion.div>
@@ -580,6 +586,7 @@ export function AppSidebar({
 						rootData={rootData}
 						onFeedbackClick={() => setIsFeedbackModalOpen(true)}
 						extensionId={extensionId}
+						docsUrl={rootData?.docsUrl}
 					/>
 				</motion.div>
 			</div>

@@ -1,9 +1,10 @@
 import { type Config } from '@react-router/dev/config'
-import { getBrandDomain } from '@repo/config/brand'
+import { getLocalDomain } from '@repo/config/brand'
 import { sentryOnBuildEnd } from '@sentry/react-router'
 
 const MODE = process.env.NODE_ENV
-const domain = getBrandDomain()
+const domain = getLocalDomain()
+const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare'
 
 export default {
 	// Defaults to true. Set to false to enable SPA for all routes.
@@ -15,7 +16,7 @@ export default {
 		unstable_optimizeDeps: true,
 	},
 
-	allowedActionOrigins: [`app.${domain}:2999`],
+	allowedActionOrigins: isCloudflare ? [] : [`app.${domain}:2999`],
 
 	buildEnd: async ({ viteConfig, reactRouterConfig, buildManifest }) => {
 		if (MODE === 'production' && process.env.SENTRY_AUTH_TOKEN) {

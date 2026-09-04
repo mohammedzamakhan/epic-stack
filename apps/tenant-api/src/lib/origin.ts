@@ -1,6 +1,6 @@
 import { LRUCache } from 'lru-cache'
 
-import { getBrandDomain } from '@repo/config/brand'
+import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
 import { and, db, eq, or, Organization } from '@repo/database'
 import { TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
 
@@ -289,12 +289,15 @@ export async function isAllowedBrowserOrigin(origin: string): Promise<boolean> {
 	if (cached !== undefined) return cached
 
 	const url = parseOrigin(origin)
+	const isProd = process.env.NODE_ENV === 'production'
 	const appHostname = `app.${brandDomain()}`
 	const appUrl = parseOrigin(appBaseUrl())
 	const isAppOrigin = Boolean(
 		url &&
 		(url.hostname === appHostname ||
 			url.hostname === `admin.${brandDomain()}` ||
+			(!isProd && url.hostname === `app.${getLocalDomain()}`) ||
+			(!isProd && url.hostname === `admin.${getLocalDomain()}`) ||
 			url.hostname === 'localhost' ||
 			(appUrl && url.origin === appUrl.origin)),
 	)
@@ -330,7 +333,12 @@ export function isOperatorControlPlaneOrigin(origin: string) {
 	}
 	const hostname = url.hostname.toLowerCase()
 	const domain = brandDomain()
-	return hostname === `app.${domain}` || hostname === `admin.${domain}`
+	return (
+		hostname === `app.${domain}` ||
+		hostname === `admin.${domain}` ||
+		(!isProd && hostname === `app.${getLocalDomain()}`) ||
+		(!isProd && hostname === `admin.${getLocalDomain()}`)
+	)
 }
 
 export async function isAllowedAnalyticsOrigin(origin: string) {

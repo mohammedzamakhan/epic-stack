@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
-import { getBrandDomain } from '@repo/config/brand'
+import { getLocalDomain } from '@repo/config/brand'
 import {
 	type SentryReactRouterBuildOptions,
 	sentryReactRouter,
@@ -14,7 +14,7 @@ import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
 const appDir = fileURLToPath(new URL('.', import.meta.url))
-const domain = `app.${getBrandDomain()}`
+const domain = `app.${getLocalDomain()}`
 
 const MODE = process.env.NODE_ENV
 const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare'

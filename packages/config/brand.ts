@@ -82,6 +82,13 @@ export const brand = {
 
 export const getBrandDomain = () => brand.domain
 
+/**
+ * Reserved, non-public hostname used by the local HTTPS development proxy.
+ * Keep this derived from the brand slug so local setup can never shadow the
+ * production domain in /etc/hosts.
+ */
+export const getLocalDomain = () => `${brand.slug}.test`
+
 export const getBrandTeam = () => `The ${brand.name} Team`
 
 export const getIntegrationUserAgent = () => `${brand.slug}-Integration/1.0`

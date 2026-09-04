@@ -502,6 +502,7 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 		)
 		if (appKey === 'app') {
 			patchVar('BASE_URL', 'APP_BASE_URL', 'app_base_url')
+			patchVar('DOCS_URL', 'DOCS_URL', 'docs_url')
 			patchVar(
 				'PUBLIC_SITE_HOST_SUFFIXES',
 				'PUBLIC_SITE_HOST_SUFFIXES',

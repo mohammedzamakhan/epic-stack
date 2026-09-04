@@ -1,9 +1,10 @@
-import { getBrandDomain } from '@repo/config/brand'
+import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
 import { describe, expect, it } from 'vitest'
 
 import { getSiteHostSuffixes, resolveHost } from './resolve-host.ts'
 
 const brandDomain = getBrandDomain()
+const localDomain = getLocalDomain()
 
 const previewEnv = {
 	ROOT_APP: 'zama-887.workers.dev',
@@ -13,6 +14,15 @@ const previewEnv = {
 describe('resolveHost', () => {
 	it('reads the org slug from the brand .me domain', () => {
 		expect(resolveHost(`acme12.${brandDomain}`)).toEqual({
+			kind: 'slug',
+			orgSlug: 'acme12',
+		})
+	})
+
+	it('reads the org slug from the derived local domain', () => {
+		expect(
+			resolveHost(`acme12.${localDomain}`, { ROOT_APP: localDomain }),
+		).toEqual({
 			kind: 'slug',
 			orgSlug: 'acme12',
 		})

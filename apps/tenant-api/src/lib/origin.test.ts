@@ -1,4 +1,4 @@
-import { getBrandDomain } from '@repo/config/brand'
+import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -9,6 +9,7 @@ import {
 
 describe('operator CORS origins', () => {
 	const domain = getBrandDomain()
+	const localDomain = getLocalDomain()
 
 	it('allows the App and Admin control-plane hosts', () => {
 		expect(isOperatorControlPlaneOrigin(`https://app.${domain}:2999`)).toBe(
@@ -17,6 +18,15 @@ describe('operator CORS origins', () => {
 		expect(isOperatorControlPlaneOrigin(`https://admin.${domain}:2999`)).toBe(
 			true,
 		)
+	})
+
+	it('allows the derived local App and Admin hosts', () => {
+		expect(
+			isOperatorControlPlaneOrigin(`https://app.${localDomain}:2999`),
+		).toBe(true)
+		expect(
+			isOperatorControlPlaneOrigin(`https://admin.${localDomain}:2999`),
+		).toBe(true)
 	})
 
 	it('allows App, Admin, and localhost for operator and analytics fetches', async () => {

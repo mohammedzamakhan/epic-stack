@@ -34,6 +34,27 @@ import {
 	printInferredSummary,
 } from './wrangler-infer.mjs'
 
+function readConfiguredBrandDomain() {
+	try {
+		const brandPath = join(rootDir, 'packages/config/brand.ts')
+		const content = readFileSync(brandPath, 'utf8')
+		return content.match(/^\tdomain:\s*'([^']+)'/m)?.[1] ?? ''
+	} catch {
+		return ''
+	}
+}
+
+function readConfiguredLocalDomain() {
+	try {
+		const brandPath = join(rootDir, 'packages/config/brand.ts')
+		const content = readFileSync(brandPath, 'utf8')
+		const slug = content.match(/^\tslug:\s*'([^']+)'/m)?.[1]
+		return slug ? `${slug}.test` : 'epic-startup.test'
+	} catch {
+		return 'epic-startup.test'
+	}
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
@@ -1147,7 +1168,10 @@ async function main() {
 
 	const apex = await input({
 		message: 'Platform apex domain (e.g. epic-startup.me)',
-		default: inferred.urls.apex ?? '',
+		default:
+			inferred.urls.apex && !inferred.urls.apex.endsWith('.test')
+				? inferred.urls.apex
+				: readConfiguredBrandDomain(),
 		validate: (value) => (value.trim() ? true : 'Domain is required'),
 	})
 
@@ -1178,6 +1202,11 @@ async function main() {
 	const tenantKsa = `https://tenant-ksa.${apex}`
 	const publicAppUrl = appUrl
 	const jobsCronUrl = `https://jobs.${apex}`
+	const localDomain = readConfiguredLocalDomain()
+	const localAppUrl = `https://app.${localDomain}:2999`
+	const localAdminUrl = `https://admin.${localDomain}:2999`
+	const localTenantUs = `https://api.${localDomain}:2999`
+	const localTenantKsa = `https://api-ksa.${localDomain}:2999`
 
 	const secrets = generateSharedSecrets()
 	secrets.launch_status = await promptLaunchStatus()
@@ -1214,10 +1243,12 @@ async function main() {
 		LAUNCH_STATUS: secrets.launch_status,
 		CREDIT_CARD_REQUIRED_FOR_TRIAL: secrets.credit_card_required_for_trial,
 		JOBS_CRON_WORKER_URL: jobsCronUrl,
-		ROOT_APP: apex,
-		BASE_URL: appUrl,
-		TENANT_API_URL: tenantUs,
-		TENANT_API_URL_KSA: tenantKsa,
+		ROOT_APP: localDomain,
+		BASE_URL: localAppUrl,
+		TENANT_API_URL: 'http://localhost:3007',
+		TENANT_API_URL_KSA: 'http://localhost:3009',
+		PUBLIC_TENANT_API_URL: localTenantUs,
+		PUBLIC_TENANT_API_URL_KSA: localTenantKsa,
 	}
 	if (secrets.discord) {
 		Object.assign(envPatches, secrets.discord)
@@ -1228,18 +1259,18 @@ async function main() {
 		HONEYPOT_SECRET: secrets.shared.HONEYPOT_SECRET,
 		INTERNAL_COMMAND_TOKEN: secrets.shared.INTERNAL_COMMAND_TOKEN,
 		LAUNCH_STATUS: secrets.launch_status,
-		ROOT_APP: apex,
-		BASE_URL: adminUrl,
+		ROOT_APP: localDomain,
+		BASE_URL: localAdminUrl,
 	})
 	const sitesEnvPatched = patchEnvFile(join(rootDir, 'apps/sites/.env'), {
-		ROOT_APP: apex,
-		PUBLIC_APP_URL: publicAppUrl,
-		TENANT_API_URL: tenantUs,
-		TENANT_API_URL_KSA: tenantKsa,
+		ROOT_APP: localDomain,
+		PUBLIC_APP_URL: localAppUrl,
+		TENANT_API_URL: localTenantUs,
+		TENANT_API_URL_KSA: localTenantKsa,
 	})
 	if (appEnvPatched || adminEnvPatched || sitesEnvPatched) {
 		log(
-			'Updated local .env files with generated secrets and platform URLs.',
+			'Updated local .env files with generated secrets and derived .test URLs.',
 			'green',
 		)
 	}
@@ -1259,7 +1290,9 @@ async function main() {
 		tenant_api_url: tenantUs,
 		tenant_api_url_ksa: tenantKsa,
 		jobs_cron_worker_url: jobsCronUrl,
+		docs_url: '',
 		...stagingHostnames(apex),
+		docs_url_staging: '',
 	}
 	log(`\nJobs cron URL: ${jobsCronUrl}`, 'gray')
 	log(
