@@ -110,6 +110,7 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 }
 
 export default defineConfig((config) => ({
+	base: MODE === 'test' ? 'http://localhost:3001' : undefined,
 	build: {
 		target: 'es2022',
 		cssMinify: MODE === 'production',
@@ -232,6 +233,9 @@ export default defineConfig((config) => ({
 		setupFiles: ['./tests/setup/setup-test-env.ts'],
 		globalSetup: ['./tests/setup/global-setup.ts'],
 		environment: 'node',
+		env: {
+			BASE_URL: 'http://localhost:3001',
+		},
 		envFile: '../../.env',
 		restoreMocks: true,
 		// Forked workers get isolated process.env + SQLite files (threads shared one DB).
