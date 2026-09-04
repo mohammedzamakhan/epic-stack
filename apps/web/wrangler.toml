@@ -5,8 +5,8 @@ workers_dev = true
 
 # Patched at deploy by scripts/patch-wrangler.mjs
 [vars]
-PUBLIC_ROOT_APP = "lighteninggroup.com"
-PUBLIC_APP_URL = "https://app.lighteninggroup.com"
+PUBLIC_ROOT_APP = "epic-startup.me"
+PUBLIC_APP_URL = "https://app.epic-startup.me"
 
 [[d1_databases]]
 binding = "DB"

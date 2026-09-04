@@ -17,14 +17,14 @@ export const brand = {
 	name: 'Epic Startup',
 	shortName: 'Epic Startup',
 	slug: 'epic-startup',
-	domain: 'lighteninggroup.com',
+	domain: 'epic-startup.me',
 	tagline: 'Build your next startup even faster',
 	description:
 		'Epic Startup is a modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.',
 
 	// URLs
-	url: 'https://lighteninggroup.com',
-	supportEmail: 'support@lighteninggroup.com',
+	url: 'https://epicstartup.com',
+	supportEmail: 'support@epicstartup.com',
 
 	// Social/Meta
 	twitterHandle: '@epicstartup',
