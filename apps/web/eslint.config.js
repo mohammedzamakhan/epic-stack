@@ -8,6 +8,7 @@ export default [
 		ignores: [
 			'dist/',
 			'.astro/',
+			'.emdash/',
 			'node_modules/',
 			'public/',
 			'env.d.ts',

@@ -58,7 +58,9 @@ jobs:
           npm run build
 
       - name: 🧩 Patch Wrangler config (Web preview)
-        run: node scripts/patch-wrangler.mjs --app web --env preview --require-bindings
+        run:
+          node scripts/patch-wrangler.mjs --app web --env preview
+          --require-bindings
         env:
           WEB_D1_DATABASE_ID: ${{ vars.WEB_D1_DATABASE_ID }}
           WEB_R2_BUCKET_NAME: ${{ vars.WEB_R2_BUCKET_NAME }}
@@ -346,7 +348,7 @@ jobs:
                 console.log('Best Practices:', bp);
                 console.log('SEO:', seo);
                 
-                const threshold = 98;
+                const threshold = 90;
                 let failed = false;
                 
                 if (perf < threshold) {

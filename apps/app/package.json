@@ -109,6 +109,7 @@
     "@tiptap/starter-kit": "^3.0.7",
     "@tiptap/suggestion": "^3.0.7",
     "@tusbar/cache-control": "1.0.2",
+    "@varlock/cloudflare-integration": "^1.5.1",
     "@varlock/vite-integration": "^0.1.0",
     "@xyflow/react": "^12.11.3",
     "address": "^2.0.3",
