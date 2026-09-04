@@ -80,8 +80,11 @@ function bindingEnvKey(deployEnv) {
 
 function previewWebWorkerName(launchConfig) {
 	return (
-		readEnv('WEB_WORKER_NAME_PREVIEW', launchConfig, 'bindings.preview.web.worker_name') ||
-		'epic-startup-preview'
+		readEnv(
+			'WEB_WORKER_NAME_PREVIEW',
+			launchConfig,
+			'bindings.preview.web.worker_name',
+		) || 'epic-startup-preview'
 	)
 }
 
@@ -218,10 +221,7 @@ function patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches) {
 	if (appKey === 'tenant-api') {
 		const url = readPlatformUrl(
 			[`TENANT_API_URL${suffix}`, 'TENANT_API_URL'],
-			[
-				isStaging ? 'urls.tenant_api_url_staging' : null,
-				'urls.tenant_api_url',
-			],
+			[isStaging ? 'urls.tenant_api_url_staging' : null, 'urls.tenant_api_url'],
 			launchConfig,
 			isStaging ? stagingDefaults.tenant_api_url_staging : undefined,
 		)
@@ -246,7 +246,16 @@ function patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches) {
 		if (!apex.startsWith('www.')) {
 			hosts.push(`www.${apex}`)
 		}
-		applyZoneRoutes(target, buildZoneRoutes(hosts, rootApp), patches, 'web')
+		const routes = isStaging
+			? buildZoneRoutes(hosts, rootApp)
+			: [
+					{ pattern: apex, custom_domain: true },
+					...buildZoneRoutes(
+						hosts.filter((h) => h !== apex),
+						rootApp,
+					),
+				]
+		applyZoneRoutes(target, routes, patches, 'web')
 		return
 	}
 
@@ -291,7 +300,9 @@ function injectTomlRoutes(content, deployEnv, routes) {
 	const lines = routes.flatMap((route) => [
 		`[[${tablePrefix}routes]]`,
 		`pattern = "${route.pattern}"`,
-		`zone_name = "${route.zone_name}"`,
+		route.custom_domain
+			? 'custom_domain = true'
+			: `zone_name = "${route.zone_name}"`,
 		'',
 	])
 
@@ -303,7 +314,9 @@ function collectRoutesForApp(appKey, deployEnv, launchConfig) {
 	const target = {}
 	const patches = []
 	patchRoutesForApp(appKey, deployEnv, target, launchConfig, patches)
-	return /** @type {{ pattern: string, zone_name: string }[]} */ (target.routes ?? [])
+	return /** @type {{ pattern: string, zone_name: string }[]} */ (
+		target.routes ?? []
+	)
 }
 
 function readEnv(name, launchConfig, launchPath) {
@@ -330,8 +343,7 @@ function readEnv(name, launchConfig, launchPath) {
  */
 function readUrlSetting(envBase, urlKey, deployEnv, launchConfig) {
 	const suffix = envSuffix(deployEnv)
-	const envNames =
-		deployEnv === 'staging' ? [`${envBase}${suffix}`] : [envBase]
+	const envNames = deployEnv === 'staging' ? [`${envBase}${suffix}`] : [envBase]
 	for (const name of envNames) {
 		if (process.env[name]) return process.env[name]
 	}
@@ -508,7 +520,11 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 				'PUBLIC_SITE_HOST_SUFFIXES',
 				'public_site_host_suffixes',
 			)
-			patchVar('JOBS_CRON_WORKER_URL', 'JOBS_CRON_WORKER_URL', 'jobs_cron_worker_url')
+			patchVar(
+				'JOBS_CRON_WORKER_URL',
+				'JOBS_CRON_WORKER_URL',
+				'jobs_cron_worker_url',
+			)
 		} else {
 			patchVar('BASE_URL', 'ADMIN_BASE_URL', 'admin_base_url')
 		}
@@ -531,10 +547,7 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 	if (appKey === 'tenant-api') {
 		patch(
 			'name',
-			[
-				`TENANT_API_US_WORKER_NAME${suffix}`,
-				'TENANT_API_US_WORKER_NAME',
-			],
+			[`TENANT_API_US_WORKER_NAME${suffix}`, 'TENANT_API_US_WORKER_NAME'],
 			`bindings.${deployEnv === 'staging' ? 'staging' : 'production'}.tenant_api.worker_name`,
 		)
 		patchVar('APP_URL', 'APP_BASE_URL', 'app_base_url')
@@ -557,7 +570,9 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 	writeJsonc(outputPath, config)
 	console.log(`Wrote ${outputPath}`)
 	if (useViteBuild) {
-		console.log('  Deploy: npx wrangler deploy --config build/server/wrangler.deploy.json')
+		console.log(
+			'  Deploy: npx wrangler deploy --config build/server/wrangler.deploy.json',
+		)
 	}
 	if (patches.length > 0) {
 		console.log(patches.map((line) => `  • ${line}`).join('\n'))
@@ -628,7 +643,12 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			)
 		}
 
-		const rootApp = readUrlSetting('ROOT_APP', 'root_app', deployEnv, launchConfig)
+		const rootApp = readUrlSetting(
+			'ROOT_APP',
+			'root_app',
+			deployEnv,
+			launchConfig,
+		)
 		if (rootApp) {
 			applyToml(
 				/(PUBLIC_ROOT_APP\s*=\s*")[^"]+(")/,
@@ -702,7 +722,12 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			)
 		}
 
-		const rootApp = readUrlSetting('ROOT_APP', 'root_app', deployEnv, launchConfig)
+		const rootApp = readUrlSetting(
+			'ROOT_APP',
+			'root_app',
+			deployEnv,
+			launchConfig,
+		)
 		if (rootApp) {
 			applyToml(
 				/(ROOT_APP\s*=\s*")[^"]+(")/,
@@ -731,7 +756,11 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			`bindings.${bindingEnv}.sites.worker_name`,
 		)
 		if (workerName) {
-			applyToml(/^name\s*=\s*"[^"]+"/m, `name = "${workerName}"`, `name ← SITES_WORKER_NAME${suffix}`)
+			applyToml(
+				/^name\s*=\s*"[^"]+"/m,
+				`name = "${workerName}"`,
+				`name ← SITES_WORKER_NAME${suffix}`,
+			)
 		}
 	}
 
@@ -771,7 +800,9 @@ function usesAstroWorkerBuild(appKey) {
 
 function patchAstroTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 	const meta = APPS[appKey]
-	const config = JSON.parse(readFileSync(astroBuiltWranglerPath(appKey), 'utf8'))
+	const config = JSON.parse(
+		readFileSync(astroBuiltWranglerPath(appKey), 'utf8'),
+	)
 	const outputPath = join(rootDir, meta.dir, 'dist/server/wrangler.deploy.json')
 	const suffix = envSuffix(deployEnv)
 	const bindingEnv = bindingEnvKey(deployEnv)

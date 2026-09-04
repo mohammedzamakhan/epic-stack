@@ -1,4 +1,3 @@
-import '@varlock/cloudflare-integration/init'
 import { z } from 'zod'
 import {
 	setListTenantOrgIdsProvider,
