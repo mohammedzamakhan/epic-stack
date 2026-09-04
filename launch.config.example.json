@@ -69,6 +69,7 @@
 		"tenant_api_url": "https://tenant-us.yourdomain.com",
 		"tenant_api_url_ksa": "https://tenant-ksa.yourdomain.com",
 		"jobs_cron_worker_url": "https://jobs.yourdomain.com",
+		"docs_url": "",
 		"root_app_staging": "yourdomain.com",
 		"public_app_url_staging": "https://app-staging.yourdomain.com",
 		"public_site_host_suffixes_staging": "yourdomain.com,workers.dev",
@@ -77,6 +78,7 @@
 		"web_base_url_staging": "https://staging.yourdomain.com",
 		"tenant_api_url_staging": "https://tenant-us-staging.yourdomain.com",
 		"jobs_cron_worker_url_staging": "https://jobs-staging.yourdomain.com",
+		"docs_url_staging": "",
 		"demo_site_host_staging": "demo-staging.yourdomain.com"
 	}
 }

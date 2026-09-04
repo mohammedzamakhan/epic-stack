@@ -12,8 +12,9 @@ npm run dev:sites
 npm run dev
 ```
 
-Sites runs on port **3008**. Through the HTTPS proxy (`:2999`), org subdomains
-and custom domains are routed here.
+Sites runs on port **3008**. Through the HTTPS proxy (`:2999`), the derived
+`{brand.slug}.test` domain and its org subdomains and custom domains are routed
+here.
 
 ### Env (varlock)
 
@@ -24,8 +25,9 @@ local `.env` (gitignored) as needed. Types are generated to `env.d.ts`.
 ### Hosts
 
 `/etc/hosts` does not support wildcards. `npm run setup:hosts` adds product app
-domains, published org slug subdomains, and connected custom domains from the
-database. Re-run after publishing or connecting a domain.
+domains and published org slug subdomains under `{brand.slug}.test`. It never
+maps the production brand domain or connected public custom domains to
+localhost. Re-run after publishing a site.
 
 ### Custom domains (Cloudflare for SaaS)
 

@@ -461,7 +461,9 @@ function updateBrandConfig(brandInfo) {
 	log(`✅ Updated ${brandPath}`, 'green')
 }
 
-function updateEnvFiles(domain) {
+function updateEnvFiles(brandInfo) {
+	const domain = brandInfo.domain
+	const localDomain = `${brandInfo.slug}.test`
 	const envFiles = [
 		'apps/app/.env',
 		'apps/admin/.env',
@@ -493,28 +495,49 @@ function updateEnvFiles(domain) {
 			let content = readFileSync(envPath, 'utf-8')
 			const original = content
 
-			content = content.replace(/^ROOT_APP=.*$/m, `ROOT_APP=${domain}`)
+			content = content.replace(/^ROOT_APP=.*$/m, `ROOT_APP=${localDomain}`)
 			content = content.replace(
 				/^PUBLIC_ROOT_APP=.*$/m,
-				`PUBLIC_ROOT_APP=${domain}`,
+				`PUBLIC_ROOT_APP=${localDomain}`,
 			)
 			content = content.replace(
 				/CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET=sites\.epic-startup\.me/g,
 				`CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET=sites.${domain}`,
 			)
 			content = content.replace(
-				/PUBLIC_TENANT_API_URL=https:\/\/api\.epic-startup\.me/g,
-				`PUBLIC_TENANT_API_URL=https://api.${domain}`,
+				/^PUBLIC_TENANT_API_URL=.*$/m,
+				`PUBLIC_TENANT_API_URL=https://api.${localDomain}:2999`,
 			)
 			content = content.replace(
-				/PUBLIC_TENANT_API_URL_KSA=https:\/\/api-ksa\.epic-startup\.me/g,
-				`PUBLIC_TENANT_API_URL_KSA=https://api-ksa.${domain}`,
+				/^PUBLIC_TENANT_API_URL_KSA=.*$/m,
+				`PUBLIC_TENANT_API_URL_KSA=https://api-ksa.${localDomain}:2999`,
 			)
+			if (envFile.startsWith('apps/app/')) {
+				content = content.replace(
+					/^BASE_URL=.*$/m,
+					`BASE_URL="https://app.${localDomain}:2999"`,
+				)
+			}
+			if (envFile.startsWith('apps/admin/')) {
+				content = content.replace(
+					/^BASE_URL=.*$/m,
+					`BASE_URL="https://admin.${localDomain}:2999"`,
+				)
+			}
+			if (envFile.startsWith('apps/sites/')) {
+				content = content.replace(
+					/^PUBLIC_APP_URL=.*$/m,
+					`PUBLIC_APP_URL=https://app.${localDomain}:2999`,
+				)
+			}
 
 			if (content !== original) {
 				writeFileSync(envPath, content, 'utf-8')
 				updatedCount++
-				log(`✅ Updated domain references in ${envFile} to ${domain}`, 'green')
+				log(
+					`✅ Updated ${envFile} (local: ${localDomain}, production: ${domain})`,
+					'green',
+				)
 			}
 		} catch (error) {
 			log(`⚠️  Failed to update ${envFile}: ${error.message}`, 'yellow')
@@ -703,7 +726,7 @@ async function main() {
 
 		const brandInfo = await promptBrandInfo()
 		updateBrandConfig(brandInfo)
-		updateEnvFiles(brandInfo.domain)
+		updateEnvFiles(brandInfo)
 		updateMobileAppConfig(brandInfo)
 		updateStaticBrandFiles(brandInfo)
 		rebuildBrandPackage()

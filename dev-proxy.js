@@ -49,7 +49,21 @@ function getBrandDomain() {
 	}
 }
 
-const domain = getBrandDomain()
+function getLocalDomain() {
+	try {
+		const path = require('path')
+		const brandConfigPath = path.join(__dirname, 'packages/config/brand.ts')
+		const brandContent = fs.readFileSync(brandConfigPath, 'utf-8')
+		const slugMatch = brandContent.match(/^\tslug:\s*'([^']+)'/m)
+		if (slugMatch && slugMatch[1]) return `${slugMatch[1]}.test`
+	} catch (error) {
+		console.log(`⚠️  Could not derive local domain: ${error.message}`)
+	}
+
+	return `${getBrandDomain().split('.')[0]}.test`
+}
+
+const domain = getLocalDomain()
 
 // Reserved product subdomains — everything else under *.{domain} is Sites
 const RESERVED_SUBDOMAINS = new Set([
