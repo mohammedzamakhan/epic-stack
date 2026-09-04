@@ -6,6 +6,7 @@ import {
 import { createTenantApiApp } from '../src/app.ts'
 import { organizationFromProvisionPayload } from '../src/lib/origin.ts'
 import {
+	applyVarlockEnv,
 	assertTenantApiSecrets,
 	getBearerToken,
 	timingSafeEqualString,
@@ -19,13 +20,8 @@ export { TenantOrg, TenantRegistry }
 
 const edgeApp = createTenantApiApp()
 
-function applyWorkerEnv(env: TenantApiWorkerEnv) {
-	for (const [key, value] of Object.entries(env)) {
-		if (typeof value === 'string') {
-			process.env[key] = value
-		}
-	}
-	process.env.TENANT_API_RUNTIME = 'workers'
+export function applyWorkerEnv(env: TenantApiWorkerEnv) {
+	applyVarlockEnv(env)
 }
 
 function registryStub(env: TenantApiWorkerEnv) {

@@ -54,11 +54,7 @@ const profileSchema = z.object({
 })
 
 function getJwtSecret(): string {
-	if (process.env.JWT_SECRET) return process.env.JWT_SECRET
-	try {
-		if (ENV && (ENV as any).JWT_SECRET) return (ENV as any).JWT_SECRET
-	} catch {}
-	return ''
+	return ENV.JWT_SECRET || ''
 }
 
 const ACCESS_TOKEN_EXPIRY = '15m'

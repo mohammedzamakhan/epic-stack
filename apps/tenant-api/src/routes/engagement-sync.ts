@@ -1,8 +1,11 @@
 import { Hono, type Context } from 'hono'
 import { z } from 'zod'
-import { ENV } from 'varlock/env'
 import { TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
-import { getBearerToken, timingSafeEqualString } from '../lib/secrets.ts'
+import {
+	getBearerToken,
+	getInternalCommandToken,
+	timingSafeEqualString,
+} from '../lib/secrets.ts'
 import {
 	syncEmailEngagementForAllOrgs,
 	syncEmailEngagementForOrg,
@@ -11,7 +14,7 @@ import {
 export const engagementSyncRoutes = new Hono()
 
 function unauthorized(c: Context) {
-	const internalToken = ENV.INTERNAL_COMMAND_TOKEN || ''
+	const internalToken = getInternalCommandToken()
 	if (internalToken.length < 16) {
 		return c.json({ error: 'Engagement sync is not configured' }, 503)
 	}

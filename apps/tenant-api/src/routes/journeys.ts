@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono'
 import { jwtVerify } from 'jose'
-import { ENV } from 'varlock/env'
 import { z } from 'zod'
+
 import {
 	createJourneySchema,
 	updateJourneySchema,
@@ -13,6 +13,7 @@ import { findActiveOrganizationById } from '../lib/origin.ts'
 import { getNodeRegion, orgMatchesNodeRegion } from '../lib/region.ts'
 import {
 	getBearerToken,
+	getInternalCommandToken,
 	getOperatorToken,
 	timingSafeEqualString,
 } from '../lib/secrets.ts'
@@ -33,14 +34,6 @@ import {
 } from '../services/journey-service.ts'
 import { brand } from '@repo/config/brand'
 
-function getEnvVar(key: string, defaultValue = ''): string {
-	if (process.env[key]) return process.env[key]!
-	try {
-		if (ENV && (ENV as any)[key]) return (ENV as any)[key]
-	} catch {}
-	return defaultValue
-}
-
 // =========================================================================
 // 1. SYSTEM-TO-SYSTEM JOURNEY ROUTES (/api/journeys/*)
 // Authenticated via Bearer INTERNAL_COMMAND_TOKEN using constant-time check
@@ -49,7 +42,7 @@ function getEnvVar(key: string, defaultValue = ''): string {
 export const journeySystemRoutes = new Hono()
 
 function checkSystemAuth(c: Context) {
-	const internalToken = getEnvVar('INTERNAL_COMMAND_TOKEN', '')
+	const internalToken = getInternalCommandToken()
 	if (internalToken.length < 16) {
 		return c.json({ error: 'System API is not configured' }, 503)
 	}

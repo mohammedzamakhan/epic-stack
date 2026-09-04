@@ -10,7 +10,7 @@ assertDataRegion()
 
 const app = createTenantApiApp()
 
-const port = Number(process.env.PORT || ENV.PORT) || 3007
+const port = Number(ENV.PORT) || 3007
 const region = getNodeRegion()
 
 console.log(

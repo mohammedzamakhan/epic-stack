@@ -20,12 +20,13 @@ import {
 	type EvaluateConditionPayload,
 } from '@repo/tenant-db'
 import { getNodeRegion } from '../lib/region.ts'
+import { syncEnvFromProcess } from '../lib/secrets.ts'
 
 export type CreateJourneyInput = z.input<typeof createJourneySchema>
 export type UpdateJourneyInput = z.input<typeof updateJourneySchema>
 
 function getEnvVar(key: string, defaultValue = ''): string {
-	if (process.env[key]) return process.env[key]!
+	syncEnvFromProcess()
 	try {
 		if (ENV && (ENV as any)[key]) return (ENV as any)[key]
 	} catch {}
