@@ -67,6 +67,10 @@ export function ghVariablesToBuildEnv(variables) {
 		// Node 22.23.2 is preinstalled on the
 		// Cloudflare Workers Builds image, so selecting it avoids a download.
 		NODE_VERSION: { value: '22.23.2', is_secret: false },
+		// Ensure ample heap space for React Router SSR and Vite bundling.
+		NODE_OPTIONS: { value: '--max-old-space-size=6144', is_secret: false },
+		// Ensure Cloudflare-specific bundle flags (sourcemap suppression, worker aliases).
+		DEPLOY_TARGET: { value: 'cloudflare', is_secret: false },
 		// cf-workers-ci.mjs performs the repository's hardened npm ci flow itself.
 		// Disable Cloudflare's implicit install so dependencies are not installed twice.
 		SKIP_DEPENDENCY_INSTALL: { value: '1', is_secret: false },

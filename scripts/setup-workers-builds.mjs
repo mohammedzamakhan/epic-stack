@@ -48,13 +48,9 @@ function log(message) {
 /** Strip values that look like API tokens or secrets from a string. */
 function redactSecrets(message) {
 	// Cloudflare API tokens are 40-char alphanumeric; redact any long hex-ish runs.
-	return String(message).replace(
-		/[A-Za-z0-9_-]{32,}/g,
-		(match) =>
-			// Keep UUIDs (contain dashes) and known safe patterns; redact the rest.
-			/^[0-9a-f]{8}-/.test(match)
-				? match
-				: `${match.slice(0, 4)}…[REDACTED]`,
+	return String(message).replace(/[A-Za-z0-9_-]{32,}/g, (match) =>
+		// Keep UUIDs (contain dashes) and known safe patterns; redact the rest.
+		/^[0-9a-f]{8}-/.test(match) ? match : `${match.slice(0, 4)}…[REDACTED]`,
 	)
 }
 
@@ -218,10 +214,20 @@ async function createTrigger(accountId, token, payload) {
 }
 
 async function updateTrigger(accountId, token, triggerUuid, payload) {
-	const { external_script_id: _ignoredScriptId, repo_connection_uuid: _ignoredRepoUuid, ...updatePayload } = payload
+	const {
+		external_script_id: _ignoredScriptId,
+		repo_connection_uuid: _ignoredRepoUuid,
+		...updatePayload
+	} = payload
 	return cfApi(accountId, token, `/builds/triggers/${triggerUuid}`, {
 		method: 'PATCH',
 		body: updatePayload,
+	})
+}
+
+async function deleteTrigger(accountId, token, triggerUuid) {
+	return cfApi(accountId, token, `/builds/triggers/${triggerUuid}`, {
+		method: 'DELETE',
 	})
 }
 
@@ -320,18 +326,20 @@ async function ensureTrigger({
 		log(`  created trigger: ${payload.trigger_name} (${triggerUuid})`)
 	}
 
-	// A dashboard-created preview trigger would still run before GHA CI. Keep it
-	// available, but disable push matching so there is only one build per change.
+	// Dashboard-created preview triggers ("Deploy non-production branches") or legacy triggers
+	// would run on every git push before GHA CI completes. Delete them so only
+	// our dedicated manual/CI trigger remains.
 	for (const trigger of triggers) {
 		if (!trigger.trigger_uuid || trigger.trigger_uuid === triggerUuid) continue
 		try {
-			await updateTrigger(accountId, token, trigger.trigger_uuid, {
-				branch_includes: ['cf-builds-disabled'],
-				branch_excludes: [],
-			})
-			log(`  disabled automatic trigger: ${trigger.trigger_name}`)
-		} catch {
-			// Cloudflare automatically manages preview trigger pairing with the primary trigger
+			await deleteTrigger(accountId, token, trigger.trigger_uuid)
+			log(
+				`  deleted unmanaged trigger: ${trigger.trigger_name} (${trigger.trigger_uuid})`,
+			)
+		} catch (error) {
+			log(
+				`  warning: could not delete unmanaged trigger ${trigger.trigger_uuid}: ${error.message}`,
+			)
 		}
 	}
 
