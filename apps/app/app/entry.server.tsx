@@ -54,14 +54,16 @@ function applySecurityHeaders(responseHeaders: Headers) {
 	}
 }
 
-function applyRuntimeHeaders(responseHeaders: Headers) {
+function applyRuntimeHeaders(responseHeaders: Headers, request?: Request) {
 	if (isCloudflareWorkerRuntime()) {
 		responseHeaders.set('cf-worker', 'epic-startup-app')
-		// Cloudflare Workers deployment info
-		responseHeaders.set(
-			'cf-datacenter',
-			(ENV as any).CF_DATACENTER || (ENV as any).REGION || 'unknown',
-		)
+		const cfColo = (request as any)?.cf?.colo
+		const datacenter =
+			cfColo ||
+			(typeof process !== 'undefined' &&
+				(process.env?.CF_DATACENTER || process.env?.REGION)) ||
+			'unknown'
+		responseHeaders.set('cf-datacenter', datacenter)
 		return
 	}
 }
@@ -139,7 +141,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	)
 
 	applySecurityHeaders(responseHeaders)
-	applyRuntimeHeaders(responseHeaders)
+	applyRuntimeHeaders(responseHeaders, request)
 	await applyInstanceHeaders(responseHeaders)
 
 	const nonce = createNonce()
