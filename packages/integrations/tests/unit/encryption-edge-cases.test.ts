@@ -206,6 +206,15 @@ describe('IntegrationEncryptionService Edge Cases', () => {
 	})
 
 	describe('validateToken edge cases', () => {
+		beforeEach(() => {
+			vi.useFakeTimers()
+			vi.setSystemTime(new Date('2026-01-01T12:00:00.000Z'))
+		})
+
+		afterEach(() => {
+			vi.useRealTimers()
+		})
+
 		it('should handle token expiring exactly now', () => {
 			const tokenData: TokenData = {
 				accessToken: 'token',

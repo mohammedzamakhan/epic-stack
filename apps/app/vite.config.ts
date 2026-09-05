@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
-import { getBrandDomain } from '@repo/config/brand'
+import { getLocalDomain } from '@repo/config/brand'
 import {
 	type SentryReactRouterBuildOptions,
 	sentryReactRouter,
@@ -14,7 +14,7 @@ import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
 const appDir = fileURLToPath(new URL('.', import.meta.url))
-const domain = `app.${getBrandDomain()}`
+const domain = `app.${getLocalDomain()}`
 
 const MODE = process.env.NODE_ENV
 const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare'
@@ -110,6 +110,7 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 }
 
 export default defineConfig((config) => ({
+	base: MODE === 'test' ? 'http://localhost:3001' : undefined,
 	build: {
 		target: 'es2022',
 		cssMinify: MODE === 'production',
@@ -124,36 +125,6 @@ export default defineConfig((config) => ({
 						'@sentry/profiling-node',
 						'@sentry-internal/node-cpu-profiler',
 					],
-					output: {
-						// Optimize chunk splitting for better caching and parallel loading
-						manualChunks: (id) => {
-							// Split vendor chunks for better caching
-							if (id.includes('node_modules')) {
-								// Large UI libraries in separate chunks
-								if (id.includes('@radix-ui')) {
-									return 'vendor-radix'
-								}
-								if (id.includes('@tiptap')) {
-									return 'vendor-tiptap'
-								}
-								if (id.includes('recharts') || id.includes('d3-')) {
-									return 'vendor-charts'
-								}
-								if (
-									id.includes('react-router') ||
-									id.includes('@react-router')
-								) {
-									return 'vendor-router'
-								}
-								// Core React in its own chunk
-								if (id.includes('react') || id.includes('react-dom')) {
-									return 'vendor-react'
-								}
-								// Other vendor code
-								return 'vendor'
-							}
-						},
-					},
 				},
 
 		assetsInlineLimit: isCloudflare
@@ -232,8 +203,12 @@ export default defineConfig((config) => ({
 		setupFiles: ['./tests/setup/setup-test-env.ts'],
 		globalSetup: ['./tests/setup/global-setup.ts'],
 		environment: 'node',
+		env: {
+			BASE_URL: 'http://localhost:3001',
+		},
 		envFile: '../../.env',
 		restoreMocks: true,
+		testTimeout: 15000,
 		// Forked workers get isolated process.env + SQLite files (threads shared one DB).
 		pool: 'forks',
 		maxWorkers: process.env.CI ? 2 : undefined,

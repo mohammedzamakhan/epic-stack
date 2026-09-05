@@ -12,6 +12,7 @@ import {
 } from '@repo/tenant-db'
 import { durableSqliteMigrations } from './migrations.generated.ts'
 import { createTenantApiApp } from '../src/app.ts'
+import { applyVarlockEnv } from '../src/lib/secrets.ts'
 import type { TenantApiWorkerEnv } from './bindings.ts'
 
 export const TENANT_ORG_HEADER = 'X-Epic-Tenant-Org-Id'
@@ -46,6 +47,8 @@ export class TenantOrg extends DurableObject<TenantApiWorkerEnv> {
 	}
 
 	async fetch(request: Request): Promise<Response> {
+		applyVarlockEnv(this.env)
+
 		const orgId = request.headers.get(TENANT_ORG_HEADER)
 		if (!orgId || !TENANT_ORG_ID_PATTERN.test(orgId)) {
 			return Response.json(

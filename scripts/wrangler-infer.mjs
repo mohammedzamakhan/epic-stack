@@ -46,7 +46,7 @@ function tryWrangler(args, cwd) {
 }
 
 function parseAccountIdFromWhoami(output) {
-	const match = output.match(/\│[^│]+\│\s*([0-9a-f]{32})\s*\│/i)
+	const match = output.match(/│[^│]+│\s*([0-9a-f]{32})\s*│/i)
 	return match?.[1] ?? null
 }
 

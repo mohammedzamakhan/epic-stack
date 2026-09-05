@@ -21,13 +21,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		role: 'operator',
 	})
 
-	const { publicTenantApiUrl } = resolveRegionalTenantApiUrls(
-		organization.dataRegion,
-	)
+	const { tenantApiUrl } = resolveRegionalTenantApiUrls(organization.dataRegion)
 
 	return data({
 		...minted,
-		tenantApiUrl: publicTenantApiUrl,
+		tenantApiUrl,
 		orgId: organization.id,
 		hasProvisionedDb: organization.hasProvisionedDb,
 	})

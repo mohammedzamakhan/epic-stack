@@ -2,13 +2,14 @@ import { fileURLToPath } from 'node:url'
 import cloudflare from '@astrojs/cloudflare'
 import { lingui } from '@lingui/vite-plugin'
 import { SITE_FONTS } from '@repo/common/site-fonts'
-import { getBrandDomain } from '@repo/config/brand'
+import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
 
 const domain = getBrandDomain()
+const localDomain = getLocalDomain()
 
 export default defineConfig({
 	output: 'server',
@@ -99,7 +100,7 @@ export default defineConfig({
 		],
 		server: {
 			// Allow org subdomains via the local proxy
-			allowedHosts: [`.${domain}`, domain, 'localhost'],
+			allowedHosts: [`.${localDomain}`, localDomain, 'localhost'],
 		},
 		optimizeDeps: {
 			exclude: [

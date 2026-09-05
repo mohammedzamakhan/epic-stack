@@ -30,6 +30,10 @@ brand, SSL, and hosts setup scripts. Review the
 [getting started guide](./docs/getting-started.md) and each app's local
 environment schema for environment-specific configuration.
 
+Local HTTPS uses the automatically derived `{brand.slug}.test` domain (for
+example, `app.acme.test:2999`). The configured brand domain remains reserved for
+production and staging deployment URLs.
+
 ## Repository layout
 
 The root workspace globs are `apps/*` and `packages/*`. Turborepo runs common

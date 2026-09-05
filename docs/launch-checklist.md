@@ -98,7 +98,12 @@ unsuffixed names are used for `main` (production).
 | `TENANT_API_URL`            | `https://tenant-us.yourdomain.com`  | App, Admin, Sites, jobs-cron, CI health |
 | `TENANT_API_URL_KSA`        | `https://tenant-ksa.yourdomain.com` | App, Admin, Sites, jobs-cron, CI health |
 | `JOBS_CRON_WORKER_URL`      | `https://jobs.yourdomain.com`       | App (custom domain on jobs-cron Worker) |
+| `DOCS_URL`                  | `https://docs.yourdomain.com`       | App sidebar (optional)                  |
 | `WEB_BASE_URL`              | `https://yourdomain.com`            | Web marketing Worker (apex + `www`)     |
+
+`DOCS_URL` is optional. Set it to the absolute URL of your documentation site to
+show **Get help** in the App sidebar; leave it unset or empty to omit that item.
+Use `DOCS_URL_STAGING` when staging should link to different docs.
 
 ### Staging URLs (`dev` branch)
 
@@ -116,6 +121,7 @@ Flat single-label subdomains on the production apex (free Universal SSL — no
 | `PUBLIC_SITE_HOST_SUFFIXES_STAGING` | `yourdomain.com,workers.dev`               |
 | `TENANT_API_URL_STAGING`            | `https://tenant-us-staging.yourdomain.com` |
 | `JOBS_CRON_WORKER_URL_STAGING`      | `https://jobs-staging.yourdomain.com`      |
+| `DOCS_URL_STAGING`                  | `https://docs-staging.yourdomain.com`      |
 
 `patch-wrangler.mjs` injects **zone routes** from the URLs above. Production
 Sites uses `*.yourdomain.com/*`. Staging Sites defaults to

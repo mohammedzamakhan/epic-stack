@@ -37,11 +37,13 @@ export function getGhVariables(config) {
 		['TENANT_API_URL', urls.tenant_api_url],
 		['TENANT_API_URL_KSA', urls.tenant_api_url_ksa],
 		['JOBS_CRON_WORKER_URL', urls.jobs_cron_worker_url],
+		['DOCS_URL', urls.docs_url],
 		['APP_BASE_URL_STAGING', urls.app_base_url_staging],
 		['ADMIN_BASE_URL_STAGING', urls.admin_base_url_staging],
 		['WEB_BASE_URL_STAGING', urls.web_base_url_staging],
 		['TENANT_API_URL_STAGING', urls.tenant_api_url_staging],
 		['JOBS_CRON_WORKER_URL_STAGING', urls.jobs_cron_worker_url_staging],
+		['DOCS_URL_STAGING', urls.docs_url_staging],
 		['APP_D1_DATABASE_ID_STAGING', staging.app.d1_database_id],
 		['APP_KV_NAMESPACE_ID_STAGING', staging.app.kv_namespace_id],
 		['APP_WORKER_NAME_STAGING', staging.app.worker_name],
@@ -65,6 +67,10 @@ export function ghVariablesToBuildEnv(variables) {
 		// Node 22.23.2 is preinstalled on the
 		// Cloudflare Workers Builds image, so selecting it avoids a download.
 		NODE_VERSION: { value: '22.23.2', is_secret: false },
+		// Ensure ample heap space for React Router SSR and Vite bundling.
+		NODE_OPTIONS: { value: '--max-old-space-size=6144', is_secret: false },
+		// Ensure Cloudflare-specific bundle flags (sourcemap suppression, worker aliases).
+		DEPLOY_TARGET: { value: 'cloudflare', is_secret: false },
 		// cf-workers-ci.mjs performs the repository's hardened npm ci flow itself.
 		// Disable Cloudflare's implicit install so dependencies are not installed twice.
 		SKIP_DEPENDENCY_INSTALL: { value: '1', is_secret: false },

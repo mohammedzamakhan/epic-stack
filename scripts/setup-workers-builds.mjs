@@ -28,6 +28,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 const statePath = join(rootDir, 'launch.workers-builds.json')
 
+if (existsSync(join(rootDir, '.env'))) {
+	for (const line of readFileSync(join(rootDir, '.env'), 'utf8').split('\n')) {
+		const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)?\s*$/)
+		if (match && !process.env[match[1]]) {
+			process.env[match[1]] = match[2].trim().replace(/^["']|["']$/g, '')
+		}
+	}
+}
+
 const BUILD_COMMAND_PREFIX = 'node scripts/cf-workers-ci.mjs build --app'
 const DEPLOY_COMMAND_PREFIX = 'node scripts/cf-workers-ci.mjs deploy --app'
 const DEPLOY_TIERS = ['production', 'staging']
@@ -39,13 +48,9 @@ function log(message) {
 /** Strip values that look like API tokens or secrets from a string. */
 function redactSecrets(message) {
 	// Cloudflare API tokens are 40-char alphanumeric; redact any long hex-ish runs.
-	return String(message).replace(
-		/[A-Za-z0-9_-]{32,}/g,
-		(match) =>
-			// Keep UUIDs (contain dashes) and known safe patterns; redact the rest.
-			/^[0-9a-f]{8}-/.test(match)
-				? match
-				: `${match.slice(0, 4)}…[REDACTED]`,
+	return String(message).replace(/[A-Za-z0-9_-]{32,}/g, (match) =>
+		// Keep UUIDs (contain dashes) and known safe patterns; redact the rest.
+		/^[0-9a-f]{8}-/.test(match) ? match : `${match.slice(0, 4)}…[REDACTED]`,
 	)
 }
 
@@ -56,6 +61,7 @@ function parseArgs(argv) {
 		dryRun: false,
 		applyGh: true,
 		buildTokenUuid: process.env.CLOUDFLARE_BUILD_TOKEN_UUID || null,
+		purgeCache: false,
 	}
 	for (let i = 2; i < argv.length; i++) {
 		const arg = argv[i]
@@ -64,9 +70,10 @@ function parseArgs(argv) {
 		else if (arg === '--build-token') args.buildTokenUuid = argv[++i]
 		else if (arg === '--dry-run') args.dryRun = true
 		else if (arg === '--no-gh') args.applyGh = false
+		else if (arg === '--purge-cache') args.purgeCache = true
 		else if (arg === '--help' || arg === '-h') {
 			console.log(
-				'Usage: npm run launch:workers-builds [-- --app <app>] [--tier <production|staging>] [--build-token <uuid>] [--dry-run] [--no-gh]',
+				'Usage: npm run launch:workers-builds [-- --app <app>] [--tier <production|staging>] [--build-token <uuid>] [--purge-cache] [--dry-run] [--no-gh]',
 			)
 			process.exit(0)
 		}
@@ -209,10 +216,30 @@ async function createTrigger(accountId, token, payload) {
 }
 
 async function updateTrigger(accountId, token, triggerUuid, payload) {
+	const {
+		external_script_id: _ignoredScriptId,
+		repo_connection_uuid: _ignoredRepoUuid,
+		...updatePayload
+	} = payload
 	return cfApi(accountId, token, `/builds/triggers/${triggerUuid}`, {
 		method: 'PATCH',
-		body: payload,
+		body: updatePayload,
 	})
+}
+
+async function deleteTrigger(accountId, token, triggerUuid) {
+	return cfApi(accountId, token, `/builds/triggers/${triggerUuid}`, {
+		method: 'DELETE',
+	})
+}
+
+export async function purgeTriggerCache(accountId, token, triggerUuid) {
+	return cfApi(
+		accountId,
+		token,
+		`/builds/triggers/${triggerUuid}/purge_build_cache`,
+		{ method: 'POST' },
+	)
 }
 
 async function patchTriggerEnv(accountId, token, triggerUuid, env) {
@@ -238,28 +265,39 @@ function buildTriggerPayload({
 	buildTokenUuid,
 	entry,
 	tier,
+	workerName,
 }) {
 	return {
 		external_script_id: workerTag,
 		repo_connection_uuid: repoConnectionUuid,
 		build_token_uuid: buildTokenUuid,
-		trigger_name: `epic-startup-${entry.app}-${tier}-ci`,
+		trigger_name: `${workerName || `epic-startup-${entry.app}-${tier}`}-ci`,
 		build_command: `${BUILD_COMMAND_PREFIX} ${entry.app}`,
 		deploy_command: `${DEPLOY_COMMAND_PREFIX} ${entry.app}`,
 		root_directory: '/',
-		// GitHub Actions starts builds only after CI passes. Excluding every branch
-		// prevents Cloudflare's Git integration from starting a duplicate build.
-		branch_includes: [],
-		branch_excludes: ['*'],
+		// GitHub Actions starts builds only after CI passes. Using a dedicated branch
+		// name with empty excludes prevents Cloudflare from building automatically on git push,
+		// while adhering to Cloudflare API's schema requirements.
+		branch_includes: ['cf-builds-manual-only'],
+		branch_excludes: [],
 		path_includes: entry.watchPaths,
 		path_excludes: [],
-		build_caching_enabled: true,
+		// Dependency caching is disabled because cf-workers-ci.mjs uses SKIP_DEPENDENCY_INSTALL: 1
+		// and runs a deterministic npm ci. Archiving large monorepo node_modules is redundant
+		// and causes extraction crashes ("Failed: error occurred while installing tools or dependencies")
+		// during Cloudflare's tool bootstrap phase.
+		build_caching_enabled: false,
 	}
 }
 
 function reusableTrigger(triggers, triggerName, repoConnectionUuid) {
 	return (
 		triggers.find((trigger) => trigger.trigger_name === triggerName) ??
+		triggers.find(
+			(trigger) =>
+				trigger.trigger_name?.includes('-ci') &&
+				trigger.repo_connection?.repo_connection_uuid === repoConnectionUuid,
+		) ??
 		triggers.find(
 			(trigger) =>
 				trigger.repo_connection?.repo_connection_uuid === repoConnectionUuid &&
@@ -278,6 +316,7 @@ async function ensureTrigger({
 	buildTokenUuid,
 	entry,
 	tier,
+	workerName,
 }) {
 	const payload = buildTriggerPayload({
 		workerTag,
@@ -285,6 +324,7 @@ async function ensureTrigger({
 		buildTokenUuid,
 		entry,
 		tier,
+		workerName,
 	})
 	const triggers = await listTriggers(accountId, token, workerTag)
 	const existing = reusableTrigger(
@@ -309,15 +349,27 @@ async function ensureTrigger({
 		log(`  created trigger: ${payload.trigger_name} (${triggerUuid})`)
 	}
 
-	// A dashboard-created preview trigger would still run before GHA CI. Keep it
-	// available, but disable push matching so there is only one build per change.
+	// Dashboard-created preview triggers ("Deploy non-production branches") or legacy triggers
+	// would run on every git push before GHA CI completes. Delete them so only
+	// our dedicated manual/CI trigger remains.
 	for (const trigger of triggers) {
 		if (!trigger.trigger_uuid || trigger.trigger_uuid === triggerUuid) continue
-		await updateTrigger(accountId, token, trigger.trigger_uuid, {
-			branch_includes: [],
-			branch_excludes: ['*'],
-		})
-		log(`  disabled automatic trigger: ${trigger.trigger_name}`)
+		if (
+			trigger.repo_connection?.repo_connection_uuid &&
+			trigger.repo_connection.repo_connection_uuid !== repoConnectionUuid
+		) {
+			continue
+		}
+		try {
+			await deleteTrigger(accountId, token, trigger.trigger_uuid)
+			log(
+				`  deleted unmanaged trigger: ${trigger.trigger_name} (${trigger.trigger_uuid})`,
+			)
+		} catch (error) {
+			log(
+				`  warning: could not delete unmanaged trigger ${trigger.trigger_uuid}: ${error.message}`,
+			)
+		}
 	}
 
 	return triggerUuid
@@ -385,6 +437,7 @@ export async function configureWorkersBuilds({
 	dryRun = false,
 	applyGh = true,
 	buildTokenUuid = process.env.CLOUDFLARE_BUILD_TOKEN_UUID || null,
+	purgeCache = false,
 } = {}) {
 	const selectedManifest = app
 		? WORKERS_BUILDS_MANIFEST.filter((entry) => entry.app === app)
@@ -478,6 +531,7 @@ export async function configureWorkersBuilds({
 				buildTokenUuid: buildToken.build_token_uuid,
 				entry,
 				tier,
+				workerName,
 			})
 			await patchTriggerEnv(
 				resolvedAccountId,
@@ -486,6 +540,17 @@ export async function configureWorkersBuilds({
 				buildEnv,
 			)
 			log(`  synced ${Object.keys(buildEnv).length} build variables`)
+
+			if (purgeCache) {
+				try {
+					await purgeTriggerCache(resolvedAccountId, resolvedToken, triggerUuid)
+					log('  purged trigger build cache')
+				} catch (purgeError) {
+					log(
+						`  warning: could not purge cache for ${triggerUuid}: ${purgeError instanceof Error ? purgeError.message : String(purgeError)}`,
+					)
+				}
+			}
 
 			const variable = triggerVariable(entry, tier)
 			state.triggers[entry.app] ??= {}
@@ -548,6 +613,7 @@ async function main() {
 		dryRun: args.dryRun,
 		applyGh: args.applyGh,
 		buildTokenUuid: args.buildTokenUuid,
+		purgeCache: args.purgeCache,
 	})
 
 	if (args.dryRun) return

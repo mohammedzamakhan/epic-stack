@@ -52,7 +52,15 @@ export function NavSecondary({
 								onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
 								render={
 									item.url ? (
-										<Link to={item.url} target={item.target}>
+										<Link
+											to={item.url}
+											target={item.target}
+											rel={
+												item.target === '_blank'
+													? 'noopener noreferrer'
+													: undefined
+											}
+										>
 											<item.icon
 												ref={(ref: any) => (iconRefs.current[item.title] = ref)}
 												size={16}

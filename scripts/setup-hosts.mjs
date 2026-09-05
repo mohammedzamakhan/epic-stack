@@ -5,10 +5,17 @@
  * and active organization slugs from the database (for Sites subdomains).
  */
 
-import { existsSync, readFileSync } from 'fs'
+import {
+	existsSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from 'fs'
+import { tmpdir } from 'os'
 import { join, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { execSync } from 'child_process'
+import { execFileSync, execSync } from 'child_process'
 import { createClient } from '@libsql/client'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -63,7 +70,7 @@ function getBrandDomain() {
 		const brandConfigPath = join(rootDir, 'packages/config/brand.ts')
 		if (!existsSync(brandConfigPath)) {
 			log('⚠️  Brand config not found, using default domain', 'yellow')
-			return 'epic-startup.me'
+			return 'epic-startup.com'
 		}
 
 		const brandContent = readFileSync(brandConfigPath, 'utf-8')
@@ -80,7 +87,7 @@ function getBrandDomain() {
 		const nameMatch = brandContent.match(/name:\s*'([^']+)'/)
 		if (!nameMatch) {
 			log('⚠️  Could not parse brand name, using default domain', 'yellow')
-			return 'epic-startup.me'
+			return 'epic-startup.com'
 		}
 
 		const brandName = nameMatch[1]
@@ -91,8 +98,21 @@ function getBrandDomain() {
 		return `${domainName}.me`
 	} catch (error) {
 		log(`⚠️  Error reading brand config: ${error.message}`, 'yellow')
-		return 'epic-startup.me'
+		return 'epic-startup.com'
 	}
+}
+
+function getLocalDomain() {
+	try {
+		const brandConfigPath = join(rootDir, 'packages/config/brand.ts')
+		const brandContent = readFileSync(brandConfigPath, 'utf-8')
+		const slugMatch = brandContent.match(/^\tslug:\s*'([^']+)'/m)
+		if (slugMatch?.[1]) return `${slugMatch[1]}.test`
+	} catch (error) {
+		log(`⚠️  Could not derive local domain: ${error.message}`, 'yellow')
+	}
+
+	return `${getBrandDomain().split('.')[0]}.test`
 }
 
 function getDefaultDatabaseUrl() {
@@ -160,7 +180,10 @@ async function getHostsEntries(domain) {
 	}
 
 	if (customDomains.length > 0) {
-		log(`Found ${customDomains.length} custom domain(s) for hosts`, 'blue')
+		log(
+			`Skipping ${customDomains.length} public custom domain(s) to avoid shadowing DNS`,
+			'yellow',
+		)
 	}
 
 	const brandHostnames = [
@@ -168,16 +191,63 @@ async function getHostsEntries(domain) {
 		...orgSlugs.map((slug) => `${slug}.${domain}`),
 	]
 
-	const allHostnames = [...brandHostnames, ...customDomains]
-
 	return {
 		orgSlugs,
 		customDomains,
-		entries: allHostnames.map((hostname) => ({
+		entries: brandHostnames.map((hostname) => ({
 			ip,
 			hostname,
 			entry: `${ip} ${hostname}`,
 		})),
+	}
+}
+
+function removeLegacyHostsEntries(domain, orgSlugs, customDomains) {
+	const legacyHostnames = new Set([
+		...PRODUCT_SUBDOMAINS.map((subdomain) => `${subdomain}${domain}`),
+		...orgSlugs.map((slug) => `${slug}.${domain}`),
+		...customDomains.filter(
+			(d) =>
+				d &&
+				!d.endsWith('.localhost') &&
+				d !== 'localhost' &&
+				!d.endsWith('.test'),
+		),
+	])
+	const hostsContent = readFileSync('/etc/hosts', 'utf-8')
+	let changed = false
+	const nextContent = hostsContent
+		.split('\n')
+		.map((line) => {
+			const commentIndex = line.indexOf('#')
+			const body = commentIndex === -1 ? line : line.slice(0, commentIndex)
+			const comment = commentIndex === -1 ? '' : line.slice(commentIndex)
+			const fields = body.trim().split(/\s+/)
+			if (fields[0] !== '127.0.0.1') return line
+
+			const remainingHosts = fields
+				.slice(1)
+				.filter((hostname) => !legacyHostnames.has(hostname))
+			if (remainingHosts.length === fields.length - 1) return line
+
+			changed = true
+			if (remainingHosts.length === 0) return comment
+			return `127.0.0.1 ${remainingHosts.join(' ')}${comment ? ` ${comment}` : ''}`
+		})
+		.join('\n')
+
+	if (!changed) return
+
+	const temporaryDirectory = mkdtempSync(join(tmpdir(), 'epic-hosts-'))
+	const temporaryHostsPath = join(temporaryDirectory, 'hosts')
+	try {
+		writeFileSync(temporaryHostsPath, nextContent, 'utf-8')
+		execFileSync('sudo', ['cp', temporaryHostsPath, '/etc/hosts'], {
+			stdio: 'inherit',
+		})
+		log(`✅ Removed legacy local entries for ${domain}`, 'green')
+	} finally {
+		rmSync(temporaryDirectory, { recursive: true, force: true })
 	}
 }
 
@@ -208,10 +278,22 @@ function addHostsEntry(entry) {
 async function main() {
 	log('\n🌐 Setting up local development domains...', 'bright')
 
-	const domain = getBrandDomain()
-	log(`Using domain: ${domain}`, 'blue')
+	const domain = getLocalDomain()
+	log(`Using local domain: ${domain}`, 'blue')
 
 	const { orgSlugs, customDomains, entries } = await getHostsEntries(domain)
+	try {
+		removeLegacyHostsEntries(
+			`${domain.split('.')[0]}.me`,
+			orgSlugs,
+			customDomains,
+		)
+	} catch (error) {
+		log(
+			`⚠️  Could not remove legacy hosts entries: ${error.message}`,
+			'yellow',
+		)
+	}
 
 	log(
 		'\nThis script will add entries to your /etc/hosts file for local development.',
@@ -253,13 +335,6 @@ async function main() {
 			log(`\n  Organization Sites:`, 'blue')
 			for (const slug of orgSlugs) {
 				log(`  https://${slug}.${domain}:2999`, 'gray')
-			}
-		}
-
-		if (customDomains.length > 0) {
-			log(`\n  Custom domains:`, 'blue')
-			for (const customDomain of customDomains) {
-				log(`  https://${customDomain}:2999`, 'gray')
 			}
 		}
 

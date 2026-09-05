@@ -49,6 +49,7 @@ export default defineConfig({
 		env: {
 			...process.env,
 			PORT,
+			BASE_URL: `http://localhost:${PORT}`,
 			NODE_ENV: 'test',
 			MOCKS: 'true',
 			// Local `.env` is often CLOSED_BETA for product work. CI has no such

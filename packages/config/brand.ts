@@ -17,14 +17,14 @@ export const brand = {
 	name: 'Epic Startup',
 	shortName: 'Epic Startup',
 	slug: 'epic-startup',
-	domain: 'epic-startup.me',
+	domain: 'epic-startup.com',
 	tagline: 'Build your next startup even faster',
 	description:
 		'Epic Startup is a modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.',
 
 	// URLs
-	url: 'https://epicstartup.com',
-	supportEmail: 'support@epicstartup.com',
+	url: 'https://epic-startup.com',
+	supportEmail: 'support@epic-startup.com',
 
 	// Social/Meta
 	twitterHandle: '@epicstartup',
@@ -81,6 +81,13 @@ export const brand = {
 } as const
 
 export const getBrandDomain = () => brand.domain
+
+/**
+ * Reserved, non-public hostname used by the local HTTPS development proxy.
+ * Keep this derived from the brand slug so local setup can never shadow the
+ * production domain in /etc/hosts.
+ */
+export const getLocalDomain = () => `${brand.slug}.test`
 
 export const getBrandTeam = () => `The ${brand.name} Team`
 

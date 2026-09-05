@@ -1,4 +1,5 @@
 import { ENV } from 'varlock/env'
+import { getBoundTenantApiService } from '../tenant-api-service.server.ts'
 
 const DEFAULT_REGION = 'us'
 
@@ -42,9 +43,13 @@ async function callTenantCommand(options: {
 	}
 
 	const expectedRegion = resolveRegion(options.dataRegion)
+	const boundService =
+		expectedRegion === 'us' ? getBoundTenantApiService() : null
+	const fetchImpl = boundService ? boundService.fetch.bind(boundService) : fetch
+
 	let response: Response
 	try {
-		response = await fetch(`${tenantApiUrl}${options.path}`, {
+		response = await fetchImpl(`${tenantApiUrl}${options.path}`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -68,23 +73,25 @@ async function callTenantCommand(options: {
 		error?: string
 		message?: string
 		region?: string
-	}
+	} | null
 
 	if (!response.ok) {
-		throw new Error(
-			payload.message ||
-				payload.error ||
-				`Tenant API error: ${response.status}`,
-		)
+		const detail =
+			payload?.message ||
+			payload?.error ||
+			(payload && typeof payload === 'object' && Object.keys(payload).length > 0
+				? JSON.stringify(payload)
+				: `HTTP ${response.status} ${response.statusText || ''}`.trim())
+		throw new Error(`Tenant API error: ${detail}`)
 	}
 
-	if (payload.region && payload.region !== expectedRegion) {
+	if (payload?.region && payload.region !== expectedRegion) {
 		throw new Error(
 			`Tenant API responded from "${payload.region}" but org dataRegion is "${expectedRegion}"`,
 		)
 	}
 
-	return { region: payload.region || expectedRegion }
+	return { region: payload?.region || expectedRegion }
 }
 
 export async function provisionTenantDatabase(options: {

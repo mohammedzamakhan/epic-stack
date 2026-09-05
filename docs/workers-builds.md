@@ -53,7 +53,9 @@ The script:
 - Syncs **all binding/URL variables** from `launch.config.json` into Cloudflare
 - Selects Cloudflare's preinstalled Node `22.23.2` runtime (React Router
   requires Node newer than `22.22`)
-- Enables build caching and applies monorepo watch paths
+- Disables redundant Cloudflare dependency caching (`cf-workers-ci.mjs` runs
+  isolated `npm ci`; avoiding oversized cache archives prevents tool-bootstrap
+  crashes) and applies monorepo watch paths
 - Sets **`CF_BUILD_TRIGGER_*_PRODUCTION`** and **`CF_BUILD_TRIGGER_*_STAGING`**
   GitHub Variables (via `gh` if logged in)
 - Writes `launch.workers-builds.json` (gitignored state)
@@ -96,6 +98,25 @@ WORKERS_CI_BRANCH=dev node scripts/cf-workers-ci.mjs deploy --app jobs-cron
 - Lint, typecheck, vitest, Playwright
 - OCI tenant-api (Docker + SSH)
 - Lighthouse PR preview (`epic-startup-preview` Worker)
+
+## Troubleshooting
+
+### "Failed: error occurred while installing tools or dependencies"
+
+If a build fails right after `Installing nodejs ...` during tool/dependency
+setup, it is typically caused by a corrupted or oversized dependency cache
+archive. Because `cf-workers-ci.mjs` manages dependencies with `npm ci`, build
+caching is disabled by default on all triggers.
+
+To purge any stale cache archives:
+
+```bash
+# Purge build cache for all Workers Builds triggers
+npm run launch:workers-builds -- --purge-cache
+```
+
+Alternatively, in the Cloudflare Dashboard: **Worker → Settings → Build → Build
+cache → Clear Cache**.
 
 ## Cloudflare references
 

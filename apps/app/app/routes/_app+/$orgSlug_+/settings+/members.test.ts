@@ -16,6 +16,7 @@ import {
 	getResponseStatus,
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
+import type * as invitation from '#app/utils/organization/invitation.server.ts'
 import { action, loader } from './members.tsx'
 
 vi.mock('@repo/common/onboarding', () => ({
@@ -25,10 +26,7 @@ vi.mock('@repo/common/onboarding', () => ({
 vi.mock(
 	'#app/utils/organization/invitation.server.ts',
 	async (importOriginal) => {
-		const actual =
-			await importOriginal<
-				typeof import('#app/utils/organization/invitation.server.ts')
-			>()
+		const actual = await importOriginal<typeof invitation>()
 		return {
 			...actual,
 			sendOrganizationInvitationEmail: vi

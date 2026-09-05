@@ -34,6 +34,27 @@ import {
 	printInferredSummary,
 } from './wrangler-infer.mjs'
 
+function readConfiguredBrandDomain() {
+	try {
+		const brandPath = join(rootDir, 'packages/config/brand.ts')
+		const content = readFileSync(brandPath, 'utf8')
+		return content.match(/^\tdomain:\s*'([^']+)'/m)?.[1] ?? ''
+	} catch {
+		return ''
+	}
+}
+
+function readConfiguredLocalDomain() {
+	try {
+		const brandPath = join(rootDir, 'packages/config/brand.ts')
+		const content = readFileSync(brandPath, 'utf8')
+		const slug = content.match(/^\tslug:\s*'([^']+)'/m)?.[1]
+		return slug ? `${slug}.test` : 'epic-startup.test'
+	} catch {
+		return 'epic-startup.test'
+	}
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
@@ -378,11 +399,13 @@ function patchEnvFile(envPath, replacements) {
 	return changed
 }
 
-function runWrangler(args, cwd) {
+function runWrangler(args, cwd, { env, input } = {}) {
 	const result = spawnSync('npx', ['wrangler', ...args], {
 		cwd,
 		encoding: 'utf8',
-		stdio: ['inherit', 'pipe', 'pipe'],
+		input,
+		env: env ? { ...process.env, ...env } : process.env,
+		stdio: input !== undefined ? ['pipe', 'pipe', 'pipe'] : ['inherit', 'pipe', 'pipe'],
 	})
 	if (result.status !== 0) {
 		throw new Error(
@@ -445,10 +468,6 @@ function applyGeneratedWranglerSecrets(
 	trialCreditCardMode,
 ) {
 	const label = deployEnv === 'staging' ? 'staging' : 'production'
-	const appBaseUrl =
-		deployEnv === 'staging' ? urls.app_base_url_staging : urls.app_base_url
-	const adminBaseUrl =
-		deployEnv === 'staging' ? urls.admin_base_url_staging : urls.admin_base_url
 
 	log(`\n🔑 Applying generated Wrangler secrets (${label})…`, 'yellow')
 
@@ -474,7 +493,6 @@ function applyGeneratedWranglerSecrets(
 				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 				['LAUNCH_STATUS', launchStatus],
 				['CREDIT_CARD_REQUIRED_FOR_TRIAL', trialCreditCardMode],
-				['BASE_URL', appBaseUrl],
 				...(secrets.discord
 					? Object.entries(secrets.discord).filter(([, value]) => value)
 					: []),
@@ -492,7 +510,6 @@ function applyGeneratedWranglerSecrets(
 				['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
 				['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 				['LAUNCH_STATUS', launchStatus],
-				['BASE_URL', adminBaseUrl],
 			],
 		},
 		{
@@ -598,6 +615,7 @@ function applyRemoteD1Migrations(config) {
 					wranglerConfig,
 				],
 				appDir,
+				{ env: { CI: 'true' }, input: 'y\n' },
 			)
 			log(`✅ Migrations applied to ${CF_D1.app} (production)`, 'green')
 		}
@@ -620,11 +638,12 @@ function applyRemoteD1Migrations(config) {
 					'staging',
 				],
 				appDir,
+				{ env: { CI: 'true' }, input: 'y\n' },
 			)
 			log(`✅ Migrations applied to ${CF_D1.appStaging} (staging)`, 'green')
 		}
 	} catch (error) {
-		log(`\nRemote D1 migration failed: ${error.message}`, 'yellow')
+		log(`\n❌ Remote D1 migration failed: ${error.message}`, 'red')
 		log(
 			'Apply manually after patching: node scripts/patch-wrangler.mjs --app app --env production',
 			'gray',
@@ -633,6 +652,7 @@ function applyRemoteD1Migrations(config) {
 			`  cd apps/app && npx wrangler d1 migrations apply ${CF_D1.app} --remote --config ${wranglerConfig}`,
 			'gray',
 		)
+		throw error
 	}
 }
 
@@ -1016,7 +1036,6 @@ function printWranglerSecrets(secrets, { autoApplied = false } = {}) {
 						['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
 						['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 						['LAUNCH_STATUS', 'CLOSED_BETA | PUBLIC_BETA | LAUNCHED'],
-						['BASE_URL', '(your APP_BASE_URL)'],
 						...(secrets.discord
 							? Object.entries(secrets.discord).map(([name, value]) => [
 									name,
@@ -1034,7 +1053,6 @@ function printWranglerSecrets(secrets, { autoApplied = false } = {}) {
 						['SSO_ENCRYPTION_KEY', secrets.shared.SSO_ENCRYPTION_KEY],
 						['AUDIT_LOG_SECRET_KEY', secrets.shared.AUDIT_LOG_SECRET_KEY],
 						['LAUNCH_STATUS', '(same as App)'],
-						['BASE_URL', '(your ADMIN_BASE_URL)'],
 					],
 				},
 				{
@@ -1146,8 +1164,11 @@ async function main() {
 	printInferredSummary(inferred, log)
 
 	const apex = await input({
-		message: 'Platform apex domain (e.g. epic-startup.me)',
-		default: inferred.urls.apex ?? '',
+		message: 'Platform apex domain (e.g. epic-startup.com)',
+		default:
+			inferred.urls.apex && !inferred.urls.apex.endsWith('.test')
+				? inferred.urls.apex
+				: readConfiguredBrandDomain(),
 		validate: (value) => (value.trim() ? true : 'Domain is required'),
 	})
 
@@ -1178,6 +1199,11 @@ async function main() {
 	const tenantKsa = `https://tenant-ksa.${apex}`
 	const publicAppUrl = appUrl
 	const jobsCronUrl = `https://jobs.${apex}`
+	const localDomain = readConfiguredLocalDomain()
+	const localAppUrl = `https://app.${localDomain}:2999`
+	const localAdminUrl = `https://admin.${localDomain}:2999`
+	const localTenantUs = `https://api.${localDomain}:2999`
+	const localTenantKsa = `https://api-ksa.${localDomain}:2999`
 
 	const secrets = generateSharedSecrets()
 	secrets.launch_status = await promptLaunchStatus()
@@ -1214,10 +1240,10 @@ async function main() {
 		LAUNCH_STATUS: secrets.launch_status,
 		CREDIT_CARD_REQUIRED_FOR_TRIAL: secrets.credit_card_required_for_trial,
 		JOBS_CRON_WORKER_URL: jobsCronUrl,
-		ROOT_APP: apex,
-		BASE_URL: appUrl,
-		TENANT_API_URL: tenantUs,
-		TENANT_API_URL_KSA: tenantKsa,
+		ROOT_APP: localDomain,
+		BASE_URL: localAppUrl,
+		TENANT_API_URL: localTenantUs,
+		TENANT_API_URL_KSA: localTenantKsa,
 	}
 	if (secrets.discord) {
 		Object.assign(envPatches, secrets.discord)
@@ -1228,18 +1254,18 @@ async function main() {
 		HONEYPOT_SECRET: secrets.shared.HONEYPOT_SECRET,
 		INTERNAL_COMMAND_TOKEN: secrets.shared.INTERNAL_COMMAND_TOKEN,
 		LAUNCH_STATUS: secrets.launch_status,
-		ROOT_APP: apex,
-		BASE_URL: adminUrl,
+		ROOT_APP: localDomain,
+		BASE_URL: localAdminUrl,
 	})
 	const sitesEnvPatched = patchEnvFile(join(rootDir, 'apps/sites/.env'), {
-		ROOT_APP: apex,
-		PUBLIC_APP_URL: publicAppUrl,
-		TENANT_API_URL: tenantUs,
-		TENANT_API_URL_KSA: tenantKsa,
+		ROOT_APP: localDomain,
+		PUBLIC_APP_URL: localAppUrl,
+		TENANT_API_URL: localTenantUs,
+		TENANT_API_URL_KSA: localTenantKsa,
 	})
 	if (appEnvPatched || adminEnvPatched || sitesEnvPatched) {
 		log(
-			'Updated local .env files with generated secrets and platform URLs.',
+			'Updated local .env files with generated secrets and derived .test URLs.',
 			'green',
 		)
 	}
@@ -1259,7 +1285,9 @@ async function main() {
 		tenant_api_url: tenantUs,
 		tenant_api_url_ksa: tenantKsa,
 		jobs_cron_worker_url: jobsCronUrl,
+		docs_url: '',
 		...stagingHostnames(apex),
+		docs_url_staging: '',
 	}
 	log(`\nJobs cron URL: ${jobsCronUrl}`, 'gray')
 	log(
@@ -1397,7 +1425,18 @@ async function main() {
 				})
 			: false
 	if (applyMigrations) {
-		applyRemoteD1Migrations(config)
+		try {
+			applyRemoteD1Migrations(config)
+		} catch {
+			const continueAnyway = await confirm({
+				message:
+					'D1 migrations failed. Continue with deployment anyway? (Workers may fail without database tables)',
+				default: false,
+			})
+			if (!continueAnyway) {
+				process.exit(1)
+			}
+		}
 	}
 
 	printGhCommands(config, inferred.githubRepo)

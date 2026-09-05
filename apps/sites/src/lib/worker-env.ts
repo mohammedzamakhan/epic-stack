@@ -57,3 +57,11 @@ export function getTenantApiUrl(): string {
 export function getTenantApiUrlKsa(): string {
 	return (readBinding('TENANT_API_URL_KSA') || '').replace(/\/$/, '')
 }
+
+export function getAppServiceBinding(): { fetch: typeof fetch } | null {
+	const fromWorker = (cloudflareWorkerEnv as any)?.APP
+	if (fromWorker && typeof fromWorker.fetch === 'function') {
+		return fromWorker
+	}
+	return null
+}

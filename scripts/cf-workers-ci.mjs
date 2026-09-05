@@ -30,7 +30,6 @@ const rootDir = join(__dirname, '..')
  *   buildEnv?: Record<string, string>,
  *   sitesBuildEnv?: boolean,
  *   skipTurboBuild?: boolean,
- *   tenantApiBuild?: boolean,
  *   deploy: {
  *     cwd: string,
  *     config?: string,
@@ -96,8 +95,7 @@ const APPS = {
 	},
 	'tenant-api': {
 		patchApp: 'tenant-api',
-		skipTurboBuild: true,
-		tenantApiBuild: true,
+		turboFilter: 'tenant-api',
 		deploy: {
 			cwd: 'apps/tenant-api',
 			npmScript: 'deploy:cf',
@@ -172,6 +170,7 @@ function installDeps() {
 		'rolldown',
 		'@astrojs/compiler-binding',
 	])
+	run('node', ['packages/ui/generate-icons.js'])
 }
 
 function patchWrangler(appKey, deployEnv) {
@@ -199,8 +198,6 @@ function buildApp(appKey) {
 				...(config.sitesBuildEnv ? sitesBuildEnv(deployEnv) : {}),
 			},
 		})
-	} else if (config.tenantApiBuild) {
-		run('npm', ['run', 'build', '-w', 'tenant-api'])
 	}
 
 	patchWrangler(appKey, deployEnv)

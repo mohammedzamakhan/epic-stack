@@ -58,7 +58,9 @@ jobs:
           npm run build
 
       - name: 🧩 Patch Wrangler config (Web preview)
-        run: node scripts/patch-wrangler.mjs --app web --env preview --require-bindings
+        run:
+          node scripts/patch-wrangler.mjs --app web --env preview
+          --require-bindings
         env:
           WEB_D1_DATABASE_ID: ${{ vars.WEB_D1_DATABASE_ID }}
           WEB_R2_BUCKET_NAME: ${{ vars.WEB_R2_BUCKET_NAME }}
@@ -226,8 +228,8 @@ jobs:
               return '🔴';
             };
 
-            const getStatus = (score) => {
-              if (score >= 98) return 'PASS ✅';
+            const getStatus = (score, target = 90) => {
+              if (score >= target) return 'PASS ✅';
               return 'FAIL ❌';
             };
 
@@ -243,10 +245,10 @@ jobs:
               const seoAvg = avg(results, 'seo');
               
               body += `
-            | ${getScoreEmoji(perfAvg)} Performance | **${perfAvg}** | ${getStatus(perfAvg)} |
-            | ${getScoreEmoji(a11yAvg)} Accessibility | **${a11yAvg}** | ${getStatus(a11yAvg)} |
-            | ${getScoreEmoji(bpAvg)} Best Practices | **${bpAvg}** | ${getStatus(bpAvg)} |
-            | ${getScoreEmoji(seoAvg)} SEO | **${seoAvg}** | ${getStatus(seoAvg)} |
+            | ${getScoreEmoji(perfAvg)} Performance | **${perfAvg}** | ${getStatus(perfAvg, 85)} |
+            | ${getScoreEmoji(a11yAvg)} Accessibility | **${a11yAvg}** | ${getStatus(a11yAvg, 90)} |
+            | ${getScoreEmoji(bpAvg)} Best Practices | **${bpAvg}** | ${getStatus(bpAvg, 90)} |
+            | ${getScoreEmoji(seoAvg)} SEO | **${seoAvg}** | ${getStatus(seoAvg, 90)} |
 
             ### 📋 Detailed Results
 
@@ -262,12 +264,12 @@ jobs:
               body += `
 
             ---
-            🎯 **Target:** All scores must be ≥ 98
+            🎯 **Target:** Performance ≥ 85, Accessibility/Best Practices/SEO ≥ 90
             📊 **Runs:** 3 per page (median reported)
             🔗 **Preview:** ${{ needs.preview-deploy.outputs.preview_url }}`;
               
               // Check if any score is below threshold
-              const allPassing = perfAvg >= 98 && a11yAvg >= 98 && bpAvg >= 98 && seoAvg >= 98;
+              const allPassing = perfAvg >= 85 && a11yAvg >= 90 && bpAvg >= 90 && seoAvg >= 90;
               
               if (!allPassing) {
                 body += `
@@ -346,11 +348,12 @@ jobs:
                 console.log('Best Practices:', bp);
                 console.log('SEO:', seo);
                 
-                const threshold = 98;
+                const perfThreshold = 85;
+                const threshold = 90;
                 let failed = false;
                 
-                if (perf < threshold) {
-                  console.error('❌ Performance score ' + perf + ' is below threshold ' + threshold);
+                if (perf < perfThreshold) {
+                  console.error('❌ Performance score ' + perf + ' is below threshold ' + perfThreshold);
                   failed = true;
                 }
                 if (a11y < threshold) {

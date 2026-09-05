@@ -3,7 +3,7 @@ import partytown from '@astrojs/partytown'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import { d1, r2 } from '@emdash-cms/cloudflare'
-import { getBrandDomain } from '@repo/config/brand'
+import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
@@ -12,6 +12,7 @@ import { sqlite } from 'emdash/db'
 import { fontless } from 'fontless'
 
 const domain = getBrandDomain()
+const localDomain = getLocalDomain()
 const isDevCommand =
 	process.env.npm_lifecycle_event === 'dev' || process.argv.includes('dev')
 const isCloudflareBuild =
@@ -165,7 +166,7 @@ export default defineConfig({
 			}),
 		],
 		server: {
-			allowedHosts: [domain, 'localhost'],
+			allowedHosts: [localDomain, 'localhost'],
 		},
 		optimizeDeps: {
 			exclude: [

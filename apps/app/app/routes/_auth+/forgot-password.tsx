@@ -19,6 +19,7 @@ import {
 	CardTitle,
 } from '@repo/ui/card'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
 import { EmailSchema, UsernameSchema } from '@repo/validation'
@@ -153,7 +154,15 @@ export const meta: Route.MetaFunction = () => {
 }
 
 export default function ForgotPasswordRoute() {
-	const actionData = useActionData<typeof action>()
+	const actionData = useActionData<typeof action>() as {
+		error?: string
+		error_description?: string
+		result?: any
+	} | null
+	const rateLimitError =
+		actionData?.error === 'rate_limit_exceeded'
+			? actionData.error_description
+			: null
 
 	const [form, fields] = useForm({
 		id: 'forgot-password-form',
@@ -176,6 +185,21 @@ export default function ForgotPasswordRoute() {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
+				{rateLimitError && (
+					<div
+						role="alert"
+						className="border-destructive/50 bg-destructive/10 mb-4 rounded-lg border p-4"
+					>
+						<div className="text-destructive flex items-center gap-2">
+							<Icon name="alert-triangle" className="h-5 w-5" />
+							<h3 className="font-semibold">
+								<Trans>Too Many Requests</Trans>
+							</h3>
+						</div>
+						<p className="text-destructive/90 mt-2 text-sm">{rateLimitError}</p>
+					</div>
+				)}
+
 				<Form method="POST" {...getFormProps(form)}>
 					<HoneypotInputs />
 					<FieldGroup>

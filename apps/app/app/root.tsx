@@ -344,6 +344,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			impersonationInfo,
 			cookieConsent,
 			launchStatus: getLaunchStatus(),
+			docsUrl: ENV.DOCS_URL?.trim() || null,
 			homePageId,
 			env: {
 				NODE_ENV: ENV.NODE_ENV,

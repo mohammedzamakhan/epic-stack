@@ -63,8 +63,6 @@ export function sitePreviewFrameSrc(
 }
 
 type TenantApiConnectEnv = {
-	PUBLIC_TENANT_API_URL?: string
-	PUBLIC_TENANT_API_URL_KSA?: string
 	TENANT_API_URL?: string
 	TENANT_API_URL_KSA?: string
 }
@@ -87,8 +85,6 @@ export function tenantApiConnectSrc(env: TenantApiConnectEnv = {}) {
 	return [
 		...new Set(
 			[
-				originFromUrl(env.PUBLIC_TENANT_API_URL),
-				originFromUrl(env.PUBLIC_TENANT_API_URL_KSA),
 				originFromUrl(env.TENANT_API_URL),
 				originFromUrl(env.TENANT_API_URL_KSA),
 			].filter((value): value is string => Boolean(value)),

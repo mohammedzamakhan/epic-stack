@@ -8,11 +8,11 @@ import {
 	getResponseStatus,
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
+import type * as payments from '#app/utils/payments.server.ts'
 import { action, loader } from './billing.tsx'
 
 vi.mock('#app/utils/payments.server.ts', async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import('#app/utils/payments.server.ts')>()
+	const actual = await importOriginal<typeof payments>()
 	return {
 		...actual,
 		getPlansAndPrices: vi.fn().mockResolvedValue({

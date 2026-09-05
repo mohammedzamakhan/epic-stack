@@ -200,7 +200,7 @@ msgstr ""
 msgid "• Otherwise → <0>False branch</0>"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:748
+#: app/routes/_auth+/login.tsx:752
 msgid "← Back to SSO login"
 msgstr ""
 
@@ -301,7 +301,7 @@ msgstr ""
 msgid "Account settings"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:274
+#: app/routes/_auth+/login.tsx:278
 msgid "Account Suspended"
 msgstr ""
 
@@ -789,7 +789,7 @@ msgid "Back to broadcasts"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.sent.tsx:49
-#: app/routes/_auth+/forgot-password.tsx:221
+#: app/routes/_auth+/forgot-password.tsx:242
 msgid "Back to login"
 msgstr ""
 
@@ -1278,7 +1278,7 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:670
+#: app/routes/_auth+/login.tsx:674
 #: app/routes/organizations+/create.tsx:801
 msgid "Continue"
 msgstr ""
@@ -1295,11 +1295,11 @@ msgstr "Continue payout setup"
 msgid "Continue to Payment"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:582
+#: app/routes/_auth+/login.tsx:586
 msgid "Continue with"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:262
+#: app/routes/_auth+/login.tsx:266
 msgid "Continue with your password"
 msgstr ""
 
@@ -1378,7 +1378,7 @@ msgstr ""
 msgid "Create a plan"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:360
+#: app/routes/_auth+/login.tsx:364
 #: app/routes/_auth+/onboarding_.$provider.tsx:358
 #: app/routes/_auth+/onboarding.tsx:532
 msgid "Create account"
@@ -1844,7 +1844,7 @@ msgstr ""
 msgid "Domain"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:351
+#: app/routes/_auth+/login.tsx:355
 msgid "Don't have an account?"
 msgstr ""
 
@@ -2005,7 +2005,7 @@ msgstr ""
 #: app/components/settings/cards/profile-card.tsx:132
 #: app/components/website/link-inspector.tsx:368
 #: app/components/website/link-inspector.tsx:468
-#: app/routes/_auth+/login.tsx:763
+#: app/routes/_auth+/login.tsx:767
 #: app/routes/_auth+/signup.tsx:218
 msgid "Email"
 msgstr ""
@@ -2023,8 +2023,8 @@ msgstr ""
 msgid "Email HTML Body"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:643
-#: app/routes/_auth+/login.tsx:768
+#: app/routes/_auth+/login.tsx:647
+#: app/routes/_auth+/login.tsx:772
 msgid "Email or Username"
 msgstr ""
 
@@ -2081,8 +2081,8 @@ msgstr ""
 msgid "Enter the 6-digit one time password (OTP) token that your authentication app provides you."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:649
-#: app/routes/_auth+/login.tsx:775
+#: app/routes/_auth+/login.tsx:653
+#: app/routes/_auth+/login.tsx:779
 msgid "Enter your email or username"
 msgstr ""
 
@@ -2099,7 +2099,7 @@ msgstr ""
 msgid "Enter your new password below."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:804
+#: app/routes/_auth+/login.tsx:808
 msgid "Enter your password"
 msgstr ""
 
@@ -2108,7 +2108,7 @@ msgstr ""
 msgid "Enter your username"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:193
+#: app/routes/_auth+/forgot-password.tsx:214
 msgid "Enter your username or email"
 msgstr ""
 
@@ -2196,7 +2196,7 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:432
+#: app/routes/_auth+/login.tsx:436
 msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr ""
 
@@ -2329,11 +2329,11 @@ msgstr ""
 msgid "Fix validation errors before publishing"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:172
+#: app/routes/_auth+/forgot-password.tsx:181
 msgid "Forgot Password"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:797
+#: app/routes/_auth+/login.tsx:801
 msgid "Forgot your password?"
 msgstr ""
 
@@ -2381,7 +2381,7 @@ msgstr ""
 msgid "Generate with AI"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:394
+#: app/routes/_auth+/login.tsx:398
 msgid "Generating Authentication Options"
 msgstr ""
 
@@ -2777,8 +2777,8 @@ msgstr ""
 msgid "Last exported: {lastExportDateFormatted}"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:473
-#: app/routes/_auth+/login.tsx:484
+#: app/routes/_auth+/login.tsx:477
+#: app/routes/_auth+/login.tsx:488
 msgid "Last used"
 msgstr ""
 
@@ -2893,11 +2893,11 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:291
+#: app/routes/_auth+/login.tsx:295
 msgid "Login Error"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:388
+#: app/routes/_auth+/login.tsx:392
 msgid "Login with a passkey"
 msgstr ""
 
@@ -3368,7 +3368,7 @@ msgstr ""
 msgid "No tools available."
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:175
+#: app/routes/_auth+/forgot-password.tsx:184
 msgid "No worries, we'll send you reset instructions."
 msgstr ""
 
@@ -3588,7 +3588,7 @@ msgstr ""
 msgid "Or continue with"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:309
+#: app/routes/_auth+/login.tsx:313
 msgid "Or continue with email or username"
 msgstr ""
 
@@ -3688,7 +3688,7 @@ msgid "Passkeys are a secure, passwordless way to sign in using your device's bi
 msgstr ""
 
 #: app/components/settings/password-form.tsx:112
-#: app/routes/_auth+/login.tsx:791
+#: app/routes/_auth+/login.tsx:795
 #: app/routes/_auth+/onboarding.tsx:451
 msgid "Password"
 msgstr ""
@@ -3859,7 +3859,7 @@ msgid "Please enter your 2FA code to verify your identity."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:107
-#: app/routes/_auth+/login.tsx:616
+#: app/routes/_auth+/login.tsx:620
 msgid "Please enter your email or username"
 msgstr ""
 
@@ -4078,7 +4078,7 @@ msgstr ""
 msgid "Recipients"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:586
+#: app/routes/_auth+/login.tsx:590
 msgid "Recommended for"
 msgstr ""
 
@@ -4130,14 +4130,14 @@ msgstr ""
 msgid "Reload page"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:826
+#: app/routes/_auth+/login.tsx:830
 #: app/routes/_auth+/onboarding_.$provider.tsx:341
 #: app/routes/_auth+/onboarding.tsx:518
 msgid "Remember me"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.sent.tsx:47
-#: app/routes/_auth+/forgot-password.tsx:219
+#: app/routes/_auth+/forgot-password.tsx:240
 msgid "Remember your password?"
 msgstr ""
 
@@ -4221,7 +4221,7 @@ msgstr ""
 msgid "Request permanent deletion of your account and all associated data. A 7-day grace period allows you to cancel if needed."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:400
+#: app/routes/_auth+/login.tsx:404
 msgid "Requesting your authorization"
 msgstr ""
 
@@ -4681,7 +4681,7 @@ msgstr ""
 msgid "Send now"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:213
+#: app/routes/_auth+/forgot-password.tsx:234
 msgid "Send reset instructions"
 msgstr ""
 
@@ -4831,11 +4831,11 @@ msgstr ""
 msgid "Sign in"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:839
+#: app/routes/_auth+/login.tsx:843
 msgid "Sign In"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:264
+#: app/routes/_auth+/login.tsx:268
 msgid "Sign in to your account"
 msgstr ""
 
@@ -4867,8 +4867,8 @@ msgstr ""
 msgid "Signed in as"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:556
-#: app/routes/_auth+/login.tsx:730
+#: app/routes/_auth+/login.tsx:560
+#: app/routes/_auth+/login.tsx:734
 msgid "Signing in as"
 msgstr ""
 
@@ -5253,7 +5253,7 @@ msgstr ""
 msgid "There are <0>{daysRemaining} days</0> left in your trial. Get in touch with questions or feedback."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:295
+#: app/routes/_auth+/login.tsx:299
 msgid "There was an issue with your login attempt. Please try again."
 msgstr ""
 
@@ -5358,6 +5358,10 @@ msgstr ""
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:900
 msgid "Tokens automatically expire after 30 days of inactivity"
 msgstr ""
+
+#: app/routes/_auth+/forgot-password.tsx:193
+msgid "Too Many Requests"
+msgstr "Too Many Requests"
 
 #: app/components/leadership-card.tsx:52
 msgid "Top Contributors"
@@ -5618,7 +5622,7 @@ msgstr ""
 msgid "Use authenticator app instead"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:599
+#: app/routes/_auth+/login.tsx:603
 msgid "Use password instead"
 msgstr ""
 
@@ -5631,18 +5635,18 @@ msgid "Used when a visitor's preferred language isn't available, and as the requ
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:114
-#: app/routes/_auth+/login.tsx:765
+#: app/routes/_auth+/login.tsx:769
 #: app/routes/_auth+/onboarding_.$provider.tsx:270
 #: app/routes/_auth+/onboarding.tsx:417
 msgid "Username"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:188
+#: app/routes/_auth+/forgot-password.tsx:209
 msgid "Username or Email"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:100
-#: app/routes/_auth+/login.tsx:692
+#: app/routes/_auth+/login.tsx:696
 msgid "Username or email is required"
 msgstr ""
 
@@ -5675,7 +5679,7 @@ msgstr ""
 msgid "Verify Discord membership"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:402
+#: app/routes/_auth+/login.tsx:406
 msgid "Verifying your passkey"
 msgstr ""
 
@@ -5744,7 +5748,7 @@ msgstr ""
 msgid "Warnings"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:560
+#: app/routes/_auth+/login.tsx:564
 msgid "We found your organization:"
 msgstr ""
 
@@ -5795,7 +5799,7 @@ msgstr ""
 msgid "Welcome aboard!"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:254
+#: app/routes/_auth+/login.tsx:258
 msgid "Welcome back"
 msgstr ""
 
@@ -5954,7 +5958,7 @@ msgstr ""
 msgid "You receive"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:428
+#: app/routes/_auth+/login.tsx:432
 msgid "You're logged in! Navigating..."
 msgstr ""
 
@@ -5966,7 +5970,7 @@ msgstr ""
 msgid "You're signed in on {sessionCount, plural, one {# device} other {# devices}} as {userEmail}"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:278
+#: app/routes/_auth+/login.tsx:282
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr ""
 

@@ -16,7 +16,14 @@ const MODE = ENV.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = ENV.ALLOW_INDEXING
-const SENTRY_ENABLED = IS_PROD && ENV.SENTRY_DSN
+const SENTRY_ENABLED =
+	IS_PROD &&
+	!process.env.MOCKS &&
+	Boolean(
+		ENV.SENTRY_DSN &&
+		ENV.SENTRY_DSN !== 'your-dsn' &&
+		ENV.SENTRY_DSN.includes('@'),
+	)
 const BUILD_PATH = '../build/server/index.js'
 
 if (SENTRY_ENABLED) {
@@ -278,7 +285,22 @@ if (IS_DEV) {
 	// Everything else (like favicon.ico) is cached for an hour. You may want to be
 	// more aggressive with this caching.
 	app.use(express.static('build/client', { maxAge: '1h' }))
-	app.use(await import(BUILD_PATH).then((mod) => mod.app))
+
+	const { createRequestHandler } = await import('@react-router/express')
+	const { serverBuildContext } = await import('../app/server-context.ts')
+	const build = await import(BUILD_PATH)
+	app.use(
+		createRequestHandler({
+			build,
+			mode: MODE,
+			getLoadContext: async () => {
+				const RR = await new Function("return import('react-router')")()
+				const ctx = new RR.RouterContextProvider()
+				ctx.set(serverBuildContext, build)
+				return ctx
+			},
+		}),
+	)
 }
 
 const desiredPort = Number(process.env.PORT || 3005)

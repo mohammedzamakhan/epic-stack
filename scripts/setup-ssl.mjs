@@ -70,7 +70,7 @@ function getBrandDomain() {
 		const brandConfigPath = join(rootDir, 'packages/config/brand.ts')
 		if (!existsSync(brandConfigPath)) {
 			log('⚠️  Brand config not found, using default domain', 'yellow')
-			return 'epic-startup.me'
+			return 'epic-startup.com'
 		}
 
 		const brandContent = readFileSync(brandConfigPath, 'utf-8')
@@ -87,7 +87,7 @@ function getBrandDomain() {
 		const nameMatch = brandContent.match(/name:\s*'([^']+)'/)
 		if (!nameMatch) {
 			log('⚠️  Could not parse brand name, using default domain', 'yellow')
-			return 'epic-startup.me'
+			return 'epic-startup.com'
 		}
 
 		const brandName = nameMatch[1]
@@ -98,19 +98,46 @@ function getBrandDomain() {
 		return `${domainName}.me`
 	} catch (error) {
 		log(`⚠️  Error reading brand config: ${error.message}`, 'yellow')
-		return 'epic-startup.me'
+		return 'epic-startup.com'
 	}
 }
 
+function getLocalDomain() {
+	try {
+		const brandConfigPath = join(rootDir, 'packages/config/brand.ts')
+		const brandContent = readFileSync(brandConfigPath, 'utf-8')
+		const slugMatch = brandContent.match(/^\tslug:\s*'([^']+)'/m)
+		if (slugMatch?.[1]) return `${slugMatch[1]}.test`
+	} catch (error) {
+		log(`⚠️  Could not derive local domain: ${error.message}`, 'yellow')
+	}
+
+	return `${getBrandDomain().split('.')[0]}.test`
+}
+
 function generateCertificates(sslDir) {
-	const domain = getBrandDomain()
-	log(`🔐 Using domain: ${domain}`, 'blue')
+	const domain = getLocalDomain()
+	log(`🔐 Using local domain: ${domain}`, 'blue')
 
 	const keyPath = join(sslDir, '_wildcard.domain.me+2-key.pem')
 	const certPath = join(sslDir, '_wildcard.domain.me+2.pem')
 
-	// Check if certificates already exist
+	// Reuse the fixed filenames expected by dev-proxy.js only when the existing
+	// certificate already covers the current derived local domain.
+	let certificateIsCurrent = false
 	if (existsSync(keyPath) && existsSync(certPath)) {
+		try {
+			const certificateText = execSync(
+				`openssl x509 -in "${certPath}" -noout -ext subjectAltName`,
+				{ encoding: 'utf8' },
+			)
+			certificateIsCurrent = certificateText.includes(`DNS:${domain}`)
+		} catch {
+			certificateIsCurrent = false
+		}
+	}
+
+	if (certificateIsCurrent) {
 		log('\n✓ SSL certificates already exist', 'green')
 		log(`  Key: ${keyPath}`, 'gray')
 		log(`  Cert: ${certPath}`, 'gray')

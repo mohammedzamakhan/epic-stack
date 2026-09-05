@@ -31,12 +31,14 @@ export default defineConfig({
 	webServer: {
 		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
 		port: Number(PORT),
-		reuseExistingServer: true,
+		reuseExistingServer: !process.env.CI,
 		stdout: 'pipe',
 		stderr: 'pipe',
+		timeout: 120 * 1000,
 		env: {
 			PORT,
 			NODE_ENV: 'test',
+			MOCKS: 'true',
 		},
 	},
 })

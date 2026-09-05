@@ -4,12 +4,11 @@ import { brand } from '@repo/config/brand'
 import { and, db, eq, Organization, UserOrganization } from '@repo/database'
 import { SignJWT } from 'jose'
 import { ENV } from 'varlock/env'
+import { getBoundTenantApiService } from './tenant-api-service.server.ts'
 
 export type TenantApiUrlEnv = {
 	TENANT_API_URL?: string
 	TENANT_API_URL_KSA?: string
-	PUBLIC_TENANT_API_URL?: string
-	PUBLIC_TENANT_API_URL_KSA?: string
 }
 
 export interface OperatorTenantClient {
@@ -20,7 +19,6 @@ export interface OperatorTenantClient {
 	/** Server-to-server origin (may be http://localhost in local npm run dev). */
 	tenantApiUrl: string
 	/** Browser-facing origin. HTTPS via the dev proxy so App pages are not mixed content. */
-	publicTenantApiUrl: string
 	fetchTenant: (path: string, init?: RequestInit) => Promise<Response>
 }
 
@@ -37,14 +35,7 @@ function firstConfiguredUrl(
 }
 
 function envUrl(name: keyof TenantApiUrlEnv) {
-	const fromProcess = process.env[name]
-	if (fromProcess) return fromProcess
-	try {
-		const fromEnv = (ENV as TenantApiUrlEnv)[name]
-		if (typeof fromEnv === 'string' && fromEnv) return fromEnv
-	} catch {
-		// varlock ENV is unavailable in some unit-test contexts
-	}
+	return ENV[name]
 }
 
 /**
@@ -57,21 +48,14 @@ export function resolveRegionalTenantApiUrls(
 	env: TenantApiUrlEnv = {
 		TENANT_API_URL: envUrl('TENANT_API_URL'),
 		TENANT_API_URL_KSA: envUrl('TENANT_API_URL_KSA'),
-		PUBLIC_TENANT_API_URL: envUrl('PUBLIC_TENANT_API_URL'),
-		PUBLIC_TENANT_API_URL_KSA: envUrl('PUBLIC_TENANT_API_URL_KSA'),
 	},
 ) {
 	const isKsa = dataRegion === 'ksa'
 	const tenantApiUrl =
 		firstConfiguredUrl(isKsa ? env.TENANT_API_URL_KSA : env.TENANT_API_URL) ||
 		(isKsa ? 'http://localhost:3009' : 'http://localhost:3007')
-	const publicTenantApiUrl =
-		firstConfiguredUrl(
-			isKsa ? env.PUBLIC_TENANT_API_URL_KSA : env.PUBLIC_TENANT_API_URL,
-			tenantApiUrl,
-		) || tenantApiUrl
 
-	return { tenantApiUrl, publicTenantApiUrl }
+	return { tenantApiUrl }
 }
 
 /**
@@ -107,10 +91,7 @@ export async function getOperatorTenantClient(
 		})
 	}
 
-	const operatorToken =
-		process.env.TENANT_OPERATOR_TOKEN ||
-		(typeof ENV !== 'undefined' && (ENV as any).TENANT_OPERATOR_TOKEN) ||
-		''
+	const operatorToken = ENV.TENANT_OPERATOR_TOKEN
 
 	if (!operatorToken || operatorToken.length < 16) {
 		throw new Response(
@@ -132,9 +113,7 @@ export async function getOperatorTenantClient(
 		.setExpirationTime('15m')
 		.sign(secret)
 
-	const { tenantApiUrl, publicTenantApiUrl } = resolveRegionalTenantApiUrls(
-		organization.dataRegion,
-	)
+	const { tenantApiUrl } = resolveRegionalTenantApiUrls(organization.dataRegion)
 
 	const fetchTenant = async (path: string, init: RequestInit = {}) => {
 		const headers = new Headers(init.headers || {})
@@ -142,7 +121,13 @@ export async function getOperatorTenantClient(
 		headers.set('Content-Type', 'application/json')
 
 		const url = `${tenantApiUrl}${path.startsWith('/') ? path : `/${path}`}`
-		return fetch(url, {
+		const isUs = (organization.dataRegion || 'us').toLowerCase() !== 'ksa'
+		const boundService = isUs ? getBoundTenantApiService() : null
+		const fetchImpl = boundService
+			? boundService.fetch.bind(boundService)
+			: fetch
+
+		return fetchImpl(url, {
 			...init,
 			headers,
 		})
@@ -154,7 +139,6 @@ export async function getOperatorTenantClient(
 		dataRegion: organization.dataRegion,
 		jwt,
 		tenantApiUrl,
-		publicTenantApiUrl,
 		fetchTenant,
 	}
 }

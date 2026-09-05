@@ -9,6 +9,7 @@ import {
 	createRequestHandler,
 	RouterContextProvider,
 } from 'react-router'
+import { initVarlockEnv } from 'varlock/env'
 import { ensureLinguiRequestLocale } from '../app/modules/lingui/lingui.server.ts'
 
 const cloudflareContext = createContext<{
@@ -22,11 +23,25 @@ const requestHandler = createRequestHandler(
 )
 
 function applyWorkerEnv(env: Env) {
+	const existingConfig = (globalThis as any).__varlockLoadedEnv?.config ?? {}
+	const newConfig: Record<string, { value: unknown }> = { ...existingConfig }
 	for (const [key, value] of Object.entries(env)) {
-		if (typeof value === 'string') {
-			process.env[key] = value
+		if (
+			typeof value === 'string' ||
+			typeof value === 'number' ||
+			typeof value === 'boolean'
+		) {
+			newConfig[key] = { value: String(value) }
+			if (typeof process !== 'undefined' && process.env) {
+				process.env[key] = String(value)
+			}
 		}
 	}
+	;(globalThis as any).__varlockLoadedEnv = {
+		...(globalThis as any).__varlockLoadedEnv,
+		config: newConfig,
+	}
+	initVarlockEnv({ allowFail: true })
 }
 
 function sentryOptions(env: Env) {

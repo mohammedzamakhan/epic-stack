@@ -22,8 +22,8 @@ import {
 // Use brand name
 console.log(brand.name) // "Epic Startup"
 console.log(brand.slug) // "epic-startup"
-console.log(brand.domain) // "epic-startup.me"
-console.log(getBrandDomain()) // "epic-startup.me"
+console.log(brand.domain) // "epic-startup.com"
+console.log(getBrandDomain()) // "epic-startup.com"
 
 // Generate page titles
 const title = getPageTitle('Login') // "Login | Epic Startup"
@@ -56,7 +56,8 @@ To rebrand your entire application:
 2. Or edit `packages/config/brand.ts` (`name`, `slug`, `domain`, …)
 3. Rebuild with `npm run build --workspace=@repo/config` if you edited
    `brand.ts` by hand
-4. All apps will use the new values (hosts/SSL/dev-proxy read `brand.domain`)
+4. All apps will use the new values (hosts/SSL/dev-proxy read `getLocalDomain()`
+   and its derived `.test` hostname)
 
 ## Favicons & Static Assets
 
