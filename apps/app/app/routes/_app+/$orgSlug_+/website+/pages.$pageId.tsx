@@ -5336,15 +5336,6 @@ export default function PageBuilderRoute() {
 		}
 	}, [previewUrl])
 
-	const footerSection = page.sections.find(
-		(section) => section.type === 'footer',
-	)
-	const ignoredNextSectionPosition =
-		footerSection?.position ??
-		(page.sections.length === 0
-			? 0
-			: Math.max(...page.sections.map((section) => section.position)) + 1)
-
 	const isSplitLayout = mode === 'build' && isLg
 
 	const sectionsSidebar = (

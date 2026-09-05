@@ -282,7 +282,18 @@ async function main() {
 	log(`Using local domain: ${domain}`, 'blue')
 
 	const { orgSlugs, customDomains, entries } = await getHostsEntries(domain)
-	removeLegacyHostsEntries(`${domain.split('.')[0]}.me`, orgSlugs, customDomains)
+	try {
+		removeLegacyHostsEntries(
+			`${domain.split('.')[0]}.me`,
+			orgSlugs,
+			customDomains,
+		)
+	} catch (error) {
+		log(
+			`⚠️  Could not remove legacy hosts entries: ${error.message}`,
+			'yellow',
+		)
+	}
 
 	log(
 		'\nThis script will add entries to your /etc/hosts file for local development.',

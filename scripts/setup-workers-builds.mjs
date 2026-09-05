@@ -354,6 +354,12 @@ async function ensureTrigger({
 	// our dedicated manual/CI trigger remains.
 	for (const trigger of triggers) {
 		if (!trigger.trigger_uuid || trigger.trigger_uuid === triggerUuid) continue
+		if (
+			trigger.repo_connection?.repo_connection_uuid &&
+			trigger.repo_connection.repo_connection_uuid !== repoConnectionUuid
+		) {
+			continue
+		}
 		try {
 			await deleteTrigger(accountId, token, trigger.trigger_uuid)
 			log(

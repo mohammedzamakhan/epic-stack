@@ -1,4 +1,4 @@
-import { db, eq, Session, Verification } from '@repo/database'
+import { db, eq, Session } from '@repo/database'
 import { describe, expect, it } from 'vitest'
 import {
 	createAuthenticatedRequest,

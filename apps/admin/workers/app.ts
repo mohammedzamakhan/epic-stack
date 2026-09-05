@@ -9,9 +9,8 @@ import {
 	createRequestHandler,
 	RouterContextProvider,
 } from 'react-router'
-import { ensureLinguiRequestLocale } from '../app/modules/lingui/lingui.server.ts'
-
 import { initVarlockEnv } from 'varlock/env'
+import { ensureLinguiRequestLocale } from '../app/modules/lingui/lingui.server.ts'
 
 const cloudflareContext = createContext<{
 	env: Env
