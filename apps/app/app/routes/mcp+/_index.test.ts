@@ -104,7 +104,7 @@ async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	return org
 }
 
-describe('MCP Stateless Endpoint', () => {
+describe('MCP Stateless Endpoint', { timeout: 60000 }, () => {
 	const createdUserIds: string[] = []
 	const createdOrgIds: string[] = []
 

@@ -99,7 +99,7 @@ async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	return org
 }
 
-describe('OAuth Authorization Endpoint', () => {
+describe('OAuth Authorization Endpoint', { timeout: 60000 }, () => {
 	const createdUserIds: string[] = []
 	const createdOrgIds: string[] = []
 

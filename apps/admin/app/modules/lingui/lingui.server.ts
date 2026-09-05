@@ -1,5 +1,5 @@
 import { createLocaleCookie, createLinguiServer } from '@repo/i18n/server'
-import config from '../../../lingui.config'
+import config from '../../../lingui.config.ts'
 import { loadCatalog } from './lingui.ts'
 
 export const localeCookie = createLocaleCookie()
