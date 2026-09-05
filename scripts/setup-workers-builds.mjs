@@ -61,6 +61,7 @@ function parseArgs(argv) {
 		dryRun: false,
 		applyGh: true,
 		buildTokenUuid: process.env.CLOUDFLARE_BUILD_TOKEN_UUID || null,
+		purgeCache: false,
 	}
 	for (let i = 2; i < argv.length; i++) {
 		const arg = argv[i]
@@ -69,9 +70,10 @@ function parseArgs(argv) {
 		else if (arg === '--build-token') args.buildTokenUuid = argv[++i]
 		else if (arg === '--dry-run') args.dryRun = true
 		else if (arg === '--no-gh') args.applyGh = false
+		else if (arg === '--purge-cache') args.purgeCache = true
 		else if (arg === '--help' || arg === '-h') {
 			console.log(
-				'Usage: npm run launch:workers-builds [-- --app <app>] [--tier <production|staging>] [--build-token <uuid>] [--dry-run] [--no-gh]',
+				'Usage: npm run launch:workers-builds [-- --app <app>] [--tier <production|staging>] [--build-token <uuid>] [--purge-cache] [--dry-run] [--no-gh]',
 			)
 			process.exit(0)
 		}
@@ -231,6 +233,15 @@ async function deleteTrigger(accountId, token, triggerUuid) {
 	})
 }
 
+export async function purgeTriggerCache(accountId, token, triggerUuid) {
+	return cfApi(
+		accountId,
+		token,
+		`/builds/triggers/${triggerUuid}/purge_build_cache`,
+		{ method: 'POST' },
+	)
+}
+
 async function patchTriggerEnv(accountId, token, triggerUuid, env) {
 	return cfApi(
 		accountId,
@@ -271,7 +282,11 @@ function buildTriggerPayload({
 		branch_excludes: [],
 		path_includes: entry.watchPaths,
 		path_excludes: [],
-		build_caching_enabled: true,
+		// Dependency caching is disabled because cf-workers-ci.mjs uses SKIP_DEPENDENCY_INSTALL: 1
+		// and runs a deterministic npm ci. Archiving large monorepo node_modules is redundant
+		// and causes extraction crashes ("Failed: error occurred while installing tools or dependencies")
+		// during Cloudflare's tool bootstrap phase.
+		build_caching_enabled: false,
 	}
 }
 
@@ -416,6 +431,7 @@ export async function configureWorkersBuilds({
 	dryRun = false,
 	applyGh = true,
 	buildTokenUuid = process.env.CLOUDFLARE_BUILD_TOKEN_UUID || null,
+	purgeCache = false,
 } = {}) {
 	const selectedManifest = app
 		? WORKERS_BUILDS_MANIFEST.filter((entry) => entry.app === app)
@@ -519,6 +535,17 @@ export async function configureWorkersBuilds({
 			)
 			log(`  synced ${Object.keys(buildEnv).length} build variables`)
 
+			if (purgeCache) {
+				try {
+					await purgeTriggerCache(resolvedAccountId, resolvedToken, triggerUuid)
+					log('  purged trigger build cache')
+				} catch (purgeError) {
+					log(
+						`  warning: could not purge cache for ${triggerUuid}: ${purgeError instanceof Error ? purgeError.message : String(purgeError)}`,
+					)
+				}
+			}
+
 			const variable = triggerVariable(entry, tier)
 			state.triggers[entry.app] ??= {}
 			state.triggers[entry.app][tier] = {
@@ -580,6 +607,7 @@ async function main() {
 		dryRun: args.dryRun,
 		applyGh: args.applyGh,
 		buildTokenUuid: args.buildTokenUuid,
+		purgeCache: args.purgeCache,
 	})
 
 	if (args.dryRun) return
