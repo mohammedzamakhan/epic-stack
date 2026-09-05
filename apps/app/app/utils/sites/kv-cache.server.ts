@@ -20,10 +20,14 @@ export async function purgeOrganizationSiteCache(
 
 	try {
 		for (const prefix of prefixes) {
-			const keys = await SITES_DATA_KV.list({ prefix })
-			for (const key of keys.keys) {
-				await SITES_DATA_KV.delete(key.name)
-			}
+			let cursor: string | undefined = undefined
+			do {
+				const list = await SITES_DATA_KV.list({ prefix, cursor })
+				for (const key of list.keys) {
+					await SITES_DATA_KV.delete(key.name)
+				}
+				cursor = list.list_complete ? undefined : list.cursor
+			} while (cursor)
 		}
 	} catch (e) {
 		console.error('Failed to purge site KV cache', e)

@@ -26,8 +26,9 @@ import {
  */
 export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
-	const slug = url.searchParams.get('slug')
-	const host = url.searchParams.get('host')
+	const slug = url.searchParams.get('slug')?.trim().toLowerCase() || null
+	const host =
+		url.searchParams.get('host')?.trim().toLowerCase().split(':')[0] || null
 	const pageSlug = url.searchParams.get('page')
 	const wantHome = url.searchParams.get('home') === 'true'
 	const lng = url.searchParams.get('lng')
@@ -87,7 +88,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			.from(Organization)
 			.where(
 				and(
-					eq(Organization.slug, slug.trim().toLowerCase()),
+					eq(Organization.slug, slug),
 					eq(Organization.active, true),
 					eq(Organization.sitePublished, true),
 				),
@@ -108,10 +109,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			.from(Organization)
 			.where(
 				and(
-					eq(
-						Organization.customDomain,
-						host.trim().toLowerCase().split(':')[0]!,
-					),
+					eq(Organization.customDomain, host),
 					eq(Organization.active, true),
 					eq(Organization.sitePublished, true),
 					inArray(Organization.customDomainStatus, ['active', 'pending']),

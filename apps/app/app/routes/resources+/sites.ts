@@ -25,8 +25,9 @@ import {
  */
 export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
-	const slug = url.searchParams.get('slug')
-	const host = url.searchParams.get('host')
+	const slug = url.searchParams.get('slug')?.trim().toLowerCase() || null
+	const host =
+		url.searchParams.get('host')?.trim().toLowerCase().split(':')[0] || null
 	const lng = url.searchParams.get('lng')
 
 	if (!slug && !host) {

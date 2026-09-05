@@ -498,14 +498,17 @@ function applyTargetPatches(
 			if (missing) missing.push(`${prefix}_KV_NAMESPACE_ID${suffix}`)
 		}
 		if (appKey === 'app') {
+			const envNames = targetEnv === 'staging'
+				? [`${prefix}_SITES_DATA_KV_ID_STAGING`]
+				: [`${prefix}_SITES_DATA_KV_ID`]
 			if (
 				!patch(
 					'kv_namespaces[1].id',
-					[`${prefix}_SITES_DATA_KV_ID${suffix}`, `${prefix}_SITES_DATA_KV_ID`],
+					envNames,
 					`bindings.${bindingEnv}.${appKey}.sites_data_kv_id`,
 				)
 			) {
-				if (missing) missing.push(`${prefix}_SITES_DATA_KV_ID${suffix}`)
+				if (missing) missing.push(envNames[0])
 			}
 		}
 		patch(
@@ -876,11 +879,16 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			`bindings.${bindingEnv}.sites.sites_data_kv_id`,
 		)
 		if (sitesDataKvId) {
-			applyToml(
-				/(binding\s*=\s*"SITES_DATA_KV"\s*\n\s*id\s*=\s*")[^"]+(")/,
-				`$1${sitesDataKvId}$2`,
-				`SITES_DATA_KV id ← SITES_DATA_KV_ID${suffix}`,
-			)
+			if (deployEnv === 'staging') {
+				content += `\n[[env.staging.kv_namespaces]]\nbinding = "SITES_DATA_KV"\nid = "${sitesDataKvId}"\n`
+				patches.push(`env.staging.kv_namespaces (SITES_DATA_KV) ← SITES_DATA_KV_ID${suffix}`)
+			} else {
+				applyToml(
+					/(binding\s*=\s*"SITES_DATA_KV"\s*\n\s*id\s*=\s*")[^"]+(")/,
+					`$1${sitesDataKvId}$2`,
+					`SITES_DATA_KV id ← SITES_DATA_KV_ID${suffix}`,
+				)
+			}
 		}
 	}
 
