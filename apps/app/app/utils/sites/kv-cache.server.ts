@@ -22,11 +22,11 @@ export async function purgeOrganizationSiteCache(
 		for (const prefix of prefixes) {
 			let cursor: string | undefined = undefined
 			do {
-				const list = await SITES_DATA_KV.list({ prefix, cursor })
-				for (const key of list.keys) {
+				const keysPage = await SITES_DATA_KV.list({ prefix, cursor })
+				for (const key of keysPage.keys) {
 					await SITES_DATA_KV.delete(key.name)
 				}
-				cursor = list.list_complete ? undefined : list.cursor
+				cursor = keysPage.list_complete ? undefined : keysPage.cursor
 			} while (cursor)
 		}
 	} catch (e) {
