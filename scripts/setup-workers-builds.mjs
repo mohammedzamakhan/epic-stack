@@ -278,7 +278,11 @@ function buildTriggerPayload({
 function reusableTrigger(triggers, triggerName, repoConnectionUuid) {
 	return (
 		triggers.find((trigger) => trigger.trigger_name === triggerName) ??
-		triggers.find((trigger) => trigger.trigger_name?.includes('-ci')) ??
+		triggers.find(
+			(trigger) =>
+				trigger.trigger_name?.includes('-ci') &&
+				trigger.repo_connection?.repo_connection_uuid === repoConnectionUuid,
+		) ??
 		triggers.find(
 			(trigger) =>
 				trigger.repo_connection?.repo_connection_uuid === repoConnectionUuid &&

@@ -121,15 +121,29 @@ export function rateLimitByKey(
  * to prevent runaway Twilio costs. Defaults to 500/hour.
  */
 const GLOBAL_SEND_WINDOW_MS = 60 * 60 * 1000 // 1 hour
-function getGlobalSendMax() {
-	return parseInt(ENV.GLOBAL_SMS_CAP || '500', 10)
+export function getGlobalSendMax() {
+	let raw: string | undefined
+	try {
+		raw = ENV.GLOBAL_SMS_CAP || process.env.GLOBAL_SMS_CAP
+	} catch {
+		raw = process.env.GLOBAL_SMS_CAP
+	}
+	if (!raw) return 500
+	const parsed = Number.parseInt(raw, 10)
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : 500
 }
 let globalSendTimestamps: number[] = []
 
 export function checkGlobalSendCap():
 	{ limited: true; retryAfter: number } | { limited: false } {
 	// Bypass in development mode
-	if ((ENV as any).NODE_ENV !== 'production') {
+	let isProduction = false
+	try {
+		isProduction = (ENV as any).NODE_ENV === 'production'
+	} catch {
+		isProduction = process.env.NODE_ENV === 'production'
+	}
+	if (!isProduction) {
 		return { limited: false }
 	}
 
