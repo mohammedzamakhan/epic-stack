@@ -10,6 +10,11 @@ import {
 	findPublishedSiteOrganization,
 	toPublicSitePayload,
 } from '#app/utils/sites/public-org.server.ts'
+import {
+	getCachedSiteData,
+	getSiteKvKey,
+	setCachedSiteData,
+} from '#app/utils/sites/kv-cache.server.ts'
 
 /**
  * Public endpoint for org Sites pages.
@@ -56,7 +61,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			]
 		: acceptLocales
 
-	return Response.json(toPublicSitePayload(organization, { preferredLocale }), {
+	// Cache in KV
+	const queryHash = `${slug || ''}-${host || ''}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	const cacheKey = getSiteKvKey('org', organization.id, queryHash)
+
+	let payload = await getCachedSiteData(cacheKey)
+	if (!payload) {
+		payload = toPublicSitePayload(organization, { preferredLocale })
+		await setCachedSiteData(cacheKey, payload)
+	}
+
+	return Response.json(payload, {
 		headers: {
 			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
 			Vary: 'Accept-Language',

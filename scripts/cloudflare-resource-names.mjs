@@ -21,6 +21,8 @@ export const CF_D1 = {
 export const CF_KV = {
 	app: `${CF_RESOURCE_PREFIX}-cache`,
 	appStaging: `${CF_RESOURCE_PREFIX}-cache-staging`,
+	sitesData: `${CF_RESOURCE_PREFIX}-sites-data`,
+	sitesDataStaging: `${CF_RESOURCE_PREFIX}-sites-data-staging`,
 }
 
 export const CF_R2 = {
