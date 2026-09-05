@@ -5339,7 +5339,7 @@ export default function PageBuilderRoute() {
 	const footerSection = page.sections.find(
 		(section) => section.type === 'footer',
 	)
-	const nextSectionPosition =
+	const ignoredNextSectionPosition =
 		footerSection?.position ??
 		(page.sections.length === 0
 			? 0

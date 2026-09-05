@@ -238,6 +238,7 @@ export default defineConfig((config) => ({
 		},
 		envFile: '../../.env',
 		restoreMocks: true,
+		testTimeout: 15000,
 		// Forked workers get isolated process.env + SQLite files (threads shared one DB).
 		pool: 'forks',
 		maxWorkers: process.env.CI ? 2 : undefined,

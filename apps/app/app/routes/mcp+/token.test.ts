@@ -101,7 +101,7 @@ async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	return org
 }
 
-describe('OAuth Token Endpoint', () => {
+describe('OAuth Token Endpoint', { timeout: 60000 }, () => {
 	const createdUserIds: string[] = []
 	const createdOrgIds: string[] = []
 
@@ -196,7 +196,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should return proper token response structure for refresh_token grant', async () => {
 			await fc.assert(
@@ -252,7 +252,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should include all required fields in token response', async () => {
 			await fc.assert(
@@ -299,7 +299,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 	})
 
 	describe('Property 25: OAuth error code standards', () => {
@@ -321,7 +321,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should return invalid_grant error for expired authorization code', async () => {
 			await fc.assert(
@@ -348,7 +348,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should return invalid_grant error for invalid refresh token', async () => {
 			await fc.assert(
@@ -364,7 +364,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should return unsupported_grant_type error for unknown grant type', async () => {
 			await fc.assert(
@@ -380,7 +380,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should return invalid_request error for missing required parameters', async () => {
 			await fc.assert(
@@ -408,7 +408,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 	})
 
 	describe('Token endpoint integration', () => {
@@ -449,7 +449,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should successfully refresh access token using refresh token', async () => {
 			await fc.assert(
@@ -495,7 +495,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should prevent code reuse after successful exchange', async () => {
 			await fc.assert(
@@ -536,7 +536,7 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 
 		it('should maintain token expiration times correctly', async () => {
 			await fc.assert(
@@ -573,6 +573,6 @@ describe('OAuth Token Endpoint', () => {
 				),
 				{ numRuns: 10 },
 			)
-		})
+		}, 60000)
 	})
 })

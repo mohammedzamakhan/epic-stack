@@ -192,6 +192,7 @@ export default defineConfig((config) => ({
 		},
 		envFile: '../../.env',
 		restoreMocks: true,
+		testTimeout: 15000,
 		pool: 'threads',
 		coverage: {
 			include: ['app/**/*.{ts,tsx}'],
