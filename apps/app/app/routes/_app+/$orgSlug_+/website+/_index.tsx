@@ -38,6 +38,7 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
+import { purgeOrganizationSiteCache } from '#app/utils/sites/kv-cache.server.ts'
 import {
 	createCustomHostname,
 	deleteCustomHostname,
@@ -145,6 +146,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 
 			return Response.json({
 				status: 'success',
@@ -221,6 +227,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 
 			return redirectWithToast(`/${organization.slug}/website`, {
 				title: 'Custom domain added',
@@ -256,6 +267,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				})
 				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
+
 			return redirectWithToast(`/${organization.slug}/website`, {
 				title: 'Custom domain removed',
 				description: 'Your custom domain has been disconnected.',
@@ -291,6 +308,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.set({ customDomainStatus: status })
 				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 
 			return redirectWithToast(`/${organization.slug}/website`, {
 				title: 'Domain status updated',
@@ -372,6 +394,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 
 			return redirectWithToast(`/${organization.slug}/website`, {
 				title: 'Data region updated',
@@ -421,6 +448,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 
 			return redirectWithToast(`/${organization.slug}/website`, {
 				title: 'Languages updated',

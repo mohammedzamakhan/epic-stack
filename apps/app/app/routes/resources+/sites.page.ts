@@ -11,6 +11,11 @@ import {
 	findPublishedSitePage,
 	toPublicPagePayload,
 } from '#app/utils/sites/public-org.server.ts'
+import {
+	getCachedSiteData,
+	getSiteKvKey,
+	setCachedSiteData,
+} from '#app/utils/sites/kv-cache.server.ts'
 
 /**
  * Public endpoint for fetching an org Site's page.
@@ -39,6 +44,31 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	if (!rateLimitCheck.allowed) {
 		return createRateLimitResponse(rateLimitCheck.resetAt)
+	}
+
+	const isPreview = url.searchParams.get('preview') === 'true'
+	const acceptLocales = getClientLocales(request)
+
+	// Cache in KV for non-preview requests
+	const queryHash = `${slug || ''}-${host || ''}-${pageSlug || ''}-${wantHome}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	let cacheKey: string | null = null
+
+	// We can't generate the KV key yet because we don't have orgId until after we query it.
+	// But actually, we can use the URL params as part of the queryHash and we'll use a placeholder orgId
+	// for the cache key, or we can just fetch orgId first. Let's fetch orgId from DB or KV.
+	// To minimize DB queries, we should use the slug or host as the ID for the cache key.
+	const idForCache = slug || host || 'unknown'
+	if (!isPreview) {
+		cacheKey = getSiteKvKey('page', idForCache, queryHash)
+		const cached = await getCachedSiteData(cacheKey)
+		if (cached) {
+			return Response.json(cached, {
+				headers: {
+					'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+					Vary: 'Accept-Language',
+				},
+			})
+		}
 	}
 
 	// First find the organization to ensure it's published and active, and to get its ID
@@ -98,8 +128,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	const isPreview = url.searchParams.get('preview') === 'true'
-
 	// Then fetch the page
 	const page = await findPublishedSitePage(orgId, pageSlug, {
 		preview: isPreview,
@@ -110,7 +138,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	const acceptLocales = getClientLocales(request)
 	const preferredLocales = lng
 		? [
 				lng,
@@ -129,16 +156,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			? preferredLocales
 			: defaultLocale
 
-	return Response.json(
-		toPublicPagePayload(page, requestedLocale, defaultLocale, {
-			headerConfig,
-			footerConfig,
-		}),
-		{
-			headers: {
-				'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
-				Vary: 'Accept-Language',
-			},
+	const payload = toPublicPagePayload(page, requestedLocale, defaultLocale, {
+		headerConfig,
+		footerConfig,
+	})
+
+	if (!isPreview && cacheKey) {
+		await setCachedSiteData(cacheKey, payload)
+	}
+
+	return Response.json(payload, {
+		headers: {
+			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+			Vary: 'Accept-Language',
 		},
-	)
+	})
 }

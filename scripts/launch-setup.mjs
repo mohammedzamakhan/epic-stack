@@ -1343,6 +1343,15 @@ async function main() {
 			config.bindings.production.admin.kv_namespace_id =
 				config.bindings.production.app.kv_namespace_id
 
+			const sitesDataKv = runWrangler(
+				['kv', 'namespace', 'create', CF_KV.sitesData],
+				join(rootDir, 'apps/app'),
+			)
+			config.bindings.production.app.sites_data_kv_id =
+				parseKvCreateOutput(sitesDataKv)
+			config.bindings.production.sites.sites_data_kv_id =
+				config.bindings.production.app.sites_data_kv_id
+
 			const stagingD1 = runWrangler(
 				['d1', 'create', CF_D1.appStaging],
 				join(rootDir, 'apps/app'),
@@ -1360,6 +1369,15 @@ async function main() {
 				parseKvCreateOutput(stagingKv)
 			config.bindings.staging.admin.kv_namespace_id =
 				config.bindings.staging.app.kv_namespace_id
+
+			const stagingSitesDataKv = runWrangler(
+				['kv', 'namespace', 'create', CF_KV.sitesDataStaging],
+				join(rootDir, 'apps/app'),
+			)
+			config.bindings.staging.app.sites_data_kv_id =
+				parseKvCreateOutput(stagingSitesDataKv)
+			config.bindings.staging.sites.sites_data_kv_id =
+				config.bindings.staging.app.sites_data_kv_id
 
 			const webD1 = runWrangler(
 				['d1', 'create', CF_D1.web],

@@ -5,7 +5,8 @@
 			"app": {
 				"worker_name": "epic-startup-app",
 				"d1_database_id": "00000000-0000-0000-0000-000000000001",
-				"kv_namespace_id": "00000000000000000000000000000001"
+				"kv_namespace_id": "00000000000000000000000000000001",
+				"sites_data_kv_id": "00000000000000000000000000000001"
 			},
 			"admin": {
 				"worker_name": "epic-startup-admin",
@@ -18,7 +19,8 @@
 				"r2_bucket_name": "epic-startup-media"
 			},
 			"sites": {
-				"worker_name": "epic-startup-sites"
+				"worker_name": "epic-startup-sites",
+				"sites_data_kv_id": "00000000000000000000000000000001"
 			},
 			"jobs_cron": {
 				"worker_name": "epic-startup-jobs-cron"
@@ -36,7 +38,8 @@
 			"app": {
 				"worker_name": "epic-startup-app-staging",
 				"d1_database_id": "00000000-0000-0000-0000-000000000003",
-				"kv_namespace_id": "00000000000000000000000000000002"
+				"kv_namespace_id": "00000000000000000000000000000002",
+				"sites_data_kv_id": "00000000000000000000000000000002"
 			},
 			"admin": {
 				"worker_name": "epic-startup-admin-staging",
@@ -49,7 +52,8 @@
 				"r2_bucket_name": "epic-startup-media-staging"
 			},
 			"sites": {
-				"worker_name": "epic-startup-sites-staging"
+				"worker_name": "epic-startup-sites-staging",
+				"sites_data_kv_id": "00000000000000000000000000000002"
 			},
 			"jobs_cron": {
 				"worker_name": "epic-startup-jobs-cron-staging"

@@ -83,7 +83,7 @@ async function fetchAppJson<T>(
 				new Response(JSON.stringify(data), {
 					headers: {
 						'Content-Type': 'application/json',
-						'Cache-Control': 'max-age=60',
+						'Cache-Control': 'max-age=10',
 					},
 				}),
 			)

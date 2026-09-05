@@ -497,6 +497,17 @@ function applyTargetPatches(
 		) {
 			if (missing) missing.push(`${prefix}_KV_NAMESPACE_ID${suffix}`)
 		}
+		if (appKey === 'app') {
+			if (
+				!patch(
+					'kv_namespaces[1].id',
+					[`${prefix}_SITES_DATA_KV_ID${suffix}`, `${prefix}_SITES_DATA_KV_ID`],
+					`bindings.${bindingEnv}.${appKey}.sites_data_kv_id`,
+				)
+			) {
+				if (missing) missing.push(`${prefix}_SITES_DATA_KV_ID${suffix}`)
+			}
+		}
 		patch(
 			'name',
 			[`${prefix}_WORKER_NAME${suffix}`, `${prefix}_WORKER_NAME`],
@@ -857,6 +868,19 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 				content += `\n${serviceTable}\nbinding = "APP"\nservice = "${appWorkerName}"\n`
 				patches.push(`services.APP ← ${appWorkerName}`)
 			}
+		}
+		
+		const sitesDataKvId = readEnv(
+			`SITES_DATA_KV_ID${suffix}`,
+			launchConfig,
+			`bindings.${bindingEnv}.sites.sites_data_kv_id`,
+		)
+		if (sitesDataKvId) {
+			applyToml(
+				/(binding\s*=\s*"SITES_DATA_KV"\s*\n\s*id\s*=\s*")[^"]+(")/,
+				`$1${sitesDataKvId}$2`,
+				`SITES_DATA_KV id ← SITES_DATA_KV_ID${suffix}`,
+			)
 		}
 	}
 

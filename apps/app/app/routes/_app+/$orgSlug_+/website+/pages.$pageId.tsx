@@ -145,6 +145,7 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
+import { purgeOrganizationSiteCache } from '#app/utils/sites/kv-cache.server.ts'
 import {
 	uploadSiteFont,
 	uploadSiteIcon,
@@ -594,6 +595,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const organization = await requireUserOrganization(request, params.orgSlug, {
 		id: true,
+		slug: true,
+		customDomain: true,
 	})
 
 	await requireUserWithOrganizationPermission(
@@ -676,6 +679,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					.update(WebsitePage)
 					.set({ seoImageUrl })
 					.where(eq(WebsitePage.id, page.id))
+				await purgeOrganizationSiteCache(
+					organization.id,
+					organization.slug,
+					organization.customDomain,
+				)
 				return Response.json({ status: 'success', seoImageUrl })
 			} catch (error) {
 				return Response.json(
@@ -768,6 +776,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					.set({ siteIconKey })
 					.where(eq(Organization.id, organization.id))
 				await invalidateUserOrganizationsCache(userId)
+				await purgeOrganizationSiteCache(
+					organization.id,
+					organization.slug,
+					organization.customDomain,
+				)
 				return Response.json({ status: 'success' })
 			} catch (error) {
 				return Response.json(
@@ -851,6 +864,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					})
 					.where(eq(Organization.id, organization.id))
 				await invalidateUserOrganizationsCache(userId)
+				await purgeOrganizationSiteCache(
+					organization.id,
+					organization.slug,
+					organization.customDomain,
+				)
 				return Response.json({ status: 'success' })
 			} catch (error) {
 				return Response.json(
@@ -882,6 +900,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			.update(WebsitePage)
 			.set({ title: submission.value.title })
 			.where(eq(WebsitePage.id, page.id))
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -969,6 +992,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				seoNoIndex,
 			})
 			.where(eq(WebsitePage.id, page.id))
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1043,6 +1071,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			position: bodyPosition,
 			config: JSON.stringify(sectionConfig),
 		})
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1069,6 +1102,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.update(Organization)
 				.set({ siteHeaderConfig: config })
 				.where(eq(Organization.id, organization.id))
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		}
 		if (sectionId === SITE_FOOTER_ID) {
@@ -1076,6 +1114,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.update(Organization)
 				.set({ siteFooterConfig: config })
 				.where(eq(Organization.id, organization.id))
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		}
 
@@ -1088,6 +1131,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					eq(WebsitePageSection.pageId, page.id),
 				),
 			)
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1144,6 +1192,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					}
 				}
 			})
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		} catch {
 			return Response.json(
@@ -1190,6 +1243,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					eq(WebsitePageSection.pageId, page.id),
 				),
 			)
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1220,14 +1278,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		if (isLockedBlockType(sections[idx]?.type ?? '')) {
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		}
 
 		const swapIdx = direction === 'up' ? idx - 1 : idx + 1
 		if (swapIdx < 0 || swapIdx >= sections.length) {
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' }) // No-op at boundaries
 		}
 		if (isLockedBlockType(sections[swapIdx]?.type ?? '')) {
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		}
 
@@ -1248,6 +1321,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			})
 		}
 
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1315,6 +1393,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 		})
 
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1366,6 +1449,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				} catch {}
 			}
 		})
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1380,6 +1468,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			.update(WebsitePage)
 			.set({ status: 'draft' })
 			.where(eq(WebsitePage.id, page.id))
+		await purgeOrganizationSiteCache(
+			organization.id,
+			organization.slug,
+			organization.customDomain,
+		)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1423,6 +1516,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				})
 				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		} catch {
 			return Response.json(
@@ -1450,6 +1548,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				.set({ siteIconKey: null })
 				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		} catch {
 			return Response.json(
@@ -1496,6 +1599,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				})
 				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
+			await purgeOrganizationSiteCache(
+				organization.id,
+				organization.slug,
+				organization.customDomain,
+			)
 			return Response.json({ status: 'success' })
 		} catch {
 			return Response.json(

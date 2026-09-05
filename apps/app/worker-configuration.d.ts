@@ -4,6 +4,7 @@
 interface Env {
 	DB: D1Database
 	CACHE: KVNamespace
+	SITES_DATA_KV: KVNamespace
 	ASSETS?: Fetcher
 
 	NODE_ENV: string
