@@ -2,7 +2,7 @@ import { type ActionFunctionArgs } from 'react-router'
 import { __setMockLaunchStatus } from '#app/utils/env.server.ts'
 
 export async function action({ request }: ActionFunctionArgs) {
-	if (process.env.NODE_ENV === 'production') {
+	if (process.env.NODE_ENV === 'production' && !process.env.MOCKS) {
 		throw new Response('Not Found', { status: 404 })
 	}
 	const formData = await request.formData()
