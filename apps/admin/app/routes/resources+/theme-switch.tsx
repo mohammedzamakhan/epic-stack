@@ -32,7 +32,7 @@ export async function action({ request }: Route.ActionArgs) {
 	const { theme, redirectTo } = submission.value
 
 	const responseInit = {
-		headers: { 'set-cookie': setTheme(theme) },
+		headers: { 'set-cookie': setTheme(theme, request) },
 	}
 	if (redirectTo) {
 		return redirect(redirectTo, responseInit)

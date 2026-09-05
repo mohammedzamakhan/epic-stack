@@ -16,7 +16,14 @@ const MODE = ENV.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = ENV.ALLOW_INDEXING
-const SENTRY_ENABLED = IS_PROD && ENV.SENTRY_DSN
+const SENTRY_ENABLED =
+	IS_PROD &&
+	!process.env.MOCKS &&
+	Boolean(
+		ENV.SENTRY_DSN &&
+		ENV.SENTRY_DSN !== 'your-dsn' &&
+		ENV.SENTRY_DSN.includes('@'),
+	)
 const BUILD_PATH = '../build/server/index.js'
 
 if (SENTRY_ENABLED) {

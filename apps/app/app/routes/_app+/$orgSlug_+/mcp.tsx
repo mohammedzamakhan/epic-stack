@@ -375,7 +375,12 @@ function CreateApiKeyModal({
 	const orgName = organization.name
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleClose}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) handleClose()
+			}}
+		>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
@@ -512,7 +517,12 @@ function NewApiKeyModal({
 	}, [apiKey])
 
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) onClose()
+			}}
+		>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
@@ -1031,7 +1041,12 @@ function RevokeConfirmationDialog({
 	isSubmitting: boolean
 }) {
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) onClose()
+			}}
+		>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">

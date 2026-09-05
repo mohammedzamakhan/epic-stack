@@ -40,7 +40,8 @@ async function createTestUserWithSession(createdUserIds: string[]) {
 	const [user] = await db
 		.insert(User)
 		.values({
-			email: faker.internet.email(),
+			email:
+				`${faker.string.alphanumeric(8)}-${faker.internet.email()}`.toLowerCase(),
 			username: `user-${faker.string.uuid().slice(0, 8)}`,
 			name: faker.person.fullName(),
 		})

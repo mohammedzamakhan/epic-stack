@@ -149,11 +149,17 @@ describe('Rate Limiting', () => {
 		it('should reject requests exceeding the limit', async () => {
 			const token = `token-reject-${faker.string.uuid()}`
 
-			// Make maxRequests requests (at limit)
-			for (let i = 0; i < RATE_LIMITS.toolInvocation.maxRequests; i++) {
-				await checkRateLimit(
-					{ type: 'token', value: token },
-					RATE_LIMITS.toolInvocation,
+			// Make maxRequests requests (at limit) - batch them for speed
+			const batchSize = 100
+			const batches = RATE_LIMITS.toolInvocation.maxRequests / batchSize
+			for (let batch = 0; batch < batches; batch++) {
+				await Promise.all(
+					Array.from({ length: batchSize }, () =>
+						checkRateLimit(
+							{ type: 'token', value: token },
+							RATE_LIMITS.toolInvocation,
+						),
+					),
 				)
 			}
 
