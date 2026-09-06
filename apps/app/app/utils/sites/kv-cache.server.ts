@@ -22,7 +22,7 @@ export async function purgeOrganizationSiteCache(
 		for (const prefix of prefixes) {
 			let cursor: string | undefined = undefined
 			do {
-				const keysPage = await SITES_DATA_KV.list({ prefix, cursor })
+				const keysPage: any = await SITES_DATA_KV.list({ prefix, cursor })
 				for (const key of keysPage.keys) {
 					await SITES_DATA_KV.delete(key.name)
 				}
