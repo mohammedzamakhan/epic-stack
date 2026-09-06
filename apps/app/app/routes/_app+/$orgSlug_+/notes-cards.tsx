@@ -11,10 +11,10 @@ import { PrioritySignal } from '@repo/ui/priority-signal'
 import { Textarea } from '@repo/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 import { formatDistanceToNow } from 'date-fns'
-import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
+import sanitizeHtml from 'sanitize-html'
 import { VideoPoster } from '#app/components/ui/video-poster.tsx'
 import { type loader } from './notes'
 
@@ -80,7 +80,7 @@ export const NoteCard = ({
 	const [editTitle, setEditTitle] = useState(note.title)
 	const [editContent, setEditContent] = useState(
 		note.content
-			? DOMPurify.sanitize(note.content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+			? sanitizeHtml(note.content, { allowedTags: [], allowedAttributes: {} })
 			: '',
 	)
 	const navigate = useNavigate()
@@ -139,9 +139,9 @@ export const NoteCard = ({
 		setEditTitle(note.title)
 		setEditContent(
 			note.content
-				? DOMPurify.sanitize(note.content, {
-						ALLOWED_TAGS: [],
-						ALLOWED_ATTR: [],
+				? sanitizeHtml(note.content, {
+						allowedTags: [],
+						allowedAttributes: {},
 					})
 				: '',
 		)
@@ -473,9 +473,9 @@ export const NoteCard = ({
 							{/* Content preview */}
 							{note.content &&
 								(() => {
-									const sanitizedContent = DOMPurify.sanitize(note.content, {
-										ALLOWED_TAGS: [],
-										ALLOWED_ATTR: [],
+									const sanitizedContent = sanitizeHtml(note.content, {
+										allowedTags: [],
+										allowedAttributes: {},
 									})
 									return (
 										<p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">

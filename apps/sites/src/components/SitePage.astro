@@ -100,6 +100,7 @@ const alternateLinks = [
 	orgSlug={Astro.locals.orgSlug || organization.slug}
 	customHost={Astro.locals.customHost}
 	defaultLocale={defaultLocale}
+	googleAnalyticsId={organization.googleAnalyticsId ?? null}
 >
 	<div class="bg-background text-foreground flex min-h-dvh flex-col">
 		<AnnouncementBanners announcements={announcements} />

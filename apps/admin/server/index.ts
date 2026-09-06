@@ -3,7 +3,6 @@ import 'varlock/auto-load'
 import { styleText } from 'node:util'
 import { helmet } from '@nichtsam/helmet/node-http'
 import { wideEventMiddleware } from '@repo/observability'
-import * as Sentry from '@sentry/react-router'
 import { ip as ipAddress } from 'address'
 import closeWithGrace from 'close-with-grace'
 import compression from 'compression'
@@ -16,19 +15,7 @@ const MODE = ENV.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = ENV.ALLOW_INDEXING
-const SENTRY_ENABLED =
-	IS_PROD &&
-	!process.env.MOCKS &&
-	Boolean(
-		ENV.SENTRY_DSN &&
-		ENV.SENTRY_DSN !== 'your-dsn' &&
-		ENV.SENTRY_DSN.includes('@'),
-	)
 const BUILD_PATH = '../build/server/index.js'
-
-if (SENTRY_ENABLED) {
-	void import('./utils/monitoring.ts').then(({ init }) => init())
-}
 
 const app = express()
 
@@ -349,9 +336,5 @@ closeWithGrace(async ({ err }) => {
 	if (err) {
 		console.error(styleText('red', String(err)))
 		console.error(styleText('red', String(err.stack)))
-		if (SENTRY_ENABLED) {
-			Sentry.captureException(err)
-			await Sentry.flush(500)
-		}
 	}
 })

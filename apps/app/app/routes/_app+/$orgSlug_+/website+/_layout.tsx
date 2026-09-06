@@ -28,6 +28,11 @@ export default function WebsiteLayout() {
 			href: `/${orgSlug}/website/announcements`,
 			isActive: location.pathname.includes(`/${orgSlug}/website/announcements`),
 		},
+		{
+			label: _(t`Redirects`),
+			href: `/${orgSlug}/website/redirects`,
+			isActive: location.pathname.includes(`/${orgSlug}/website/redirects`),
+		},
 	]
 
 	// Builder routes (pages.$pageId) render full-viewport, skip the layout chrome

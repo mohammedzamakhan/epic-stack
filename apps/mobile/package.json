@@ -30,8 +30,6 @@
     "@repo/config": "*",
     "@repo/types": "*",
     "@repo/validation": "*",
-    "@sentry/react-router": "10.29.0",
-    "ai": "5.0.108",
     "expo": "~54.0.3",
     "expo-auth-session": "~7.0.7",
     "expo-constants": "~18.0.8",

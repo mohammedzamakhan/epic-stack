@@ -317,6 +317,11 @@ function OrganizationSidebar({
 						`/${orgSlug}/website/announcements`,
 					),
 				},
+				{
+					title: _(msg`Redirects`),
+					url: `/${orgSlug}/website/redirects`,
+					isActive: location.pathname.includes(`/${orgSlug}/website/redirects`),
+				},
 			],
 		},
 		{

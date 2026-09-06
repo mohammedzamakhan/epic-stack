@@ -1,6 +1,5 @@
 import { getErrorMessage } from '@repo/common'
-import { captureException } from '@sentry/react-router'
-import { useEffect, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import {
 	type ErrorResponse,
 	isRouteErrorResponse,
@@ -33,12 +32,6 @@ export function GeneralErrorBoundary({
 	if (typeof document !== 'undefined') {
 		console.error(error)
 	}
-
-	useEffect(() => {
-		if (isResponse) return
-
-		captureException(error)
-	}, [error, isResponse])
 
 	return (
 		<div className="text-h2 container flex items-center justify-center p-20">

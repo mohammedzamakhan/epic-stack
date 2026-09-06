@@ -4,6 +4,7 @@ import { createSiteI18n } from '~/lib/i18n'
 import {
 	fetchPublishedOrganizationForHost,
 	fetchPublishedSitePage,
+	recordSiteRedirectHit,
 } from '~/lib/org'
 import {
 	type SiteHostEnv,
@@ -240,6 +241,72 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	const routedPathname =
 		localeResult.kind === 'rewrite' ? localeResult.pathname : url.pathname
+
+	// Check for tenant-configured redirects
+	if (organization?.redirects && organization.redirects.length > 0) {
+		const normalize = (p: string) => {
+			const clean = p.trim().toLowerCase()
+			return clean.length > 1 && clean.endsWith('/')
+				? clean.slice(0, -1)
+				: clean
+		}
+
+		const candidatePaths = new Set([
+			normalize(url.pathname),
+			normalize(routedPathname),
+		])
+
+		const matchedRedirect = organization.redirects.find((r) =>
+			candidatePaths.has(normalize(r.fromPath)),
+		)
+
+		if (matchedRedirect) {
+			let destination = matchedRedirect.toPath.trim()
+
+			// Reject scheme-relative or invalid destinations
+			const isExternal =
+				destination.startsWith('http://') || destination.startsWith('https://')
+			const isInternal =
+				destination.startsWith('/') &&
+				!destination.startsWith('//') &&
+				!destination.startsWith('/\\')
+
+			if (!isExternal && !isInternal) {
+				// Invalid/unsafe destination, ignore redirect
+			} else {
+				waitUntil(context, recordSiteRedirectHit(matchedRedirect.id))
+
+				if (!isExternal) {
+					// Preserve locale prefix if non-default locale was used and destination is relative
+					if (
+						localeResult.kind === 'rewrite' &&
+						localeResult.locale !== defaultLocale &&
+						!destination.startsWith(`/${localeResult.locale}/`) &&
+						destination !== `/${localeResult.locale}`
+					) {
+						const cleanDest = destination.startsWith('/')
+							? destination
+							: `/${destination}`
+						destination = `/${localeResult.locale}${cleanDest === '/' ? '' : cleanDest}`
+					}
+
+					// Forward query search params if not already present in destination
+					if (url.search && !destination.includes('?')) {
+						destination = `${destination}${url.search}`
+					}
+				}
+
+				return withSecurityHeaders(
+					new Response(null, {
+						status: matchedRedirect.statusCode,
+						headers: { Location: destination },
+					}),
+					url.pathname,
+					hostEnv,
+				)
+			}
+		}
+	}
 	if (organization && !isSitesAppRoute(routedPathname)) {
 		const pageSlug = routedPathname.replace(/^\/+|\/+$/g, '')
 		context.locals.publishedPagePromise = fetchPublishedSitePage({

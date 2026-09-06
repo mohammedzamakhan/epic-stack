@@ -2,8 +2,7 @@ import 'varlock/auto-load'
 
 import { styleText } from 'node:util'
 import { helmet } from '@nichtsam/helmet/node-http'
-import { logger, sentryLogger, wideEventMiddleware } from '@repo/observability'
-import * as Sentry from '@sentry/react-router'
+import { logger, wideEventMiddleware } from '@repo/observability'
 import { ip as ipAddress } from 'address'
 import closeWithGrace from 'close-with-grace'
 import compression from 'compression'
@@ -16,19 +15,7 @@ const MODE = ENV.NODE_ENV
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = ENV.ALLOW_INDEXING !== false
-const SENTRY_ENABLED =
-	IS_PROD &&
-	!process.env.MOCKS &&
-	Boolean(
-		ENV.SENTRY_DSN &&
-		ENV.SENTRY_DSN !== 'your-dsn' &&
-		ENV.SENTRY_DSN.includes('@'),
-	)
 const BUILD_PATH = '../build/server/index.js'
-
-if (SENTRY_ENABLED) {
-	void import('./utils/monitoring.ts').then(({ init }) => init())
-}
 
 const app = express()
 
@@ -52,7 +39,7 @@ app.use((req, res, next) => {
 		)
 		res.header(
 			'Access-Control-Allow-Headers',
-			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace',
+			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, X-PostHog-Distinct-ID, X-PostHog-Session-ID',
 		)
 		res.header('Access-Control-Allow-Credentials', 'true')
 	}
@@ -401,17 +388,7 @@ closeWithGrace(async ({ err }) => {
 		console.error(styleText('red', String(err)))
 		console.error(styleText('red', String(err.stack)))
 
-		// Capture to Sentry with explicit call to ensure it completes before flush
-		if (SENTRY_ENABLED) {
-			Sentry.captureException(err, {
-				level: 'fatal',
-				extra: { context: 'server_shutdown' },
-			})
-			await Sentry.flush(500)
-		}
-
-		// Also log via pino for structured logging
-		sentryLogger.fatal({ err }, 'Server shutting down with error')
+		logger.fatal({ err }, 'Server shutting down with error')
 	} else {
 		logger.info('Server shutting down gracefully')
 	}

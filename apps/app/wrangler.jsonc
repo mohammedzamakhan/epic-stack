@@ -35,9 +35,11 @@
 	// Runtime URLs and LAUNCH_STATUS also belong in secrets, not vars — see docs/launch-checklist.md.
 	// SESSION_SECRET, HONEYPOT_SECRET, RESEND_API_KEY, STRIPE_*, INTERNAL_COMMAND_TOKEN,
 	// TENANT_OPERATOR_TOKEN, JWT_SECRET, TENANT_CUSTOMER_JWT_SECRET, LAUNCH_STATUS, BASE_URL,
-	// AWS_*, INTEGRATION_ENCRYPTION_KEY, SSO_ENCRYPTION_KEY, AUDIT_LOG_SECRET_KEY, SENTRY_DSN, etc.
+	// AWS_*, INTEGRATION_ENCRYPTION_KEY, SSO_ENCRYPTION_KEY, AUDIT_LOG_SECRET_KEY,
+	// POSTHOG_PROJECT_TOKEN, etc.
 	"vars": {
 		"NODE_ENV": "production",
+		"POSTHOG_HOST": "https://us.i.posthog.com",
 	},
 	"env": {
 		"staging": {
@@ -62,6 +64,7 @@
 			],
 			"vars": {
 				"NODE_ENV": "production",
+				"POSTHOG_HOST": "https://us.i.posthog.com",
 			},
 		},
 	},

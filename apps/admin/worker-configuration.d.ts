@@ -16,7 +16,6 @@ interface Env {
 	BUCKET_NAME: string
 	AWS_ACCESS_KEY_ID: string
 	GITHUB_CLIENT_ID: string
-	SENTRY_DSN: string
 	STRIPE_PORTAL_URL: string
 	SESSION_SECRET: string
 	HONEYPOT_SECRET: string
@@ -29,5 +28,4 @@ interface Env {
 	GITHUB_CLIENT_SECRET: string
 	GITHUB_TOKEN: string
 	BETTERSTACK_API_KEY: string
-	SENTRY_AUTH_TOKEN: string
 }

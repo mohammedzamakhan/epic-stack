@@ -63,6 +63,18 @@
 			}
 		}
 	},
+	"observability": {
+		"production": {
+			"posthog_project_token": "phc_replace_me",
+			"posthog_host": "https://us.i.posthog.com",
+			"posthog_logs_destination": "posthog-logs"
+		},
+		"staging": {
+			"posthog_project_token": "phc_replace_me_staging",
+			"posthog_host": "https://us.i.posthog.com",
+			"posthog_logs_destination": "posthog-logs-staging"
+		}
+	},
 	"urls": {
 		"app_base_url": "https://app.yourdomain.com",
 		"admin_base_url": "https://admin.yourdomain.com",

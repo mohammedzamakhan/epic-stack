@@ -21,6 +21,7 @@ interface Env {
 	PUBLIC_SITE_HOST_SUFFIXES?: string
 	TENANT_API_URL: string
 	TENANT_API_URL_KSA: string
+	POSTHOG_HOST?: string
 
 	// Secrets (set via `wrangler secret put <NAME>`)
 	SESSION_SECRET?: string
@@ -46,5 +47,5 @@ interface Env {
 	INTEGRATION_ENCRYPTION_KEY?: string
 	INTEGRATIONS_OAUTH_STATE_SECRET?: string
 	SSO_ENCRYPTION_KEY?: string
-	SENTRY_DSN?: string
+	POSTHOG_PROJECT_TOKEN?: string
 }

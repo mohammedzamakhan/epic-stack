@@ -3,7 +3,7 @@ import { ENV } from 'varlock/env'
 import { getPageTitle } from '@repo/config/brand'
 import SitePage from '~/components/SitePage.astro'
 import RenderBlocks from '~/components/blocks/RenderBlocks.astro'
-import { fetchPublishedSitePage } from '~/lib/org'
+import { fetchPublishedSitePage, recordSiteNotFound } from '~/lib/org'
 import { buildSiteThemeCss } from '@repo/common/site-theme'
 
 const orgSlug = Astro.locals.orgSlug
@@ -30,6 +30,19 @@ const page = await (Astro.locals.publishedPagePromise ??
 	}))
 
 if (!page) {
+	const logPromise = recordSiteNotFound({
+		slug: orgSlug,
+		host: customHost,
+		path: Astro.url.pathname,
+		referrer: Astro.request.headers.get('referer'),
+		userAgent: Astro.request.headers.get('user-agent'),
+	})
+	const cfContext = (Astro.locals as any)?.cfContext
+	if (typeof cfContext?.waitUntil === 'function') {
+		cfContext.waitUntil(logPromise)
+	} else {
+		void logPromise
+	}
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 

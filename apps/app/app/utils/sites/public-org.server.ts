@@ -19,6 +19,7 @@ import {
 	inArray,
 	Organization,
 	OrganizationAnnouncement,
+	WebsiteRedirect,
 } from '@repo/database'
 import {
 	composePageSectionsWithChrome,
@@ -34,6 +35,13 @@ export type PublicSiteAnnouncement = {
 	linkNewTab: boolean
 }
 
+export type PublicSiteRedirect = {
+	id: string
+	fromPath: string
+	toPath: string
+	statusCode: number
+}
+
 export type PublicSiteOrganization = {
 	id: string
 	name: string
@@ -44,6 +52,7 @@ export type PublicSiteOrganization = {
 	siteLocales: string | null
 	siteDefaultLocale: string | null
 	siteIconKey: string | null
+	googleAnalyticsId: string | null
 	announcements: Array<{
 		id: string
 		content: string
@@ -52,6 +61,7 @@ export type PublicSiteOrganization = {
 		linkLabel: string | null
 		linkNewTab: boolean
 	}>
+	redirects: PublicSiteRedirect[]
 }
 
 export type PublicSitePayload = {
@@ -75,6 +85,8 @@ export type PublicSitePayload = {
 		original: string
 	} | null
 	announcements: PublicSiteAnnouncement[]
+	redirects: PublicSiteRedirect[]
+	googleAnalyticsId: string | null
 }
 
 const ANNOUNCEMENT_TYPES = ['info', 'warning', 'error', 'success'] as const
@@ -172,6 +184,8 @@ export function toPublicSitePayload(
 				toPublicAnnouncement(announcement, locale, localesConfig.defaultLocale),
 			)
 			.filter((item): item is PublicSiteAnnouncement => item !== null),
+		redirects: organization.redirects ?? [],
+		googleAnalyticsId: organization.googleAnalyticsId ?? null,
 	}
 }
 
@@ -222,7 +236,21 @@ export async function findPublishedSiteOrganization(options: {
 				eq(OrganizationAnnouncement.isEnabled, true),
 			),
 		)
-	return { ...organization, announcements }
+	const redirects = await db
+		.select({
+			id: WebsiteRedirect.id,
+			fromPath: WebsiteRedirect.fromPath,
+			toPath: WebsiteRedirect.toPath,
+			statusCode: WebsiteRedirect.statusCode,
+		})
+		.from(WebsiteRedirect)
+		.where(
+			and(
+				eq(WebsiteRedirect.organizationId, organization.id),
+				eq(WebsiteRedirect.isEnabled, true),
+			),
+		)
+	return { ...organization, announcements, redirects }
 }
 
 export type PublicSitePageSection = {
