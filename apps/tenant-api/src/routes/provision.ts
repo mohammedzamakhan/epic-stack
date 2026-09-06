@@ -11,6 +11,7 @@ import {
 	organizationFromProvisionPayload,
 } from '../lib/origin.ts'
 import { getNodeRegion, orgMatchesNodeRegion } from '../lib/region.ts'
+import { rateLimit } from '../lib/rate-limit.ts'
 import {
 	getBearerToken,
 	getInternalCommandToken,
@@ -18,6 +19,14 @@ import {
 } from '../lib/secrets.ts'
 
 export const provisionRoutes = new Hono()
+
+// These commands create or remove tenant databases. They are authenticated with
+// the internal command token and additionally throttled to limit accidental or
+// malicious control-plane retry storms.
+provisionRoutes.use(
+	'*',
+	rateLimit('tenant-provisioning', { windowMs: 60 * 1000, maxRequests: 20 }),
+)
 
 const orgIdSchema = z.object({
 	orgId: z

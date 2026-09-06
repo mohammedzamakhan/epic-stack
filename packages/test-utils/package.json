@@ -17,6 +17,9 @@
     "./db-utils": "./src/db-utils.ts",
     "./render": "./src/render.tsx"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@epic-web/invariant": "^1.0.0",
     "@faker-js/faker": "^10.6.0",

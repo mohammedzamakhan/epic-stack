@@ -494,7 +494,7 @@ describe('handleStripeWebhook', () => {
 	})
 
 	describe('Error handling', () => {
-		it('should return 200 even when handler throws error (fire-and-forget)', async () => {
+		it('should return 500 when processing fails so Stripe retries the event', async () => {
 			const mockEvent: Stripe.Event = {
 				id: 'evt_132',
 				type: 'customer.subscription.updated',
@@ -535,9 +535,8 @@ describe('handleStripeWebhook', () => {
 				webhookDeps,
 			)
 
-			// Should still return 200 - errors are logged but don't affect response
-			expect(response.status).toBe(200)
-			expect(await response.text()).toBe('Webhook received')
+			expect(response.status).toBe(500)
+			expect(await response.text()).toBe('Webhook processing failed')
 		})
 
 		it('should handle subscription with multiple items', async () => {

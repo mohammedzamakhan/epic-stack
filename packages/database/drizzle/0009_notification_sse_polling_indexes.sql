@@ -1,0 +1,2 @@
+CREATE INDEX `Notification_userId_updatedAt_idx` ON `Notification` (`userId`,`updatedAt`);--> statement-breakpoint
+CREATE INDEX `Notification_userId_organizationId_updatedAt_idx` ON `Notification` (`userId`,`organizationId`,`updatedAt`);

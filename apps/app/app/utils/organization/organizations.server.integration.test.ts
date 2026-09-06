@@ -17,6 +17,7 @@ import {
 	getOrganizationBySlug,
 	getOrganizationWithAccess,
 	getUserDefaultOrganization,
+	getUserOrganizations,
 	setUserDefaultOrganization,
 	userHasOrganizationRole,
 	userHasOrgAccess,
@@ -106,6 +107,21 @@ describe('organizations.server integration', () => {
 		await setUserDefaultOrganization(user.id, org2.id)
 		const defaultOrg2 = await getUserDefaultOrganization(user.id)
 		expect(defaultOrg2?.organization.id).toBe(org2.id)
+	})
+
+	it('loads all memberships and organization permissions in a batched query path', async () => {
+		const user = await createTestUser()
+		const firstOrg = await createTestOrganization(user.id, 'admin')
+		const secondOrg = await createTestOrganization(user.id, 'member')
+
+		const organizations = await getUserOrganizations(user.id, true)
+
+		expect(organizations.map((item) => item.organization.id)).toEqual(
+			expect.arrayContaining([firstOrg.id, secondOrg.id]),
+		)
+		expect(
+			organizations.every((item) => item.organizationRole.permissions),
+		).toBe(true)
 	})
 
 	it('checks user organization access and returns role information', async () => {

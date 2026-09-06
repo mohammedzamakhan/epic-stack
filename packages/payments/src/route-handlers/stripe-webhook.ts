@@ -110,8 +110,8 @@ async function processWebhookEvent(
  * Shared Stripe webhook handler for processing subscription events.
  * This handler is used by both the admin and app applications.
  *
- * Returns 200 immediately after signature verification per Stripe best practices.
- * Event processing happens asynchronously to avoid timeouts.
+ * Returns 2xx only after the event has been processed. A 5xx lets Stripe retry
+ * transient failures instead of silently losing subscription state.
  *
  * @param request - The incoming request
  * @param deps - Dependencies (stripe client, handlers, webhook secret)
@@ -146,12 +146,15 @@ export async function handleStripeWebhook(
 		return new Response('Invalid signature', { status: 400 })
 	}
 
-	processWebhookEvent(event, deps).catch((error) => {
+	try {
+		await processWebhookEvent(event, deps)
+	} catch (error) {
 		logger.error(
 			{ err: error, eventType: event.type },
 			'Error processing webhook',
 		)
-	})
+		return new Response('Webhook processing failed', { status: 500 })
+	}
 
 	return new Response('Webhook received', { status: 200 })
 }

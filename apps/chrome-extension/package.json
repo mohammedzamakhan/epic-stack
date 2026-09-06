@@ -9,6 +9,7 @@
     "build:chrome": "BROWSER=chrome vite build --mode production",
     "build:firefox": "BROWSER=firefox vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -56,6 +56,27 @@ function redactSecret(message: string, secret: string | undefined) {
 	return message.replaceAll(secret, '[redacted]')
 }
 
+export class ShopOrderNotFoundError extends Error {
+	constructor() {
+		super('Order not found')
+		this.name = 'ShopOrderNotFoundError'
+	}
+}
+
+function isProviderNotFoundError(error: unknown) {
+	if (!error || typeof error !== 'object') return false
+	const candidate = error as {
+		status?: number
+		statusCode?: number
+		response?: { status?: number }
+	}
+	return (
+		candidate.status === 404 ||
+		candidate.statusCode === 404 ||
+		candidate.response?.status === 404
+	)
+}
+
 function getStripeKeyPayload(key: string) {
 	return key.match(/^(?:sk|rk|pk)_(?:test|live)_(.+)$/)?.[1] ?? null
 }
@@ -570,10 +591,26 @@ export class ShopCommerce {
 		paymentId?: string | null
 		checkoutId?: string | null
 	}): Promise<ShopOrderSnapshot & { order?: ShopOrderUpsert | null }> {
+		try {
+			return await this.getOrderStatusFromProcessor(options)
+		} catch (error) {
+			if (error instanceof ShopOrderNotFoundError) throw error
+			if (isProviderNotFoundError(error)) throw new ShopOrderNotFoundError()
+			throw error
+		}
+	}
+
+	private async getOrderStatusFromProcessor(options: {
+		processor: ShopProcessorId
+		organizationId: string
+		sessionId?: string | null
+		paymentId?: string | null
+		checkoutId?: string | null
+	}): Promise<ShopOrderSnapshot & { order?: ShopOrderUpsert | null }> {
 		if (options.processor === 'mor' && options.checkoutId) {
 			const checkout = await this.retrieveHostedCheckout(options.checkoutId)
 			if (checkout.metadata.orgId !== options.organizationId) {
-				throw new Error('Order not found')
+				throw new ShopOrderNotFoundError()
 			}
 
 			const order =
@@ -595,7 +632,7 @@ export class ShopCommerce {
 				retrieveCheckoutShopPayment(this.getCheckoutShop(), options.paymentId!),
 			)
 			if (payment.metadata.orgId !== options.organizationId) {
-				throw new Error('Order not found')
+				throw new ShopOrderNotFoundError()
 			}
 
 			const order =
@@ -615,7 +652,7 @@ export class ShopCommerce {
 		if (options.processor === 'connect' && options.paymentId) {
 			const paymentIntent = await this.retrievePaymentIntent(options.paymentId)
 			if (paymentIntent.metadata?.orgId !== options.organizationId) {
-				throw new Error('Order not found')
+				throw new ShopOrderNotFoundError()
 			}
 
 			const order =
@@ -634,16 +671,16 @@ export class ShopCommerce {
 		}
 
 		if (!options.sessionId) {
-			throw new Error('Order not found')
+			throw new ShopOrderNotFoundError()
 		}
 
 		if (options.processor !== 'connect') {
-			throw new Error('Order not found')
+			throw new ShopOrderNotFoundError()
 		}
 
 		const session = await this.retrieveConnectCheckoutSession(options.sessionId)
 		if (session.metadata?.orgId !== options.organizationId) {
-			throw new Error('Order not found')
+			throw new ShopOrderNotFoundError()
 		}
 
 		const order =

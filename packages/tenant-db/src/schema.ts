@@ -36,6 +36,33 @@ export const customers = sqliteTable('customers', {
 	),
 })
 
+// Refresh tokens are retained after rotation so reuse of an older token can
+// invalidate the session instead of being indistinguishable from a typo.
+export const customerRefreshTokens = sqliteTable(
+	'customer_refresh_tokens',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => randomUUID()),
+		customerId: text('customer_id')
+			.notNull()
+			.references(() => customers.id, { onDelete: 'cascade' }),
+		tokenHash: text('token_hash').notNull(),
+		expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+		rotatedAt: integer('rotated_at', { mode: 'timestamp' }),
+		revokedAt: integer('revoked_at', { mode: 'timestamp' }),
+		createdAt: integer('created_at', { mode: 'timestamp' }).default(
+			sql`(strftime('%s', 'now'))`,
+		),
+	},
+	(table) => [
+		uniqueIndex('customer_refresh_tokens_token_hash_unique').on(
+			table.tokenHash,
+		),
+		index('idx_customer_refresh_tokens_customer').on(table.customerId),
+	],
+)
+
 // ==========================================
 // 2. MARKETING JOURNEYS (Workflow Definitions)
 // ==========================================

@@ -39,7 +39,11 @@ export {
 	createShopCommerceConfigFromEnv,
 } from './config'
 
-export { ShopCommerce, createShopCommerce } from './commerce'
+export {
+	ShopCommerce,
+	ShopOrderNotFoundError,
+	createShopCommerce,
+} from './commerce'
 
 export {
 	hostedWebhookHeadersFromRequest,
