@@ -11,6 +11,7 @@ import {
 } from 'react-router'
 import { initVarlockEnv } from 'varlock/env'
 import { ensureLinguiRequestLocale } from '../app/modules/lingui/lingui.server.ts'
+import { bindSiteDataKV } from '../app/utils/sites/kv-cache.server.ts'
 import { bindTenantApiService } from '../app/utils/tenant-api-service.server.ts'
 
 const cloudflareContext = createContext<{
@@ -62,6 +63,7 @@ export default Sentry.withSentry(sentryOptions, {
 		applyWorkerEnv(env)
 		bindCloudflareD1(env.DB)
 		bindCacheKV(env.CACHE)
+		bindSiteDataKV((env as any).SITES_DATA_KV)
 		if ((env as any).TENANT_API) {
 			bindTenantApiService((env as any).TENANT_API)
 		}
