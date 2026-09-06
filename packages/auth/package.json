@@ -38,7 +38,6 @@
     "@repo/cache": "*",
     "@repo/common": "*",
     "@repo/database": "*",
-    "ai": "5.0.108",
     "bcryptjs": "^3.0.2",
     "react-router": "^8.3.0",
     "remix-auth-github": "^3.0.2",

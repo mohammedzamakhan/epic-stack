@@ -48,8 +48,6 @@
     "/playwright-report"
   ],
   "dependencies": {
-    "@ai-sdk/google": "^2.0.45",
-    "@ai-sdk/react": "^2.0.111",
     "@coji/remix-auth-google": "^4.2.0",
     "@conform-to/react": "^1.8.2",
     "@conform-to/zod": "^1.8.2",
@@ -105,7 +103,6 @@
     "@varlock/cloudflare-integration": "^1.5.1",
     "@varlock/vite-integration": "^0.1.0",
     "address": "^2.0.3",
-    "ai": "5.0.108",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "close-with-grace": "^2.3.0",
@@ -165,7 +162,7 @@
     "@cloudflare/vite-plugin": "^1.13.0",
     "@cloudflare/workers-types": "^4.20250811.0",
     "@epic-web/config": "^1.20.1",
-    "@faker-js/faker": "^9.7.0",
+    "@faker-js/faker": "^10.6.0",
     "@lingui/cli": "^5.8.0",
     "@lingui/conf": "^5.8.0",
     "@lingui/vite-plugin": "^5.3.2",

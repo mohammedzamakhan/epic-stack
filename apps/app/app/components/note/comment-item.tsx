@@ -12,23 +12,25 @@ import {
 } from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { formatDistanceToNow } from 'date-fns'
-import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useMemo, useState } from 'react'
+import sanitizeHtml from 'sanitize-html'
 
 import { SanitizedHtml } from '#app/components/sanitized-html.tsx'
 
 import CommentInput, { type MentionUser } from './comment-input'
 
-DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
-	if (data.attrName === 'target' && data.attrValue === '_blank') {
-		const rel = node.getAttribute('rel') || ''
-		const relValues = rel.split(/\s+/).filter(Boolean)
-		if (!relValues.includes('noopener')) relValues.push('noopener')
-		if (!relValues.includes('noreferrer')) relValues.push('noreferrer')
-		node.setAttribute('rel', relValues.join(' '))
-	}
-})
+const transformTargetBlankLinks = {
+	a: (tagName: string, attribs: Record<string, string>) => {
+		if (attribs.target === '_blank') {
+			const rel = (attribs.rel || '').split(/\s+/).filter(Boolean)
+			if (!rel.includes('noopener')) rel.push('noopener')
+			if (!rel.includes('noreferrer')) rel.push('noreferrer')
+			attribs.rel = rel.join(' ')
+		}
+		return { tagName, attribs }
+	},
+}
 
 interface CommentUser {
 	id: string
@@ -136,8 +138,8 @@ export function CommentItem({
 		depth < maxDepth && replyingToId === null && editingCommentId === null
 
 	const sanitizedContent = useMemo(() => {
-		return DOMPurify.sanitize(comment.content, {
-			ALLOWED_TAGS: [
+		return sanitizeHtml(comment.content, {
+			allowedTags: [
 				'p',
 				'br',
 				'strong',
@@ -153,9 +155,21 @@ export function CommentItem({
 				'code',
 				'pre',
 			],
-			ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'data-mention-id'],
-			ALLOW_DATA_ATTR: false,
-			ALLOW_UNKNOWN_PROTOCOLS: false,
+			allowedAttributes: {
+				'*': ['class', 'data-mention-id'],
+				a: ['href', 'target', 'rel'],
+			},
+			transformTags: transformTargetBlankLinks,
+			allowedSchemes: [
+				'http',
+				'https',
+				'mailto',
+				'tel',
+				'callto',
+				'sms',
+				'cid',
+				'xmpp',
+			],
 		})
 	}, [comment.content])
 

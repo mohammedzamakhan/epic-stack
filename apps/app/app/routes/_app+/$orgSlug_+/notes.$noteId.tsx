@@ -35,7 +35,6 @@ import {
 import { StatusButton } from '@repo/ui/status-button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
 import { formatDistanceToNow } from 'date-fns'
-import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import {
 	useRef,
@@ -55,6 +54,7 @@ import {
 	type LoaderFunctionArgs,
 	data,
 } from 'react-router'
+import sanitizeHtml from 'sanitize-html'
 import { ENV } from 'varlock/env'
 import { z } from 'zod'
 
@@ -105,15 +105,17 @@ import {
 } from '#app/utils/organization/permissions.server.ts'
 
 // Enforce rel="noopener noreferrer" for all target="_blank" links
-DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
-	if (data.attrName === 'target' && data.attrValue === '_blank') {
-		const rel = node.getAttribute('rel') || ''
-		const relValues = rel.split(/\s+/).filter(Boolean)
-		if (!relValues.includes('noopener')) relValues.push('noopener')
-		if (!relValues.includes('noreferrer')) relValues.push('noreferrer')
-		node.setAttribute('rel', relValues.join(' '))
-	}
-})
+const transformTargetBlankLinks = {
+	a: (tagName: string, attribs: Record<string, string>) => {
+		if (attribs.target === '_blank') {
+			const rel = (attribs.rel || '').split(/\s+/).filter(Boolean)
+			if (!rel.includes('noopener')) rel.push('noopener')
+			if (!rel.includes('noreferrer')) rel.push('noreferrer')
+			attribs.rel = rel.join(' ')
+		}
+		return { tagName, attribs }
+	},
+}
 
 // Comment shapes returned by the note loader query
 type CommentWithUser = {
@@ -619,8 +621,8 @@ export default function NoteRoute() {
 	}))
 
 	const sanitizedNoteContent = useMemo(() => {
-		return DOMPurify.sanitize(note.content, {
-			ALLOWED_TAGS: [
+		return sanitizeHtml(note.content, {
+			allowedTags: [
 				'p',
 				'br',
 				'strong',
@@ -644,9 +646,21 @@ export default function NoteRoute() {
 				'pre',
 				'div',
 			],
-			ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
-			ALLOW_DATA_ATTR: false,
-			ALLOW_UNKNOWN_PROTOCOLS: false,
+			allowedAttributes: {
+				'*': ['class', 'data-mention-id', 'data-id', 'data-type'],
+				a: ['href', 'target', 'rel'],
+			},
+			transformTags: transformTargetBlankLinks,
+			allowedSchemes: [
+				'http',
+				'https',
+				'mailto',
+				'tel',
+				'callto',
+				'sms',
+				'cid',
+				'xmpp',
+			],
 		})
 	}, [note.content])
 

@@ -1,5 +1,5 @@
 import { getClientIp } from '@repo/common/ip-tracking'
-import DOMPurify from 'isomorphic-dompurify'
+import sanitizeHtmlLibrary from 'sanitize-html'
 import {
 	createSSOError,
 	SSOErrorType,
@@ -13,10 +13,9 @@ import { isSuspiciousActivityBlocked } from './rate-limit.server.ts'
 export function sanitizeHtml(input: string): string {
 	if (!input || typeof input !== 'string') return ''
 
-	return DOMPurify.sanitize(input, {
-		ALLOWED_TAGS: [], // No HTML tags allowed
-		ALLOWED_ATTR: [],
-		KEEP_CONTENT: true, // Keep text content, remove tags
+	return sanitizeHtmlLibrary(input, {
+		allowedTags: [], // No HTML tags allowed
+		allowedAttributes: {},
 	})
 }
 

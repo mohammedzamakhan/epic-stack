@@ -22,9 +22,7 @@ const hasPostHogSourceMapCredentials = Boolean(
 function cloudflareWorkerAliasPlugin(): Plugin | null {
 	if (!isCloudflare) return null
 	const workerFile = (name: string) => `${appDir}/workers/${name}`
-	const ssrOnly: Record<string, string> = {
-		'isomorphic-dompurify': workerFile('dompurify-stub.ts'),
-	}
+	const ssrOnly: Record<string, string> = {}
 	const always: Record<string, string> = {
 		'node:sqlite': workerFile('node-sqlite-stub.ts'),
 	}

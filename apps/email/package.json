@@ -13,7 +13,6 @@
     "@react-email/components": "0.0.41",
     "@remix-run/server-runtime": "^2.17.5",
     "@repo/email": "*",
-    "ai": "5.0.108",
     "react": "^19.1.1",
     "react-email": "4.3.2",
     "react-router": "^8.3.0"
