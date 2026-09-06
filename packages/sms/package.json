@@ -10,6 +10,9 @@
       "default": "./src/index.ts"
     }
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "twilio": "^5.0.0"
   },

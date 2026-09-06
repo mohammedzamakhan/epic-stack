@@ -11,7 +11,7 @@ app, marketing site, admin dashboard, tenant sites, regional tenant-api, mobile
 app, CMS, jobs-cron, email templates, notifications) and shared packages (UI,
 auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
-**Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Drizzle,
+**Tech Stack**: React 19 + React Router 8, Node.js 22, SQLite + Drizzle,
 Tailwind CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites).
 App/Admin deploy on Cloudflare Workers with D1. CMS deploys on Vercel (Turso +
 R2 via S3). Regional tenant-api deploys on OCI Ampere (Riyadh + Ashburn) with
@@ -113,7 +113,7 @@ npm run validate       # lint + typecheck + test + e2e
 - Strict mode enabled
 - Path aliases: `#app/*` (app code), `#tests/*` (tests), `@repo/*` (packages)
 - Use Zod for all validation schemas
-- React Router v7 conventions (loaders/actions)
+- React Router v8 conventions (loaders/actions)
 
 **Imports**:
 

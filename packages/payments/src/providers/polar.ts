@@ -169,59 +169,46 @@ export class PolarProvider implements PaymentProvider {
 	}
 
 	async getPlansAndPrices(): Promise<PlansAndPrices> {
-		try {
-			const products = await this.getProducts()
-			const prices = await this.getPrices()
+		const products = await this.getProducts()
+		const prices = await this.getPrices()
 
-			const basePlan = products.find((product) => product.name === 'Base')
-			const plusPlan = products.find((product) => product.name === 'Plus')
+		const basePlan = products.find((product) => product.name === 'Base')
+		const plusPlan = products.find((product) => product.name === 'Plus')
 
-			// Filter for monthly and yearly prices
-			const monthlyPrices = prices.filter(
-				(price) => price.interval === 'month' && price.currency === 'usd',
-			)
-			const yearlyPrices = prices.filter(
-				(price) => price.interval === 'year' && price.currency === 'usd',
-			)
+		// Filter for monthly and yearly prices
+		const monthlyPrices = prices.filter(
+			(price) => price.interval === 'month' && price.currency === 'usd',
+		)
+		const yearlyPrices = prices.filter(
+			(price) => price.interval === 'year' && price.currency === 'usd',
+		)
 
-			// Find prices for each plan and interval
-			const basePriceMonthly = monthlyPrices.find(
-				(price) => price.productId === basePlan?.id,
-			)
-			const basePriceYearly = yearlyPrices.find(
-				(price) => price.productId === basePlan?.id,
-			)
-			const plusPriceMonthly = monthlyPrices.find(
-				(price) => price.productId === plusPlan?.id,
-			)
-			const plusPriceYearly = yearlyPrices.find(
-				(price) => price.productId === plusPlan?.id,
-			)
+		// Find prices for each plan and interval
+		const basePriceMonthly = monthlyPrices.find(
+			(price) => price.productId === basePlan?.id,
+		)
+		const basePriceYearly = yearlyPrices.find(
+			(price) => price.productId === basePlan?.id,
+		)
+		const plusPriceMonthly = monthlyPrices.find(
+			(price) => price.productId === plusPlan?.id,
+		)
+		const plusPriceYearly = yearlyPrices.find(
+			(price) => price.productId === plusPlan?.id,
+		)
 
-			return {
-				plans: { base: basePlan, plus: plusPlan },
-				prices: {
-					base: {
-						monthly: basePriceMonthly,
-						yearly: basePriceYearly,
-					},
-					plus: {
-						monthly: plusPriceMonthly,
-						yearly: plusPriceYearly,
-					},
+		return {
+			plans: { base: basePlan, plus: plusPlan },
+			prices: {
+				base: {
+					monthly: basePriceMonthly,
+					yearly: basePriceYearly,
 				},
-			}
-		} catch (error) {
-			console.error('PolarProvider: Error in getPlansAndPrices:', error)
-
-			// Return fallback data to prevent the app from hanging
-			return {
-				plans: { base: undefined, plus: undefined },
-				prices: {
-					base: { monthly: undefined, yearly: undefined },
-					plus: { monthly: undefined, yearly: undefined },
+				plus: {
+					monthly: plusPriceMonthly,
+					yearly: plusPriceYearly,
 				},
-			}
+			},
 		}
 	}
 

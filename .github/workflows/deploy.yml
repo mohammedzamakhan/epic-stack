@@ -62,13 +62,22 @@ jobs:
             BASE_REF="HEAD~1"
           fi
 
-          # Check which projects are affected
-          echo "app=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*app\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*admin\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*web\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "sites=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*sites\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "tenant_api=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*tenant-api\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "jobs_cron=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*jobs-cron\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          # Turbo's JSON output is an API contract; formatted terminal output is not.
+          affected_packages=$(npx turbo ls --filter="...[$BASE_REF]" --output=json)
+          is_affected() {
+            echo "$affected_packages" | jq -e --arg package "$1" \
+              '.packages.items | any(.name == $package)' > /dev/null
+          }
+
+          for package in app admin web sites tenant-api jobs-cron; do
+            if is_affected "$package"; then
+              value=true
+            else
+              value=false
+            fi
+            output_name=${package//-/_}
+            echo "$output_name=$value" >> "$GITHUB_OUTPUT"
+          done
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04

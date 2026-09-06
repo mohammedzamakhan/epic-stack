@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { SignJWT, jwtVerify } from 'jose'
 import { ENV } from 'varlock/env'
@@ -7,7 +7,12 @@ import { z } from 'zod'
 
 import { brand } from '@repo/config/brand'
 import { sendSms } from '@repo/sms'
-import { customers, getTenantDb, TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
+import {
+	customerRefreshTokens,
+	customers,
+	getTenantDb,
+	TENANT_ORG_ID_PATTERN,
+} from '@repo/tenant-db'
 import {
 	findActiveOrganizationById,
 	resolveOrganizationForBrowserAuth,
@@ -70,6 +75,26 @@ function customerNeedsName(name: string | null | undefined) {
 }
 
 type TenantDb = Awaited<ReturnType<typeof getTenantDb>>
+
+function isSqliteBusyError(error: unknown) {
+	return error instanceof Error && error.message.includes('SQLITE_BUSY')
+}
+
+async function retryOnSqliteBusy<T>(operation: () => Promise<T>): Promise<T> {
+	let lastError: unknown
+	for (const delayMs of [0, 10, 25, 50]) {
+		if (delayMs > 0) {
+			await new Promise((resolve) => setTimeout(resolve, delayMs))
+		}
+		try {
+			return await operation()
+		} catch (error) {
+			if (!isSqliteBusyError(error)) throw error
+			lastError = error
+		}
+	}
+	throw lastError
+}
 
 async function openTenantDb(orgId: string): Promise<TenantDb | null> {
 	try {
@@ -155,10 +180,32 @@ async function issueAccessToken(payload: {
 async function issueRefreshToken(
 	db: Awaited<ReturnType<typeof getTenantDb>>,
 	customerId: string,
+	options: { revokeExisting?: boolean } = {},
 ): Promise<string> {
 	const rawToken = crypto.randomBytes(32).toString('hex')
 	const tokenHash = hmacHash(rawToken)
 	const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS)
+	const now = new Date()
+
+	if (options.revokeExisting !== false) {
+		await db
+			.update(customerRefreshTokens)
+			.set({ revokedAt: now })
+			.where(
+				and(
+					eq(customerRefreshTokens.customerId, customerId),
+					isNull(customerRefreshTokens.rotatedAt),
+					isNull(customerRefreshTokens.revokedAt),
+				),
+			)
+			.run()
+	}
+
+	await db.insert(customerRefreshTokens).values({
+		customerId,
+		tokenHash,
+		expiresAt,
+	})
 
 	await db
 		.update(customers)
@@ -171,6 +218,31 @@ async function issueRefreshToken(
 		.run()
 
 	return rawToken
+}
+
+async function revokeCustomerRefreshTokens(db: TenantDb, customerId: string) {
+	const now = new Date()
+	await Promise.all([
+		db
+			.update(customerRefreshTokens)
+			.set({ revokedAt: now })
+			.where(
+				and(
+					eq(customerRefreshTokens.customerId, customerId),
+					isNull(customerRefreshTokens.revokedAt),
+				),
+			)
+			.run(),
+		db
+			.update(customers)
+			.set({
+				refreshTokenHash: null,
+				refreshTokenExpiresAt: null,
+				updatedAt: now,
+			})
+			.where(eq(customers.id, customerId))
+			.run(),
+	])
 }
 
 /**
@@ -450,33 +522,171 @@ authRoutes.post(
 
 		const tokenHash = hmacHash(refreshToken)
 
-		const customer = await db
-			.select()
-			.from(customers)
-			.where(eq(customers.refreshTokenHash, tokenHash))
-			.get()
+		const newRefreshToken = crypto.randomBytes(32).toString('hex')
+		const newRefreshTokenHash = hmacHash(newRefreshToken)
+		const newRefreshTokenExpiresAt = new Date(
+			Date.now() + REFRESH_TOKEN_EXPIRY_MS,
+		)
+		const rotation = await retryOnSqliteBusy(() =>
+			db.transaction(async (tx) => {
+				const revokeAll = async (customerId: string) => {
+					const now = new Date()
+					await tx
+						.update(customerRefreshTokens)
+						.set({ revokedAt: now })
+						.where(
+							and(
+								eq(customerRefreshTokens.customerId, customerId),
+								isNull(customerRefreshTokens.revokedAt),
+							),
+						)
+						.run()
+					await tx
+						.update(customers)
+						.set({
+							refreshTokenHash: null,
+							refreshTokenExpiresAt: null,
+							updatedAt: now,
+						})
+						.where(eq(customers.id, customerId))
+						.run()
+				}
 
-		if (!customer) {
-			return c.json({ error: 'Invalid refresh token' }, 401)
-		}
+				const tokenRecord = await tx
+					.select()
+					.from(customerRefreshTokens)
+					.where(eq(customerRefreshTokens.tokenHash, tokenHash))
+					.get()
 
-		if (
-			!customer.refreshTokenExpiresAt ||
-			new Date() > customer.refreshTokenExpiresAt
-		) {
-			await db
-				.update(customers)
-				.set({ refreshTokenHash: null, refreshTokenExpiresAt: null })
-				.where(eq(customers.id, customer.id))
-				.run()
+				if (tokenRecord) {
+					const customer = await tx
+						.select()
+						.from(customers)
+						.where(eq(customers.id, tokenRecord.customerId))
+						.get()
+					if (!customer) return { kind: 'invalid' as const, reason: 'invalid' }
+
+					if (
+						tokenRecord.rotatedAt ||
+						tokenRecord.revokedAt ||
+						new Date() > tokenRecord.expiresAt
+					) {
+						await revokeAll(customer.id)
+						return {
+							kind: 'invalid' as const,
+							reason: tokenRecord.expiresAt < new Date() ? 'expired' : 'reused',
+							customerId: customer.id,
+						}
+					}
+
+					const [rotatedToken] = await tx
+						.update(customerRefreshTokens)
+						.set({ rotatedAt: new Date() })
+						.where(
+							and(
+								eq(customerRefreshTokens.id, tokenRecord.id),
+								isNull(customerRefreshTokens.rotatedAt),
+								isNull(customerRefreshTokens.revokedAt),
+							),
+						)
+						.returning({ id: customerRefreshTokens.id })
+					if (!rotatedToken) {
+						await revokeAll(customer.id)
+						return {
+							kind: 'invalid' as const,
+							reason: 'reused' as const,
+							customerId: customer.id,
+						}
+					}
+
+					await tx.insert(customerRefreshTokens).values({
+						customerId: customer.id,
+						tokenHash: newRefreshTokenHash,
+						expiresAt: newRefreshTokenExpiresAt,
+					})
+					await tx
+						.update(customers)
+						.set({
+							refreshTokenHash: newRefreshTokenHash,
+							refreshTokenExpiresAt: newRefreshTokenExpiresAt,
+							updatedAt: new Date(),
+						})
+						.where(eq(customers.id, customer.id))
+						.run()
+					return { kind: 'rotated' as const, customer }
+				}
+
+				// Existing tenant databases may contain a legacy single refresh hash.
+				// Accept it once, then move the session onto replay-detecting tokens.
+				const customer = await tx
+					.select()
+					.from(customers)
+					.where(eq(customers.refreshTokenHash, tokenHash))
+					.get()
+				if (!customer) return { kind: 'invalid' as const, reason: 'invalid' }
+				if (
+					!customer.refreshTokenExpiresAt ||
+					new Date() > customer.refreshTokenExpiresAt
+				) {
+					await revokeAll(customer.id)
+					return { kind: 'invalid' as const, reason: 'expired' as const }
+				}
+
+				const [migratedCustomer] = await tx
+					.update(customers)
+					.set({
+						refreshTokenHash: newRefreshTokenHash,
+						refreshTokenExpiresAt: newRefreshTokenExpiresAt,
+						updatedAt: new Date(),
+					})
+					.where(
+						and(
+							eq(customers.id, customer.id),
+							eq(customers.refreshTokenHash, tokenHash),
+						),
+					)
+					.returning({ id: customers.id })
+				if (!migratedCustomer) {
+					await revokeAll(customer.id)
+					return {
+						kind: 'invalid' as const,
+						reason: 'reused' as const,
+						customerId: customer.id,
+					}
+				}
+				await tx.insert(customerRefreshTokens).values({
+					customerId: customer.id,
+					tokenHash: newRefreshTokenHash,
+					expiresAt: newRefreshTokenExpiresAt,
+				})
+				return { kind: 'rotated' as const, customer }
+			}),
+		)
+
+		if (rotation.kind === 'invalid') {
+			if (rotation.reason === 'reused') {
+				console.warn('Refresh token reuse detected; revoked customer session', {
+					customerId: rotation.customerId,
+				})
+			}
 			return c.json(
-				{ error: 'Refresh token expired. Please re-authenticate.' },
+				{
+					error:
+						rotation.reason === 'expired'
+							? 'Refresh token expired. Please re-authenticate.'
+							: 'Invalid refresh token',
+				},
 				401,
 			)
 		}
 
-		const { accessToken, refreshToken: newRefreshToken } =
-			await issueSessionTokens(db, customer, organization)
+		const accessToken = await issueAccessToken({
+			customerId: rotation.customer.id,
+			orgId: organization.id,
+			name: rotation.customer.name,
+			orgSlug: organization.slug,
+			customDomain: organization.customDomain,
+		})
 
 		return c.json({
 			success: true,
@@ -498,15 +708,21 @@ authRoutes.post('/logout', async (c) => {
 			}
 			const tokenHash = hmacHash(parsed.data.refreshToken)
 
-			await db
-				.update(customers)
-				.set({
-					refreshTokenHash: null,
-					refreshTokenExpiresAt: null,
-					updatedAt: new Date(),
-				})
-				.where(eq(customers.refreshTokenHash, tokenHash))
-				.run()
+			const token = await db
+				.select({ customerId: customerRefreshTokens.customerId })
+				.from(customerRefreshTokens)
+				.where(eq(customerRefreshTokens.tokenHash, tokenHash))
+				.get()
+			if (token) {
+				await revokeCustomerRefreshTokens(db, token.customerId)
+			} else {
+				const customer = await db
+					.select({ id: customers.id })
+					.from(customers)
+					.where(eq(customers.refreshTokenHash, tokenHash))
+					.get()
+				if (customer) await revokeCustomerRefreshTokens(db, customer.id)
+			}
 		} catch (error) {
 			console.error('Error invalidating refresh token:', error)
 		}

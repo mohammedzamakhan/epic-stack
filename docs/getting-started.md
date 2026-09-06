@@ -1,65 +1,62 @@
-# Getting Started with the Epic Stack
+# Getting Started with Epic Startup
 
-The Epic Stack is a [Remix Stack](https://remix.run/stacks). To start your Epic
-Stack, run the following [`npx`](https://docs.npmjs.com/cli/v9/commands/npx)
-command using the current LTS version of Node.js:
+Epic Startup is a full-stack SaaS starter monorepo. It includes the operator
+app, public tenant sites, regional tenant APIs, a marketing site, an admin
+dashboard, and shared packages.
 
-```sh
-npx epicli new <project-name>
-```
+## Requirements
 
-This will prompt you for a project name (the name of the directory to put your
-project). Once you've selected that, the CLI will start the setup process.
+- Node.js 22.18.0
+- npm 10.9.0
 
-Once the setup is complete, go ahead and `cd` into the new project directory and
-run `npm run dev` to get the app started.
-
-Check the project README.md for instructions on getting the app deployed. You'll
-want to get this done early in the process to make sure you're all set up
-properly.
-
-If you'd like to skip some of the setup steps, you can set the following
-environment variables when you run the script:
-
-- `SKIP_SETUP` - skips running `npm run setup`
-- `SKIP_FORMAT` - skips running `npm run format`
-- `SKIP_DEPLOYMENT` - skips deployment setup
-
-So, if you enabled all of these it would be:
+The repository pins both versions with Volta. Install dependencies from the
+repository root:
 
 ```sh
-SKIP_SETUP=true SKIP_FORMAT=true SKIP_DEPLOYMENT=true npx epicli new
+PUPPETEER_SKIP_DOWNLOAD=true npm install
+npm run setup
 ```
 
-Or, on windows:
+Install Playwright browsers when you intend to run end-to-end tests:
 
-```
-set SKIP_SETUP=true && set SKIP_FORMAT=true && set SKIP_DEPLOYMENT=true && npx epicli new
+```sh
+npm run test:e2e:install
 ```
 
 ## Development
 
-- Initial setup:
+Start every local service:
 
-  ```sh
-  npm run setup
-  ```
+```sh
+npm run dev
+```
 
-- Start dev server:
+Or start an individual app:
 
-  ```sh
-  npm run dev
-  ```
+```sh
+npm run dev:app        # Operator app on :3001
+npm run dev:web        # Marketing site on :3002
+npm run dev:sites      # Public tenant sites on :3008
+npm run dev:tenant-api # US tenant API on :3007
+npm run dev:tenant-api:ksa # KSA tenant API on :3009
+```
 
-This starts your app in development mode, rebuilding assets on file changes.
+`npm run dev` starts both regional tenant APIs. Tenant customer data is stored
+on the regional tenant API, not in the operator app's control-plane database.
+Read [Tenant data residency](./tenant-data-residency.md) before changing tenant
+authentication, data regions, or customer data handling.
 
-`npm run dev` also starts two tenant-api nodes (US on 3007, KSA on 3009) used by
-tenant Sites phone login. New orgs default to US customer data. To try KSA, set
-**Customer data region** on Website settings (switching after customers exist
-deletes them). See [Tenant data residency](./tenant-data-residency.md).
+## Database and validation
 
-The database seed script creates a new user with some data you can use to get
-started:
+```sh
+npm run db:migrate:deploy
+npm run db:seed
+npm run lint
+npm run typecheck
+npm run test
+npm run test:e2e:run
+```
 
-- Username: `kody`
-- Password: `KodyLovesYou!2026`
+Use `npm run validate` before submitting a change; it runs the repository's full
+validation suite. See the root [README](../README.md) and
+[testing guide](./testing.md) for environment setup and test details.

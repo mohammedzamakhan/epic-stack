@@ -56,7 +56,7 @@ import {
 	deleteSubscription,
 } from '#app/utils/payments.server.ts'
 import {
-	collectOrgMediaObjectKeys,
+	countOrgMediaObjectKeys,
 	createAndStartStorageMigration,
 	customSnapshotFromS3ConfigRow,
 	getActiveStorageMigration,
@@ -112,7 +112,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const [activeMigration, latestMigration, mediaFileCount] = await Promise.all([
 		getActiveStorageMigration(organization.id),
 		getLatestStorageMigration(organization.id),
-		collectOrgMediaObjectKeys(organization.id).then((keys) => keys.length),
+		countOrgMediaObjectKeys(organization.id),
 	])
 
 	return {

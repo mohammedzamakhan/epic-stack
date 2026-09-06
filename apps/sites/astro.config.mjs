@@ -177,7 +177,9 @@ export default defineConfig({
 	},
 
 	build: {
-		inlineStylesheets: 'always',
+		// Keep shared CSS as an asset when it is large enough to benefit from
+		// browser caching across public tenant-site pages.
+		inlineStylesheets: 'auto',
 	},
 
 	adapter:

@@ -43,7 +43,6 @@ const NotesChart = lazy(() =>
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { setUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
-// import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {

@@ -235,6 +235,16 @@ describe('StripeProvider', () => {
 		})
 	})
 
+	describe('getPlansAndPrices', () => {
+		it('propagates provider failures instead of returning an empty catalog', async () => {
+			mockStripeInstance.products.list.mockRejectedValue(new Error('API Error'))
+
+			await expect(stripeProvider.getPlansAndPrices()).rejects.toThrow(
+				'Failed to fetch Stripe products: API Error',
+			)
+		})
+	})
+
 	describe('createCheckoutSession', () => {
 		it('should create checkout session successfully', async () => {
 			const mockSession = {

@@ -15,7 +15,8 @@
     "build": "tsc --project tsconfig.build.json",
     "clean": "rm -rf node_modules dist",
     "prepare": "npm run build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --project tsconfig.build.json --noEmit"
   },
   "exports": {
     "./eslint-preset": "./eslint-preset.js",
