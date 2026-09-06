@@ -243,6 +243,12 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          APP_D1_DATABASE_ID: ${{ vars.APP_D1_DATABASE_ID }}
+          APP_D1_DATABASE_ID_STAGING: ${{ vars.APP_D1_DATABASE_ID_STAGING }}
+          APP_KV_NAMESPACE_ID: ${{ vars.APP_KV_NAMESPACE_ID }}
+          APP_KV_NAMESPACE_ID_STAGING: ${{ vars.APP_KV_NAMESPACE_ID_STAGING }}
+          APP_SITES_DATA_KV_ID: ${{ vars.APP_SITES_DATA_KV_ID }}
+          APP_SITES_DATA_KV_ID_STAGING: ${{ vars.APP_SITES_DATA_KV_ID_STAGING }}
         run: |
           if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
             DEPLOY_ENV=staging
@@ -252,7 +258,7 @@ jobs:
             WRANGLER_ENV=()
           fi
 
-          node scripts/patch-wrangler.mjs --app app --env "$DEPLOY_ENV"
+          node scripts/patch-wrangler.mjs --app app --env "$DEPLOY_ENV" --require-bindings
           npx wrangler d1 migrations apply epic-startup-db --remote \
             --config apps/app/wrangler.deploy.jsonc "${WRANGLER_ENV[@]}"
 
