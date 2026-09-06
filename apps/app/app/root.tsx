@@ -220,10 +220,24 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
 
 	// Load user organizations with slug-based switching handled automatically
-	const { getUserOrganizationsWithSlugHandling } =
+	const { getUserOrganizations, getUserOrganizationsWithSlugHandling } =
 		await import('./utils/organization/organizations.server')
+	const cachedOrganizations = user
+		? await cachified({
+				key: `user-organizations:${user.id}`,
+				cache,
+				// Memberships and permissions are security-sensitive. The matching
+				// cache is invalidated by organization mutations and has a short TTL.
+				ttl: 1000 * 60,
+				getFreshValue: () => getUserOrganizations(user.id, true),
+			})
+		: undefined
 	const userOrganizations = user
-		? await getUserOrganizationsWithSlugHandling(user.id, orgSlug)
+		? await getUserOrganizationsWithSlugHandling(
+				user.id,
+				orgSlug,
+				cachedOrganizations,
+			)
 		: undefined
 
 	const favoriteNotes = user

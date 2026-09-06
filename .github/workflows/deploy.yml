@@ -62,13 +62,22 @@ jobs:
             BASE_REF="HEAD~1"
           fi
 
-          # Check which projects are affected
-          echo "app=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*app\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*admin\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*web\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "sites=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*sites\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "tenant_api=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*tenant-api\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "jobs_cron=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*jobs-cron\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          # Turbo's JSON output is an API contract; formatted terminal output is not.
+          affected_packages=$(npx turbo ls --filter="...[$BASE_REF]" --output=json)
+          is_affected() {
+            echo "$affected_packages" | jq -e --arg package "$1" \
+              '.packages.items | any(.name == $package)' > /dev/null
+          }
+
+          for package in app admin web sites tenant-api jobs-cron; do
+            if is_affected "$package"; then
+              value=true
+            else
+              value=false
+            fi
+            output_name=${package//-/_}
+            echo "$output_name=$value" >> "$GITHUB_OUTPUT"
+          done
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04
@@ -207,10 +216,51 @@ jobs:
             apps/admin/playwright-report/
           retention-days: 30
 
+  migrate-control-plane-d1:
+    name: 🗃️ Migrate Control-Plane D1
+    runs-on: ubuntu-24.04
+    needs: [lint, typecheck, vitest, playwright]
+    if: |
+      github.event_name == 'push' &&
+      needs.lint.result == 'success' &&
+      needs.typecheck.result == 'success' &&
+      needs.vitest.result == 'success' &&
+      (needs.playwright.result == 'success' || needs.playwright.result == 'skipped')
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
+
+      - name: 🗃️ Apply pending D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            DEPLOY_ENV=staging
+            WRANGLER_ENV=(--env staging)
+          else
+            DEPLOY_ENV=production
+            WRANGLER_ENV=()
+          fi
+
+          node scripts/patch-wrangler.mjs --app app --env "$DEPLOY_ENV"
+          npx wrangler d1 migrations apply epic-startup-db --remote \
+            --config apps/app/wrangler.deploy.jsonc "${WRANGLER_ENV[@]}"
+
   trigger-cf-deploys:
     name: ☁️ Trigger Cloudflare Deploys
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, playwright, affected]
+    needs:
+      [lint, typecheck, vitest, playwright, affected, migrate-control-plane-d1]
     if: |
       always() &&
       github.event_name == 'push' &&
@@ -218,6 +268,7 @@ jobs:
       needs.typecheck.result == 'success' &&
       needs.vitest.result == 'success' &&
       needs.affected.result == 'success' &&
+      needs.migrate-control-plane-d1.result == 'success' &&
       (needs.playwright.result == 'success' || needs.playwright.result == 'skipped')
     steps:
       - name: ⬇️ Checkout repo

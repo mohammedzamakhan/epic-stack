@@ -2,8 +2,6 @@ import { randomUUID } from 'node:crypto'
 import { eq, and, desc, count } from 'drizzle-orm'
 import { ENV } from 'varlock/env'
 import { z } from 'zod'
-import { sendSms } from '@repo/sms'
-import { sendTenantEmail } from '../lib/tenant-email.ts'
 import {
 	getTenantDb,
 	customers,
@@ -19,8 +17,12 @@ import {
 	type CompleteRunPayload,
 	type EvaluateConditionPayload,
 } from '@repo/tenant-db'
+import { sendSms } from '@repo/sms'
 import { getNodeRegion } from '../lib/region.ts'
 import { syncEnvFromProcess } from '../lib/secrets.ts'
+import { sendTenantEmail } from '../lib/tenant-email.ts'
+
+export const JOURNEY_PROCESSING_LEASE_MS = 5 * 60 * 1000
 
 export type CreateJourneyInput = z.input<typeof createJourneySchema>
 export type UpdateJourneyInput = z.input<typeof updateJourneySchema>
@@ -95,7 +97,8 @@ export async function executeJourneyStep(
 		(e) =>
 			e.status === 'processing' &&
 			e.executedAt &&
-			Date.now() - new Date(e.executedAt).getTime() < 30_000,
+			Date.now() - new Date(e.executedAt).getTime() <
+				JOURNEY_PROCESSING_LEASE_MS,
 	)
 	if (processingExecution) {
 		return {

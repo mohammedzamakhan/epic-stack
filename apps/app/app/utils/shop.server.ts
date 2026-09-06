@@ -22,6 +22,7 @@ import {
 	normalizeShopProcessor,
 	SHOP_ORDER_METADATA_TYPE,
 	SHOP_PLATFORM_FEE_PERCENT,
+	ShopOrderNotFoundError,
 	shopProcessorToDbValue,
 	type ShopCommerce,
 	type ShopOrderUpsert,
@@ -166,15 +167,16 @@ export async function findPublishedShopOrganization(options: {
 
 export function getPublicShopProduct(organization: ShopOrganization) {
 	if (!isShopSnapshotAvailable(toShopSnapshot(organization))) return null
+	const name = organization.shopProductName?.trim()
+	const priceCents = organization.shopProductPriceCents
+	if (!name || priceCents === null) return null
 
-	const { platformFeeCents, orgPayoutCents } = calculateShopFees(
-		organization.shopProductPriceCents!,
-	)
+	const { platformFeeCents, orgPayoutCents } = calculateShopFees(priceCents)
 
 	return {
-		name: organization.shopProductName!,
+		name,
 		description: organization.shopProductDescription,
-		priceCents: organization.shopProductPriceCents!,
+		priceCents,
 		currency: 'usd',
 		processor: normalizeShopProcessor(organization.shopPaymentProvider),
 		platformFeePercent: SHOP_PLATFORM_FEE_PERCENT,
@@ -443,6 +445,10 @@ export async function createPublicShopCheckoutSession(options: {
 	if (!isShopSnapshotAvailable(snapshot)) {
 		throw new Response('Shop is not configured', { status: 404 })
 	}
+	const product = getPublicShopProduct(organization)
+	if (!product) {
+		throw new Response('Shop is not configured', { status: 404 })
+	}
 
 	const verifiedCustomer = await resolveVerifiedShopCustomer(
 		options.request,
@@ -462,7 +468,7 @@ export async function createPublicShopCheckoutSession(options: {
 	const metadata: Record<string, string> = {
 		type: SHOP_ORDER_METADATA_TYPE,
 		orgId: organization.id,
-		productName: organization.shopProductName!,
+		productName: product.name,
 	}
 
 	if (verifiedCustomer?.customerId) {
@@ -471,9 +477,9 @@ export async function createPublicShopCheckoutSession(options: {
 
 	const session = await getShopCommerce().createCheckout({
 		processor,
-		productName: organization.shopProductName!,
-		productDescription: organization.shopProductDescription,
-		amountCents: organization.shopProductPriceCents!,
+		productName: product.name,
+		productDescription: product.description,
+		amountCents: product.priceCents,
 		connectAccountId: organization.stripeConnectAccountId,
 		checkoutSubEntityId: organization.checkoutSubEntityId,
 		hostedProductId: organization.polarProductId,
@@ -517,6 +523,10 @@ export async function createPublicShopPaymentIntent(options: {
 	if (!isShopSnapshotAvailable(snapshot)) {
 		throw new Response('Shop is not configured', { status: 404 })
 	}
+	const product = getPublicShopProduct(organization)
+	if (!product || !organization.stripeConnectAccountId) {
+		throw new Response('Shop is not configured', { status: 404 })
+	}
 
 	const processor = normalizeShopProcessor(organization.shopPaymentProvider)
 	if (processor !== 'connect') {
@@ -535,7 +545,7 @@ export async function createPublicShopPaymentIntent(options: {
 	const metadata: Record<string, string> = {
 		type: SHOP_ORDER_METADATA_TYPE,
 		orgId: organization.id,
-		productName: organization.shopProductName!,
+		productName: product.name,
 	}
 
 	if (verifiedCustomer?.customerId) {
@@ -557,8 +567,8 @@ export async function createPublicShopPaymentIntent(options: {
 	}
 
 	const payment = await getShopCommerce().createInlineCardPayment({
-		connectAccountId: organization.stripeConnectAccountId!,
-		amountCents: organization.shopProductPriceCents!,
+		connectAccountId: organization.stripeConnectAccountId,
+		amountCents: product.priceCents,
 		currency: 'usd',
 		metadata,
 		platformCustomerId,
@@ -730,8 +740,11 @@ export async function getPublicShopOrderStatus(options: {
 			amountCents: result.amountCents,
 			currency: result.currency,
 		}
-	} catch {
-		throw new Response('Order not found', { status: 404 })
+	} catch (error) {
+		if (error instanceof ShopOrderNotFoundError) {
+			throw new Response('Order not found', { status: 404 })
+		}
+		throw error
 	}
 }
 
@@ -1046,5 +1059,7 @@ async function upsertShopOrder(
 		return row?.id ?? null
 	}
 
-	return null
+	throw new Error(
+		`Cannot persist ${order.processor} shop order without a processor identifier`,
+	)
 }

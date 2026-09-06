@@ -49,8 +49,19 @@ npx tsx src/migrate.ts
 To deploy migrations to production on Cloudflare D1:
 
 ```sh
-npm run db:migrate:deploy
+cd apps/app
+npx wrangler d1 migrations apply epic-startup-db --remote \
+  --config wrangler.deploy.jsonc
 ```
+
+On pushes to `main` and `dev`, GitHub Actions applies pending D1 migrations
+before it triggers the App or Admin Worker deployments. The migration job uses
+the App config because App and Admin share the same control-plane D1 database;
+if migration fails, Worker deployments are not triggered. The CI Cloudflare API
+token must have permission to edit that D1 database.
+
+`npm run db:migrate:deploy` is for the local LibSQL development database used by
+tests and local development; it does not migrate Cloudflare D1.
 
 ## Seeding
 

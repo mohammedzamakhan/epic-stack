@@ -302,32 +302,32 @@ export async function handleSubscriptionChange(subscription: {
 
 	if (status === 'active' || status === 'trialing') {
 		const productId = subscription.items[0]?.price.product
+		const previousSubscriptionId = organization.stripeSubscriptionId
 
-		// If this is a new active subscription and the organization has a different subscription ID,
-		// cancel the old one to prevent multiple active subscriptions
-		if (
-			organization.stripeSubscriptionId &&
-			organization.stripeSubscriptionId !== subscriptionId
-		) {
-			try {
-				await paymentProvider.cancelSubscription(
-					organization.stripeSubscriptionId,
-				)
-			} catch (error) {
-				console.error('Error cancelling old subscription:', error)
-			}
-		}
-
-		// Get product name
+		// Get the product before changing local subscription state. A provider
+		// failure must not leave a partially updated organization record.
 		const products = await paymentProvider.getProducts()
 		const product = products.find((p) => p.id === productId)
 
+		// Persist the new subscription before cancelling an old one. The Stripe
+		// cancellation is external to the database transaction, so ordering it
+		// first could leave the organization with no recorded active subscription.
 		await updateOrganizationSubscription(organization.id, {
 			stripeSubscriptionId: subscriptionId,
 			stripeProductId: productId || null,
 			planName: product?.name || null,
 			subscriptionStatus: status,
 		})
+
+		// If this is a new active subscription and the organization has a different subscription ID,
+		// cancel the old one to prevent multiple active subscriptions
+		if (previousSubscriptionId && previousSubscriptionId !== subscriptionId) {
+			try {
+				await paymentProvider.cancelSubscription(previousSubscriptionId)
+			} catch (error) {
+				console.error('Error cancelling old subscription:', error)
+			}
+		}
 	} else if (status === 'canceled' || status === 'unpaid') {
 		// Only update to null if this is the current subscription
 		if (organization.stripeSubscriptionId === subscriptionId) {

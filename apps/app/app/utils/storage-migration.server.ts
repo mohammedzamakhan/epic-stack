@@ -4,11 +4,13 @@ import {
 	db,
 	eq,
 	inArray,
+	isNotNull,
 	NoteComment,
 	NoteCommentImage,
 	OrganizationNote,
 	OrganizationNoteUpload,
 	OrganizationS3Config,
+	sql,
 	StorageMigration,
 } from '@repo/database'
 import { decrypt, encrypt, getSSOMasterKey } from '@repo/security'
@@ -312,6 +314,50 @@ export async function collectOrgMediaObjectKeys(
 ) {
 	const objects = await collectOrgMediaObjects(organizationId, options)
 	return objects.map((entry) => entry.objectKey)
+}
+
+/**
+ * Counts the distinct media keys without loading every key into the settings
+ * page process. The migration path still uses collectOrgMediaObjectKeys because
+ * it needs the actual key list.
+ */
+export async function countOrgMediaObjectKeys(organizationId: string) {
+	const uploadKeys = db
+		.select({ objectKey: OrganizationNoteUpload.objectKey })
+		.from(OrganizationNoteUpload)
+		.innerJoin(
+			OrganizationNote,
+			eq(OrganizationNoteUpload.noteId, OrganizationNote.id),
+		)
+		.where(eq(OrganizationNote.organizationId, organizationId))
+
+	const thumbnailKeys = db
+		.select({ objectKey: sql<string>`${OrganizationNoteUpload.thumbnailKey}` })
+		.from(OrganizationNoteUpload)
+		.innerJoin(
+			OrganizationNote,
+			eq(OrganizationNoteUpload.noteId, OrganizationNote.id),
+		)
+		.where(
+			and(
+				eq(OrganizationNote.organizationId, organizationId),
+				isNotNull(OrganizationNoteUpload.thumbnailKey),
+			),
+		)
+
+	const commentImageKeys = db
+		.select({ objectKey: NoteCommentImage.objectKey })
+		.from(NoteCommentImage)
+		.innerJoin(NoteComment, eq(NoteCommentImage.commentId, NoteComment.id))
+		.innerJoin(OrganizationNote, eq(NoteComment.noteId, OrganizationNote.id))
+		.where(eq(OrganizationNote.organizationId, organizationId))
+
+	const mediaKeys = uploadKeys.union(thumbnailKeys).union(commentImageKeys)
+	const [result] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(mediaKeys.as('media_keys'))
+
+	return Number(result?.count ?? 0)
 }
 
 export async function getActiveStorageMigration(organizationId: string) {

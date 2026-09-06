@@ -15,6 +15,7 @@ import {
 } from '@repo/tenant-db'
 import {
 	interpolateMergeTags,
+	JOURNEY_PROCESSING_LEASE_MS,
 	executeJourneyStep,
 	completeJourneyRun,
 	getJourneyDefinition,
@@ -871,7 +872,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 			expect(run?.triggerEvent).toBe('manual')
 		})
 
-		it('enforces 30s processing window idempotency on duplicate step execution requests', async () => {
+		it('keeps a slow provider delivery lease idempotent for five minutes', async () => {
 			const db = await getTenantDb(orgId)
 
 			const customerInsert = await db
@@ -892,8 +893,11 @@ describe('Journey Service & Regional Message Dispatching', () => {
 			})
 			const runId = testRes.runId!
 
-			// Insert a step execution that is currently processing (started 5 seconds ago)
-			const recentProcessingTime = new Date(Date.now() - 5_000)
+			// A provider dispatch started nearly five minutes ago must not be retried
+			// while the first request may still complete.
+			const recentProcessingTime = new Date(
+				Date.now() - JOURNEY_PROCESSING_LEASE_MS + 1_000,
+			)
 			const existingExecInsert = await db
 				.insert(journeyStepExecutions)
 				.values({
@@ -906,7 +910,7 @@ describe('Journey Service & Regional Message Dispatching', () => {
 				.returning()
 			const existingExec = existingExecInsert[0]!
 
-			// Attempt duplicate execution during the 30s window
+			// Attempt duplicate execution during the processing lease.
 			const duplicateRes = await executeJourneyStep(orgId, {
 				runId,
 				nodeId: 'email-1',

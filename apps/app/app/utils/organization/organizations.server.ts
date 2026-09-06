@@ -6,6 +6,7 @@ import {
 	db,
 	desc,
 	eq,
+	inArray,
 	Organization,
 	OrganizationImage,
 	OrganizationRole,
@@ -84,11 +85,24 @@ export async function getUserOrganizations(
 			roleId: OrgRoleTable.id,
 			roleName: OrgRoleTable.name,
 			roleLevel: OrgRoleTable.level,
+			organizationName: Organization.name,
+			organizationSlug: Organization.slug,
+			imageId: OrganizationImage.id,
+			imageAltText: OrganizationImage.altText,
+			imageObjectKey: OrganizationImage.objectKey,
 		})
 		.from(UserOrganization)
 		.innerJoin(
 			OrgRoleTable,
 			eq(UserOrganization.organizationRoleId, OrgRoleTable.id),
+		)
+		.innerJoin(
+			Organization,
+			eq(UserOrganization.organizationId, Organization.id),
+		)
+		.leftJoin(
+			OrganizationImage,
+			eq(OrganizationImage.organizationId, Organization.id),
 		)
 		.where(
 			and(
@@ -96,31 +110,57 @@ export async function getUserOrganizations(
 				eq(UserOrganization.active, true),
 			),
 		)
-	const result: UserOrganizationWithRole[] = []
-	for (const membership of memberships) {
-		const organization = await getOrganizationSummary(membership.organizationId)
-		if (!organization) continue
+	const permissionsByRole = new Map<
+		string,
+		Array<{ action: string; entity: string; access: string }>
+	>()
+	if (includePermissions && memberships.length > 0) {
+		const permissions = await db
+			.select({
+				roleId: _OrganizationPermissionToRole.A,
+				action: Permission.action,
+				entity: Permission.entity,
+				access: Permission.access,
+			})
+			.from(_OrganizationPermissionToRole)
+			.innerJoin(Permission, eq(_OrganizationPermissionToRole.B, Permission.id))
+			.where(
+				and(
+					inArray(
+						_OrganizationPermissionToRole.A,
+						memberships.map((membership) => membership.roleId),
+					),
+					eq(Permission.context, 'organization'),
+				),
+			)
+		for (const permission of permissions) {
+			const rolePermissions = permissionsByRole.get(permission.roleId) ?? []
+			rolePermissions.push({
+				action: permission.action,
+				entity: permission.entity,
+				access: permission.access,
+			})
+			permissionsByRole.set(permission.roleId, rolePermissions)
+		}
+	}
+
+	return memberships.map((membership) => {
 		const permissions = includePermissions
-			? await db
-					.select({
-						action: Permission.action,
-						entity: Permission.entity,
-						access: Permission.access,
-					})
-					.from(_OrganizationPermissionToRole)
-					.innerJoin(
-						Permission,
-						eq(_OrganizationPermissionToRole.B, Permission.id),
-					)
-					.where(
-						and(
-							eq(_OrganizationPermissionToRole.A, membership.roleId),
-							eq(Permission.context, 'organization'),
-						),
-					)
+			? (permissionsByRole.get(membership.roleId) ?? [])
 			: undefined
-		result.push({
-			organization,
+		return {
+			organization: {
+				id: membership.organizationId,
+				name: membership.organizationName,
+				slug: membership.organizationSlug,
+				image: membership.imageId
+					? {
+							id: membership.imageId,
+							altText: membership.imageAltText,
+							objectKey: membership.imageObjectKey ?? '',
+						}
+					: null,
+			},
 			organizationRole: {
 				id: membership.roleId,
 				name: membership.roleName,
@@ -128,9 +168,8 @@ export async function getUserOrganizations(
 				...(permissions ? { permissions } : {}),
 			},
 			isDefault: membership.isDefault,
-		})
-	}
-	return result
+		}
+	})
 }
 
 export async function getUserDefaultOrganization(userId: User['id']) {
@@ -208,26 +247,41 @@ export async function setUserDefaultOrganization(
 export async function getUserOrganizationsWithSlugHandling(
 	userId: string,
 	orgSlug: string | undefined,
+	organizations?: UserOrganizationWithRole[],
 ) {
-	const organizations = await getUserOrganizations(userId, true)
+	const userOrganizations =
+		organizations ?? (await getUserOrganizations(userId, true))
 	const defaultOrg = await getUserDefaultOrganization(userId)
-	const currentOrganization = defaultOrg || organizations[0]
+	const currentOrganization = defaultOrg || userOrganizations[0]
 	if (
 		currentOrganization &&
 		orgSlug &&
 		currentOrganization.organization.slug !== orgSlug
 	) {
-		const selected = organizations.find(
+		const selected = userOrganizations.find(
 			(org) => org.organization.slug === orgSlug,
 		)
 		if (!selected) throw new Response('Organization not found', { status: 404 })
 		await setUserDefaultOrganization(userId, selected.organization.id)
 		return {
-			organizations,
-			currentOrganization: await getUserDefaultOrganization(userId),
+			organizations: userOrganizations.map((organization) => ({
+				...organization,
+				isDefault: organization.organization.id === selected.organization.id,
+			})),
+			currentOrganization: {
+				...selected,
+				isDefault: true,
+			},
 		}
 	}
-	return { organizations, currentOrganization }
+	return {
+		organizations: userOrganizations.map((organization) => ({
+			...organization,
+			isDefault:
+				currentOrganization?.organization.id === organization.organization.id,
+		})),
+		currentOrganization,
+	}
 }
 
 export async function createOrganization({

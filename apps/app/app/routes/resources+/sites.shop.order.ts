@@ -53,6 +53,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		})
 	} catch (error) {
 		if (error instanceof Response) throw error
-		throw new Response('Not Found', { status: 404 })
+		console.error('Unable to retrieve public shop order status:', error)
+		throw new Response('Order status is temporarily unavailable', {
+			status: 503,
+		})
 	}
 }
