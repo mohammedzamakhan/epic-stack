@@ -8,13 +8,21 @@ import {
 const CLOUDFLARE_INSIGHTS_SCRIPT = 'https://static.cloudflareinsights.com'
 const CLOUDFLARE_INSIGHTS_CONNECT = 'https://cloudflareinsights.com'
 
+// Google Analytics / Google Tag Manager (loaded off-thread by Partytown)
+const GA_SCRIPT_SRC = 'https://www.googletagmanager.com'
+const GA_CONNECT_SRC = [
+	'https://www.google-analytics.com',
+	'https://analytics.google.com',
+	'https://www.googletagmanager.com',
+]
+
 export function sitesScriptSrc(isDev: boolean) {
 	const evalSrc = isDev ? " 'unsafe-eval'" : ''
-	return `script-src 'self' 'unsafe-inline'${evalSrc} ${CLOUDFLARE_INSIGHTS_SCRIPT}`
+	return `script-src 'self' 'unsafe-inline'${evalSrc} ${CLOUDFLARE_INSIGHTS_SCRIPT} ${GA_SCRIPT_SRC}`
 }
 
 export function sitesConnectSrc(origins: string[]) {
-	return ['connect-src', "'self'", ...origins, CLOUDFLARE_INSIGHTS_CONNECT]
+	return ['connect-src', "'self'", ...origins, CLOUDFLARE_INSIGHTS_CONNECT, ...GA_CONNECT_SRC]
 		.filter(Boolean)
 		.join(' ')
 }

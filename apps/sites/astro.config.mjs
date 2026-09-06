@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import cloudflare from '@astrojs/cloudflare'
+import partytown from '@astrojs/partytown'
 import { lingui } from '@lingui/vite-plugin'
 import { SITE_FONTS } from '@repo/common/site-fonts'
 import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
@@ -19,6 +20,11 @@ export default defineConfig({
 	},
 	integrations: [
 		varlockAstroIntegration(),
+		partytown({
+			config: {
+				forward: ['dataLayer.push', 'gtag'],
+			},
+		}),
 		{
 			name: 'fix-varlock-entry-detection',
 			hooks: {

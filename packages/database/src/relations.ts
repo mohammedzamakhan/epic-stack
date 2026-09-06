@@ -57,6 +57,8 @@ import {
 	OrganizationSiteAsset,
 	WebsitePage,
 	WebsitePageSection,
+	WebsiteRedirect,
+	WebsiteNotFoundLog,
 	NotificationPreference,
 	Notification,
 	SavedReport,
@@ -243,6 +245,8 @@ export const OrganizationRelations = relations(Organization, ({ many }) => ({
 	announcements: many(OrganizationAnnouncement),
 	siteAssets: many(OrganizationSiteAsset),
 	createdWebsitePages: many(WebsitePage),
+	websiteRedirects: many(WebsiteRedirect),
+	websiteNotFoundLogs: many(WebsiteNotFoundLog),
 	notificationPreferences: many(NotificationPreference),
 	notifications: many(Notification),
 	savedReports: many(SavedReport),
@@ -820,3 +824,23 @@ export const SavedReportRelations = relations(SavedReport, ({ one }) => ({
 		references: [User.id],
 	}),
 }))
+
+export const WebsiteRedirectRelations = relations(
+	WebsiteRedirect,
+	({ one }) => ({
+		organization: one(Organization, {
+			fields: [WebsiteRedirect.organizationId],
+			references: [Organization.id],
+		}),
+	}),
+)
+
+export const WebsiteNotFoundLogRelations = relations(
+	WebsiteNotFoundLog,
+	({ one }) => ({
+		organization: one(Organization, {
+			fields: [WebsiteNotFoundLog.organizationId],
+			references: [Organization.id],
+		}),
+	}),
+)

@@ -1,6 +1,7 @@
 ---
 import { buildCustomSiteFontFaceCss } from '@repo/common/site-fonts'
 import { brand } from '@repo/config/brand'
+import GoogleAnalytics from '~/components/GoogleAnalytics.astro'
 import { resolveMediaUrl } from '~/lib/media'
 import { type PublicSiteTheme } from '~/lib/org'
 import '../styles/tailwind.css'
@@ -26,6 +27,7 @@ interface Props {
 	orgSlug?: string | null
 	customHost?: string | null
 	defaultLocale?: string
+	googleAnalyticsId?: string | null
 }
 
 const {
@@ -44,6 +46,7 @@ const {
 	customHost,
 	defaultLocale = 'en',
 	alternateLinks = [],
+	googleAnalyticsId,
 } = Astro.props
 const themeMode = theme?.mode ?? 'system'
 const themeCss = theme?.css ?? ''
@@ -161,6 +164,7 @@ const htmlClass =
 			}
 		</style>
 		<slot name="head" />
+		<GoogleAnalytics measurementId={googleAnalyticsId} />
 		{/* Inject after bundled CSS so org theme tokens win over any leftover defaults. */}
 		{themeCss ? (
 			<style is:inline set:html={themeCss} id="org-site-theme" />
