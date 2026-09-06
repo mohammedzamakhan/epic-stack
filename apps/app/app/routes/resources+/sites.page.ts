@@ -8,6 +8,11 @@ import {
 	PUBLIC_SITE_RATE_LIMIT,
 } from '#app/utils/rate-limit.server.ts'
 import {
+	getCachedSiteData,
+	getSiteKvKey,
+	setCachedSiteData,
+} from '#app/utils/sites/kv-cache.server.ts'
+import {
 	findPublishedSitePage,
 	toPublicPagePayload,
 } from '#app/utils/sites/public-org.server.ts'
@@ -21,8 +26,9 @@ import {
  */
 export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
-	const slug = url.searchParams.get('slug')
-	const host = url.searchParams.get('host')
+	const slug = url.searchParams.get('slug')?.trim().toLowerCase() || null
+	const host =
+		url.searchParams.get('host')?.trim().toLowerCase().split(':')[0] || null
 	const pageSlug = url.searchParams.get('page')
 	const wantHome = url.searchParams.get('home') === 'true'
 	const lng = url.searchParams.get('lng')
@@ -41,6 +47,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		return createRateLimitResponse(rateLimitCheck.resetAt)
 	}
 
+	const isPreview = url.searchParams.get('preview') === 'true'
+	const acceptLocales = getClientLocales(request)
+
+	// We will generate the cache key after getting orgId
+
 	// First find the organization to ensure it's published and active, and to get its ID
 	let orgId = null
 	let defaultLocale = 'en'
@@ -57,7 +68,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			.from(Organization)
 			.where(
 				and(
-					eq(Organization.slug, slug.trim().toLowerCase()),
+					eq(Organization.slug, slug),
 					eq(Organization.active, true),
 					eq(Organization.sitePublished, true),
 				),
@@ -78,10 +89,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			.from(Organization)
 			.where(
 				and(
-					eq(
-						Organization.customDomain,
-						host.trim().toLowerCase().split(':')[0]!,
-					),
+					eq(Organization.customDomain, host),
 					eq(Organization.active, true),
 					eq(Organization.sitePublished, true),
 					inArray(Organization.customDomainStatus, ['active', 'pending']),
@@ -98,7 +106,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	const isPreview = url.searchParams.get('preview') === 'true'
+	const queryHash = `${pageSlug || ''}-${wantHome}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	let cacheKey: string | null = null
+
+	if (!isPreview) {
+		cacheKey = getSiteKvKey('page', orgId, queryHash)
+		const cached = await getCachedSiteData(cacheKey)
+		if (cached) {
+			return Response.json(cached, {
+				headers: {
+					'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+					Vary: 'Accept-Language',
+				},
+			})
+		}
+	}
 
 	// Then fetch the page
 	const page = await findPublishedSitePage(orgId, pageSlug, {
@@ -110,7 +132,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	const acceptLocales = getClientLocales(request)
 	const preferredLocales = lng
 		? [
 				lng,
@@ -129,16 +150,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			? preferredLocales
 			: defaultLocale
 
-	return Response.json(
-		toPublicPagePayload(page, requestedLocale, defaultLocale, {
-			headerConfig,
-			footerConfig,
-		}),
-		{
-			headers: {
-				'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
-				Vary: 'Accept-Language',
-			},
+	const payload = toPublicPagePayload(page, requestedLocale, defaultLocale, {
+		headerConfig,
+		footerConfig,
+	})
+
+	if (!isPreview && cacheKey) {
+		await setCachedSiteData(cacheKey, payload)
+	}
+
+	return Response.json(payload, {
+		headers: {
+			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+			Vary: 'Accept-Language',
 		},
-	)
+	})
 }

@@ -7,6 +7,11 @@ import {
 	PUBLIC_SITE_RATE_LIMIT,
 } from '#app/utils/rate-limit.server.ts'
 import {
+	getCachedSiteData,
+	getSiteKvKey,
+	setCachedSiteData,
+} from '#app/utils/sites/kv-cache.server.ts'
+import {
 	findPublishedSiteOrganization,
 	toPublicSitePayload,
 } from '#app/utils/sites/public-org.server.ts'
@@ -20,8 +25,9 @@ import {
  */
 export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
-	const slug = url.searchParams.get('slug')
-	const host = url.searchParams.get('host')
+	const slug = url.searchParams.get('slug')?.trim().toLowerCase() || null
+	const host =
+		url.searchParams.get('host')?.trim().toLowerCase().split(':')[0] || null
 	const lng = url.searchParams.get('lng')
 
 	if (!slug && !host) {
@@ -56,7 +62,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			]
 		: acceptLocales
 
-	return Response.json(toPublicSitePayload(organization, { preferredLocale }), {
+	// Cache in KV
+	const queryHash = `${slug || ''}-${host || ''}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	const cacheKey = getSiteKvKey('org', organization.id, queryHash)
+
+	let payload = await getCachedSiteData(cacheKey)
+	if (!payload) {
+		payload = toPublicSitePayload(organization, { preferredLocale })
+		await setCachedSiteData(cacheKey, payload)
+	}
+
+	return Response.json(payload, {
 		headers: {
 			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
 			Vary: 'Accept-Language',

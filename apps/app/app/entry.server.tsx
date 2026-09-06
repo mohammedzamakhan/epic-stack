@@ -57,7 +57,6 @@ function applySecurityHeaders(responseHeaders: Headers) {
 function applyRuntimeHeaders(responseHeaders: Headers, request?: Request) {
 	if (isCloudflareWorkerRuntime()) {
 		responseHeaders.set('cf-worker', 'epic-startup-app')
-		// Cloudflare Workers deployment info
 		const cfColo = (request as any)?.cf?.colo
 		const datacenter =
 			cfColo ||

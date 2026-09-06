@@ -12,6 +12,7 @@ export function getGhVariables(config) {
 	return [
 		['APP_D1_DATABASE_ID', prod.app.d1_database_id],
 		['APP_KV_NAMESPACE_ID', prod.app.kv_namespace_id],
+		['APP_SITES_DATA_KV_ID', prod.app.sites_data_kv_id],
 		['APP_WORKER_NAME', prod.app.worker_name],
 		['ADMIN_D1_DATABASE_ID', prod.admin.d1_database_id],
 		['ADMIN_KV_NAMESPACE_ID', prod.admin.kv_namespace_id],
@@ -46,6 +47,7 @@ export function getGhVariables(config) {
 		['DOCS_URL_STAGING', urls.docs_url_staging],
 		['APP_D1_DATABASE_ID_STAGING', staging.app.d1_database_id],
 		['APP_KV_NAMESPACE_ID_STAGING', staging.app.kv_namespace_id],
+		['APP_SITES_DATA_KV_ID_STAGING', staging.app.sites_data_kv_id],
 		['APP_WORKER_NAME_STAGING', staging.app.worker_name],
 		['ADMIN_D1_DATABASE_ID_STAGING', staging.admin.d1_database_id],
 		['ADMIN_KV_NAMESPACE_ID_STAGING', staging.admin.kv_namespace_id],

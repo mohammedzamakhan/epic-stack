@@ -73,12 +73,8 @@ function log(message, color = 'reset') {
 
 /** Strip values that look like API tokens or secrets from a string. */
 function redactSecrets(message) {
-	return String(message).replace(
-		/[A-Za-z0-9_-]{32,}/g,
-		(match) =>
-			/^[0-9a-f]{8}-/.test(match)
-				? match
-				: `${match.slice(0, 4)}…[REDACTED]`,
+	return String(message).replace(/[A-Za-z0-9_-]{32,}/g, (match) =>
+		/^[0-9a-f]{8}-/.test(match) ? match : `${match.slice(0, 4)}…[REDACTED]`,
 	)
 }
 
@@ -405,7 +401,10 @@ function runWrangler(args, cwd, { env, input } = {}) {
 		encoding: 'utf8',
 		input,
 		env: env ? { ...process.env, ...env } : process.env,
-		stdio: input !== undefined ? ['pipe', 'pipe', 'pipe'] : ['inherit', 'pipe', 'pipe'],
+		stdio:
+			input !== undefined
+				? ['pipe', 'pipe', 'pipe']
+				: ['inherit', 'pipe', 'pipe'],
 	})
 	if (result.status !== 0) {
 		throw new Error(
@@ -1343,6 +1342,15 @@ async function main() {
 			config.bindings.production.admin.kv_namespace_id =
 				config.bindings.production.app.kv_namespace_id
 
+			const sitesDataKv = runWrangler(
+				['kv', 'namespace', 'create', CF_KV.sitesData],
+				join(rootDir, 'apps/app'),
+			)
+			config.bindings.production.app.sites_data_kv_id =
+				parseKvCreateOutput(sitesDataKv)
+			config.bindings.production.sites.sites_data_kv_id =
+				config.bindings.production.app.sites_data_kv_id
+
 			const stagingD1 = runWrangler(
 				['d1', 'create', CF_D1.appStaging],
 				join(rootDir, 'apps/app'),
@@ -1360,6 +1368,15 @@ async function main() {
 				parseKvCreateOutput(stagingKv)
 			config.bindings.staging.admin.kv_namespace_id =
 				config.bindings.staging.app.kv_namespace_id
+
+			const stagingSitesDataKv = runWrangler(
+				['kv', 'namespace', 'create', CF_KV.sitesDataStaging],
+				join(rootDir, 'apps/app'),
+			)
+			config.bindings.staging.app.sites_data_kv_id =
+				parseKvCreateOutput(stagingSitesDataKv)
+			config.bindings.staging.sites.sites_data_kv_id =
+				config.bindings.staging.app.sites_data_kv_id
 
 			const webD1 = runWrangler(
 				['d1', 'create', CF_D1.web],

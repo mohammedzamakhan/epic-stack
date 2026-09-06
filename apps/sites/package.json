@@ -14,7 +14,8 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "astro check",
     "test": "vitest run",
-    "lingui:extract": "lingui extract --clean"
+    "lingui:extract": "lingui extract --clean",
+    "dummy": "echo"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.7",

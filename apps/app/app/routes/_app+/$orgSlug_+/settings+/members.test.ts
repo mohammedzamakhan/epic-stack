@@ -8,6 +8,7 @@ import {
 	_OrganizationPermissionToRole,
 } from '@repo/database'
 import { describe, expect, it, vi } from 'vitest'
+import type * as invitation from '#app/utils/organization/invitation.server.ts'
 import {
 	createAuthenticatedRequest,
 	createTestOrganization,
@@ -16,7 +17,6 @@ import {
 	getResponseStatus,
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
-import type * as invitation from '#app/utils/organization/invitation.server.ts'
 import { action, loader } from './members.tsx'
 
 vi.mock('@repo/common/onboarding', () => ({

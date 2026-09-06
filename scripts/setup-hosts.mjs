@@ -289,10 +289,7 @@ async function main() {
 			customDomains,
 		)
 	} catch (error) {
-		log(
-			`⚠️  Could not remove legacy hosts entries: ${error.message}`,
-			'yellow',
-		)
+		log(`⚠️  Could not remove legacy hosts entries: ${error.message}`, 'yellow')
 	}
 
 	log(

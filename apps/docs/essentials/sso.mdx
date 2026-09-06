@@ -43,18 +43,23 @@ sequenceDiagram
 ## Key Features
 
 <CardGroup cols={2}>
-  <Card title="OIDC Auto-Discovery" icon="compass">
-    Automatically discovers authorization, token, userinfo, revocation, and JWKS endpoints from `/.well-known/openid-configuration`.
-  </Card>
-  <Card title="PKCE & Cryptographic Security" icon="shield-check">
-    Enforces PKCE (RFC 7636) with SHA-256 code challenge method, secure nonce cookies against replay attacks, and AES-256-GCM encryption for stored secrets.
-  </Card>
-  <Card title="Just-in-Time (JIT) Provisioning" icon="user-plus">
-    Automatically provisions new users upon successful SSO authentication, or links existing users by email with customizable default roles.
-  </Card>
-  <Card title="Flexible Attribute Mapping" icon="arrows-split-up-and-left">
-    Map standard or custom IdP claims (`sub`, `email`, `name`, `preferred_username`, `groups`) to Epic Stack profile fields.
-  </Card>
+	<Card title="OIDC Auto-Discovery" icon="compass">
+		Automatically discovers authorization, token, userinfo, revocation, and JWKS
+		endpoints from `/.well-known/openid-configuration`.
+	</Card>
+	<Card title="PKCE & Cryptographic Security" icon="shield-check">
+		Enforces PKCE (RFC 7636) with SHA-256 code challenge method, secure nonce
+		cookies against replay attacks, and AES-256-GCM encryption for stored
+		secrets.
+	</Card>
+	<Card title="Just-in-Time (JIT) Provisioning" icon="user-plus">
+		Automatically provisions new users upon successful SSO authentication, or
+		links existing users by email with customizable default roles.
+	</Card>
+	<Card title="Flexible Attribute Mapping" icon="arrows-split-up-and-left">
+		Map standard or custom IdP claims (`sub`, `email`, `name`,
+		`preferred_username`, `groups`) to Epic Stack profile fields.
+	</Card>
 </CardGroup>
 
 ---
@@ -124,12 +129,12 @@ Admins can configure SSO for any organization via the Admin Portal at:
 
 By default, Epic Stack automatically extracts standard OIDC claims:
 
-| Field | Standard OIDC Claim | Description |
-| :--- | :--- | :--- |
-| **Email** | `email` | User's primary email address (required) |
-| **Name** | `name` (or `given_name` + `family_name`) | User's full display name |
-| **Username** | `preferred_username` or `sub` | Unique username / handle |
-| **Email Verified** | `email_verified` | Verification status boolean |
+| Field              | Standard OIDC Claim                      | Description                             |
+| :----------------- | :--------------------------------------- | :-------------------------------------- |
+| **Email**          | `email`                                  | User's primary email address (required) |
+| **Name**           | `name` (or `given_name` + `family_name`) | User's full display name                |
+| **Username**       | `preferred_username` or `sub`            | Unique username / handle                |
+| **Email Verified** | `email_verified`                         | Verification status boolean             |
 
 You can customize claim keys using the **Attribute Mapping** JSON field in the SSO configuration form if your provider uses non-standard claim names.
 

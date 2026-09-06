@@ -20,10 +20,10 @@ module.exports = {
 		},
 		assert: {
 			assertions: {
-				'categories:performance': ['error', { minScore: 0.90 }],
-				'categories:accessibility': ['error', { minScore: 0.90 }],
-				'categories:best-practices': ['error', { minScore: 0.90 }],
-				'categories:seo': ['error', { minScore: 0.90 }],
+				'categories:performance': ['error', { minScore: 0.9 }],
+				'categories:accessibility': ['error', { minScore: 0.9 }],
+				'categories:best-practices': ['error', { minScore: 0.9 }],
+				'categories:seo': ['error', { minScore: 0.9 }],
 
 				'first-contentful-paint': ['warn', { maxNumericValue: 2000 }],
 				'largest-contentful-paint': ['warn', { maxNumericValue: 3000 }],
