@@ -50,27 +50,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const isPreview = url.searchParams.get('preview') === 'true'
 	const acceptLocales = getClientLocales(request)
 
-	// Cache in KV for non-preview requests
-	const queryHash = `${slug || ''}-${host || ''}-${pageSlug || ''}-${wantHome}-${lng || ''}-${JSON.stringify(acceptLocales)}`
-	let cacheKey: string | null = null
-
-	// We can't generate the KV key yet because we don't have orgId until after we query it.
-	// But actually, we can use the URL params as part of the queryHash and we'll use a placeholder orgId
-	// for the cache key, or we can just fetch orgId first. Let's fetch orgId from DB or KV.
-	// To minimize DB queries, we should use the slug or host as the ID for the cache key.
-	const idForCache = slug || host || 'unknown'
-	if (!isPreview) {
-		cacheKey = getSiteKvKey('page', idForCache, queryHash)
-		const cached = await getCachedSiteData(cacheKey)
-		if (cached) {
-			return Response.json(cached, {
-				headers: {
-					'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
-					Vary: 'Accept-Language',
-				},
-			})
-		}
-	}
+	// We will generate the cache key after getting orgId
 
 	// First find the organization to ensure it's published and active, and to get its ID
 	let orgId = null
@@ -124,6 +104,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	if (!orgId) {
 		throw new Response('Not Found', { status: 404 })
+	}
+
+	const queryHash = `${pageSlug || ''}-${wantHome}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	let cacheKey: string | null = null
+
+	if (!isPreview) {
+		cacheKey = getSiteKvKey('page', orgId, queryHash)
+		const cached = await getCachedSiteData(cacheKey)
+		if (cached) {
+			return Response.json(cached, {
+				headers: {
+					'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+					Vary: 'Accept-Language',
+				},
+			})
+		}
 	}
 
 	// Then fetch the page

@@ -1,3 +1,8 @@
+import {
+	type KVNamespace,
+	type KVNamespaceListResult,
+} from '@cloudflare/workers-types'
+
 export function getSiteKvKey(
 	type: 'org' | 'page',
 	id: string,
@@ -11,7 +16,8 @@ export async function purgeOrganizationSiteCache(
 	slug?: string,
 	host?: string | null,
 ) {
-	const SITES_DATA_KV = process.env.SITES_DATA_KV as any | undefined
+	const SITES_DATA_KV = process.env.SITES_DATA_KV as unknown as
+		KVNamespace | undefined
 	if (!SITES_DATA_KV) return
 
 	const prefixes = [`org:${orgId}:`]
@@ -22,15 +28,21 @@ export async function purgeOrganizationSiteCache(
 		for (const prefix of prefixes) {
 			let cursor: string | undefined = undefined
 			do {
-				const keysPage: any = await SITES_DATA_KV.list({ prefix, cursor })
-				for (const key of keysPage.keys) {
-					await SITES_DATA_KV.delete(key.name)
-				}
-				cursor = keysPage.list_complete ? undefined : keysPage.cursor
+				const keysPage: KVNamespaceListResult<unknown, string> =
+					await SITES_DATA_KV.list({ prefix, cursor })
+				await Promise.allSettled(
+					keysPage.keys.map((key) =>
+						SITES_DATA_KV.delete(key.name).catch((e) => {
+							console.error(`Failed to delete KV key ${key.name}`, e)
+						}),
+					),
+				)
+				cursor = 'cursor' in keysPage ? keysPage.cursor : undefined
 			} while (cursor)
 		}
 	} catch (e) {
 		console.error('Failed to purge site KV cache', e)
+		throw e
 	}
 }
 

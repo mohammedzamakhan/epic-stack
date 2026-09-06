@@ -889,6 +889,8 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 					`SITES_DATA_KV id ← SITES_DATA_KV_ID${suffix}`,
 				)
 			}
+		} else if (requireBindings) {
+			missing.push(`SITES_DATA_KV_ID${suffix}`)
 		}
 	}
 
