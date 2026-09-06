@@ -172,6 +172,67 @@ describe('Website Redirects Route', () => {
 		expect(data.errors.toPath[0]).toContain('Destination cannot be the same')
 	})
 
+	it('action create-redirect prevents indirect circular redirect loop', async () => {
+		// First select: duplicate check returns empty
+		// Second select: detectRedirectCycle returns existing redirect /b -> /a
+		mockSelectResults(
+			[],
+			[{ id: 'r1', fromPath: '/b', toPath: '/a' }],
+		)
+
+		const formData = new FormData()
+		formData.set('intent', 'create-redirect')
+		formData.set('fromPath', '/a')
+		formData.set('toPath', '/b')
+		formData.set('statusCode', '301')
+
+		const response = await action({
+			request: new Request('http://localhost/test-org/website/redirects', {
+				method: 'POST',
+				body: formData,
+			}),
+			params: { orgSlug: 'test-org' },
+			context: {},
+		} as any)
+
+		expect(response.status).toBe(400)
+		const data = (await response.json()) as any
+		expect(data.errors.toPath[0]).toContain('circular loop')
+	})
+
+	it('action update-redirect prevents indirect circular redirect loop', async () => {
+		// First select: duplicate check (excluding self) returns empty
+		// Second select: detectRedirectCycle returns existing redirect /b -> /c, /c -> /a
+		mockSelectResults(
+			[],
+			[
+				{ id: 'r1', fromPath: '/a', toPath: '/x' },
+				{ id: 'r2', fromPath: '/b', toPath: '/c' },
+				{ id: 'r3', fromPath: '/c', toPath: '/a' },
+			],
+		)
+
+		const formData = new FormData()
+		formData.set('intent', 'update-redirect')
+		formData.set('id', 'r1')
+		formData.set('fromPath', '/a')
+		formData.set('toPath', '/b')
+		formData.set('statusCode', '301')
+
+		const response = await action({
+			request: new Request('http://localhost/test-org/website/redirects', {
+				method: 'POST',
+				body: formData,
+			}),
+			params: { orgSlug: 'test-org' },
+			context: {},
+		} as any)
+
+		expect(response.status).toBe(400)
+		const data = (await response.json()) as any
+		expect(data.errors.toPath[0]).toContain('circular loop')
+	})
+
 	it('action create-redirect rejects scheme-relative destinations', async () => {
 		const formData = new FormData()
 		formData.set('intent', 'create-redirect')

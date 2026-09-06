@@ -29,11 +29,9 @@ export function PostHogAnalytics({
 		const previousUserId = window.sessionStorage.getItem(IDENTIFIED_USER_KEY)
 
 		if (!userId) {
-			if (previousUserId) {
-				posthog.reset()
-				window.sessionStorage.removeItem(IDENTIFIED_USER_KEY)
-				window.sessionStorage.removeItem(IDENTIFIED_ORGANIZATION_KEY)
-			}
+			posthog.reset()
+			window.sessionStorage.removeItem(IDENTIFIED_USER_KEY)
+			window.sessionStorage.removeItem(IDENTIFIED_ORGANIZATION_KEY)
 			if (wasOptedOut) posthog.capture('$pageview')
 			return
 		}
