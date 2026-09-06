@@ -106,7 +106,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	const queryHash = `${pageSlug || ''}-${wantHome}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	const localeKey = Array.isArray(acceptLocales)
+		? acceptLocales.join(',')
+		: (acceptLocales ?? '')
+	const queryHash = `${pageSlug || ''}-${wantHome}-${lng || ''}-${localeKey}`
 	let cacheKey: string | null = null
 
 	if (!isPreview) {

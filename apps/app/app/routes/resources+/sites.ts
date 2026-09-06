@@ -63,7 +63,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		: acceptLocales
 
 	// Cache in KV
-	const queryHash = `${slug || ''}-${host || ''}-${lng || ''}-${JSON.stringify(acceptLocales)}`
+	const localeKey = Array.isArray(acceptLocales)
+		? acceptLocales.join(',')
+		: (acceptLocales ?? '')
+	const queryHash = `${slug || ''}-${host || ''}-${lng || ''}-${localeKey}`
 	const cacheKey = getSiteKvKey('org', organization.id, queryHash)
 
 	let payload = await getCachedSiteData(cacheKey)
