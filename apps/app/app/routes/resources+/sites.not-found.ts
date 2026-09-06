@@ -90,31 +90,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	const now = new Date()
 
-	// Check if already logged
-	const [existing] = await db
-		.select({ id: WebsiteNotFoundLog.id })
-		.from(WebsiteNotFoundLog)
-		.where(
-			and(
-				eq(WebsiteNotFoundLog.organizationId, organization.id),
-				eq(WebsiteNotFoundLog.path, normalizedPath),
-			),
-		)
-		.limit(1)
-
-	if (existing) {
-		await db
-			.update(WebsiteNotFoundLog)
-			.set({
-				hitCount: sql`${WebsiteNotFoundLog.hitCount} + 1`,
-				lastHitAt: now,
-				...(referrer ? { lastReferrer: referrer } : {}),
-				...(userAgent ? { lastUserAgent: userAgent } : {}),
-				updatedAt: now,
-			})
-			.where(eq(WebsiteNotFoundLog.id, existing.id))
-	} else {
-		await db.insert(WebsiteNotFoundLog).values({
+	// Atomic upsert: increment hitCount and update metadata on conflict
+	await db
+		.insert(WebsiteNotFoundLog)
+		.values({
 			organizationId: organization.id,
 			path: normalizedPath,
 			hitCount: 1,
@@ -125,7 +104,19 @@ export async function action({ request }: ActionFunctionArgs) {
 			createdAt: now,
 			updatedAt: now,
 		})
-	}
+		.onConflictDoUpdate({
+			target: [
+				WebsiteNotFoundLog.organizationId,
+				WebsiteNotFoundLog.path,
+			],
+			set: {
+				hitCount: sql`${WebsiteNotFoundLog.hitCount} + 1`,
+				lastHitAt: now,
+				...(referrer ? { lastReferrer: referrer } : {}),
+				...(userAgent ? { lastUserAgent: userAgent } : {}),
+				updatedAt: now,
+			},
+		})
 
 	return Response.json({ ok: true })
 }

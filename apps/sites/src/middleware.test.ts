@@ -142,4 +142,32 @@ describe('Sites middleware onRequest', () => {
 		expect(response.status).toBe(302)
 		expect(response.headers.get('Location')).toBe('/sale?ref=newsletter')
 	})
+
+	it('rejects scheme-relative redirect targets like //evil.com', async () => {
+		const { fetchPublishedOrganizationForHost } = await import('~/lib/org')
+		vi.mocked(fetchPublishedOrganizationForHost).mockResolvedValueOnce({
+			id: 'org-1',
+			name: 'Acme Corp',
+			slug: 'acme',
+			redirects: [
+				{
+					id: 'red-evil',
+					fromPath: '/trap',
+					toPath: '//evil.com',
+					statusCode: 301,
+				},
+			],
+		} as any)
+
+		const context: any = {
+			request: new Request('http://acme.sites.localhost:3008/trap'),
+			locals: {},
+		}
+		const next = vi.fn().mockResolvedValue(new Response('next-handler', { status: 200 }))
+
+		const response = (await onRequest(context, next)) as Response
+
+		expect(next).toHaveBeenCalled()
+		expect(response.headers.get('Location')).toBeNull()
+	})
 })

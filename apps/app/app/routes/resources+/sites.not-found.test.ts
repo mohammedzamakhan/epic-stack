@@ -57,9 +57,8 @@ describe('sites.not-found resource route', () => {
 		expect(response.status).toBe(400)
 	})
 
-	it('records a new 404 hit when org found and no existing log', async () => {
-		// Mock finding organization, then checking existing log (empty)
-		mockSelectResults([{ id: 'org-123' }], [])
+	it('records a 404 hit using atomic upsert when org is found', async () => {
+		mockSelectResults([{ id: 'org-123' }])
 
 		const request = new Request('http://localhost/resources/sites/not-found', {
 			method: 'POST',
@@ -76,23 +75,5 @@ describe('sites.not-found resource route', () => {
 		const data = await response.json()
 		expect(data).toEqual({ ok: true })
 		expect(mockDb.insert).toHaveBeenCalled()
-	})
-
-	it('increments 404 hit when existing log entry exists', async () => {
-		// Mock finding organization, then existing log found
-		mockSelectResults([{ id: 'org-123' }], [{ id: 'log-1' }])
-
-		const request = new Request('http://localhost/resources/sites/not-found', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				slug: 'acme',
-				path: '/missing-product',
-			}),
-		})
-
-		const response = await action({ request, params: {}, context: {} } as any)
-		expect(response.status).toBe(200)
-		expect(mockDb.update).toHaveBeenCalled()
 	})
 })

@@ -261,40 +261,50 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		)
 
 		if (matchedRedirect) {
-			waitUntil(context, recordSiteRedirectHit(matchedRedirect.id))
+			let destination = matchedRedirect.toPath.trim()
 
-			let destination = matchedRedirect.toPath
+			// Reject scheme-relative or invalid destinations
 			const isExternal =
 				destination.startsWith('http://') || destination.startsWith('https://')
+			const isInternal =
+				destination.startsWith('/') &&
+				!destination.startsWith('//') &&
+				!destination.startsWith('/\\')
 
-			if (!isExternal) {
-				// Preserve locale prefix if non-default locale was used and destination is relative
-				if (
-					localeResult.kind === 'rewrite' &&
-					localeResult.locale !== defaultLocale &&
-					!destination.startsWith(`/${localeResult.locale}/`) &&
-					destination !== `/${localeResult.locale}`
-				) {
-					const cleanDest = destination.startsWith('/')
-						? destination
-						: `/${destination}`
-					destination = `/${localeResult.locale}${cleanDest === '/' ? '' : cleanDest}`
+			if (!isExternal && !isInternal) {
+				// Invalid/unsafe destination, ignore redirect
+			} else {
+				waitUntil(context, recordSiteRedirectHit(matchedRedirect.id))
+
+				if (!isExternal) {
+					// Preserve locale prefix if non-default locale was used and destination is relative
+					if (
+						localeResult.kind === 'rewrite' &&
+						localeResult.locale !== defaultLocale &&
+						!destination.startsWith(`/${localeResult.locale}/`) &&
+						destination !== `/${localeResult.locale}`
+					) {
+						const cleanDest = destination.startsWith('/')
+							? destination
+							: `/${destination}`
+						destination = `/${localeResult.locale}${cleanDest === '/' ? '' : cleanDest}`
+					}
+
+					// Forward query search params if not already present in destination
+					if (url.search && !destination.includes('?')) {
+						destination = `${destination}${url.search}`
+					}
 				}
 
-				// Forward query search params if not already present in destination
-				if (url.search && !destination.includes('?')) {
-					destination = `${destination}${url.search}`
-				}
+				return withSecurityHeaders(
+					new Response(null, {
+						status: matchedRedirect.statusCode,
+						headers: { Location: destination },
+					}),
+					url.pathname,
+					hostEnv,
+				)
 			}
-
-			return withSecurityHeaders(
-				new Response(null, {
-					status: matchedRedirect.statusCode,
-					headers: { Location: destination },
-				}),
-				url.pathname,
-				hostEnv,
-			)
 		}
 	}
 	if (organization && !isSitesAppRoute(routedPathname)) {

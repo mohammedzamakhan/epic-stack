@@ -168,9 +168,33 @@ function normalizePath(p: string): string {
 	return clean
 }
 
+function isValidRedirectDestination(val: string): boolean {
+	const trimmed = val.trim()
+	if (!trimmed) return false
+	// Reject scheme-relative URLs like //evil.com
+	if (trimmed.startsWith('//')) return false
+	if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+		try {
+			const parsed = new URL(trimmed)
+			return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+		} catch {
+			return false
+		}
+	}
+	// Internal relative path must start with exactly one slash and not backslash
+	return trimmed.startsWith('/') && !trimmed.startsWith('/\\')
+}
+
 const CreateRedirectSchema = z.object({
 	fromPath: z.string().trim().min(1, 'Source path is required'),
-	toPath: z.string().trim().min(1, 'Destination is required'),
+	toPath: z
+		.string()
+		.trim()
+		.min(1, 'Destination is required')
+		.refine(
+			isValidRedirectDestination,
+			'Destination must be an internal path (e.g. /page) or a valid http:// or https:// URL.',
+		),
 	statusCode: z.coerce
 		.number()
 		.refine((val) => val === 301 || val === 302, 'Must be 301 or 302'),
@@ -180,7 +204,14 @@ const CreateRedirectSchema = z.object({
 const UpdateRedirectSchema = z.object({
 	id: z.string().min(1),
 	fromPath: z.string().trim().min(1, 'Source path is required'),
-	toPath: z.string().trim().min(1, 'Destination is required'),
+	toPath: z
+		.string()
+		.trim()
+		.min(1, 'Destination is required')
+		.refine(
+			isValidRedirectDestination,
+			'Destination must be an internal path (e.g. /page) or a valid http:// or https:// URL.',
+		),
 	statusCode: z.coerce
 		.number()
 		.refine((val) => val === 301 || val === 302, 'Must be 301 or 302'),
@@ -607,7 +638,11 @@ export default function WebsiteRedirectsRoute() {
 
 	// Map of paths that have active redirects
 	const activeRedirectFromPaths = useMemo(() => {
-		return new Set(redirects.map((r) => r.fromPath.toLowerCase()))
+		return new Set(
+			redirects
+				.filter((r) => r.isEnabled)
+				.map((r) => r.fromPath.toLowerCase()),
+		)
 	}, [redirects])
 
 	const redirectCount = filteredRedirects.length

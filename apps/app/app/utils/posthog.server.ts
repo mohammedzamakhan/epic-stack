@@ -1,4 +1,3 @@
-import { sanitizeUrl } from '@repo/observability'
 import { PostHog } from 'posthog-node'
 import { createContext, type RouterContextProvider } from 'react-router'
 import { ENV } from 'varlock/env'
@@ -50,6 +49,17 @@ export const posthogMiddleware: Route.MiddlewareFunction = async (
 	}
 }
 
+function sanitizeTelemetryUrl(url: string): string {
+	try {
+		const parsed = new URL(url)
+		parsed.search = ''
+		parsed.hash = ''
+		return parsed.toString()
+	} catch {
+		return '[INVALID_URL]'
+	}
+}
+
 export function capturePostHogServerException(
 	context: Readonly<RouterContextProvider>,
 	error: unknown,
@@ -60,7 +70,7 @@ export function capturePostHogServerException(
 
 	try {
 		requestContext.client.captureException(error, requestContext.distinctId, {
-			$current_url: sanitizeUrl(request.url),
+			$current_url: sanitizeTelemetryUrl(request.url),
 			$session_id: requestContext.sessionId,
 			$process_person_profile: Boolean(
 				request.headers.get('x-posthog-distinct-id'),
