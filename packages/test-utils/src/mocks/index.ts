@@ -32,7 +32,7 @@ server.events.on('request:start', ({ request }) => {
 const bypassUrls = [
 	'api.stripe.com',
 	'stripe.com',
-	'.sentry.io',
+	'.posthog.com',
 	'__rrdt',
 	'generativelanguage.googleapis.com',
 ]

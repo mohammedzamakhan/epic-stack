@@ -3,7 +3,6 @@
 import './polyfill-crypto.ts'
 import { bindCacheKV } from '@repo/cache'
 import { bindCloudflareD1 } from '@repo/database'
-import * as Sentry from '@sentry/cloudflare'
 import {
 	createContext,
 	createRequestHandler,
@@ -46,17 +45,7 @@ function applyWorkerEnv(env: Env) {
 	initVarlockEnv({ allowFail: true })
 }
 
-function sentryOptions(env: Env) {
-	const dsn = env.SENTRY_DSN
-	const enabled = Boolean(dsn && dsn !== 'your-dsn' && dsn.includes('@'))
-	return {
-		dsn: enabled ? dsn : undefined,
-		environment: env.NODE_ENV || 'production',
-		tracesSampleRate: enabled ? 1 : 0,
-	}
-}
-
-export default Sentry.withSentry(sentryOptions, {
+export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		// Wrangler bindings must win over varlock's build-time .env snapshot
 		// so cookie Domain / BASE_URL match this workers.dev preview.
@@ -74,4 +63,4 @@ export default Sentry.withSentry(sentryOptions, {
 
 		return requestHandler(request, loadContext)
 	},
-}) satisfies ExportedHandler<Env>
+} satisfies ExportedHandler<Env>

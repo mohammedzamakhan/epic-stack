@@ -10,12 +10,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
-    },
-    "./client": {
-      "types": "./client.d.ts",
-      "import": "./client.ts",
-      "require": "./client.ts",
-      "default": "./client.ts"
     }
   },
   "scripts": {
@@ -31,7 +25,6 @@
     "@react-email/preview-server": "^5.0.8",
     "@remix-run/server-runtime": "^2.17.5",
     "@repo/security": "*",
-    "@sentry/react-router": "^10.29.0",
     "ai": "5.0.108",
     "lru-cache": "^11.1.0",
     "pino": "^10.1.0",

@@ -3,6 +3,7 @@ import partytown from '@astrojs/partytown'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import { d1, r2 } from '@emdash-cms/cloudflare'
+import posthog from '@posthog/rollup-plugin'
 import { getBrandDomain, getLocalDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
@@ -18,6 +19,11 @@ const isDevCommand =
 const isCloudflareBuild =
 	process.env.npm_lifecycle_event === 'build' ||
 	process.env.CLOUDFLARE_BUILD === 'true'
+const shouldUploadSourceMaps = Boolean(
+	isCloudflareBuild &&
+	process.env.POSTHOG_PERSONAL_API_KEY &&
+	process.env.POSTHOG_PROJECT_ID,
+)
 
 export default defineConfig({
 	output: 'server',
@@ -114,7 +120,16 @@ export default defineConfig({
 		}),
 		partytown({
 			config: {
-				forward: ['dataLayer.push', 'gtag'],
+				forward: [
+					'dataLayer.push',
+					'gtag',
+					'posthog.capture',
+					'posthog.captureException',
+					'posthog.identify',
+					'posthog.logger.error',
+					'posthog.logger.info',
+					'posthog.logger.warn',
+				],
 			},
 		}),
 	],
@@ -124,6 +139,20 @@ export default defineConfig({
 			dedupe: ['react', 'react-dom', '@emdash-cms/admin'],
 		},
 		plugins: [
+			shouldUploadSourceMaps
+				? posthog({
+						personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY,
+						projectId: process.env.POSTHOG_PROJECT_ID,
+						host: process.env.POSTHOG_HOST,
+						sourcemaps: {
+							enabled: true,
+							releaseName: 'epic-startup-web',
+							releaseVersion:
+								process.env.COMMIT_SHA ?? process.env.npm_package_version,
+							deleteAfterUpload: true,
+						},
+					})
+				: null,
 			{
 				name: 'block-emdash-on-client',
 				enforce: 'pre',
@@ -169,11 +198,7 @@ export default defineConfig({
 			allowedHosts: [localDomain, 'localhost'],
 		},
 		optimizeDeps: {
-			exclude: [
-				'@sentry/profiling-node',
-				'@sentry-internal/node-cpu-profiler',
-				'emdash',
-			],
+			exclude: ['emdash'],
 			include: [
 				'react',
 				'react-dom',

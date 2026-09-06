@@ -1,12 +1,9 @@
 import { fileURLToPath } from 'node:url'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { lingui } from '@lingui/vite-plugin'
+import posthog from '@posthog/rollup-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import { getLocalDomain } from '@repo/config/brand'
-import {
-	type SentryReactRouterBuildOptions,
-	sentryReactRouter,
-} from '@sentry/react-router'
 import tailwindcss from '@tailwindcss/vite'
 import { varlockVitePlugin } from '@varlock/vite-integration'
 import { defineConfig, type Plugin } from 'vite'
@@ -18,16 +15,17 @@ const domain = `app.${getLocalDomain()}`
 
 const MODE = process.env.NODE_ENV
 const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare'
+const hasPostHogSourceMapCredentials = Boolean(
+	process.env.POSTHOG_PERSONAL_API_KEY && process.env.POSTHOG_PROJECT_ID,
+)
 
 function cloudflareWorkerAliasPlugin(): Plugin | null {
 	if (!isCloudflare) return null
 	const workerFile = (name: string) => `${appDir}/workers/${name}`
 	const ssrOnly: Record<string, string> = {
 		'isomorphic-dompurify': workerFile('dompurify-stub.ts'),
-		'@sentry/react-router': workerFile('sentry-stub.ts'),
 	}
 	const always: Record<string, string> = {
-		'@sentry/profiling-node': workerFile('litefs-stub.ts'),
 		'node:sqlite': workerFile('node-sqlite-stub.ts'),
 	}
 	const remixCrypto = workerFile('remix-crypto-stub.ts')
@@ -91,24 +89,6 @@ function stubCacheServerPlugin(): Plugin {
 	}
 }
 
-const sentryConfig: SentryReactRouterBuildOptions = {
-	authToken: process.env.SENTRY_AUTH_TOKEN,
-	org: process.env.SENTRY_ORG,
-	project: process.env.SENTRY_PROJECT,
-
-	unstable_sentryVitePluginOptions: {
-		release: {
-			name: process.env.COMMIT_SHA,
-			setCommits: {
-				auto: true,
-			},
-		},
-		sourcemaps: {
-			filesToDeleteAfterUpload: ['./build/**/*.map'],
-		},
-	},
-}
-
 export default defineConfig((config) => ({
 	base: MODE === 'test' ? 'http://localhost:3001' : undefined,
 	build: {
@@ -119,12 +99,7 @@ export default defineConfig((config) => ({
 			? {}
 			: {
 					input: config.isSsrBuild ? './server/app.ts' : undefined,
-					external: [
-						/node:.*/,
-						'fsevents',
-						'@sentry/profiling-node',
-						'@sentry-internal/node-cpu-profiler',
-					],
+					external: [/node:.*/, 'fsevents'],
 				},
 
 		assetsInlineLimit: isCloudflare
@@ -135,16 +110,17 @@ export default defineConfig((config) => ({
 					}
 				},
 
-		// The Cloudflare bundle includes the entire SSR dependency graph. Generating
-		// source maps for it pushes the CI build beyond the hosted runner's heap,
-		// while Sentry uploads are disabled for this target below.
-		sourcemap: !isCloudflare,
+		// The Cloudflare SSR graph is large. Generate maps only for the client build
+		// when PostHog credentials are present; Node builds keep their local maps.
+		sourcemap: isCloudflare
+			? config.mode === 'production' &&
+				hasPostHogSourceMapCredentials &&
+				!config.isSsrBuild
+			: true,
 	},
 	optimizeDeps: {
 		include: ['@repo/email', '@repo/integrations'],
 		exclude: [
-			'@sentry/profiling-node',
-			'@sentry-internal/node-cpu-profiler',
 			'@repo/ai',
 			'@repo/ui',
 			'@repo/marketing',
@@ -159,10 +135,12 @@ export default defineConfig((config) => ({
 			noExternal: isCloudflare
 				? true
 				: [
+						'@posthog/react',
 						'@repo/ai',
 						'@repo/email',
 						'@repo/marketing',
 						'@repo/marketing-workflow',
+						'posthog-js',
 					],
 		},
 	}),
@@ -180,7 +158,6 @@ export default defineConfig((config) => ({
 			protocol: 'ws',
 		},
 	},
-	sentryConfig,
 	plugins: [
 		...(isCloudflare ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),
 		cloudflareWorkerAliasPlugin(),
@@ -194,8 +171,21 @@ export default defineConfig((config) => ({
 		MODE === 'test' ? null : reactRouter(),
 		macrosPlugin(),
 		lingui(),
-		MODE === 'production' && process.env.SENTRY_AUTH_TOKEN && !isCloudflare
-			? sentryReactRouter(sentryConfig, config)
+		config.mode === 'production' &&
+		hasPostHogSourceMapCredentials &&
+		!config.isSsrBuild
+			? posthog({
+					personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
+					projectId: process.env.POSTHOG_PROJECT_ID!,
+					host: process.env.POSTHOG_HOST,
+					sourcemaps: {
+						enabled: true,
+						releaseName: 'epic-startup-app',
+						releaseVersion:
+							process.env.COMMIT_SHA ?? process.env.npm_package_version,
+						deleteAfterUpload: true,
+					},
+				})
 			: null,
 	].filter(Boolean) as Plugin[],
 	test: {

@@ -3,7 +3,6 @@ import { contentSecurity } from '@nichtsam/helmet/content'
 import { NonceProvider, makeTimings } from '@repo/common'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
-import * as Sentry from '@sentry/react-router'
 import { isbot } from 'isbot'
 import { renderToReadableStream } from 'react-dom/server'
 import {
@@ -49,9 +48,6 @@ function setSecurityHeaders(responseHeaders: Headers) {
 			'Strict-Transport-Security',
 			'max-age=31536000; includeSubDomains; preload',
 		)
-		if (ENV.SENTRY_DSN) {
-			responseHeaders.append('Document-Policy', 'js-profiling')
-		}
 	}
 }
 
@@ -74,11 +70,7 @@ function applyContentSecurity(
 				fetch: {
 					'default-src': ["'self'"],
 					'object-src': ["'none'"],
-					'connect-src': [
-						MODE === 'development' ? 'ws:' : undefined,
-						ENV.SENTRY_DSN ? '*.sentry.io' : undefined,
-						"'self'",
-					],
+					'connect-src': [MODE === 'development' ? 'ws:' : undefined, "'self'"],
 					'font-src': ["'self'"],
 					'frame-src': ["'self'", 'builder.io'],
 					'img-src': ["'self'", 'data:'],
@@ -193,6 +185,4 @@ export function handleError(
 	} else {
 		console.error(error)
 	}
-
-	Sentry.captureException(error)
 }

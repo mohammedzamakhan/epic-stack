@@ -1,5 +1,5 @@
+import { usePostHog } from '@posthog/react'
 import { getErrorMessage } from '@repo/common'
-import { captureException } from '@sentry/react-router'
 import { useEffect, type ReactElement } from 'react'
 import {
 	type ErrorResponse,
@@ -27,6 +27,7 @@ export function GeneralErrorBoundary({
 	unexpectedErrorHandler?: (error: unknown) => ReactElement | null
 }) {
 	const error = useRouteError()
+	const posthog = usePostHog()
 	const params = useParams()
 	const isResponse = isRouteErrorResponse(error)
 
@@ -37,8 +38,11 @@ export function GeneralErrorBoundary({
 	useEffect(() => {
 		if (isResponse) return
 
-		captureException(error)
-	}, [error, isResponse])
+		posthog?.captureException(error)
+		posthog?.logger.error('Unhandled React route error', {
+			path: window.location.pathname,
+		})
+	}, [error, isResponse, posthog])
 
 	return (
 		<div className="text-h2 container flex items-center justify-center p-20">

@@ -380,7 +380,51 @@ function readUrlSetting(envBase, urlKey, deployEnv, launchConfig) {
 }
 
 function stripJsoncComments(text) {
-	return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+	let result = ''
+	let inString = false
+	let escaped = false
+
+	for (let index = 0; index < text.length; index++) {
+		const current = text[index]
+		const next = text[index + 1]
+
+		if (inString) {
+			result += current
+			if (escaped) escaped = false
+			else if (current === '\\') escaped = true
+			else if (current === '"') inString = false
+			continue
+		}
+
+		if (current === '"') {
+			inString = true
+			result += current
+			continue
+		}
+
+		if (current === '/' && next === '/') {
+			while (index < text.length && text[index] !== '\n') index++
+			result += '\n'
+			continue
+		}
+
+		if (current === '/' && next === '*') {
+			index += 2
+			while (
+				index < text.length &&
+				!(text[index] === '*' && text[index + 1] === '/')
+			) {
+				if (text[index] === '\n') result += '\n'
+				index++
+			}
+			index++
+			continue
+		}
+
+		result += current
+	}
+
+	return result
 }
 
 function parseJsonc(path) {
@@ -518,6 +562,22 @@ function applyTargetPatches(
 		if (appKey === 'app') {
 			patchVar('BASE_URL', 'APP_BASE_URL', 'app_base_url')
 			patchVar('DOCS_URL', 'DOCS_URL', 'docs_url')
+			patch('vars.POSTHOG_PROJECT_TOKEN', [
+				`POSTHOG_PROJECT_TOKEN${suffix}`,
+				'POSTHOG_PROJECT_TOKEN',
+			])
+			patchVar('POSTHOG_HOST', 'POSTHOG_HOST', 'posthog_host')
+
+			const logsDestination = readEnv(
+				`POSTHOG_LOGS_DESTINATION${suffix}`,
+				launchConfig,
+				`observability.${bindingEnv}.posthog_logs_destination`,
+			)
+			if (logsDestination) {
+				setPath(target, 'observability.logs.enabled', true)
+				setPath(target, 'observability.logs.destinations', [logsDestination])
+				patches.push(`observability.logs [${targetEnv}] ← ${logsDestination}`)
+			}
 			patchVar(
 				'PUBLIC_SITE_HOST_SUFFIXES',
 				'PUBLIC_SITE_HOST_SUFFIXES',
@@ -784,6 +844,55 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			)
 		}
 
+		const posthogProjectToken = readEnv(
+			`POSTHOG_PROJECT_TOKEN${suffix}`,
+			launchConfig,
+			`observability.${bindingEnv}.posthog_project_token`,
+		)
+		if (posthogProjectToken) {
+			applyToml(
+				/(PUBLIC_POSTHOG_PROJECT_TOKEN\s*=\s*")[^"]*(")/,
+				`$1${posthogProjectToken}$2`,
+				`PUBLIC_POSTHOG_PROJECT_TOKEN ← POSTHOG_PROJECT_TOKEN${suffix}`,
+			)
+		}
+
+		const posthogHost = readEnv(
+			`POSTHOG_HOST${suffix}`,
+			launchConfig,
+			`observability.${bindingEnv}.posthog_host`,
+		)
+		if (posthogHost) {
+			applyToml(
+				/(PUBLIC_POSTHOG_HOST\s*=\s*")[^"]*(")/,
+				`$1${posthogHost}$2`,
+				`PUBLIC_POSTHOG_HOST ← POSTHOG_HOST${suffix}`,
+			)
+		}
+
+		const release = readEnv('COMMIT_SHA', launchConfig)
+		if (release) {
+			applyToml(
+				/(PUBLIC_POSTHOG_RELEASE\s*=\s*")[^"]*(")/,
+				`$1${release}$2`,
+				'PUBLIC_POSTHOG_RELEASE ← COMMIT_SHA',
+			)
+		}
+
+		const logsDestination = readEnv(
+			`POSTHOG_LOGS_DESTINATION${suffix}`,
+			launchConfig,
+			`observability.${bindingEnv}.posthog_logs_destination`,
+		)
+		if (logsDestination) {
+			const logsTable =
+				deployEnv === 'staging'
+					? 'env.staging.observability.logs'
+					: 'observability.logs'
+			content += `\n[${logsTable}]\nenabled = true\ndestinations = [ ${JSON.stringify(logsDestination)} ]\n`
+			patches.push(`observability.logs ← ${logsDestination}`)
+		}
+
 		if (deployEnv === 'preview') {
 			applyToml(
 				/^name\s*=\s*"[^"]+"/m,
@@ -998,6 +1107,27 @@ function patchAstroTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 		)
 		patchUrlVar('vars.PUBLIC_ROOT_APP', 'ROOT_APP', 'root_app')
 		patchUrlVar('vars.PUBLIC_APP_URL', 'PUBLIC_APP_URL', 'public_app_url')
+		patch(
+			'vars.PUBLIC_POSTHOG_PROJECT_TOKEN',
+			[`POSTHOG_PROJECT_TOKEN${suffix}`, 'POSTHOG_PROJECT_TOKEN'],
+			`observability.${bindingEnv}.posthog_project_token`,
+		)
+		patch(
+			'vars.PUBLIC_POSTHOG_HOST',
+			[`POSTHOG_HOST${suffix}`, 'POSTHOG_HOST'],
+			`observability.${bindingEnv}.posthog_host`,
+		)
+		patch('vars.PUBLIC_POSTHOG_RELEASE', ['COMMIT_SHA'], 'build.commit_sha')
+		const logsDestination = readEnv(
+			`POSTHOG_LOGS_DESTINATION${suffix}`,
+			launchConfig,
+			`observability.${bindingEnv}.posthog_logs_destination`,
+		)
+		if (logsDestination) {
+			setPath(config, 'observability.logs.enabled', true)
+			setPath(config, 'observability.logs.destinations', [logsDestination])
+			patches.push(`observability.logs ← ${logsDestination}`)
+		}
 		if (deployEnv === 'preview') {
 			setPath(config, 'name', previewWebWorkerName(launchConfig))
 			patches.push('name ← WEB_WORKER_NAME_PREVIEW')

@@ -34,10 +34,6 @@ FROM base AS build
 ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
 
-# Use the following environment variables to configure Sentry
-# ENV SENTRY_ORG=
-# ENV SENTRY_PROJECT=
-
 WORKDIR /myapp
 
 COPY --from=deps /myapp/node_modules /myapp/node_modules
@@ -46,9 +42,7 @@ COPY --from=deps /myapp/node_modules /myapp/node_modules
 ADD . .
 
 # Build the specific app
-RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-  export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
-  cd apps/app && npm run build
+RUN cd apps/app && npm run build
 
 # Final production image
 FROM base

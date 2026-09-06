@@ -2,6 +2,7 @@
 import Footer from '~/components/Footer.astro'
 import Header from '~/components/Header.astro'
 import Banner from '~/components/Banner.astro'
+import PostHog from '~/components/PostHog.astro'
 import Frame from '~/components/site/Frame.astro'
 import '../styles/tailwind.css'
 import { getThemeFromCookie, resolveThemeCookieName } from '~/utils/theme'
@@ -46,6 +47,7 @@ const isBannerEnabled: boolean = Boolean((banner as any)?.isEnabled)
 		<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
 		<link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png" />
 		<link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials" />
+		<PostHog />
 
 		<slot name="head" />
 	</head>

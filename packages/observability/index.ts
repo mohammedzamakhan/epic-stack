@@ -6,11 +6,8 @@ export type {
 	Monitor,
 	MonitorsResponse,
 } from './src/types.js'
-export { init as initMonitoring } from './src/monitoring.server.js'
 export {
 	logger,
-	sentryLogger,
-	createSentryLogger,
 	createChildLogger,
 	sanitizeUrl,
 	sanitizeIpAddress,

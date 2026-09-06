@@ -1,68 +1,122 @@
-# Monitoring
+# Product analytics and monitoring
 
-This document describes how to get [Sentry](https://sentry.io/) (the Epic
-application monitoring provider) set up for error, performance, and replay
-monitoring.
+PostHog is the analytics and error-monitoring backend for the main application
+(`apps/app`) and marketing website (`apps/web`). It is intentionally not loaded
+by Admin, Sites, tenant-api, CMS, mobile, or the shared packages.
 
-> **NOTE**: this is an optional step and only needed if you want monitoring in
-> production.
+The integration is optional. If the project token is empty, no PostHog browser
+or exception client is created. Worker log export is controlled independently by
+the Cloudflare destination setting described below.
 
-## SaaS vs Self-Hosted
+## What is collected
 
-Sentry offers both a [SaaS solution](https://sentry.io/) and
-[self-hosted solution](https://develop.sentry.dev/self-hosted/). This guide
-assumes you are using SaaS but the guide still works with self-hosted with a few
-modifications.
+| Surface   | Browser analytics                                                                            | Error tracking                                        | Logs                                                                                           |
+| --------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| App       | Page views, page leaves, authenticated user and organization context after analytics consent | Browser exceptions and React Router server exceptions | Browser SDK structured logs; Worker logs through Cloudflare's native OpenTelemetry destination |
+| Marketing | Cookieless page views, page leaves, and Web Vitals                                           | Browser exceptions                                    | Browser SDK structured logs; Worker logs through Cloudflare's native OpenTelemetry destination |
 
-## Signup
+The App SDK starts opted out. `PostHogAnalytics` only opts in after the existing
+analytics consent cookie is explicitly accepted, then identifies the signed-in
+operator and assigns the organization group. It resets identity after logout. Do
+not attach email, name, phone number, request bodies, query-string secrets, or
+tenant customer PII to events and logs.
 
-You can sign up for Sentry and create a Remix project from visiting
-[this url](https://sentry.io/signup/?project_platform=javascript-remix) and
-filling out the signup form.
+Marketing uses PostHog's cookieless mode and
+`person_profiles: 'identified_only'`. Its loader runs in a Partytown web worker
+so analytics does not compete with the critical rendering path. App analytics
+remains on the main thread because its React provider, consent lifecycle,
+automatic exception capture, and tracing headers need direct access to the
+application runtime.
 
-## Setting up the sentry-vite plugin
+## PostHog project setup
 
-Once you see the onboarding page which has the DSN, copy that somewhere (this
-becomes `SENTRY_DSN`). Now, set the sentry dsn secret in Cloudflare Workers to
-be used as an env var during runtime:
+Use separate PostHog projects for production and staging when possible. Copy
+each project's public project token and ingestion host from PostHog project
+settings. The public token is designed to be shipped to browsers; a personal API
+key is not.
 
-```sh
-npx wrangler secret put SENTRY_DSN
-# (Provide the <your_dsn> value when prompted)
+Runtime/build variables:
+
+```text
+POSTHOG_PROJECT_TOKEN=phc_...        # App and deploy patcher
+POSTHOG_HOST=https://us.i.posthog.com
+POSTHOG_PERSONAL_API_KEY=phx_...     # build secret; source-map upload only
+POSTHOG_PROJECT_ID=12345             # build variable; source-map upload only
+COMMIT_SHA=<deployed git sha>
 ```
 
-See the guides for React Router v7
-[here(library)](https://docs.sentry.io/platforms/javascript/guides/react/features/react-router/v7/)
-and
-[here(framwork)](https://docs.sentry.io/platforms/javascript/guides/react-router/).
-Note that the dedicated SDK for React Router is under development and features
-are lacking.
+For a staging deployment, the patcher first checks
+`POSTHOG_PROJECT_TOKEN_STAGING`, `POSTHOG_HOST_STAGING`, and
+`POSTHOG_LOGS_DESTINATION_STAGING`.
 
-To generate the auth token, click
-[this](https://sentry.io/orgredirect/settings/:orgslug/developer-settings/new-internal/)
-to create an internal integration (which grants the selected capabilities to the
-recipient, similar to how RBAC works). Give it a name and add the scope for
-`Releases:Admin` and `Organization:Read`. Press Save, and then generate the auth
-token at the bottom of the page under "Tokens", and copy that to a secure
-location (this becomes `SENTRY_AUTH_TOKEN`). Then visit the organization general
-settings page and copy the organization slug (`SENTRY_ORG`), and the slug name
-for your project under `Organization > Projects > Project > Name`
-(`SENTRY_PROJECT`).
+The marketing runtime names are `PUBLIC_POSTHOG_PROJECT_TOKEN`,
+`PUBLIC_POSTHOG_HOST`, and `PUBLIC_POSTHOG_RELEASE`. Do not set them separately
+in CI: `scripts/patch-wrangler.mjs` derives them from the shared names above.
 
-In the 'build' section of the [Dockerfile](../other/Dockerfile), there is an
-example of how to pass `SENTRY_AUTH_TOKEN` secret, so it is available to Vite
-when `npm run build` is run. You may also uncomment and hard code your
-`SENTRY_ORG` and `SENTRY_PROJECT` values. Setup up your secrets in
-[GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
-You can do the same for any other secret (environment variable) you need at
-build time, just make sure those secrets (variables) are available on the CI
-runner: see the 'deploy' job from [`deploy`](../.github/workflows/deploy.yml)
-workflow. Note that these do not need to be added to the
-[`env.server`](../app/utils/env.server.ts) env vars schema, as they are only
-used during the build and not the runtime.
+Add the public token as a Cloudflare Worker secret for App:
 
-The Sentry Vite plugin in [`vite.config.ts`](../vite.config.ts) will create
-sentry releases for you and automatically associate commits during the vite
-build once the `SENTRY_AUTH_TOKEN` is set. In this setup we have utilized a
-simple strategy for naming releases of using the commit sha, passed in as a
-build arg via the GitHub action workflow.
+```bash
+cd apps/app
+npx wrangler secret put POSTHOG_PROJECT_TOKEN
+npx wrangler secret put POSTHOG_PROJECT_TOKEN --env staging
+```
+
+Configure the corresponding `POSTHOG_*` variables/secrets in Cloudflare Workers
+Builds for `apps/web` and in the CI environment that runs either app build. The
+deploy patcher writes Web's public runtime bindings into the generated Wrangler
+configuration.
+
+## Cloudflare Worker logs
+
+Cloudflare can export Worker invocation logs to PostHog directly over OTLP, so
+the application does not need a second server logging SDK. In the Cloudflare
+dashboard, create a Workers Observability destination for PostHog and note its
+destination name. Set:
+
+```text
+POSTHOG_LOGS_DESTINATION=posthog-logs
+POSTHOG_LOGS_DESTINATION_STAGING=posthog-logs-staging
+```
+
+The deploy patcher only adds `observability.logs.destinations` when one of these
+variables (or the equivalent `launch.config.json` field) exists. Deployments
+therefore remain valid before a destination is created. Keep the existing Pino
+redaction rules: Cloudflare exports the resulting Worker logs as-is.
+
+See Cloudflare's
+[PostHog OpenTelemetry destination guide](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/posthog/)
+and PostHog's
+[JavaScript logs guide](https://posthog.com/docs/logs/installation/javascript).
+
+## Error tracking and source maps
+
+Both browser integrations enable `capture_exceptions`. The App also captures
+unhandled React Router server errors with `posthog-node`; request URLs are
+sanitized before being attached. The marketing site records Web Vitals through
+the browser SDK.
+
+Production source maps are uploaded only when both `POSTHOG_PERSONAL_API_KEY`
+and `POSTHOG_PROJECT_ID` are available. The Rollup plugin deletes the uploaded
+client maps afterward. Missing credentials disable the upload rather than
+breaking local or preview builds.
+
+The personal key needs the source-map upload permissions described in
+[PostHog's Vite/Rollup source-map guide](https://posthog.com/docs/error-tracking/upload-source-maps/vite).
+
+## Verification
+
+After deploying:
+
+1. Visit the marketing site and confirm `$pageview` plus Web Vitals in PostHog.
+2. Reject App analytics consent and confirm no browser analytics events are
+   emitted; accept it and confirm page views and the `organization` group
+   appear.
+3. Throw a controlled browser and route error in staging and verify readable,
+   source-mapped stack traces.
+4. Trigger a staging Worker request and verify its structured request log in
+   PostHog Logs.
+
+PostHog references:
+[React Router](https://posthog.com/docs/libraries/react-router/react-router-v7-framework-mode),
+[Astro](https://posthog.com/docs/libraries/astro), and
+[error tracking](https://posthog.com/docs/error-tracking/installation).

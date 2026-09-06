@@ -18,7 +18,7 @@ SOC 2 evaluates organizations based on five Trust Service Criteria.
 | CC6.1 Logical Access      | RBAC, session management                   | `packages/auth`, permission checks         |
 | CC6.6 Access Removal      | Session invalidation, account deactivation | User ban system, session delete            |
 | CC6.7 Encryption          | AES-256-GCM, bcrypt-12, TLS 1.3            | `packages/security/encryption.ts`          |
-| CC7.2 Security Monitoring | Audit logs, Sentry integration             | `packages/audit`, `packages/observability` |
+| CC7.2 Security Monitoring | Audit logs, PostHog/Cloudflare monitoring  | `packages/audit`, `packages/observability` |
 | CC7.3 Incident Response   | Documented procedures                      | `docs/security/incident-response.mdx`      |
 
 ### Availability
@@ -209,7 +209,7 @@ Epic Stack leverages certified infrastructure:
 | -------------- | ------------------- |
 | Cloudflare     | SOC 2 Type II       |
 | Tigris (S3)    | SOC 2 Type II       |
-| Sentry         | SOC 2 Type II, GDPR |
+| PostHog        | SOC 2 Type II, GDPR |
 | Resend (Email) | SOC 2 Type II       |
 
 Request vendor security documentation for your audit package.

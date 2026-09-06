@@ -360,7 +360,7 @@ async function notifyAdminOfSSOError(error: SSOError): Promise<void> {
 		// In a real implementation, this would send notifications via:
 		// - Email to administrators
 		// - Slack/Teams webhook
-		// - Error tracking service (Sentry, Bugsnag, etc.)
+		// - Error tracking service
 		// - Admin dashboard alerts
 
 		console.warn('Admin notification required for SSO error:', {
@@ -386,7 +386,7 @@ async function notifyAdminOfSSOError(error: SSOError): Promise<void> {
 		// })
 
 		// Error tracking
-		// Sentry.captureException(new Error(error.message), {
+		// captureException(new Error(error.message), {
 		//   tags: { sso_error_type: error.type },
 		//   extra: { details: error.details },
 		// })

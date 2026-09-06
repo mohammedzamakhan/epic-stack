@@ -60,6 +60,7 @@ import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { ImpersonationBanner } from './components/impersonation-banner.tsx'
+import { PostHogAnalytics } from './components/posthog-analytics.tsx'
 import { CookieConsentBanner } from './components/privacy-banner.tsx'
 import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
@@ -67,6 +68,7 @@ import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
 import './styles/tailwind.css'
 import { getLaunchStatus } from './utils/env.server.ts'
+import { posthogMiddleware } from './utils/posthog.server.ts'
 import { seoConfig } from './utils/seo.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 
@@ -349,6 +351,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			env: {
 				NODE_ENV: ENV.NODE_ENV,
 				ALLOW_INDEXING: ENV.ALLOW_INDEXING,
+				POSTHOG_PROJECT_TOKEN: ENV.POSTHOG_PROJECT_TOKEN,
+				POSTHOG_HOST: ENV.POSTHOG_HOST,
+				COMMIT_SHA: ENV.COMMIT_SHA,
 			},
 		},
 		{
@@ -365,6 +370,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export const headers: Route.HeadersFunction = pipeHeaders
+
+export const middleware: Route.MiddlewareFunction[] = [posthogMiddleware]
 
 function Document({
 	children,
@@ -458,9 +465,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	useToast(data.toast)
+	const organizationId =
+		data.userOrganizations?.currentOrganization?.organization.id
 
 	return (
 		<HoneypotProvider {...data.honeyProps}>
+			<PostHogAnalytics
+				consent={data.cookieConsent}
+				userId={data.user?.id}
+				organizationId={organizationId}
+			/>
 			<OpenImgContextProvider
 				optimizerEndpoint="/resources/images"
 				getSrc={getImgSrc}
