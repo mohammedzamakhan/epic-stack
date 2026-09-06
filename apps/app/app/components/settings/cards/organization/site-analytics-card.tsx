@@ -10,7 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
-import { useNavigation } from 'react-router'
+import { Form, useNavigation } from 'react-router'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 
@@ -56,24 +56,24 @@ export function SiteAnalyticsCard({
 	})
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>
-					<Trans>Google Analytics</Trans>
-				</CardTitle>
-				<CardDescription>
-					<Trans>
-						Add a Google Analytics 4 Measurement ID to track visitors on your
-						tenant website. Leave blank to disable tracking.
-					</Trans>
-				</CardDescription>
-			</CardHeader>
-			<form method="post" {...getFormProps(form)}>
+		<Form method="post" {...getFormProps(form)}>
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						<Trans>Google Analytics</Trans>
+					</CardTitle>
+					<CardDescription>
+						<Trans>
+							Add a Google Analytics 4 Measurement ID to track visitors on your
+							tenant website. Leave blank to disable tracking.
+						</Trans>
+					</CardDescription>
+				</CardHeader>
 				<input type="hidden" name="intent" value={siteAnalyticsActionIntent} />
 				<input type="hidden" name="organizationId" value={organization.id} />
 				<CardContent className="space-y-4">
 					<Field
-						labelProps={{ children: 'Measurement ID' }}
+						labelProps={{ children: <Trans>Measurement ID</Trans> }}
 						inputProps={{
 							...getInputProps(fields.googleAnalyticsId, { type: 'text' }),
 							placeholder: 'G-XXXXXXXXXX',
@@ -83,12 +83,12 @@ export function SiteAnalyticsCard({
 					/>
 					<ErrorList errors={form.errors} id={form.errorId} />
 				</CardContent>
-				<CardFooter>
+				<CardFooter className="justify-end border-t">
 					<Button type="submit" disabled={isSubmitting}>
-						<Trans>Save</Trans>
+						<Trans>Save changes</Trans>
 					</Button>
 				</CardFooter>
-			</form>
-		</Card>
+			</Card>
+		</Form>
 	)
 }
