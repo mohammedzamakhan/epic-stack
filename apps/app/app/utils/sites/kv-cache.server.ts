@@ -3,6 +3,16 @@ import {
 	type KVNamespaceListResult,
 } from '@cloudflare/workers-types'
 
+let siteDataKv: KVNamespace | null = null
+
+/**
+ * Bind the SITES_DATA_KV KV namespace at Worker startup.
+ * Must be called from the Worker fetch handler before any request is handled.
+ */
+export function bindSiteDataKV(kv: KVNamespace | null | undefined) {
+	if (kv) siteDataKv = kv
+}
+
 export function getSiteKvKey(
 	type: 'org' | 'page',
 	id: string,
@@ -16,9 +26,7 @@ export async function purgeOrganizationSiteCache(
 	slug?: string,
 	host?: string | null,
 ) {
-	const SITES_DATA_KV = process.env.SITES_DATA_KV as unknown as
-		KVNamespace | undefined
-	if (!SITES_DATA_KV) return
+	if (!siteDataKv) return
 
 	const prefixes = [`org:${orgId}:`]
 	if (slug) prefixes.push(`org:${slug}:`)
@@ -29,10 +37,10 @@ export async function purgeOrganizationSiteCache(
 			let cursor: string | undefined = undefined
 			do {
 				const keysPage: KVNamespaceListResult<unknown, string> =
-					await SITES_DATA_KV.list({ prefix, cursor })
+					await siteDataKv.list({ prefix, cursor })
 				await Promise.allSettled(
 					keysPage.keys.map((key) =>
-						SITES_DATA_KV.delete(key.name).catch((e) => {
+						(siteDataKv as KVNamespace).delete(key.name).catch((e) => {
 							console.error(`Failed to delete KV key ${key.name}`, e)
 						}),
 					),
@@ -47,20 +55,18 @@ export async function purgeOrganizationSiteCache(
 }
 
 export async function getCachedSiteData(key: string) {
-	const SITES_DATA_KV = process.env.SITES_DATA_KV as any | undefined
-	if (!SITES_DATA_KV) return null
+	if (!siteDataKv) return null
 	try {
-		const data = await SITES_DATA_KV.get(key, 'json')
+		const data = await siteDataKv.get(key, 'json')
 		return data
 	} catch {
 		return null
 	}
 }
 
-export async function setCachedSiteData(key: string, data: any) {
-	const SITES_DATA_KV = process.env.SITES_DATA_KV as any | undefined
-	if (!SITES_DATA_KV) return
+export async function setCachedSiteData(key: string, data: unknown) {
+	if (!siteDataKv) return
 	try {
-		await SITES_DATA_KV.put(key, JSON.stringify(data))
+		await siteDataKv.put(key, JSON.stringify(data))
 	} catch {}
 }
