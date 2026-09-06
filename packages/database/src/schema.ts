@@ -2165,6 +2165,15 @@ export const Notification = sqliteTable(
 			table.type,
 			table.entityId,
 		),
+		index('Notification_userId_updatedAt_idx').on(
+			table.userId,
+			table.updatedAt,
+		),
+		index('Notification_userId_organizationId_updatedAt_idx').on(
+			table.userId,
+			table.organizationId,
+			table.updatedAt,
+		),
 		index('Notification_userId_createdAt_idx').on(
 			table.userId,
 			table.createdAt,

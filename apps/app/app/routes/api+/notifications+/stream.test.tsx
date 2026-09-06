@@ -53,4 +53,57 @@ describe('Notifications Stream API', () => {
 
 		expect(mockDb.select).toHaveBeenCalledTimes(1)
 	})
+
+	it('returns 404 instead of polling every organization for an unknown slug', async () => {
+		mockSelectResults([])
+
+		const request = new Request(
+			'http://localhost/api/notifications/stream?orgSlug=missing',
+		)
+		const response = await loader({ request, params: {} } as any)
+
+		expect(response.status).toBe(404)
+		expect(mockDb.select).toHaveBeenCalledTimes(1)
+	})
+
+	it('waits for a slow poll to finish before scheduling the next one', async () => {
+		vi.useFakeTimers()
+		let resolvePoll: (notifications: unknown[]) => void
+		const pendingPoll = new Promise<unknown[]>((resolve) => {
+			resolvePoll = resolve
+		})
+		const query: any = {
+			from: () => query,
+			where: () => query,
+			orderBy: () => query,
+			then: (resolve: (value: unknown[]) => unknown) =>
+				pendingPoll.then(resolve),
+		}
+		mockDb.select.mockReturnValue(query)
+
+		const response = await loader({
+			request: new Request('http://localhost/api/notifications/stream'),
+			params: {},
+		} as any)
+
+		try {
+			vi.advanceTimersByTime(3000)
+			await Promise.resolve()
+			expect(mockDb.select).toHaveBeenCalledTimes(1)
+
+			vi.advanceTimersByTime(30000)
+			await Promise.resolve()
+			expect(mockDb.select).toHaveBeenCalledTimes(1)
+
+			resolvePoll!([])
+			await Promise.resolve()
+			await Promise.resolve()
+			vi.advanceTimersByTime(3000)
+			await Promise.resolve()
+			expect(mockDb.select).toHaveBeenCalledTimes(2)
+		} finally {
+			await response.body?.cancel()
+			vi.useRealTimers()
+		}
+	})
 })

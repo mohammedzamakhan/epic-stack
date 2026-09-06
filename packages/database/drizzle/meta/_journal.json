@@ -64,6 +64,13 @@
 			"when": 1788709638509,
 			"tag": "0008_website_redirects",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "6",
+			"when": 1788721685225,
+			"tag": "0009_notification_sse_polling_indexes",
+			"breakpoints": true
 		}
 	]
 }

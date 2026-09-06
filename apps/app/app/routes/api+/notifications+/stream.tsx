@@ -10,6 +10,32 @@ import {
 } from '@repo/database'
 import { type LoaderFunctionArgs } from 'react-router'
 
+const POLL_INTERVAL_MS = 3000
+const KEEP_ALIVE_INTERVAL_MS = 30000
+
+function getErrorDetails(error: unknown) {
+	const cause =
+		error instanceof Error
+			? (error as Error & { cause?: unknown }).cause
+			: undefined
+	const rootCause = cause ?? error
+
+	if (rootCause instanceof Error) {
+		return { name: rootCause.name, message: rootCause.message }
+	}
+
+	if (
+		typeof rootCause === 'object' &&
+		rootCause !== null &&
+		'message' in rootCause &&
+		typeof rootCause.message === 'string'
+	) {
+		return { name: 'UnknownError', message: rootCause.message }
+	}
+
+	return { name: 'UnknownError', message: String(rootCause) }
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
 
@@ -23,27 +49,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			.from(Organization)
 			.where(eq(Organization.slug, orgSlug))
 			.limit(1)
-		if (org) organizationId = org.id
+		if (!org) {
+			return new Response('Organization not found', { status: 404 })
+		}
+		organizationId = org.id
 	}
 
 	let isClosed = false
 
-	let keepAliveTimer: ReturnType<typeof setInterval>
-	let pollTimer: ReturnType<typeof setInterval>
+	let keepAliveTimer: ReturnType<typeof setInterval> | undefined
+	let pollTimer: ReturnType<typeof setTimeout> | undefined
 
 	const stream = new ReadableStream({
 		start(controller) {
 			const encoder = new TextEncoder()
 
 			const send = (event: string, data: any) => {
+				if (isClosed) return
 				controller.enqueue(encoder.encode(`event: ${event}\n`))
 				controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
 			}
 
 			// Keep-alive
 			keepAliveTimer = setInterval(() => {
+				if (isClosed) return
 				controller.enqueue(encoder.encode(':\n\n'))
-			}, 30000)
+			}, KEEP_ALIVE_INTERVAL_MS)
 
 			// CAPACITY & CORRECTNESS NOTE:
 			// 1. Scales linearly (N queries / 3s). High scale requires Redis pub/sub.
@@ -52,10 +83,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			let lastCheckedAt = new Date()
 			const seenIds = new Set<string>()
 
-			// Poll the database instead of using EventEmitter (Supports multi-node scaling on LiteFS)
-			pollTimer = setInterval(async () => {
+			const schedulePoll = () => {
 				if (isClosed) return
+				pollTimer = setTimeout(() => {
+					void poll()
+				}, POLL_INTERVAL_MS)
+			}
 
+			// Poll sequentially rather than using setInterval: a slow D1 request must
+			// never cause additional polls to pile up behind it.
+			const poll = async () => {
 				try {
 					const newNotifications = await db
 						.select()
@@ -89,21 +126,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
 						}
 					}
 				} catch (e) {
-					console.error('SSE Poll Error', e)
+					// Drizzle wraps D1 errors. Log its cause so Workers Logs retains the
+					// D1 diagnostic without logging query parameters or notification data.
+					const { name, message } = getErrorDetails(e)
+					console.error(`SSE Poll Error (${name}): ${message}`)
+				} finally {
+					schedulePoll()
 				}
-			}, 3000)
+			}
+
+			schedulePoll()
 
 			request.signal.addEventListener('abort', () => {
 				isClosed = true
 				clearInterval(keepAliveTimer)
-				clearInterval(pollTimer)
+				if (pollTimer) clearTimeout(pollTimer)
 				controller.close()
 			})
 		},
 		cancel() {
 			isClosed = true
 			if (keepAliveTimer) clearInterval(keepAliveTimer)
-			if (pollTimer) clearInterval(pollTimer)
+			if (pollTimer) clearTimeout(pollTimer)
 		},
 	})
 
