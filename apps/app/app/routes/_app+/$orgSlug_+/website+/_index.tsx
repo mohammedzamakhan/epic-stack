@@ -38,7 +38,6 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
-import { purgeOrganizationSiteCache } from '#app/utils/sites/kv-cache.server.ts'
 import {
 	createCustomHostname,
 	deleteCustomHostname,
@@ -48,6 +47,7 @@ import {
 	isValidCustomDomain,
 	normalizeCustomDomain,
 } from '#app/utils/sites/cloudflare-custom-hostnames.server.ts'
+import { purgeOrganizationSiteCache } from '#app/utils/sites/kv-cache.server.ts'
 import {
 	deprovisionTenantDatabase,
 	provisionTenantDatabase,

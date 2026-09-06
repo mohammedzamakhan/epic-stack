@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { __setMockLaunchStatus } from '#app/utils/env.server.ts'
+import type * as payments from '#app/utils/payments.server.ts'
 import {
 	createAuthenticatedRequest,
 	createTestOrganization,
@@ -8,7 +9,6 @@ import {
 	getResponseStatus,
 	setupTestOrgWithUser,
 } from '#tests/test-utils.ts'
-import type * as payments from '#app/utils/payments.server.ts'
 import { action, loader } from './billing.tsx'
 
 vi.mock('#app/utils/payments.server.ts', async (importOriginal) => {
