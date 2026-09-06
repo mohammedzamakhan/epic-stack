@@ -20,8 +20,6 @@ import { stagingHostnames } from './staging-hostnames.mjs'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
-
-
 /** @type {Record<string, { dir: string, format: 'jsonc' | 'toml' }>} */
 const APPS = {
 	app: { dir: 'apps/app', format: 'jsonc' },
@@ -498,9 +496,10 @@ function applyTargetPatches(
 			if (missing) missing.push(`${prefix}_KV_NAMESPACE_ID${suffix}`)
 		}
 		if (appKey === 'app') {
-			const envNames = targetEnv === 'staging'
-				? [`${prefix}_SITES_DATA_KV_ID_STAGING`]
-				: [`${prefix}_SITES_DATA_KV_ID`]
+			const envNames =
+				targetEnv === 'staging'
+					? [`${prefix}_SITES_DATA_KV_ID_STAGING`]
+					: [`${prefix}_SITES_DATA_KV_ID`]
 			if (
 				!patch(
 					'kv_namespaces[1].id',
@@ -549,7 +548,9 @@ function applyTargetPatches(
 						service: tenantApiWorkerName,
 					},
 				]
-				patches.push(`services.TENANT_API [${targetEnv}] ← ${tenantApiWorkerName}`)
+				patches.push(
+					`services.TENANT_API [${targetEnv}] ← ${tenantApiWorkerName}`,
+				)
 			}
 		}
 	}
@@ -615,7 +616,8 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 		)
 
 		delete deployJsoncConfig.account_id
-		if (deployJsoncConfig.env?.staging) delete deployJsoncConfig.env.staging.account_id
+		if (deployJsoncConfig.env?.staging)
+			delete deployJsoncConfig.env.staging.account_id
 
 		writeJsonc(deployJsoncPath, deployJsoncConfig)
 		console.log(`Wrote ${deployJsoncPath}`)
@@ -624,8 +626,14 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 	// Deploy output config: build/server/wrangler.deploy.json for Vite apps,
 	// or wrangler.deploy.jsonc for other apps like jobs-cron and tenant-api.
 	if (useViteBuild) {
-		const viteOutputPath = join(rootDir, meta.dir, 'build/server/wrangler.deploy.json')
-		const viteConfig = JSON.parse(readFileSync(viteBuiltWranglerPath(appKey), 'utf8'))
+		const viteOutputPath = join(
+			rootDir,
+			meta.dir,
+			'build/server/wrangler.deploy.json',
+		)
+		const viteConfig = JSON.parse(
+			readFileSync(viteBuiltWranglerPath(appKey), 'utf8'),
+		)
 
 		// Patch production on top-level
 		applyTargetPatches(
@@ -664,8 +672,16 @@ function patchJsoncApp(appKey, deployEnv, launchConfig, requireBindings) {
 	} else if (!isAppOrAdmin) {
 		const outputPath = join(rootDir, meta.dir, 'wrangler.deploy.jsonc')
 		const config = parseJsonc(sourcePath)
-		const target = deployEnv === 'staging' ? ensureEnvSection(config, deployEnv) : config
-		applyTargetPatches(target, appKey, deployEnv, launchConfig, patches, missing)
+		const target =
+			deployEnv === 'staging' ? ensureEnvSection(config, deployEnv) : config
+		applyTargetPatches(
+			target,
+			appKey,
+			deployEnv,
+			launchConfig,
+			patches,
+			missing,
+		)
 
 		delete config.account_id
 		if (config.env?.staging) delete config.env.staging.account_id
@@ -866,13 +882,14 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 			`bindings.${bindingEnv}.app.worker_name`,
 		)
 		if (appWorkerName) {
-			const serviceTable = deployEnv === 'staging' ? '[[env.staging.services]]' : '[[services]]'
+			const serviceTable =
+				deployEnv === 'staging' ? '[[env.staging.services]]' : '[[services]]'
 			if (!content.includes(`service = "${appWorkerName}"`)) {
 				content += `\n${serviceTable}\nbinding = "APP"\nservice = "${appWorkerName}"\n`
 				patches.push(`services.APP ← ${appWorkerName}`)
 			}
 		}
-		
+
 		const sitesDataKvId = readEnv(
 			`SITES_DATA_KV_ID${suffix}`,
 			launchConfig,
@@ -881,7 +898,9 @@ function patchTomlApp(appKey, deployEnv, launchConfig, requireBindings) {
 		if (sitesDataKvId) {
 			if (deployEnv === 'staging') {
 				content += `\n[[env.staging.kv_namespaces]]\nbinding = "SITES_DATA_KV"\nid = "${sitesDataKvId}"\n`
-				patches.push(`env.staging.kv_namespaces (SITES_DATA_KV) ← SITES_DATA_KV_ID${suffix}`)
+				patches.push(
+					`env.staging.kv_namespaces (SITES_DATA_KV) ← SITES_DATA_KV_ID${suffix}`,
+				)
 			} else {
 				applyToml(
 					/(binding\s*=\s*"SITES_DATA_KV"\s*\n\s*id\s*=\s*")[^"]+(")/,

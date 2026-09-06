@@ -25,6 +25,3 @@ name = "epic-startup-sites-preview"
 [env.staging]
 name = "epic-startup-sites-staging"
 
-[[kv_namespaces]]
-binding = "SITES_DATA_KV"
-id = "00000000000000000000000000000001"

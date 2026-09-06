@@ -73,12 +73,8 @@ function log(message, color = 'reset') {
 
 /** Strip values that look like API tokens or secrets from a string. */
 function redactSecrets(message) {
-	return String(message).replace(
-		/[A-Za-z0-9_-]{32,}/g,
-		(match) =>
-			/^[0-9a-f]{8}-/.test(match)
-				? match
-				: `${match.slice(0, 4)}…[REDACTED]`,
+	return String(message).replace(/[A-Za-z0-9_-]{32,}/g, (match) =>
+		/^[0-9a-f]{8}-/.test(match) ? match : `${match.slice(0, 4)}…[REDACTED]`,
 	)
 }
 
@@ -405,7 +401,10 @@ function runWrangler(args, cwd, { env, input } = {}) {
 		encoding: 'utf8',
 		input,
 		env: env ? { ...process.env, ...env } : process.env,
-		stdio: input !== undefined ? ['pipe', 'pipe', 'pipe'] : ['inherit', 'pipe', 'pipe'],
+		stdio:
+			input !== undefined
+				? ['pipe', 'pipe', 'pipe']
+				: ['inherit', 'pipe', 'pipe'],
 	})
 	if (result.status !== 0) {
 		throw new Error(
