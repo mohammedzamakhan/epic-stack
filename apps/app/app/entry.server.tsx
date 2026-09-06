@@ -6,7 +6,7 @@ import {
 } from '@repo/common'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
-import { sentryLogger, sanitizeUrl } from '@repo/observability'
+import { logger, sanitizeUrl } from '@repo/observability'
 import { isbot } from 'isbot'
 import { renderToReadableStream } from 'react-dom/server'
 import {
@@ -23,6 +23,7 @@ import {
 } from '#app/utils/csp-frame-src.server.ts'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
+import { capturePostHogServerException } from './utils/posthog.server.ts'
 
 export const streamTimeout = 5000
 
@@ -48,9 +49,6 @@ function applySecurityHeaders(responseHeaders: Headers) {
 			'Strict-Transport-Security',
 			'max-age=31536000; includeSubDomains; preload',
 		)
-		if (ENV.SENTRY_DSN) {
-			responseHeaders.append('Document-Policy', 'js-profiling')
-		}
 	}
 }
 
@@ -105,7 +103,12 @@ function applyContentSecurity(
 						ENV.TENANT_API_URL_KSA
 							? ENV.TENANT_API_URL_KSA.replace(/\/$/, '')
 							: undefined,
-						ENV.SENTRY_DSN ? '*.sentry.io' : undefined,
+						ENV.POSTHOG_PROJECT_TOKEN?.startsWith('phc_') && ENV.POSTHOG_HOST
+							? new URL(ENV.POSTHOG_HOST).origin
+							: undefined,
+						ENV.POSTHOG_PROJECT_TOKEN?.startsWith('phc_')
+							? 'https://*.posthog.com'
+							: undefined,
 						'https://cdn.jsdelivr.net',
 						"'self'",
 						...tenantApiConnectSrc(ENV),
@@ -125,6 +128,7 @@ function applyContentSecurity(
 					'script-src-attr': builderMode
 						? [`'nonce-${nonce}'`, "'unsafe-inline'"]
 						: [`'nonce-${nonce}'`],
+					'worker-src': ["'self'", 'blob:', 'data:'],
 				},
 			},
 		},
@@ -198,13 +202,13 @@ export async function handleDataRequest(response: Response) {
 
 export function handleError(
 	error: unknown,
-	{ request }: LoaderFunctionArgs | ActionFunctionArgs,
+	{ request, context }: LoaderFunctionArgs | ActionFunctionArgs,
 ): void {
 	if (request.signal.aborted) {
 		return
 	}
 
-	const requestLogger = sentryLogger.child({
+	const requestLogger = logger.child({
 		url: sanitizeUrl(request.url),
 		method: request.method,
 	})
@@ -214,4 +218,6 @@ export function handleError(
 	} else {
 		requestLogger.error({ error }, 'Unknown error in request handling')
 	}
+
+	capturePostHogServerException(context, error, request)
 }

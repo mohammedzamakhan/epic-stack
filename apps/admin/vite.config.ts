@@ -4,10 +4,6 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import { getLocalDomain } from '@repo/config/brand'
-import {
-	type SentryReactRouterBuildOptions,
-	sentryReactRouter,
-} from '@sentry/react-router'
 import tailwindcss from '@tailwindcss/vite'
 import { varlockVitePlugin } from '@varlock/vite-integration'
 import { defineConfig, type Plugin } from 'vite'
@@ -25,10 +21,8 @@ function cloudflareWorkerAliasPlugin(): Plugin | null {
 	const workerFile = (name: string) => path.resolve(__dirname, 'workers', name)
 	const ssrOnly: Record<string, string> = {
 		'isomorphic-dompurify': workerFile('dompurify-stub.ts'),
-		'@sentry/react-router': workerFile('sentry-stub.ts'),
 	}
 	const always: Record<string, string> = {
-		'@sentry/profiling-node': workerFile('litefs-stub.ts'),
 		'node:sqlite': workerFile('node-sqlite-stub.ts'),
 	}
 	const remixCrypto = workerFile('remix-crypto-stub.ts')
@@ -81,24 +75,6 @@ function stubCacheServerPlugin(): Plugin {
 	}
 }
 
-const sentryConfig: SentryReactRouterBuildOptions = {
-	authToken: process.env.SENTRY_AUTH_TOKEN,
-	org: process.env.SENTRY_ORG,
-	project: process.env.SENTRY_PROJECT,
-
-	unstable_sentryVitePluginOptions: {
-		release: {
-			name: process.env.COMMIT_SHA,
-			setCommits: {
-				auto: true,
-			},
-		},
-		sourcemaps: {
-			filesToDeleteAfterUpload: ['./build/**/*.map'],
-		},
-	},
-}
-
 export default defineConfig((config) => ({
 	base: MODE === 'test' ? 'http://localhost:3004' : undefined,
 	build: {
@@ -109,12 +85,7 @@ export default defineConfig((config) => ({
 			? {}
 			: {
 					input: config.isSsrBuild ? './server/app.ts' : undefined,
-					external: [
-						/node:.*/,
-						'fsevents',
-						'@sentry/profiling-node',
-						'@sentry-internal/node-cpu-profiler',
-					],
+					external: [/node:.*/, 'fsevents'],
 				},
 
 		assetsInlineLimit: isCloudflareDeploy
@@ -126,18 +97,12 @@ export default defineConfig((config) => ({
 				},
 
 		// The Cloudflare bundle includes the entire SSR dependency graph. Generating
-		// source maps for it pushes the CI build beyond the hosted runner's heap,
-		// while Sentry uploads are disabled for this target below.
+		// source maps for it pushes the CI build beyond the hosted runner's heap.
 		sourcemap: !isCloudflareDeploy,
 	},
 	optimizeDeps: {
 		include: ['@repo/email', '@repo/integrations', '@repo/ai', '@repo/ui'],
-		exclude: [
-			'@sentry/profiling-node',
-			'@sentry-internal/node-cpu-profiler',
-			'@repo/marketing',
-			'@repo/marketing-workflow',
-		],
+		exclude: ['@repo/marketing', '@repo/marketing-workflow'],
 	},
 	...(MODE !== 'test' && {
 		ssr: {
@@ -160,7 +125,6 @@ export default defineConfig((config) => ({
 			protocol: 'ws',
 		},
 	},
-	sentryConfig,
 	plugins: [
 		isCloudflareDeploy
 			? cloudflare({ viteEnvironment: { name: 'ssr' } })
@@ -176,11 +140,6 @@ export default defineConfig((config) => ({
 		MODE === 'test' ? null : reactRouter(),
 		macrosPlugin(),
 		lingui(),
-		MODE === 'production' &&
-		process.env.SENTRY_AUTH_TOKEN &&
-		!isCloudflareDeploy
-			? sentryReactRouter(sentryConfig, config)
-			: null,
 	].filter(Boolean) as Plugin[],
 	test: {
 		include: ['./app/**/*.test.{ts,tsx}'],

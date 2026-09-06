@@ -46,15 +46,13 @@ server-side code anyway. You should be using environment variables for that.
 Additionally, if you're relying on "security through obscurity" then you're
 probably not as secure as you think you are.
 
-Also, source maps are necessary for error monitoring with tools like Sentry.
-Without source maps, you'll only see the minified code in your error monitoring
-tools. This makes it much harder to debug errors in production. And if you're
-debugging your application in production you'll also be limited to minified code
-as well.
+Also, source maps are necessary for production error-monitoring tools. Without
+source maps, you'll only see the minified code in your error monitoring tools.
+This makes it much harder to debug errors in production. And if you're debugging
+your application in production you'll also be limited to minified code as well.
 
-It may be possible to generate the source maps and make them available to
-Sentry, but then prevent them from being sent to the client. More research is
-needed to determine whether this is possible.
+It is possible to generate source maps, upload them to an error-monitoring
+provider during the build, and then prevent them from being sent to the client.
 
 ## Decision
 

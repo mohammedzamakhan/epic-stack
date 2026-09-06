@@ -2,35 +2,31 @@
 
 Date: 2023-06-09
 
-Status: accepted
+Status: amended 2026-09-05
 
 ## Context
 
-Unless you want to be watching your metrics and logs 24/7 you probably want to
-be notified when users experience errors in your application. There are great
-tools for monitoring your application. I've used Sentry for years and it's
-great.
-
-One of the guiding principles of the project is to avoid services. The nature of
-application monitoring requires that the monitor not be part of the application.
-So, we necessarily need to use a service for monitoring.
-
-One nice thing about Sentry is it is open source so we can run it ourselves if
-we like. However, that may be more work than we want to take on at first.
+Production incidents should be discoverable without watching dashboards around
+the clock. The product also needs privacy-aware website and product analytics,
+browser performance signals, structured logs, and readable production errors.
+The App and marketing site run on Cloudflare Workers, which can export runtime
+logs through a native OpenTelemetry destination.
 
 ## Decision
 
-We'll set up the Epic Stack to use Sentry and document how you could get it
-running yourself if you prefer to self-host it.
+Use PostHog for website analytics, App product analytics, browser/server error
+tracking, and log exploration. Scope the browser/server SDKs to `apps/app` and
+`apps/web`. Keep analytics optional: an empty project token disables it.
 
-We'll also ensure that we defer the setup requirement to later so you can still
-get started with the Epic Stack without monitoring in place which is very useful
-for experiments and makes it easier to remove or adapt to a different solution
-if you so desire.
+The authenticated App requires explicit analytics consent before capture or
+identity. Marketing uses cookieless analytics and runs the SDK loader through
+Partytown. Cloudflare exports Worker logs directly instead of coupling shared
+packages to a telemetry vendor.
 
 ## Consequences
 
-We tie the Epic Stack to Sentry a bit, but I think that's a solid trade-off for
-the benefit of production error monitoring that Sentry provides. People who need
-the scale where Sentry starts to cost money (https://sentry.io/pricing/) will
-probably be making money at that point and will be grateful for the monitoring.
+One product now correlates analytics, errors, and logs. Partytown protects the
+marketing critical path, while the App keeps its SDK on the main thread for
+React integration and consent control. Cloudflare destination setup and
+source-map credentials remain external deployment prerequisites. Telemetry must
+continue to exclude secrets and customer PII.

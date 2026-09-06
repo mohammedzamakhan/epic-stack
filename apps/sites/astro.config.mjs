@@ -103,11 +103,7 @@ export default defineConfig({
 			allowedHosts: [`.${localDomain}`, localDomain, 'localhost'],
 		},
 		optimizeDeps: {
-			exclude: [
-				'@sentry/profiling-node',
-				'@sentry-internal/node-cpu-profiler',
-				'@lingui/core/macro',
-			],
+			exclude: ['@lingui/core/macro'],
 		},
 		resolve: {
 			alias: {

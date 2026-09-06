@@ -21,7 +21,7 @@ be done in the `apps/app/app/entry.server.tsx` file.
 			directives: {
 				'connect-src': [
 					MODE === 'development' ? 'ws:' : null,
-					process.env.SENTRY_DSN ? '*.sentry.io' : null,
+					'https://*.posthog.com',
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],

@@ -1,6 +1,5 @@
 import pino from 'pino'
 import type { Logger as PinoLogger } from 'pino'
-import * as Sentry from '@sentry/react-router'
 import { getClientIp as extractClientIp } from '@repo/security'
 
 /**
@@ -10,7 +9,6 @@ import { getClientIp as extractClientIp } from '@repo/security'
  * - Structured JSON logging
  * - Automatic sensitive data redaction
  * - Pretty printing in development
- * - Integration with Sentry for errors
  * - Child loggers for context
  *
  * @example
@@ -102,63 +100,6 @@ const redactPaths = [
 	'*.ssn',
 	'*.socialSecurityNumber',
 ]
-
-/**
- * Sanitize data for Sentry to prevent sensitive data leakage
- * Pino's redaction doesn't apply to Sentry's extra field
- */
-function sanitizeForSentry(obj: any): any {
-	if (!obj || typeof obj !== 'object') return obj
-
-	// Deep clone to avoid mutating original
-	const sanitized = JSON.parse(JSON.stringify(obj))
-
-	// List of sensitive key patterns (case-insensitive)
-	const sensitivePatterns = [
-		'password',
-		'token',
-		'secret',
-		'key',
-		'apikey',
-		'api_key',
-		'accesstoken',
-		'refreshtoken',
-		'authorization',
-		'cookie',
-		'credential',
-		'privatekey',
-		'saml',
-		'assertion',
-		'ssn',
-		'creditcard',
-		'cardnumber',
-		'cvv',
-	]
-
-	function redactObject(data: any): any {
-		if (!data || typeof data !== 'object') return data
-
-		for (const [key, value] of Object.entries(data)) {
-			const keyLower = key.toLowerCase()
-
-			// Check if key matches sensitive pattern
-			const isSensitive = sensitivePatterns.some((pattern) =>
-				keyLower.includes(pattern),
-			)
-
-			if (isSensitive) {
-				data[key] = '[REDACTED]'
-			} else if (typeof value === 'object' && value !== null) {
-				// Recursively redact nested objects
-				data[key] = redactObject(value)
-			}
-		}
-
-		return data
-	}
-
-	return redactObject(sanitized)
-}
 
 /**
  * Validate IP address format to prevent injection attacks
@@ -302,93 +243,6 @@ const createLogger = (): PinoLogger => {
  * Base logger instance
  */
 export const logger = createLogger()
-
-/**
- * Enhanced logger that integrates with Sentry
- * Automatically captures errors and warnings to Sentry
- */
-export const createSentryLogger = (baseLogger: PinoLogger = logger) => {
-	return {
-		trace: baseLogger.trace.bind(baseLogger),
-		debug: baseLogger.debug.bind(baseLogger),
-		info: baseLogger.info.bind(baseLogger),
-
-		warn: (obj: any, msg?: string, ...args: any[]) => {
-			baseLogger.warn(obj, msg, ...args)
-
-			// Send warnings to Sentry with lower severity (sanitized)
-			if (typeof obj === 'object' && obj !== null) {
-				Sentry.captureMessage(msg || obj.message || 'Warning logged', {
-					level: 'warning',
-					extra: sanitizeForSentry(obj),
-				})
-			}
-		},
-
-		error: (obj: any, msg?: string, ...args: any[]) => {
-			baseLogger.error(obj, msg, ...args)
-
-			// Send errors to Sentry (sanitized)
-			if (obj instanceof Error) {
-				Sentry.captureException(obj, {
-					extra: sanitizeForSentry(
-						typeof msg === 'string' ? { message: msg } : msg,
-					),
-				})
-			} else if (
-				typeof obj === 'object' &&
-				obj !== null &&
-				obj.err instanceof Error
-			) {
-				Sentry.captureException(obj.err, {
-					extra: sanitizeForSentry({ ...obj, message: msg }),
-				})
-			} else if (msg) {
-				Sentry.captureException(new Error(msg), {
-					extra: sanitizeForSentry(obj),
-				})
-			}
-		},
-
-		fatal: (obj: any, msg?: string, ...args: any[]) => {
-			baseLogger.fatal(obj, msg, ...args)
-
-			// Send fatal errors to Sentry with critical level (sanitized)
-			// Use explicit captureException for guaranteed synchronous capture
-			if (obj instanceof Error) {
-				Sentry.captureException(obj, {
-					level: 'fatal',
-					extra: sanitizeForSentry(
-						typeof msg === 'string' ? { message: msg } : msg,
-					),
-				})
-			} else if (
-				typeof obj === 'object' &&
-				obj !== null &&
-				obj.err instanceof Error
-			) {
-				Sentry.captureException(obj.err, {
-					level: 'fatal',
-					extra: sanitizeForSentry({ ...obj, message: msg }),
-				})
-			} else if (msg) {
-				Sentry.captureException(new Error(msg), {
-					level: 'fatal',
-					extra: sanitizeForSentry(obj),
-				})
-			}
-		},
-
-		child: (bindings: Record<string, any>) => {
-			return createSentryLogger(baseLogger.child(bindings))
-		},
-	}
-}
-
-/**
- * Default export with Sentry integration
- */
-export const sentryLogger = createSentryLogger(logger)
 
 /**
  * Create a child logger with specific context

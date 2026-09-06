@@ -1,15 +1,16 @@
-import DOMPurify from 'isomorphic-dompurify'
+import sanitizeHtml from 'sanitize-html'
 
-// Enforce rel="noopener noreferrer" for all target="_blank" links
-DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
-	if (data.attrName === 'target' && data.attrValue === '_blank') {
-		const rel = node.getAttribute('rel') || ''
-		const relValues = rel.split(/\s+/).filter(Boolean)
-		if (!relValues.includes('noopener')) relValues.push('noopener')
-		if (!relValues.includes('noreferrer')) relValues.push('noreferrer')
-		node.setAttribute('rel', relValues.join(' '))
-	}
-})
+const transformTargetBlankLinks = {
+	a: (tagName: string, attribs: Record<string, string>) => {
+		if (attribs.target === '_blank') {
+			const rel = (attribs.rel || '').split(/\s+/).filter(Boolean)
+			if (!rel.includes('noopener')) rel.push('noopener')
+			if (!rel.includes('noreferrer')) rel.push('noreferrer')
+			attribs.rel = rel.join(' ')
+		}
+		return { tagName, attribs }
+	},
+}
 
 /**
  * Sanitize comment content to prevent XSS attacks while allowing safe HTML formatting
@@ -21,9 +22,9 @@ DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
 export function sanitizeCommentContent(content: string): string {
 	if (!content || typeof content !== 'string') return ''
 
-	// Configure DOMPurify to allow safe HTML tags for comment formatting
-	return DOMPurify.sanitize(content, {
-		ALLOWED_TAGS: [
+	// Configure sanitize-html to allow safe HTML tags for comment formatting
+	return sanitizeHtml(content, {
+		allowedTags: [
 			// Text formatting
 			'p',
 			'br',
@@ -42,20 +43,21 @@ export function sanitizeCommentContent(content: string): string {
 			'code',
 			'pre',
 		],
-		ALLOWED_ATTR: [
-			'href',
-			'target',
-			'rel',
-			'class', // For styling mentions
-			'data-mention-id', // For @mentions
-			'data-id', // For TipTap mentions
-			'data-type', // For TipTap mentions
+		allowedAttributes: {
+			'*': ['class', 'data-mention-id', 'data-id', 'data-type'],
+			a: ['href', 'target', 'rel'],
+		},
+		transformTags: transformTargetBlankLinks,
+		allowedSchemes: [
+			'http',
+			'https',
+			'mailto',
+			'tel',
+			'callto',
+			'sms',
+			'cid',
+			'xmpp',
 		],
-		// Additional security configurations
-		ALLOW_DATA_ATTR: false, // Only allow specific data attributes
-		ALLOW_UNKNOWN_PROTOCOLS: false,
-		ALLOWED_URI_REGEXP:
-			/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 	})
 }
 
@@ -66,10 +68,9 @@ export function sanitizeCommentContent(content: string): string {
 export function sanitizeTextContent(content: string): string {
 	if (!content || typeof content !== 'string') return ''
 
-	return DOMPurify.sanitize(content, {
-		ALLOWED_TAGS: [], // No HTML tags allowed
-		ALLOWED_ATTR: [],
-		KEEP_CONTENT: true, // Keep text content, remove tags
+	return sanitizeHtml(content, {
+		allowedTags: [], // No HTML tags allowed
+		allowedAttributes: {},
 	})
 }
 
@@ -87,8 +88,8 @@ export function sanitizeWebsiteContent(
 ): string {
 	if (!content || typeof content !== 'string') return ''
 
-	return DOMPurify.sanitize(content, {
-		ALLOWED_TAGS: allowHtml
+	return sanitizeHtml(content, {
+		allowedTags: allowHtml
 			? [
 					'p',
 					'br',
@@ -104,12 +105,9 @@ export function sanitizeWebsiteContent(
 					'pre',
 				]
 			: [],
-		ALLOWED_ATTR: allowHtml ? ['href', 'target', 'rel'] : [],
-		KEEP_CONTENT: true,
-		ALLOW_DATA_ATTR: false,
-		ALLOW_UNKNOWN_PROTOCOLS: false,
-		ALLOWED_URI_REGEXP:
-			/^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+		allowedAttributes: allowHtml ? { a: ['href', 'target', 'rel'] } : {},
+		transformTags: allowHtml ? transformTargetBlankLinks : undefined,
+		allowedSchemes: ['http', 'https', 'mailto', 'tel'],
 	})
 }
 
@@ -119,8 +117,8 @@ export function sanitizeWebsiteContent(
 export function sanitizeNoteContent(content: string): string {
 	if (!content || typeof content !== 'string') return ''
 
-	return DOMPurify.sanitize(content, {
-		ALLOWED_TAGS: [
+	return sanitizeHtml(content, {
+		allowedTags: [
 			'p',
 			'br',
 			'strong',
@@ -144,18 +142,20 @@ export function sanitizeNoteContent(content: string): string {
 			'pre',
 			'div',
 		],
-		ALLOWED_ATTR: [
-			'href',
-			'target',
-			'rel',
-			'class',
-			'data-mention-id',
-			'data-id',
-			'data-type',
+		allowedAttributes: {
+			'*': ['class', 'data-mention-id', 'data-id', 'data-type'],
+			a: ['href', 'target', 'rel'],
+		},
+		transformTags: transformTargetBlankLinks,
+		allowedSchemes: [
+			'http',
+			'https',
+			'mailto',
+			'tel',
+			'callto',
+			'sms',
+			'cid',
+			'xmpp',
 		],
-		ALLOW_DATA_ATTR: false,
-		ALLOW_UNKNOWN_PROTOCOLS: false,
-		ALLOWED_URI_REGEXP:
-			/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 	})
 }

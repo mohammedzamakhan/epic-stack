@@ -2,7 +2,11 @@ import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { useFetcher } from 'react-router'
 
-export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
+export function CookieConsentBanner({
+	consent,
+}: {
+	consent: boolean | undefined
+}) {
 	const fetcher = useFetcher()
 
 	if (consent !== undefined) {

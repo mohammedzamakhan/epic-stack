@@ -1,8 +1,6 @@
 import { type Config } from '@react-router/dev/config'
 import { getLocalDomain } from '@repo/config/brand'
-import { sentryOnBuildEnd } from '@sentry/react-router'
 
-const MODE = process.env.NODE_ENV
 const domain = getLocalDomain()
 const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare'
 
@@ -19,14 +17,4 @@ export default {
 	// Dev proxy (admin.{domain}:2999 → localhost:3005) forwards a different Origin
 	// than the backend Host header; allow the public dev origin for fetcher actions.
 	allowedActionOrigins: isCloudflare ? [] : [`admin.${domain}:2999`],
-
-	buildEnd: async ({ viteConfig, reactRouterConfig, buildManifest }) => {
-		if (MODE === 'production' && process.env.SENTRY_AUTH_TOKEN) {
-			await sentryOnBuildEnd({
-				viteConfig,
-				reactRouterConfig,
-				buildManifest,
-			})
-		}
-	},
 } satisfies Config

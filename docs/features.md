@@ -52,7 +52,8 @@ Here are a few things you get today:
 - Linting with [ESLint](https://eslint.org/)
 - Static Types with [TypeScript](https://typescriptlang.org/)
 - Runtime schema validation with [zod](https://zod.dev/)
-- Error monitoring with [Sentry](https://sentry.io/welcome/)
+- Product analytics, error tracking, and logs with
+  [PostHog](https://posthog.com/)
 - Light/Dark/System mode (without a flash of incorrect theme)
 
 Here are some things that will likely find their way into the Epic Stack (or the
