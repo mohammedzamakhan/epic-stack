@@ -45,6 +45,7 @@ export type PublicOrganization = {
 		appleTouchIcon: string
 	} | null
 	announcements?: PublicSiteAnnouncement[]
+	googleAnalyticsId?: string | null
 }
 
 function getAppUrl(): string {

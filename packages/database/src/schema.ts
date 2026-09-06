@@ -2142,6 +2142,7 @@ export const Organization = sqliteTable(
 		shopProductDescription: text(),
 		shopProductPriceCents: integer(),
 		shopEnabled: integer({ mode: 'boolean' }).default(false).notNull(),
+		googleAnalyticsId: text(),
 	},
 	(table) => [
 		uniqueIndex('Organization_customDomain_key').on(table.customDomain),

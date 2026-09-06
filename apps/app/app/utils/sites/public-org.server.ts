@@ -44,6 +44,7 @@ export type PublicSiteOrganization = {
 	siteLocales: string | null
 	siteDefaultLocale: string | null
 	siteIconKey: string | null
+	googleAnalyticsId: string | null
 	announcements: Array<{
 		id: string
 		content: string
@@ -75,6 +76,7 @@ export type PublicSitePayload = {
 		original: string
 	} | null
 	announcements: PublicSiteAnnouncement[]
+	googleAnalyticsId: string | null
 }
 
 const ANNOUNCEMENT_TYPES = ['info', 'warning', 'error', 'success'] as const
@@ -172,6 +174,7 @@ export function toPublicSitePayload(
 				toPublicAnnouncement(announcement, locale, localesConfig.defaultLocale),
 			)
 			.filter((item): item is PublicSiteAnnouncement => item !== null),
+		googleAnalyticsId: organization.googleAnalyticsId ?? null,
 	}
 }
 
