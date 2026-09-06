@@ -80,7 +80,7 @@ msgstr ""
 msgid "{announcementCount} announcements"
 msgstr "{announcementCount} announcements"
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:309
+#: app/routes/_app+/$orgSlug_+/index.tsx:308
 msgid "{avgPerDay} avg per day"
 msgstr ""
 
@@ -136,6 +136,10 @@ msgstr ""
 msgid "{minutes}m ago"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1117
+msgid "{notFoundCount} missing URLs logged"
+msgstr "{notFoundCount} missing URLs logged"
+
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:638
 msgid "{pageCount} pages"
 msgstr "{pageCount} pages"
@@ -144,10 +148,14 @@ msgstr "{pageCount} pages"
 msgid "{processedObjects} of {totalObjects} files copied{failedObjectsText}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:252
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:249
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns._index.tsx:160
 msgid "{recipientCount} recipients"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:994
+msgid "{redirectCount} redirects"
+msgstr "{redirectCount} redirects"
 
 #: app/routes/_auth+/waitlist.tsx:331
 msgid "{referralCount, plural, one {# person joined using your link!} other {# people joined using your link!}}"
@@ -173,11 +181,11 @@ msgstr ""
 msgid "{stepCount} steps"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:305
+#: app/routes/_app+/$orgSlug_+/index.tsx:304
 msgid "{totalNotes} total notes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:325
+#: app/routes/_app+/$orgSlug_+/index.tsx:324
 msgid "{trend}%"
 msgstr ""
 
@@ -204,7 +212,7 @@ msgstr ""
 msgid "← Back to SSO login"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:316
+#: app/routes/_app+/$orgSlug_+/index.tsx:315
 msgid "+{trend}%"
 msgstr ""
 
@@ -247,9 +255,17 @@ msgstr ""
 msgid "1 announcement"
 msgstr "1 announcement"
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1115
+msgid "1 missing URL logged"
+msgstr "1 missing URL logged"
+
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:636
 msgid "1 page"
 msgstr "1 page"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:992
+msgid "1 redirect"
+msgstr "1 redirect"
 
 #: app/components/settings/cards/organization/team-size-card.tsx:53
 msgid "1-10 people"
@@ -262,6 +278,10 @@ msgstr ""
 #: app/components/settings/cards/organization/team-size-card.tsx:56
 msgid "201-500 people"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:782
+msgid "404 Error History"
+msgstr "404 Error History"
 
 #: app/components/settings/cards/organization/team-size-card.tsx:57
 msgid "500+ people"
@@ -280,7 +300,7 @@ msgstr ""
 msgid "Accent color"
 msgstr ""
 
-#: app/components/privacy-banner.tsx:59
+#: app/components/privacy-banner.tsx:63
 #: app/routes/_app+/organizations.tsx:302
 msgid "Accept"
 msgstr ""
@@ -314,9 +334,11 @@ msgid "Acme Inc."
 msgstr ""
 
 #: app/components/command-menu.tsx:115
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:953
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:963
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:606
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:622
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:865
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1042
 msgid "Actions"
 msgstr ""
 
@@ -325,19 +347,19 @@ msgid "active"
 msgstr ""
 
 #: app/components/settings/cards/sessions-card.tsx:249
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:75
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:72
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:54
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:238
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:114
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:983
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:993
 msgid "Active"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:659
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:673
 msgid "Activity"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1644
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1752
 msgid "Add"
 msgstr ""
 
@@ -347,7 +369,7 @@ msgstr ""
 msgid "Add {0}"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:343
+#: app/components/settings/cards/organization/site-card.tsx:356
 msgid "Add a CNAME record for your domain (or subdomain) pointing to:"
 msgstr ""
 
@@ -356,7 +378,11 @@ msgstr ""
 msgid "Add a comment..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5429
+#: app/components/settings/cards/organization/site-analytics-card.tsx:66
+msgid "Add a Google Analytics 4 Measurement ID to track visitors on your tenant website. Leave blank to disable tracking."
+msgstr "Add a Google Analytics 4 Measurement ID to track visitors on your tenant website. Leave blank to disable tracking."
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5528
 msgid "Add a hero, gallery, or any block between the header and footer."
 msgstr ""
 
@@ -364,7 +390,7 @@ msgstr ""
 msgid "Add a link"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5537
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5636
 msgid "Add a section from the left to see a live preview."
 msgstr ""
 
@@ -382,16 +408,16 @@ msgstr ""
 msgid "Add another invitation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3874
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3982
 msgid "Add card"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:928
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4184
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4292
 msgid "Add column"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3564
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3672
 msgid "Add feature"
 msgstr ""
 
@@ -400,12 +426,12 @@ msgstr ""
 msgid "Add images"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3068
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4247
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3176
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4355
 msgid "Add link"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:388
+#: app/components/app-sidebar.tsx:394
 msgid "Add members"
 msgstr ""
 
@@ -417,7 +443,7 @@ msgstr ""
 msgid "Add more connections"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5695
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5794
 msgid "Add new page"
 msgstr ""
 
@@ -425,7 +451,7 @@ msgstr ""
 msgid "Add next steps"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:819
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:833
 msgid "Add notes, links, or media to capture what matters."
 msgstr "Add notes, links, or media to capture what matters."
 
@@ -435,44 +461,44 @@ msgstr "Add notes, links, or media to capture what matters."
 msgid "Add organization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3732
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3840
 msgid "Add photo or video"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3495
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3603
 msgid "Add question"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4112
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4220
 msgid "Add review"
 msgstr ""
 
 #: app/components/data-table.tsx:324
-msgid "Add reviewer"
-msgstr ""
+#~ msgid "Add reviewer"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1569
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1575
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1677
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1683
 msgid "Add section"
 msgstr ""
 
 #: app/components/data-table.tsx:544
-msgid "Add Section"
-msgstr ""
+#~ msgid "Add Section"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4281
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4389
 msgid "Add social link"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:789
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:799
 msgid "Add the following configuration to the file:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:822
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:832
 msgid "Add this configuration to your .kiro/settings/mcp.json:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2519
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2627
 msgid "Add URL"
 msgstr ""
 
@@ -500,7 +526,7 @@ msgstr ""
 msgid "Additional users: ${monthlyPrice}/user/month"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2557
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2665
 msgid "Adds a noindex tag so this page stays off Google and Bing."
 msgstr ""
 
@@ -521,7 +547,7 @@ msgstr ""
 #~ msgstr ""
 
 #: app/components/ai/global-ai-panel.tsx:335
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:660
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:674
 msgid "AI Assistant"
 msgstr ""
 
@@ -533,7 +559,7 @@ msgstr ""
 #~ msgid "AI is thinking..."
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2416
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2524
 msgid "Aim for one or two sentences that make someone click."
 msgstr ""
 
@@ -543,8 +569,8 @@ msgid "All"
 msgstr ""
 
 #: app/components/data-table.tsx:351
-msgid "All assigned"
-msgstr ""
+#~ msgid "All assigned"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:345
 msgid "All checks passed. This workflow is ready to publish."
@@ -583,7 +609,7 @@ msgstr ""
 msgid "Already read"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3805
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3913
 msgid "Alt text"
 msgstr ""
 
@@ -595,25 +621,25 @@ msgstr ""
 msgid "Announcement actions"
 msgstr "Announcement actions"
 
-#: app/components/app-sidebar.tsx:313
+#: app/components/app-sidebar.tsx:314
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:27
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:553
 msgid "Announcements"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3511
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3619
 msgid "Answer"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:543
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:553
 msgid "API Key"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:520
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:530
 msgid "API Key Created"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:615
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:625
 msgid "API Keys"
 msgstr ""
 
@@ -642,11 +668,11 @@ msgstr ""
 msgid "Are you sure you want to delete \"{journeyName}\"?"
 msgstr ""
 
-#: app/components/note/comment-item.tsx:121
+#: app/components/note/comment-item.tsx:123
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1042
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1057
 msgid "Are you sure you want to revoke access for {clientName}? This action cannot be undone."
 msgstr ""
 
@@ -655,7 +681,7 @@ msgstr ""
 msgid "Are you sure?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3350
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3458
 msgid "Arrangement"
 msgstr ""
 
@@ -724,11 +750,11 @@ msgstr ""
 msgid "Authorize MCP Client"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:966
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:976
 msgid "Authorized {createdAt}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:925
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:935
 msgid "Authorized Clients"
 msgstr ""
 
@@ -757,17 +783,17 @@ msgstr ""
 msgid "Automation saved successfully"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:277
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:90
+#: app/components/app-sidebar.tsx:278
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:87
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:260
 msgid "Automations"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3947
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4055
 msgid "Autoplay"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1260
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1275
 msgid "Available Tools"
 msgstr ""
 
@@ -789,7 +815,7 @@ msgid "Back to broadcasts"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.sent.tsx:49
-#: app/routes/_auth+/forgot-password.tsx:242
+#: app/routes/_auth+/forgot-password.tsx:245
 msgid "Back to login"
 msgstr ""
 
@@ -797,8 +823,8 @@ msgstr ""
 msgid "Back to nodes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3190
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4608
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3298
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4716
 msgid "Background"
 msgstr ""
 
@@ -819,7 +845,7 @@ msgstr ""
 msgid "Billed monthly"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:364
+#: app/components/app-sidebar.tsx:370
 #: app/components/command-menu.tsx:181
 msgid "Billing"
 msgstr ""
@@ -832,10 +858,10 @@ msgstr ""
 msgid "Body"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:304
+#: app/components/app-sidebar.tsx:305
 #: app/components/website/branding-panel.tsx:244
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4911
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5688
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5019
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5787
 msgid "Branding"
 msgstr ""
 
@@ -843,21 +869,21 @@ msgstr ""
 msgid "Break down complex tasks"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/campaigns.$campaignId.tsx:76
+#: app/routes/_app+/$orgSlug_+/marketing+/campaigns.$campaignId.tsx:73
 msgid "Broadcast not found"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:270
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:84
+#: app/components/app-sidebar.tsx:271
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:81
 #: app/routes/_app+/$orgSlug_+/marketing+/campaigns._index.tsx:74
 msgid "Broadcasts"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:150
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:147
 msgid "Broadcasts, automations, and performance at a glance."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3313
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3421
 msgid "Browsers only autoplay video when it is muted."
 msgstr ""
 
@@ -865,16 +891,16 @@ msgstr ""
 msgid "Bucket Name"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5730
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5829
 msgid "Build"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3445
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3553
 msgid "Button"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3153
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4042
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3261
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4150
 msgid "Buttons"
 msgstr ""
 
@@ -904,7 +930,7 @@ msgstr ""
 #: app/components/core/feedback-modal.tsx:109
 #: app/components/form-actions.tsx:28
 #: app/components/note/comment-input.tsx:209
-#: app/components/note/comment-item.tsx:276
+#: app/components/note/comment-item.tsx:290
 #: app/components/note/share-note-button.tsx:317
 #: app/components/settings/cards/organization/announcement-sheet.tsx:519
 #: app/components/settings/cards/organization/danger-zone-card.tsx:131
@@ -916,14 +942,18 @@ msgstr ""
 #: app/components/settings/two-factor-form.tsx:261
 #: app/components/ui/photo-crop-form.tsx:219
 #: app/components/website/translate-provider.tsx:258
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:462
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1075
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:467
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1090
 #: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:861
 #: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:917
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1064
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1078
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:484
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:497
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1639
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1747
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1430
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1468
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1514
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1552
 #: app/routes/organizations+/create.tsx:796
 #: app/routes/organizations+/create.tsx:932
 msgid "Cancel"
@@ -945,16 +975,16 @@ msgstr "Cancel reply"
 msgid "Cancelled"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3815
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3923
 msgid "Caption"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4017
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4125
 msgid "Card position"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:312
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3858
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3966
 msgid "Cards"
 msgstr ""
 
@@ -962,8 +992,8 @@ msgstr ""
 msgid "Cards view"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3214
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4028
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3322
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4136
 msgid "Center"
 msgstr ""
 
@@ -996,7 +1026,7 @@ msgstr ""
 msgid "Changes to this note will show up here as your team works on it."
 msgstr "Changes to this note will show up here as your team works on it."
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2319
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2427
 msgid "Changing this URL will break existing links to the page."
 msgstr ""
 
@@ -1046,20 +1076,32 @@ msgstr ""
 msgid "Choose your plan"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3432
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3672
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3540
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3780
 msgid "Circle"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:775
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:785
 msgid "Claude Desktop Setup"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:861
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1541
+msgid "Clear all 404 history?"
+msgstr "Clear all 404 history?"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:819
+msgid "Clear history"
+msgstr "Clear history"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1563
+msgid "Clear History"
+msgstr "Clear History"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:871
 msgid "Click \"Add Server\" and paste this configuration:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:784
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:794
 msgid "Click \"Edit Config\" to open claude_desktop_config.json"
 msgstr ""
 
@@ -1067,11 +1109,11 @@ msgstr ""
 msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:70
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:67
 msgid "Click rate"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:872
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:882
 msgid "Click Save and restart Cursor"
 msgstr ""
 
@@ -1080,7 +1122,7 @@ msgstr ""
 msgid "Clicked {0}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:944
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:954
 msgid "Client"
 msgstr ""
 
@@ -1089,7 +1131,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:353
+#: app/components/settings/cards/organization/site-card.tsx:366
 msgid "Cloudflare is not configured in this environment. Domain is stored for local testing; SSL automation requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID."
 msgstr ""
 
@@ -1099,8 +1141,7 @@ msgstr ""
 msgid "Column name"
 msgstr ""
 
-#: app/components/data-table.tsx:512
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3639
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3747
 msgid "Columns"
 msgstr ""
 
@@ -1108,11 +1149,11 @@ msgstr ""
 msgid "Comment"
 msgstr ""
 
-#: app/components/note/comment-item.tsx:200
+#: app/components/note/comment-item.tsx:214
 msgid "Comment actions"
 msgstr "Comment actions"
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:658
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:672
 msgid "Comments"
 msgstr ""
 
@@ -1128,8 +1169,8 @@ msgstr ""
 msgid "Complete the following steps."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:836
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:875
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:846
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:885
 msgid "Complete the OAuth flow when prompted"
 msgstr ""
 
@@ -1217,7 +1258,7 @@ msgstr ""
 msgid "Connect"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:437
+#: app/components/settings/cards/organization/site-card.tsx:450
 msgid "Connect domain"
 msgstr ""
 
@@ -1229,11 +1270,11 @@ msgstr "Connect payout account"
 #~ msgid "Connect Stripe"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1342
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1357
 msgid "Connect your AI assistants to {organizationName} data using the Model Context Protocol"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:742
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:752
 msgid "Connect your favorite AI client to access your organization's data securely. Follow the instructions for your preferred client below."
 msgstr ""
 
@@ -1245,7 +1286,7 @@ msgstr ""
 msgid "Connected Channels"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:308
+#: app/components/settings/cards/organization/site-card.tsx:321
 msgid "Connected domain"
 msgstr ""
 
@@ -1271,10 +1312,10 @@ msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:425
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:593
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3138
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3328
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3624
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3964
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3246
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3436
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3732
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4072
 msgid "Content"
 msgstr ""
 
@@ -1312,14 +1353,14 @@ msgid "Copied"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:311
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:559
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:569
 #: app/routes/_auth+/waitlist.tsx:318
 msgid "Copied!"
 msgstr ""
 
 #: app/components/organization-invitations.tsx:211
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:316
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:559
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:569
 #: app/routes/_auth+/waitlist.tsx:320
 msgid "Copy"
 msgstr ""
@@ -1358,7 +1399,7 @@ msgstr "Couldn't open {routeTitle}"
 msgid "Create"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:386
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:391
 msgid "Create a new API key to connect your AI assistants to {orgName} data."
 msgstr ""
 
@@ -1396,7 +1437,7 @@ msgstr ""
 msgid "Create an organization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:618
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:628
 msgid "Create and manage API keys to authenticate your MCP clients"
 msgstr ""
 
@@ -1404,9 +1445,9 @@ msgstr ""
 msgid "Create and manage pages for your organization's website."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:383
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:477
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:625
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:388
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:482
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:635
 msgid "Create API Key"
 msgstr ""
 
@@ -1450,11 +1491,16 @@ msgstr ""
 msgid "Create Password"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:676
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1092
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1433
+msgid "Create redirect"
+msgstr "Create redirect"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:686
 msgid "Create your first API key to get started"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:229
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:226
 msgid "Create your first broadcast"
 msgstr ""
 
@@ -1470,7 +1516,7 @@ msgstr ""
 msgid "Create your first page to start building your website."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:651
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:661
 msgid "Created {createdDate}"
 msgstr ""
 
@@ -1486,7 +1532,7 @@ msgstr "Created page"
 msgid "Creating page"
 msgstr "Creating page"
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:472
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:477
 msgid "Creating..."
 msgstr ""
 
@@ -1523,7 +1569,7 @@ msgstr ""
 msgid "Current Subscription"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:851
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:861
 msgid "Cursor Setup"
 msgstr ""
 
@@ -1531,7 +1577,7 @@ msgstr ""
 msgid "Custom colors"
 msgstr "Custom colors"
 
-#: app/components/settings/cards/organization/site-card.tsx:291
+#: app/components/settings/cards/organization/site-card.tsx:304
 msgid "Custom domain"
 msgstr ""
 
@@ -1548,6 +1594,10 @@ msgstr ""
 msgid "Custom trigger event"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1230
+msgid "Custom URL"
+msgstr "Custom URL"
+
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:254
 msgid "customer"
 msgstr ""
@@ -1561,7 +1611,7 @@ msgstr ""
 msgid "Customer Attribute"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:170
+#: app/components/settings/cards/organization/site-card.tsx:183
 msgid "Customer data region"
 msgstr ""
 
@@ -1585,7 +1635,7 @@ msgstr ""
 msgid "customerId is required"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:251
+#: app/components/app-sidebar.tsx:252
 msgid "Customers"
 msgstr ""
 
@@ -1594,8 +1644,8 @@ msgid "Customers pay this amount. You receive {orgSharePercent}% after the platf
 msgstr ""
 
 #: app/components/data-table.tsx:509
-msgid "Customize Columns"
-msgstr ""
+#~ msgid "Customize Columns"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:298
 msgid "Cycles"
@@ -1611,7 +1661,7 @@ msgid "Danger"
 msgstr ""
 
 #: app/components/settings/cards/organization/site-theme-card.tsx:777
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3232
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3340
 msgid "Dark"
 msgstr ""
 
@@ -1620,18 +1670,18 @@ msgid "Dark mode"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:117
-#: app/components/app-sidebar.tsx:233
+#: app/components/app-sidebar.tsx:234
 #: app/components/user-dropdown.tsx:61
 msgid "Dashboard"
 msgstr ""
 
 #: app/components/data-table.tsx:494
-msgid "Data Table"
-msgstr ""
+#~ msgid "Data Table"
+#~ msgstr ""
 
 #: app/components/data-table.tsx:497
-msgid "Data Table is a table that displays data in a grid format."
-msgstr ""
+#~ msgid "Data Table is a table that displays data in a grid format."
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:123
 msgid "Database connection error"
@@ -1669,18 +1719,24 @@ msgstr ""
 msgid "Delay unit is required."
 msgstr ""
 
-#: app/components/data-table.tsx:386
-#: app/components/note/comment-item.tsx:216
+#: app/components/note/comment-item.tsx:230
 #: app/components/settings/passkey-manager.tsx:220
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:438
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1018
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1076
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1032
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1090
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:464
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:498
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:472
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:511
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:979
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1484
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1530
 msgid "Delete"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1500
+msgid "Delete 404 log entry?"
+msgstr "Delete 404 log entry?"
 
 #: app/components/settings/cards/danger-card.tsx:54
 msgid "Delete account"
@@ -1694,11 +1750,11 @@ msgstr ""
 msgid "Delete announcement?"
 msgstr "Delete announcement?"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3875
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3983
 msgid "Delete card"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4185
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4293
 msgid "Delete column"
 msgstr ""
 
@@ -1706,15 +1762,15 @@ msgstr ""
 #~ msgid "Delete comment"
 #~ msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:226
+#: app/components/settings/cards/organization/site-card.tsx:239
 msgid "Delete customer data and switch region?"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:251
+#: app/components/settings/cards/organization/site-card.tsx:264
 msgid "Delete data and switch"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3565
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3673
 msgid "Delete feature"
 msgstr ""
 
@@ -1722,20 +1778,24 @@ msgstr ""
 msgid "Delete invitation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3733
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3841
 msgid "Delete item"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3069
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3177
 msgid "Delete link"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1101
+msgid "Delete log entry"
+msgstr "Delete log entry"
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:98
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:99
 msgid "Delete node"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1053
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1067
 msgid "Delete note?"
 msgstr "Delete note?"
 
@@ -1752,15 +1812,19 @@ msgstr ""
 msgid "Delete page?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3496
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3604
 msgid "Delete question"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4113
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1450
+msgid "Delete redirect rule?"
+msgstr "Delete redirect rule?"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4221
 msgid "Delete review"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4282
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4390
 msgid "Delete social link"
 msgstr ""
 
@@ -1769,15 +1833,19 @@ msgid "Deny"
 msgstr ""
 
 #: app/components/settings/cards/organization/shop-card.tsx:268
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3580
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3890
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3688
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3998
 #: app/routes/organizations+/create.tsx:773
 msgid "Description"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5478
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5577
 msgid "Desktop"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1197
+msgid "Destination"
+msgstr "Destination"
 
 #: app/components/settings/cards/danger-card.tsx:47
 msgid "Destructive settings that cannot be undone."
@@ -1801,6 +1869,10 @@ msgstr ""
 msgid "Didn't receive the email? Check your spam folder, or try again with a different email address."
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1069
+msgid "Direct / Unknown"
+msgstr "Direct / Unknown"
+
 #: app/components/organization-invitations.tsx:245
 msgid "Disable"
 msgstr ""
@@ -1815,7 +1887,7 @@ msgstr ""
 msgid "Disconnect"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1059
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1074
 msgid "Disconnect any active MCP connections"
 msgstr ""
 
@@ -1832,7 +1904,7 @@ msgstr ""
 msgid "Dispatch text message with merge tags"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:340
+#: app/components/settings/cards/organization/site-card.tsx:353
 msgid "DNS setup"
 msgstr ""
 
@@ -1840,7 +1912,7 @@ msgstr ""
 msgid "Does Not Equal"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:422
+#: app/components/settings/cards/organization/site-card.tsx:435
 msgid "Domain"
 msgstr ""
 
@@ -1850,14 +1922,11 @@ msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:163
 #: ../../packages/ai/src/components/ai-chat.tsx:210
-#: app/components/data-table.tsx:237
-#: app/components/data-table.tsx:268
-#: app/components/data-table.tsx:955
 #: app/components/settings/backup-codes-display.tsx:108
 msgid "Done"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1635
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1743
 msgid "Double-click a block to add it instantly"
 msgstr ""
 
@@ -1886,7 +1955,7 @@ msgstr ""
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:239
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:113
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:403
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5762
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5861
 msgid "Draft"
 msgstr ""
 
@@ -1895,8 +1964,8 @@ msgid "Draft something for me"
 msgstr "Draft something for me"
 
 #: app/components/data-table.tsx:148
-msgid "Drag to reorder"
-msgstr ""
+#~ msgid "Drag to reorder"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:643
 msgid "Drag to reorder column"
@@ -1963,17 +2032,17 @@ msgstr ""
 msgid "e.g. You've got mail!"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:401
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:406
 msgid "e.g., Claude Desktop, Kiro IDE"
 msgstr ""
 
-#: app/components/data-table.tsx:376
 #: app/components/favorite-notes.tsx:110
-#: app/components/note/comment-item.tsx:209
+#: app/components/note/comment-item.tsx:223
 #: app/routes/_app+/$orgSlug_+/notes-table.tsx:92
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:961
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:975
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:457
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:429
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:972
 msgid "Edit"
 msgstr ""
 
@@ -1986,17 +2055,21 @@ msgid "Edit column"
 msgstr ""
 
 #: app/components/note/comment-input.tsx:63
-#: app/components/note/comment-item.tsx:233
+#: app/components/note/comment-item.tsx:247
 msgid "Edit comment..."
 msgstr "Edit comment..."
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:833
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:847
 msgid "Edit note"
 msgstr "Edit note"
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:98
 msgid "Edit Note"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1137
+msgid "Edit redirect"
+msgstr "Edit redirect"
 
 #: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:36
 #: ../../packages/marketing/src/i18n/campaign-labels.ts:14
@@ -2032,7 +2105,7 @@ msgstr ""
 msgid "Email subject line is required."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:60
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:57
 msgid "Emails sent"
 msgstr ""
 
@@ -2052,6 +2125,10 @@ msgstr ""
 msgid "Enable hosted checkout"
 msgstr "Enable hosted checkout"
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1401
+msgid "Enable redirect immediately"
+msgstr "Enable redirect immediately"
+
 #: app/components/settings/cards/organization/announcement-sheet.tsx:373
 msgid "Enabled"
 msgstr ""
@@ -2063,6 +2140,10 @@ msgstr ""
 #: app/components/settings/two-factor-form.tsx:220
 msgid "Enter 6-digit OTP token"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1302
+msgid "Enter an internal path (e.g. /new-page) or full external URL."
+msgstr "Enter an internal path (e.g. /new-page) or full external URL."
 
 #: app/routes/_auth+/verify.tsx:76
 msgid "Enter backup code"
@@ -2108,7 +2189,7 @@ msgstr ""
 msgid "Enter your username"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:214
+#: app/routes/_auth+/forgot-password.tsx:217
 msgid "Enter your username or email"
 msgstr ""
 
@@ -2122,8 +2203,6 @@ msgstr ""
 
 #: ../../packages/ai/src/components/ai-elements/tool.tsx:47
 #: ../../packages/ai/src/components/ai-elements/tool.tsx:149
-#: app/components/data-table.tsx:238
-#: app/components/data-table.tsx:269
 #: app/components/settings/cards/organization/announcement-sheet.tsx:271
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:344
 msgid "Error"
@@ -2133,7 +2212,7 @@ msgstr ""
 msgid "Errors"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:91
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:88
 msgid "Event-driven workflows"
 msgstr ""
 
@@ -2145,7 +2224,7 @@ msgstr ""
 msgid "Exactly Equals"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1182
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1197
 msgid "Example Request"
 msgstr ""
 
@@ -2161,7 +2240,11 @@ msgstr ""
 msgid "Execution Runs"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:435
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1218
+msgid "Existing page"
+msgstr "Existing page"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:440
 msgid "Expiration Date"
 msgstr ""
 
@@ -2174,7 +2257,7 @@ msgstr ""
 msgid "Expires"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:654
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:664
 msgid "Expires {expireDate}"
 msgstr ""
 
@@ -2186,7 +2269,7 @@ msgstr ""
 msgid "Export data"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3237
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3345
 msgid "Fade up"
 msgstr ""
 
@@ -2236,12 +2319,12 @@ msgstr ""
 msgid "Failed to format graph for validation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:870
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:884
 msgid "Failed to load AI Assistant"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/campaigns.$campaignId.tsx:42
-#: app/routes/_app+/$orgSlug_+/marketing+/campaigns.$campaignId.tsx:48
+#: app/routes/_app+/$orgSlug_+/marketing+/campaigns.$campaignId.tsx:39
+#: app/routes/_app+/$orgSlug_+/marketing+/campaigns.$campaignId.tsx:45
 msgid "Failed to load broadcast"
 msgstr ""
 
@@ -2253,7 +2336,7 @@ msgstr ""
 msgid "Failed to load journeys from regional tenant storage."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:131
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:128
 msgid "Failed to load marketing metrics"
 msgstr ""
 
@@ -2298,8 +2381,8 @@ msgid "Favicon and app icon variants generated."
 msgstr ""
 
 #: app/components/data-table.tsx:382
-msgid "Favorite"
-msgstr ""
+#~ msgid "Favorite"
+#~ msgstr ""
 
 #: app/components/favorite-notes.tsx:64
 msgid "Favorites"
@@ -2309,7 +2392,7 @@ msgstr ""
 msgid "Feature Preview"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3553
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3661
 msgid "Features"
 msgstr ""
 
@@ -2346,7 +2429,11 @@ msgstr ""
 #~ msgid "Form Submitted"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3655
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:748
+msgid "Forward old or broken URLs to your new pages to preserve SEO rank and customer traffic."
+msgstr "Forward old or broken URLs to your new pages to preserve SEO rank and customer traffic."
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3763
 msgid "Four"
 msgstr ""
 
@@ -2363,11 +2450,11 @@ msgstr ""
 msgid "Full Name"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:330
+#: app/components/app-sidebar.tsx:336
 msgid "General"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:292
+#: app/components/app-sidebar.tsx:293
 #: app/components/settings/cards/organization/general-settings-card.tsx:58
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:15
 msgid "General Settings"
@@ -2399,16 +2486,16 @@ msgstr ""
 msgid "Generating..."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:380
+#: app/components/app-sidebar.tsx:386
 msgid "Get chrome extension"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:144
-#: app/components/app-sidebar.tsx:393
+#: app/components/app-sidebar.tsx:146
+#: app/components/app-sidebar.tsx:401
 msgid "Get help"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:91
+#: app/components/app-sidebar.tsx:89
 #: app/components/settings/cards/organization/billing-card.tsx:303
 msgid "Get in touch"
 msgstr ""
@@ -2423,8 +2510,8 @@ msgstr ""
 msgid "Get started: {completedCount} of {totalSteps} steps complete"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:149
-#: app/components/app-sidebar.tsx:399
+#: app/components/app-sidebar.tsx:154
+#: app/components/app-sidebar.tsx:409
 #: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
 msgstr ""
@@ -2437,9 +2524,13 @@ msgstr ""
 msgid "Go there"
 msgstr "Go there"
 
-#: app/components/app-sidebar.tsx:199
+#: app/components/app-sidebar.tsx:206
 msgid "Go to homepage"
 msgstr ""
+
+#: app/components/settings/cards/organization/site-analytics-card.tsx:63
+msgid "Google Analytics"
+msgstr "Google Analytics"
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.new.tsx:35
 msgid "Graph data is required"
@@ -2459,8 +2550,8 @@ msgstr ""
 
 #: app/components/data-table.tsx:188
 #: app/components/data-table.tsx:813
-msgid "Header"
-msgstr ""
+#~ msgid "Header"
+#~ msgstr ""
 
 #: app/components/settings/cards/organization/site-theme-card.tsx:800
 msgid "Headings"
@@ -2522,18 +2613,32 @@ msgstr ""
 msgid "Hi, {userName}"
 msgstr "Hi, {userName}"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2554
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2662
 msgid "Hide from search engines"
 msgstr ""
 
-#: app/components/note/comment-item.tsx:291
+#: app/components/note/comment-item.tsx:305
 msgid "Hide replies ({replyCount})"
 msgstr "Hide replies ({replyCount})"
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:938
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1060
+msgid "hit"
+msgstr "hit"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:938
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1060
+msgid "hits"
+msgstr "hits"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1032
+msgid "Hits"
+msgstr "Hits"
+
 #: app/components/website/link-inspector.tsx:455
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:381
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5671
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5704
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5770
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5803
 msgid "Home"
 msgstr ""
 
@@ -2570,7 +2675,7 @@ msgstr ""
 msgid "I'll not be able to access the organization and its data anymore"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:588
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:598
 msgid "I've Copied the Key"
 msgstr ""
 
@@ -2586,6 +2691,10 @@ msgstr ""
 msgid "If you change your email, you'll need to verify the new address"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:831
+msgid "If you moved from an older website or changed page URLs, create redirects so visitors and search engines are automatically forwarded."
+msgstr "If you moved from an older website or changed page URLs, create redirects so visitors and search engines are automatically forwarded."
+
 #: app/components/ui/multi-image-upload.tsx:268
 msgid "Image"
 msgstr ""
@@ -2594,15 +2703,15 @@ msgstr ""
 msgid "Image to crop"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3901
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4009
 msgid "Image URL"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1056
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1071
 msgid "Immediately invalidate all tokens for this client"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:885
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:895
 msgid "Important Notes"
 msgstr ""
 
@@ -2610,7 +2719,7 @@ msgstr ""
 msgid "Important Security Note"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:572
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:582
 msgid "Important:"
 msgstr ""
 
@@ -2636,9 +2745,9 @@ msgstr ""
 msgid "Insert Merge Tags:"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:340
+#: app/components/app-sidebar.tsx:346
 #: app/components/settings/cards/organization/integrations-card.tsx:58
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1000
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1014
 msgid "Integrations"
 msgstr ""
 
@@ -2655,7 +2764,7 @@ msgstr ""
 msgid "Invalid Verification Type"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4624
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4732
 msgid "Inverted"
 msgstr ""
 
@@ -2735,16 +2844,20 @@ msgstr ""
 msgid "Kanban board"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:240
+#: app/components/settings/cards/organization/site-card.tsx:253
 msgid "Keep current region"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:397
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:534
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1367
+msgid "Keeps original indexing"
+msgstr "Keeps original indexing"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:402
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:544
 msgid "Key Name"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:812
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:822
 msgid "Kiro IDE Setup"
 msgstr ""
 
@@ -2773,6 +2886,10 @@ msgstr ""
 msgid "Last active {lastActiveValue}"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1035
+msgid "Last Encountered"
+msgstr "Last Encountered"
+
 #: app/components/settings/cards/privacy-card.tsx:57
 msgid "Last exported: {lastExportDateFormatted}"
 msgstr ""
@@ -2782,7 +2899,7 @@ msgstr ""
 msgid "Last used"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:947
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:957
 msgid "Last Used"
 msgstr ""
 
@@ -2794,9 +2911,9 @@ msgstr ""
 msgid "Launch Test Run in Builder"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3188
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3348
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3637
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3296
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3456
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3745
 msgid "Layout"
 msgstr ""
 
@@ -2806,7 +2923,7 @@ msgid "Learn more"
 msgstr ""
 
 #: app/components/note/comment-input.tsx:61
-#: app/components/note/comment-item.tsx:314
+#: app/components/note/comment-item.tsx:328
 msgid "Leave a reply..."
 msgstr "Leave a reply..."
 
@@ -2814,13 +2931,13 @@ msgstr "Leave a reply..."
 msgid "Leave empty to keep existing secret key, or enter a new one to update."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2315
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2423
 msgid "Leave empty to keep this page at the root of your site."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3209
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3405
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4023
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3317
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3513
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4131
 msgid "Left"
 msgstr ""
 
@@ -2835,15 +2952,15 @@ msgstr ""
 #: app/components/data-table.tsx:257
 #: app/components/data-table.tsx:274
 #: app/components/data-table.tsx:871
-msgid "Limit"
-msgstr ""
+#~ msgid "Limit"
+#~ msgstr ""
 
 #: app/components/website/link-inspector.tsx:642
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:599
 msgid "Link"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4170
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4278
 msgid "Link columns"
 msgstr ""
 
@@ -2861,6 +2978,7 @@ msgid "Link URL"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:590
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:849
 msgid "Live"
 msgstr ""
 
@@ -2868,7 +2986,7 @@ msgstr ""
 msgid "Loading"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:894
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:908
 msgid "Loading AI Assistant..."
 msgstr ""
 
@@ -2906,11 +3024,11 @@ msgstr ""
 msgid "Logo"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3029
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3137
 msgid "Logo & colors"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3366
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3474
 msgid "Logo panel"
 msgstr ""
 
@@ -2922,11 +3040,11 @@ msgstr ""
 msgid "Logout"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3980
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4088
 msgid "Look"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3704
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3812
 msgid "Loose"
 msgstr ""
 
@@ -2935,8 +3053,8 @@ msgid "m@example.com"
 msgstr ""
 
 #: app/components/data-table.tsx:379
-msgid "Make a copy"
-msgstr ""
+#~ msgid "Make a copy"
+#~ msgstr ""
 
 #: ../../packages/ai/src/components/ai-chat.tsx:434
 msgid "Make it more detailed"
@@ -3003,7 +3121,7 @@ msgstr ""
 msgid "Manage your personal data in accordance with GDPR Article 20."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:46
+#: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:51
 msgid "Manage your public organization website and appearance."
 msgstr ""
 
@@ -3021,35 +3139,39 @@ msgstr ""
 msgid "Mark as read"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:257
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:147
+#: app/components/app-sidebar.tsx:258
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:144
 msgid "Marketing"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:928
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:938
 msgid "MCP clients authorized to access your organization data"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:739
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:749
 msgid "MCP OAuth Setup Instructions"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:350
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1341
+#: app/components/app-sidebar.tsx:356
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1356
 msgid "MCP Server"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3256
+#: app/components/settings/cards/organization/site-analytics-card.tsx:76
+msgid "Measurement ID"
+msgstr "Measurement ID"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3364
 msgid "Media"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3762
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3870
 msgid "Media URL"
 msgstr ""
 
 #: app/components/settings/cards/organization/site-theme-card.tsx:786
 #: app/components/settings/cards/organization/site-theme-card.tsx:789
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4733
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4841
 msgid "Medium"
 msgstr ""
 
@@ -3065,7 +3187,7 @@ msgstr ""
 msgid "members"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:335
+#: app/components/app-sidebar.tsx:341
 #: app/components/organization-members.tsx:141
 msgid "Members"
 msgstr ""
@@ -3075,7 +3197,7 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2388
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2496
 msgid "Meta description"
 msgstr ""
 
@@ -3095,7 +3217,11 @@ msgstr ""
 msgid "Minutes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5501
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1029
+msgid "Missing Path"
+msgstr "Missing Path"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5600
 msgid "Mobile"
 msgstr ""
 
@@ -3121,7 +3247,7 @@ msgstr ""
 msgid "Multi-factor authentication"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4619
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4727
 msgid "Muted"
 msgstr ""
 
@@ -3129,20 +3255,20 @@ msgstr ""
 #: ../../packages/marketing-workflow/src/workflow-labels.ts:307
 #: app/components/settings/cards/organization/general-settings-card.tsx:82
 #: app/components/settings/cards/profile-card.tsx:97
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4129
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4237
 #: app/routes/organizations+/create.tsx:690
 msgid "Name"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:858
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:868
 msgid "Navigate to Features → MCP Servers"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:819
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:829
 msgid "Navigate to MCP Servers configuration"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3057
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3165
 msgid "Navigation links"
 msgstr ""
 
@@ -3162,7 +3288,8 @@ msgstr ""
 msgid "Neutral feedback"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:974
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:984
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:949
 msgid "Never used"
 msgstr ""
 
@@ -3183,6 +3310,10 @@ msgstr ""
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.new.tsx:123
 msgid "New Customer Journey"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:855
+msgid "New Destination"
+msgstr "New Destination"
 
 #: app/components/settings/email-form.tsx:64
 msgid "New Email"
@@ -3209,6 +3340,14 @@ msgstr ""
 msgid "New Password"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1137
+msgid "New redirect"
+msgstr "New redirect"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:762
+msgid "New Redirect"
+msgstr "New Redirect"
+
 #: app/components/website/link-inspector.tsx:601
 msgid "New tab"
 msgstr ""
@@ -3220,6 +3359,14 @@ msgstr ""
 #: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:86
 msgid "No"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1017
+msgid "No 404 errors match that search"
+msgstr "No 404 errors match that search"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1009
+msgid "No 404 errors recorded"
+msgstr "No 404 errors recorded"
 
 #: app/components/organization-invitations.tsx:186
 msgid "No active invite link"
@@ -3241,7 +3388,7 @@ msgstr ""
 msgid "No announcements yet"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:675
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:685
 msgid "No API keys created yet"
 msgstr ""
 
@@ -3257,7 +3404,7 @@ msgstr ""
 msgid "No broadcasts found"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:223
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:220
 msgid "No campaigns yet."
 msgstr ""
 
@@ -3265,7 +3412,7 @@ msgstr ""
 msgid "No channels available"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:934
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:944
 msgid "No clients have been authorized yet"
 msgstr ""
 
@@ -3277,7 +3424,7 @@ msgstr ""
 msgid "No contact on file"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:816
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:830
 msgid "No content yet"
 msgstr "No content yet"
 
@@ -3289,7 +3436,7 @@ msgstr ""
 msgid "No discrete action step dispatches recorded for this run."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2690
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2798
 msgid "No editor available for this block type."
 msgstr ""
 
@@ -3311,7 +3458,7 @@ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/__org-note-editor.tsx:381
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:134
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1162
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1176
 msgid "No note with the id \"{noteId}\" exists"
 msgstr ""
 
@@ -3348,7 +3495,7 @@ msgstr ""
 msgid "No pages yet"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1152
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1167
 msgid "No parameters required"
 msgstr ""
 
@@ -3356,15 +3503,23 @@ msgstr ""
 msgid "No passkeys registered yet"
 msgstr ""
 
-#: app/components/data-table.tsx:612
-msgid "No results."
-msgstr ""
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:829
+msgid "No redirects created yet"
+msgstr "No redirects created yet"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5426
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:837
+msgid "No redirects match that search"
+msgstr "No redirects match that search"
+
+#: app/components/data-table.tsx:612
+#~ msgid "No results."
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5525
 msgid "No sections yet"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1273
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1288
 msgid "No tools available."
 msgstr ""
 
@@ -3380,9 +3535,9 @@ msgstr ""
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:311
 #: app/components/settings/cards/organization/site-theme-card.tsx:787
 #: app/components/website/link-inspector.tsx:628
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3197
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3227
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3689
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3305
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3335
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3797
 msgid "None"
 msgstr ""
 
@@ -3402,7 +3557,7 @@ msgstr ""
 msgid "note"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:971
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:985
 msgid "Note actions"
 msgstr "Note actions"
 
@@ -3422,7 +3577,7 @@ msgstr ""
 msgid "notes"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:245
+#: app/components/app-sidebar.tsx:246
 #: app/components/command-menu.tsx:137
 #: app/routes/_app+/$orgSlug_+/notes.tsx:289
 msgid "Notes"
@@ -3444,7 +3599,7 @@ msgstr ""
 msgid "Notification Preferences"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:355
+#: app/components/app-sidebar.tsx:361
 msgid "Notifications"
 msgstr ""
 
@@ -3456,7 +3611,7 @@ msgstr ""
 msgid "Notifications when you are mentioned in a comment"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:889
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:899
 msgid "OAuth tokens are scoped to your organization ({orgSlug})"
 msgstr ""
 
@@ -3464,12 +3619,20 @@ msgstr ""
 msgid "of {totalUsers} people"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1166
+msgid "Old path (Source)"
+msgstr "Old path (Source)"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:852
+msgid "Old URL (Source)"
+msgstr "Old URL (Source)"
+
 #: app/components/onboarding-checklist.tsx:139
 #: app/components/onboarding-checklist.tsx:199
 msgid "Onboarding progress"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:935
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:945
 msgid "Once you connect an AI client using the setup instructions below, it will appear here."
 msgstr ""
 
@@ -3477,7 +3640,7 @@ msgstr ""
 msgid "One moment…"
 msgstr "One moment…"
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:85
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:82
 msgid "One-time email and SMS"
 msgstr ""
 
@@ -3509,15 +3672,15 @@ msgstr "Open {routeTitle}?"
 msgid "Open Checkout dashboard"
 msgstr "Open Checkout dashboard"
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:779
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:789
 msgid "Open Claude Desktop and go to Settings → Developer"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:855
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:865
 msgid "Open Cursor Settings (Cmd/Ctrl + ,)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2425
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2533
 msgid "Open Graph image"
 msgstr ""
 
@@ -3534,11 +3697,10 @@ msgstr ""
 msgid "Open in new tab"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:816
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:826
 msgid "Open Kiro IDE Settings"
 msgstr ""
 
-#: app/components/data-table.tsx:370
 #: app/components/ui/notification-bell.tsx:454
 msgid "Open menu"
 msgstr ""
@@ -3547,11 +3709,11 @@ msgstr ""
 msgid "Open payout dashboard"
 msgstr "Open payout dashboard"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5806
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5905
 msgid "Open preview"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:65
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:62
 msgid "Open rate"
 msgstr ""
 
@@ -3604,7 +3766,7 @@ msgstr ""
 msgid "Organization logo preview"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:149
+#: app/components/settings/cards/organization/site-card.tsx:162
 msgid "Organization site"
 msgstr ""
 
@@ -3627,8 +3789,8 @@ msgstr ""
 msgid "Organizations are used to group your projects."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:263
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:657
+#: app/components/app-sidebar.tsx:264
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:671
 msgid "Overview"
 msgstr ""
 
@@ -3642,12 +3804,12 @@ msgstr ""
 msgid "Page actions"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5682
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5781
 msgid "Page settings"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2270
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4917
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2378
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5025
 msgid "Page Settings"
 msgstr ""
 
@@ -3656,11 +3818,11 @@ msgid "Page Title"
 msgstr ""
 
 #: app/components/website/create-page-dialog.tsx:171
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2281
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2389
 msgid "Page URL"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:297
+#: app/components/app-sidebar.tsx:298
 #: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:22
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:549
 msgid "Pages"
@@ -3671,7 +3833,7 @@ msgid "Paragraphs, navigation, and other text."
 msgstr ""
 
 #: ../../packages/ai/src/components/ai-elements/tool.tsx:120
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1148
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1163
 msgid "Parameters"
 msgstr ""
 
@@ -3744,9 +3906,13 @@ msgstr ""
 msgid "per month"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:182
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:179
 msgid "Performance metrics"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1379
+msgid "Permanent (301) tells search engines (like Google) that the page has moved permanently, passing ranking and backlinks."
+msgstr "Permanent (301) tells search engines (like Google) that the page has moved permanently, passing ranking and backlinks."
 
 #: app/components/organization-invitations.tsx:164
 msgid "Personal invite link"
@@ -3779,42 +3945,42 @@ msgstr ""
 msgid "Phone Verified (OTP Success)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3198
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3378
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3780
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3306
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3486
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3888
 msgid "Photo"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3986
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4094
 msgid "Photo + card"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3361
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3469
 msgid "Photo + text"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3221
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3329
 msgid "Photo overlay"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3421
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3661
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3529
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3769
 msgid "Photo shape"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3399
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3507
 msgid "Photo side"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3715
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3823
 msgid "Photos and videos"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1578
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:1686
 msgid "Pick a block to insert into your page."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4614
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4722
 msgid "Plain"
 msgstr ""
 
@@ -3830,7 +3996,7 @@ msgstr ""
 msgid "Plan not available"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4287
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4395
 msgid "Platform"
 msgstr ""
 
@@ -3875,7 +4041,7 @@ msgstr ""
 msgid "PNG, up to 5 MB. Used as logo and favicon."
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:294
+#: app/components/settings/cards/organization/site-card.tsx:307
 msgid "Point your own domain at Sites with a CNAME record. SSL is provisioned automatically when Cloudflare for SaaS is configured."
 msgstr ""
 
@@ -3899,7 +4065,7 @@ msgstr ""
 #~ msgid "Press Enter to send, Shift+Enter for new line"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5745
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5844
 msgid "Preview"
 msgstr ""
 
@@ -3920,8 +4086,8 @@ msgstr ""
 msgid "Primary"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3156
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4045
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3264
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4153
 msgid "Primary button"
 msgstr ""
 
@@ -3937,7 +4103,7 @@ msgstr ""
 msgid "Privacy & Data Rights"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:682
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:696
 msgid "Private"
 msgstr ""
 
@@ -3981,11 +4147,11 @@ msgstr ""
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:208
 #: app/routes/_app+/$orgSlug_+/marketing+/automations._index.tsx:395
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:447
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5776
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5875
 msgid "Publish"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:152
+#: app/components/settings/cards/organization/site-card.tsx:165
 msgid "Publish a public website for your organization. Visitors can reach it at your org subdomain, or a custom domain you connect."
 msgstr ""
 
@@ -3993,7 +4159,7 @@ msgstr ""
 msgid "Publish and activate automation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5778
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5877
 msgid "Publish updates"
 msgstr ""
 
@@ -4002,7 +4168,7 @@ msgid "Publish your site before sharing the shop link with customers."
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:401
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5760
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5859
 msgid "Published"
 msgstr ""
 
@@ -4026,11 +4192,11 @@ msgstr ""
 msgid "QR code for two-factor authentication setup. Scan this code with your authenticator app."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3501
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3609
 msgid "Question"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3484
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3592
 msgid "Questions"
 msgstr ""
 
@@ -4042,11 +4208,11 @@ msgstr ""
 msgid "Quick edit"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4118
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4226
 msgid "Quote"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4138
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4246
 msgid "Rating"
 msgstr ""
 
@@ -4062,7 +4228,7 @@ msgstr "Read page details"
 msgid "Reading page details"
 msgstr "Reading page details"
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:204
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:201
 msgid "Recent campaigns"
 msgstr ""
 
@@ -4082,15 +4248,44 @@ msgstr ""
 msgid "Recommended for"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1325
+msgid "Recommended for SEO"
+msgstr "Recommended for SEO"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:961
+msgid "Redirect actions"
+msgstr "Redirect actions"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1320
+msgid "Redirect type"
+msgstr "Redirect type"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1082
+msgid "Redirected"
+msgstr "Redirected"
+
+#: app/components/app-sidebar.tsx:321
+#: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:32
+msgid "Redirects"
+msgstr "Redirects"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:745
+msgid "Redirects & 404 History"
+msgstr "Redirects & 404 History"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1038
+msgid "Referrer"
+msgstr "Referrer"
+
 #: app/components/settings/cards/organization/shop-card.tsx:161
 msgid "Refresh Checkout setup"
 msgstr "Refresh Checkout setup"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5797
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5896
 msgid "Refresh preview"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:379
+#: app/components/settings/cards/organization/site-card.tsx:392
 msgid "Refresh status"
 msgstr ""
 
@@ -4118,15 +4313,15 @@ msgstr ""
 msgid "Registered {timeAgo} ago"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3699
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3807
 msgid "Regular"
 msgstr ""
 
-#: app/components/privacy-banner.tsx:47
+#: app/components/privacy-banner.tsx:51
 msgid "Reject"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:878
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:892
 msgid "Reload page"
 msgstr ""
 
@@ -4137,7 +4332,7 @@ msgid "Remember me"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.sent.tsx:47
-#: app/routes/_auth+/forgot-password.tsx:240
+#: app/routes/_auth+/forgot-password.tsx:243
 msgid "Remember your password?"
 msgstr ""
 
@@ -4145,7 +4340,7 @@ msgstr ""
 #: app/components/settings/cards/organization/site-icon-card.tsx:224
 #: app/components/settings/cards/organization/site-theme-card.tsx:338
 #: app/components/website/branding-panel.tsx:314
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2494
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2602
 msgid "Remove"
 msgstr ""
 
@@ -4153,7 +4348,7 @@ msgstr ""
 msgid "Remove access from all devices except this one"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:398
+#: app/components/settings/cards/organization/site-card.tsx:411
 msgid "Remove domain"
 msgstr ""
 
@@ -4166,7 +4361,7 @@ msgstr ""
 msgid "Remove invite"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4234
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4342
 msgid "Remove link"
 msgstr ""
 
@@ -4187,7 +4382,7 @@ msgid "Removing section"
 msgstr "Removing section"
 
 #: app/components/settings/cards/organization/site-theme-card.tsx:328
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2468
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2576
 msgid "Replace"
 msgstr ""
 
@@ -4197,7 +4392,7 @@ msgstr ""
 
 #: app/components/note/comment-input.tsx:164
 #: app/components/note/comment-input.tsx:285
-#: app/components/note/comment-item.tsx:278
+#: app/components/note/comment-item.tsx:292
 msgid "Reply"
 msgstr ""
 
@@ -4205,7 +4400,7 @@ msgstr ""
 #~ msgid "Replying to comment"
 #~ msgstr ""
 
-#: app/components/app-sidebar.tsx:239
+#: app/components/app-sidebar.tsx:240
 msgid "Reports"
 msgstr ""
 
@@ -4225,11 +4420,11 @@ msgstr ""
 msgid "Requesting your authorization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1062
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1077
 msgid "Require re-authorization to reconnect"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1168
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1183
 msgid "required"
 msgstr ""
 
@@ -4267,22 +4462,22 @@ msgstr ""
 
 #: app/components/data-table.tsx:286
 #: app/components/data-table.tsx:878
-msgid "Reviewers"
-msgstr ""
+#~ msgid "Reviewers"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4100
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4208
 msgid "Reviews"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1000
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1010
 msgid "Revoke"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1092
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1107
 msgid "Revoke Access"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1039
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1054
 msgid "Revoke Authorization"
 msgstr ""
 
@@ -4290,24 +4485,28 @@ msgstr ""
 msgid "Revoke session"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:985
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1004
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:995
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1014
 msgid "Revoked"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1087
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1102
 msgid "Revoking..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3410
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4033
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3518
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4141
 msgid "Right"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3427
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3667
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3535
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3775
 msgid "Rounded"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1140
+msgid "Route incoming traffic from an old path to a new destination."
+msgstr "Route incoming traffic from an old path to a new destination."
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:512
 msgid "Routing Logic:"
@@ -4394,7 +4593,7 @@ msgstr ""
 msgid "Sans"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:94
+#: app/components/settings/cards/organization/site-card.tsx:107
 msgid "Saudi Arabia (KSA)"
 msgstr ""
 
@@ -4419,8 +4618,10 @@ msgstr ""
 
 #: app/components/settings/cards/organization/announcement-sheet.tsx:523
 #: app/components/settings/cards/organization/general-settings-card.tsx:112
+#: app/components/settings/cards/organization/site-analytics-card.tsx:88
 #: app/components/settings/cards/profile-card.tsx:192
 #: app/routes/_app+/$orgSlug_+/notes-cards.tsx:414
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1433
 msgid "Save changes"
 msgstr ""
 
@@ -4436,11 +4637,11 @@ msgstr ""
 msgid "Save product"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:798
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:808
 msgid "Save the file and restart Claude Desktop"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:833
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:843
 msgid "Save the file and restart Kiro IDE"
 msgstr ""
 
@@ -4454,8 +4655,8 @@ msgstr ""
 
 #: app/components/data-table.tsx:236
 #: app/components/data-table.tsx:267
-msgid "Saving {headerValue}"
-msgstr ""
+#~ msgid "Saving {headerValue}"
+#~ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.tsx:236
 msgid "Saving automation draft..."
@@ -4503,6 +4704,10 @@ msgstr ""
 msgid "Search for users in your organization"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:803
+msgid "Search missing URLs..."
+msgstr "Search missing URLs..."
+
 #: app/routes/_app+/$orgSlug_+/notes.tsx:347
 msgid "Search notes"
 msgstr ""
@@ -4520,9 +4725,13 @@ msgstr ""
 msgid "Search pages..."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2329
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2437
 msgid "Search preview"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:802
+msgid "Search redirects..."
+msgstr "Search redirects..."
 
 #: app/components/note/share-note-button.tsx:261
 msgid "Search team members..."
@@ -4536,8 +4745,8 @@ msgstr ""
 msgid "Secondary"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3172
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4058
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3280
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4166
 msgid "Secondary button"
 msgstr ""
 
@@ -4545,16 +4754,16 @@ msgstr ""
 msgid "Secret Access Key"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3244
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3352
 msgid "Section height"
 msgstr ""
 
 #: app/components/data-table.tsx:196
-msgid "Section Type"
-msgstr ""
+#~ msgid "Section Type"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4905
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5409
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5013
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5508
 msgid "Sections"
 msgstr ""
 
@@ -4581,16 +4790,20 @@ msgid "Select a starting layout for your new page."
 msgstr ""
 
 #: app/components/data-table.tsx:852
-msgid "Select a status"
-msgstr ""
+#~ msgid "Select a status"
+#~ msgstr ""
 
 #: app/routes/organizations+/create.tsx:852
 msgid "Select a subscription plan to get started with your organization. Your trial will begin after payment setup."
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1248
+msgid "Select a website page"
+msgstr "Select a website page"
+
 #: app/components/data-table.tsx:170
-msgid "Select all"
-msgstr ""
+#~ msgid "Select all"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:425
 msgid "Select attribute"
@@ -4600,7 +4813,7 @@ msgstr ""
 msgid "Select default language"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2511
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2619
 msgid "Select image"
 msgstr ""
 
@@ -4617,8 +4830,8 @@ msgid "Select Organization"
 msgstr ""
 
 #: app/components/data-table.tsx:179
-msgid "Select row"
-msgstr ""
+#~ msgid "Select row"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:454
 msgid "Select status"
@@ -4681,7 +4894,7 @@ msgstr ""
 msgid "Send now"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:234
+#: app/routes/_auth+/forgot-password.tsx:237
 msgid "Send reset instructions"
 msgstr ""
 
@@ -4704,7 +4917,7 @@ msgstr ""
 msgid "Sent {0}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2348
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2456
 msgid "SEO title"
 msgstr ""
 
@@ -4733,7 +4946,7 @@ msgstr ""
 msgid "Set deadlines"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:424
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:429
 msgid "Set expiration date (optional)"
 msgstr ""
 
@@ -4745,7 +4958,7 @@ msgstr ""
 msgid "Set up authenticator app"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:322
+#: app/components/app-sidebar.tsx:328
 #: app/components/command-menu.tsx:160
 #: app/components/command-menu.tsx:193
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:14
@@ -4763,7 +4976,7 @@ msgid "Setup key"
 msgstr ""
 
 #: app/components/note/share-note-button.tsx:167
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:995
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1009
 msgid "Share"
 msgstr ""
 
@@ -4783,11 +4996,11 @@ msgstr ""
 msgid "Share with others"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3032
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3140
 msgid "Shared across every page"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:345
+#: app/components/app-sidebar.tsx:351
 msgid "Shop"
 msgstr ""
 
@@ -4795,7 +5008,7 @@ msgstr ""
 msgid "Shop payouts are available for US organizations only. KSA checkout will be supported separately."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4732
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4840
 msgid "Short"
 msgstr ""
 
@@ -4807,7 +5020,7 @@ msgstr ""
 msgid "Show product on your public site"
 msgstr ""
 
-#: app/components/note/comment-item.tsx:289
+#: app/components/note/comment-item.tsx:303
 msgid "Show replies ({replyCount})"
 msgstr "Show replies ({replyCount})"
 
@@ -4820,10 +5033,10 @@ msgid "Show this banner on your public site"
 msgstr ""
 
 #: app/components/data-table.tsx:749
-msgid "Showing total visitors for the last 6 months"
-msgstr ""
+#~ msgid "Showing total visitors for the last 6 months"
+#~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2378
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2486
 msgid "Shown in browser tabs and search results. Falls back to the page title when empty."
 msgstr ""
 
@@ -4922,11 +5135,11 @@ msgstr ""
 msgid "SMS messages over 160 characters will be segmented according to standard GSM telecommunication protocols."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4269
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4377
 msgid "Social links"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3991
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4099
 msgid "Solid banner"
 msgstr ""
 
@@ -4942,7 +5155,7 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr "Something went wrong. Try again."
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3683
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3791
 msgid "Spacing"
 msgstr ""
 
@@ -4950,12 +5163,12 @@ msgstr ""
 msgid "Split path based on rules (True / False)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3437
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3677
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3545
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3785
 msgid "Square"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:991
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1005
 msgid "Star"
 msgstr "Star"
 
@@ -4971,11 +5184,9 @@ msgstr ""
 msgid "Started At"
 msgstr ""
 
-#: app/components/data-table.tsx:207
-#: app/components/data-table.tsx:848
 #: app/components/settings/cards/sessions-card.tsx:239
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:279
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:950
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:960
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:615
 msgid "Status"
 msgstr ""
@@ -5018,16 +5229,16 @@ msgstr ""
 
 #: app/components/website/link-inspector.tsx:381
 #: app/components/website/link-inspector.tsx:383
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3476
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3545
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3850
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3939
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3978
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4092
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3584
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3653
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3958
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4047
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4086
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4200
 msgid "Style"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:275
+#: app/components/settings/cards/organization/site-card.tsx:288
 msgid "Subdomain URL"
 msgstr ""
 
@@ -5041,7 +5252,6 @@ msgid "Subject Line"
 msgstr ""
 
 #: app/components/core/feedback-modal.tsx:112
-#: app/components/data-table.tsx:951
 msgid "Submit"
 msgstr ""
 
@@ -5094,7 +5304,7 @@ msgstr ""
 msgid "Supported languages"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:229
+#: app/components/settings/cards/organization/site-card.tsx:242
 msgid "Switching from {currentRegionLabel} to {pendingRegionLabel} permanently deletes every visitor account in the current region — names, phone numbers, emails, and login sessions. This cannot be undone. New sign-ins will start from an empty database in the new region."
 msgstr ""
 
@@ -5123,15 +5333,15 @@ msgstr ""
 msgid "Take me to settings"
 msgstr "Take me to settings"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4734
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4842
 msgid "Tall"
 msgstr ""
 
 #: app/components/data-table.tsx:226
 #: app/components/data-table.tsx:243
 #: app/components/data-table.tsx:865
-msgid "Target"
-msgstr ""
+#~ msgid "Target"
+#~ msgstr ""
 
 #: ../../packages/marketing-workflow/src/node-inspector.tsx:154
 #~ msgid "Target Tag Name"
@@ -5165,6 +5375,14 @@ msgstr ""
 msgid "Tell us more about your organization"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1385
+msgid "Temporary (302) keeps original search indexing. Best for short-term promotions, maintenance, or seasonal campaigns."
+msgstr "Temporary (302) keeps original search indexing. Best for short-term promotions, maintenance, or seasonal campaigns."
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1329
+msgid "Temporary forward"
+msgstr "Temporary forward"
+
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:153
 #: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:370
 msgid "Test run"
@@ -5182,11 +5400,11 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3356
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3464
 msgid "Text only"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3203
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3311
 msgid "Text position"
 msgstr ""
 
@@ -5215,11 +5433,11 @@ msgstr ""
 msgid "Thanks for signing up! You've been automatically added to {orgNames} based on your email domain."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:446
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:451
 msgid "The API key will expire on this date. Leave unchecked for no expiration."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:840
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:850
 msgid "The autoApprove setting allows automatic approval of these tools without prompting"
 msgstr ""
 
@@ -5229,11 +5447,11 @@ msgstr ""
 msgid "The execution engine will durably sleep for {0} {1} before continuing to the next node."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4163
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4271
 msgid "The footer is shared across every page. Leave copyright blank to use the organization name and current year."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3042
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3150
 msgid "The header is shared across every page."
 msgstr ""
 
@@ -5245,11 +5463,15 @@ msgstr ""
 msgid "The passwords must match"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1178
+msgid "The path on your old site that visitors or search engines request."
+msgstr "The path on your old site that visitors or search engines request."
+
 #: app/components/nav-user.tsx:220
 msgid "Theme"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:68
+#: app/components/app-sidebar.tsx:66
 msgid "There are <0>{daysRemaining} days</0> left in your trial. Get in touch with questions or feedback."
 msgstr ""
 
@@ -5257,7 +5479,7 @@ msgstr ""
 msgid "There was an issue with your login attempt. Please try again."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1263
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1278
 msgid "These are the MCP tools available in your organization. AI clients can use these tools to interact with your data."
 msgstr ""
 
@@ -5277,7 +5499,7 @@ msgstr ""
 msgid "This action cannot be undone. Are you sure you want to delete this announcement?"
 msgstr "This action cannot be undone. Are you sure you want to delete this announcement?"
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1056
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1070
 msgid "This action cannot be undone. The note and its comments will be permanently removed."
 msgstr "This action cannot be undone. The note and its comments will be permanently removed."
 
@@ -5293,7 +5515,7 @@ msgstr ""
 msgid "This helps us customize your experience and provide better insights."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:575
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:585
 msgid "This is the only time you'll see this API key. Make sure to copy it and store it securely."
 msgstr ""
 
@@ -5301,7 +5523,7 @@ msgstr ""
 msgid "This is your current session. Sign out to end it."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:757
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:767
 msgid "This is your organization's unique MCP server endpoint. Use this URL when configuring your AI client."
 msgstr ""
 
@@ -5313,7 +5535,19 @@ msgstr ""
 msgid "This will be the URL path for this page."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1052
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1503
+msgid "This will delete the 404 record for <0>{deleteLogPath}</0> from your history."
+msgstr "This will delete the 404 record for <0>{deleteLogPath}</0> from your history."
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1544
+msgid "This will permanently delete all recorded 404 errors for your organization website. This action cannot be undone."
+msgstr "This will permanently delete all recorded 404 errors for your organization website. This action cannot be undone."
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1453
+msgid "This will permanently delete the redirect from <0>{deleteRedirectFrom}</0> to <1>{deleteRedirectTo}</1>. Visitors requesting this old URL will no longer be forwarded."
+msgstr "This will permanently delete the redirect from <0>{deleteRedirectFrom}</0> to <1>{deleteRedirectTo}</1>. Visitors requesting this old URL will no longer be forwarded."
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1067
 msgid "This will:"
 msgstr ""
 
@@ -5321,11 +5555,11 @@ msgstr ""
 msgid "Thought for {duration} seconds"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3650
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3758
 msgid "Three"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3694
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3802
 msgid "Tight"
 msgstr ""
 
@@ -5337,9 +5571,9 @@ msgstr ""
 msgid "Time Delay"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3570
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3880
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4190
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3678
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3988
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4298
 msgid "Title"
 msgstr ""
 
@@ -5355,11 +5589,15 @@ msgstr ""
 msgid "Toggle notifications"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:900
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:885
+msgid "Toggle redirect active status"
+msgstr "Toggle redirect active status"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:910
 msgid "Tokens automatically expire after 30 days of inactivity"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:193
+#: app/routes/_auth+/forgot-password.tsx:196
 msgid "Too Many Requests"
 msgstr "Too Many Requests"
 
@@ -5371,7 +5609,11 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2072
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1350
+msgid "Transfers search rank"
+msgstr "Transfers search rank"
+
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2180
 msgid "Translate"
 msgstr ""
 
@@ -5384,8 +5626,8 @@ msgstr ""
 msgid "Translate All"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:319
-#: app/routes/_app+/$orgSlug_+/index.tsx:328
+#: app/routes/_app+/$orgSlug_+/index.tsx:318
+#: app/routes/_app+/$orgSlug_+/index.tsx:327
 msgid "trending"
 msgstr ""
 
@@ -5430,6 +5672,8 @@ msgid "Triggering test run for customer \"{customerId}\"..."
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:599
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:839
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1019
 msgid "Try a different search term or clear the search."
 msgstr ""
 
@@ -5447,7 +5691,7 @@ msgstr "Try again"
 msgid "Try another answer"
 msgstr "Try another answer"
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3645
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3753
 msgid "Two"
 msgstr ""
 
@@ -5455,11 +5699,11 @@ msgstr ""
 msgid "Two-factor authentication is currently enabled. Disabling it will make your account less secure. Please enter your authenticator code or a backup code to confirm."
 msgstr ""
 
-#: app/components/data-table.tsx:820
 #: app/components/settings/cards/organization/announcement-sheet.tsx:388
 #: app/components/website/link-inspector.tsx:341
 #: app/routes/_app+/$orgSlug_+/website+/announcements.tsx:596
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3776
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3884
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:858
 msgid "Type"
 msgstr ""
 
@@ -5480,7 +5724,7 @@ msgstr ""
 msgid "Unit"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:93
+#: app/components/settings/cards/organization/site-card.tsx:106
 msgid "United States"
 msgstr ""
 
@@ -5498,7 +5742,7 @@ msgid "Unnamed recipient"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/website+/pages._index.tsx:462
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5826
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5925
 msgid "Unpublish"
 msgstr ""
 
@@ -5508,11 +5752,11 @@ msgid "Unread Notifications"
 msgstr ""
 
 #: app/components/favorite-notes.tsx:136
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:991
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1005
 msgid "Unstar"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:670
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:684
 msgid "Untitled Note"
 msgstr ""
 
@@ -5541,7 +5785,7 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:675
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:689
 msgid "Updated {timeAgo} ago"
 msgstr ""
 
@@ -5553,7 +5797,7 @@ msgstr "Updated section"
 msgid "Updating section"
 msgstr "Updating section"
 
-#: app/components/app-sidebar.tsx:84
+#: app/components/app-sidebar.tsx:82
 #: app/components/settings/cards/organization/billing-card.tsx:460
 msgid "Upgrade"
 msgstr ""
@@ -5574,7 +5818,7 @@ msgstr ""
 msgid "Upload a site icon"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4880
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:4988
 msgid "Upload file"
 msgstr ""
 
@@ -5596,9 +5840,17 @@ msgstr ""
 
 #: app/components/website/link-inspector.tsx:364
 #: app/components/website/link-inspector.tsx:406
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2476
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2584
 msgid "URL"
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:776
+msgid "URL Redirects"
+msgstr "URL Redirects"
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:861
+msgid "Usage"
+msgstr "Usage"
 
 #: app/components/note/comment-input.tsx:152
 #~ msgid "Use @ to mention someone • Cmd+Enter to submit"
@@ -5609,7 +5861,7 @@ msgstr ""
 msgid "Use a backup code instead"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2428
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:2536
 msgid "Use an image that's at least 1200px by 630px (1.91:1) for the best results."
 msgstr ""
 
@@ -5641,7 +5893,7 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: app/routes/_auth+/forgot-password.tsx:209
+#: app/routes/_auth+/forgot-password.tsx:212
 msgid "Username or Email"
 msgstr ""
 
@@ -5683,8 +5935,8 @@ msgstr ""
 msgid "Verifying your passkey"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3199
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3781
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3307
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:3889
 msgid "Video"
 msgstr ""
 
@@ -5693,7 +5945,7 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:210
+#: app/routes/_app+/$orgSlug_+/marketing+/_index.tsx:207
 msgid "View all"
 msgstr ""
 
@@ -5705,7 +5957,7 @@ msgstr ""
 msgid "View and manage this session"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5815
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5914
 msgid "View live site"
 msgstr ""
 
@@ -5721,7 +5973,7 @@ msgstr ""
 msgid "View Timeline →"
 msgstr ""
 
-#: app/components/settings/cards/organization/site-card.tsx:173
+#: app/components/settings/cards/organization/site-card.tsx:186
 msgid "Visitor names, phone numbers, and emails are stored in this region. Changing it after customers have signed in permanently deletes that data — it is not moved."
 msgstr ""
 
@@ -5752,7 +6004,7 @@ msgstr ""
 msgid "We found your organization:"
 msgstr ""
 
-#: app/components/privacy-banner.tsx:20
+#: app/components/privacy-banner.tsx:24
 msgid "We use cookies to enhance your experience, analyze site traffic and deliver personalized content. <0>Read our Cookie Policy</0>."
 msgstr ""
 
@@ -5772,8 +6024,8 @@ msgstr ""
 msgid "We've sent you a code to verify your email address."
 msgstr ""
 
-#: app/components/app-sidebar.tsx:286
-#: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:44
+#: app/components/app-sidebar.tsx:287
+#: app/routes/_app+/$orgSlug_+/website+/_layout.tsx:49
 msgid "Website"
 msgstr ""
 
@@ -5791,7 +6043,7 @@ msgstr ""
 msgid "Welcome"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:299
+#: app/routes/_app+/$orgSlug_+/index.tsx:298
 msgid "Welcome {userName}!"
 msgstr ""
 
@@ -5837,7 +6089,11 @@ msgstr ""
 msgid "What's missing?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:801
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1404
+msgid "When active, visitors requesting the old URL will be forwarded right away."
+msgstr "When active, visitors requesting the old URL will be forwarded right away."
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:811
 msgid "When prompted, authorize the connection in your browser"
 msgstr ""
 
@@ -5850,9 +6106,17 @@ msgstr ""
 msgid "When someone signs up using an email that matches your verified domain, they will be automatically added to your organization as a member."
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1011
+msgid "When visitors or search engines request a URL that doesn't exist, it will appear here so you can set up redirects."
+msgstr "When visitors or search engines request a URL that doesn't exist, it will appear here so you can set up redirects."
+
 #: app/components/ui/notification-bell.tsx:228
 msgid "When you get notifications, they'll show up here."
 msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/website+/redirects.tsx:1284
+msgid "Will redirect to"
+msgstr "Will redirect to"
 
 #: app/routes/_app+/$orgSlug_+/marketing+/automations.$journeyId.runs.tsx:377
 msgid "Workflow Error:"
@@ -5923,7 +6187,7 @@ msgstr ""
 msgid "You can create notes for your organization here."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:894
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:904
 msgid "You can revoke access at any time from the Authorized Clients section above"
 msgstr ""
 
@@ -5931,7 +6195,7 @@ msgstr ""
 msgid "You can revoke this access at any time from your MCP settings page. The access token will expire in 1 hour."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1155
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1169
 msgid "You do not have permission to view this note"
 msgstr ""
 
@@ -5982,7 +6246,7 @@ msgstr ""
 msgid "Your account is secured with two-factor authentication"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:523
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:533
 msgid "Your API key has been created successfully. Copy it now - you won't be able to see it again."
 msgstr ""
 
@@ -6002,11 +6266,11 @@ msgstr ""
 msgid "Your feedback"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:753
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:763
 msgid "Your MCP Server URL"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/index.tsx:300
+#: app/routes/_app+/$orgSlug_+/index.tsx:299
 msgid "Your organization dashboard"
 msgstr ""
 
@@ -6018,7 +6282,7 @@ msgstr ""
 msgid "Your organizations"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5534
+#: app/routes/_app+/$orgSlug_+/website+/pages.$pageId.tsx:5633
 msgid "Your page will appear here"
 msgstr ""
 
