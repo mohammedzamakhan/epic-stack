@@ -15,6 +15,8 @@ vi.mock('~/lib/i18n', () => ({
 vi.mock('~/lib/org', () => ({
 	fetchPublishedOrganizationForHost: vi.fn().mockResolvedValue(null),
 	fetchPublishedSitePage: vi.fn().mockResolvedValue(null),
+	recordSiteRedirectHit: vi.fn().mockResolvedValue(true),
+	recordSiteNotFound: vi.fn().mockResolvedValue(true),
 }))
 
 import { onRequest } from './middleware.ts'
@@ -75,5 +77,69 @@ describe('Sites middleware onRequest', () => {
 		expect(response.status).toBe(200)
 		expect(context.locals.customHost).toBe('custom-domain.com')
 		expect(context.locals.orgSlug).toBeNull()
+	})
+
+	it('redirects with 301 when configured redirect matches path', async () => {
+		const { fetchPublishedOrganizationForHost } = await import('~/lib/org')
+		vi.mocked(fetchPublishedOrganizationForHost).mockResolvedValueOnce({
+			id: 'org-1',
+			name: 'Acme Corp',
+			slug: 'acme',
+			redirects: [
+				{
+					id: 'red-1',
+					fromPath: '/old-about',
+					toPath: '/about',
+					statusCode: 301,
+				},
+			],
+		} as any)
+
+		const waitUntilMock = vi.fn()
+		const context: any = {
+			request: new Request('http://acme.sites.localhost:3008/old-about'),
+			locals: {
+				cfContext: { waitUntil: waitUntilMock },
+			},
+		}
+		const next = vi.fn()
+
+		const response = (await onRequest(context, next)) as Response
+
+		expect(next).not.toHaveBeenCalled()
+		expect(response.status).toBe(301)
+		expect(response.headers.get('Location')).toBe('/about')
+		expect(waitUntilMock).toHaveBeenCalled()
+	})
+
+	it('redirects with 302 and forwards query parameters', async () => {
+		const { fetchPublishedOrganizationForHost } = await import('~/lib/org')
+		vi.mocked(fetchPublishedOrganizationForHost).mockResolvedValueOnce({
+			id: 'org-1',
+			name: 'Acme Corp',
+			slug: 'acme',
+			redirects: [
+				{
+					id: 'red-2',
+					fromPath: '/promo',
+					toPath: '/sale',
+					statusCode: 302,
+				},
+			],
+		} as any)
+
+		const context: any = {
+			request: new Request(
+				'http://acme.sites.localhost:3008/promo?ref=newsletter',
+			),
+			locals: {},
+		}
+		const next = vi.fn()
+
+		const response = (await onRequest(context, next)) as Response
+
+		expect(next).not.toHaveBeenCalled()
+		expect(response.status).toBe(302)
+		expect(response.headers.get('Location')).toBe('/sale?ref=newsletter')
 	})
 })

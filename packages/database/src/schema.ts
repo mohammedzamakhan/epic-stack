@@ -2005,6 +2005,94 @@ export const WebsitePageSection = sqliteTable(
 	],
 )
 
+export const WebsiteRedirect = sqliteTable(
+	'WebsiteRedirect',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		organizationId: text()
+			.notNull()
+			.references(() => Organization.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		fromPath: text().notNull(),
+		toPath: text().notNull(),
+		statusCode: integer().default(301).notNull(),
+		isEnabled: integer({ mode: 'boolean' }).default(true).notNull(),
+		hitCount: integer().default(0).notNull(),
+		lastTriggeredAt: integer({ mode: 'timestamp_ms' }),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex('WebsiteRedirect_organizationId_fromPath_key').on(
+			table.organizationId,
+			table.fromPath,
+		),
+		index('WebsiteRedirect_organizationId_idx').on(table.organizationId),
+		index('WebsiteRedirect_organizationId_isEnabled_idx').on(
+			table.organizationId,
+			table.isEnabled,
+		),
+	],
+)
+
+export const WebsiteNotFoundLog = sqliteTable(
+	'WebsiteNotFoundLog',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		organizationId: text()
+			.notNull()
+			.references(() => Organization.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		path: text().notNull(),
+		hitCount: integer().default(1).notNull(),
+		firstHitAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		lastHitAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		lastReferrer: text(),
+		lastUserAgent: text(),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex('WebsiteNotFoundLog_organizationId_path_key').on(
+			table.organizationId,
+			table.path,
+		),
+		index('WebsiteNotFoundLog_organizationId_lastHitAt_idx').on(
+			table.organizationId,
+			table.lastHitAt,
+		),
+		index('WebsiteNotFoundLog_organizationId_hitCount_idx').on(
+			table.organizationId,
+			table.hitCount,
+		),
+		index('WebsiteNotFoundLog_organizationId_idx').on(table.organizationId),
+	],
+)
+
 export const NotificationPreference = sqliteTable(
 	'NotificationPreference',
 	{

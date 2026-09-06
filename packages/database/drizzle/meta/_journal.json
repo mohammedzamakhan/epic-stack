@@ -1,62 +1,69 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1787234689924,
-      "tag": "0000_initial",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1787263448673,
-      "tag": "0001_storage_migration_and_s3_previous_bucket",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1787627200000,
-      "tag": "0002_platform_marketing",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1787673679247,
-      "tag": "0003_saved_reports",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1788000000000,
-      "tag": "0004_organization_shop",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1788000000001,
-      "tag": "0005_organization_polar_shop",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1788000000002,
-      "tag": "0006_organization_checkout_shop",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1788700291449,
-      "tag": "0007_organization_google_analytics",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1787234689924,
+			"tag": "0000_initial",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1787263448673,
+			"tag": "0001_storage_migration_and_s3_previous_bucket",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1787627200000,
+			"tag": "0002_platform_marketing",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1787673679247,
+			"tag": "0003_saved_reports",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1788000000000,
+			"tag": "0004_organization_shop",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "6",
+			"when": 1788000000001,
+			"tag": "0005_organization_polar_shop",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "6",
+			"when": 1788000000002,
+			"tag": "0006_organization_checkout_shop",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "6",
+			"when": 1788700291449,
+			"tag": "0007_organization_google_analytics",
+			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "6",
+			"when": 1788709638509,
+			"tag": "0008_website_redirects",
+			"breakpoints": true
+		}
+	]
 }

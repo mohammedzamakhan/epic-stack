@@ -28,6 +28,13 @@ export type PublicSiteAnnouncement = {
 	linkNewTab: boolean
 }
 
+export type PublicSiteRedirect = {
+	id: string
+	fromPath: string
+	toPath: string
+	statusCode: number
+}
+
 export type PublicOrganization = {
 	id: string
 	name: string
@@ -45,6 +52,7 @@ export type PublicOrganization = {
 		appleTouchIcon: string
 	} | null
 	announcements?: PublicSiteAnnouncement[]
+	redirects?: PublicSiteRedirect[]
 	googleAnalyticsId?: string | null
 }
 
@@ -93,6 +101,43 @@ async function fetchAppJson<T>(
 	} catch {
 		return null
 	}
+}
+
+async function postAppJson(url: string, body: unknown): Promise<boolean> {
+	try {
+		const appFetcher = getAppServiceBinding()
+		const fetchImpl = appFetcher ? appFetcher.fetch.bind(appFetcher) : fetch
+		const response = await fetchImpl(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Accept: 'application/json',
+			},
+			body: JSON.stringify(body),
+			signal: AbortSignal.timeout(4_000),
+		})
+		return response.ok
+	} catch {
+		return false
+	}
+}
+
+export async function recordSiteRedirectHit(
+	redirectId: string,
+): Promise<boolean> {
+	return postAppJson(`${getAppUrl()}/resources/sites/redirect-hit`, {
+		id: redirectId,
+	})
+}
+
+export async function recordSiteNotFound(options: {
+	slug?: string | null
+	host?: string | null
+	path: string
+	referrer?: string | null
+	userAgent?: string | null
+}): Promise<boolean> {
+	return postAppJson(`${getAppUrl()}/resources/sites/not-found`, options)
 }
 
 async function fetchPublicOrganization(
